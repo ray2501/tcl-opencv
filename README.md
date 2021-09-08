@@ -300,7 +300,8 @@ Please notice, BackgroundSubtractorMOG2 command will only have 1 instance.
     ::cv::pencilSketch matrix ?sigma_s sigma_r shade_factor?
     ::cv::stylization matrix ?sigma_s sigma_r?
 
-Below are High Dynamic Range Imaging related commands:
+Below are [High Dynamic Range Imaging](https://en.wikipedia.org/wiki/High-dynamic-range_imaging)
+related commands:
 
     ::cv::AlignMTB ?max_bits exclude_range cut?
     AlignMTB process matrix_list
