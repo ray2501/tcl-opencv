@@ -19,6 +19,12 @@ static cv::Ptr< cv::CalibrateDebevec > calibrateDebevec;
 static cv::Ptr< cv::MergeDebevec > mergeDebevec;
 
 /*
+ * OpenCV MergeMertens uses smart pointer to handle its memory.
+ * Here I create a static object to use it.
+ */
+static cv::Ptr< cv::MergeMertens > mergeMertens;
+
+/*
  * OpenCV TonemapDrago uses smart pointer to handle its memory.
  * Here I create a static object to use it.
  */
@@ -1672,7 +1678,7 @@ int MergeDebevec(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     try {
         mergeDebevec = cv::createMergeDebevec( );
 
-        if (calibrateDebevec == nullptr) {
+        if (mergeDebevec == nullptr) {
             Tcl_SetResult(interp, (char *) "mergeDebevec create failed", TCL_STATIC);
             return TCL_ERROR;
         }
@@ -1684,6 +1690,181 @@ int MergeDebevec(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     pResultStr = Tcl_NewStringObj( "cv-mergeDebevec", -1 );
 
     Tcl_CreateObjCommand(interp, "cv-mergeDebevec", (Tcl_ObjCmdProc *) MergeDebevec_FUNCTION,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
+int MergeMertens_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    int choice;
+    char *handle;
+
+    static const char *FUNC_strs[] = {
+        "process",
+        "close",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_PROCESS,
+        FUNC_CLOSE,
+    };
+
+    if( objc < 2 ){
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+        return TCL_ERROR;
+    }
+
+    handle = Tcl_GetStringFromObj(objv[0], 0);
+
+    switch( (enum FUNC_enum)choice ){
+        case FUNC_PROCESS: {
+            int count;
+            cv::Mat image, dst;
+            Tcl_HashEntry *newHashEntryPtr;
+            char handleName[16 + TCL_INTEGER_SPACE];
+            int newvalue;
+            MatrixInfo *dstinfo;
+            Tcl_Obj *pResultStr = NULL;
+            std::vector< cv::Mat > src;
+
+            if( objc != 3 ){
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix_list");
+                return TCL_ERROR;
+            }
+
+            if(Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+                Tcl_SetResult(interp, (char *) "process invalid list data", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            if (count == 0) {
+                Tcl_SetResult(interp, (char *) "process matrix_list invalid data", TCL_STATIC);
+                return TCL_ERROR;
+            } else {
+                Tcl_Obj *elemListPtr = NULL;
+                Tcl_HashEntry *hashEntryPtr;
+                char *matrix_handle;
+                MatrixInfo *info;
+
+                for (int i = 0; i < count; i++) {
+                    Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
+                    matrix_handle = Tcl_GetStringFromObj(elemListPtr, 0);
+                    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, matrix_handle );
+                    if( !hashEntryPtr ) {
+                        if( interp ) {
+                            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
+                            Tcl_AppendStringsToObj( resultObj, "process invalid MATRIX handle ",
+                                                    matrix_handle, (char *)NULL );
+                        }
+
+                        return TCL_ERROR;
+                    }
+
+                    info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
+                    if ( !info ) {
+                        Tcl_SetResult(interp, (char *) "process invalid info data", TCL_STATIC);
+                        return TCL_ERROR;
+                    }
+
+                    image = *(info->matrix);
+                    src.push_back(image);
+                }
+            }
+
+            try {
+                mergeMertens->process(src, dst);
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "process failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
+            if (!dstinfo) {
+                Tcl_SetResult(interp, (char *) "process malloc MatrixInfo failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            dstinfo->matrix = new cv::Mat(dst);
+
+            Tcl_MutexLock(&myMutex);
+            sprintf( handleName, "cv-mat%zd", matrix_count++ );
+
+            pResultStr = Tcl_NewStringObj( handleName, -1 );
+
+            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
+            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
+            Tcl_MutexUnlock(&myMutex);
+
+            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
+                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_CLOSE: {
+            if( objc != 2 ){
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            mergeMertens.reset();
+            Tcl_DeleteCommand(interp, handle);
+
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int MergeMertens(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    double contrast_weight = 1.0, saturation_weight = 1.0, exposure_weight = 0.0;
+    Tcl_Obj *pResultStr = NULL;
+
+    if (objc != 1 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "?contrast_weight saturation_weight exposure_weight?");
+        return TCL_ERROR;
+    }
+
+    if (objc == 4 ) {
+        if(Tcl_GetDoubleFromObj(interp, objv[1], &contrast_weight) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if(Tcl_GetDoubleFromObj(interp, objv[2], &saturation_weight) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if(Tcl_GetDoubleFromObj(interp, objv[3], &exposure_weight) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        mergeMertens = cv::createMergeMertens( (float) contrast_weight,
+                                               (float) saturation_weight,
+                                               (float) exposure_weight );
+
+        if (mergeMertens == nullptr) {
+            Tcl_SetResult(interp, (char *) "mergeMertens create failed", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...){
+        Tcl_SetResult(interp, (char *) "mergeMertens failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewStringObj( "cv-mergeMertens", -1 );
+
+    Tcl_CreateObjCommand(interp, "cv-mergeMertens", (Tcl_ObjCmdProc *) MergeMertens_FUNCTION,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_SetObjResult(interp, pResultStr);

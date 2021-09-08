@@ -223,6 +223,7 @@ int stylization(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int AlignMTB(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int CalibrateDebevec(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int MergeDebevec(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+int MergeMertens(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int TonemapDrago(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int TonemapMantiuk(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int TonemapReinhard(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);

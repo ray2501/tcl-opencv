@@ -320,6 +320,12 @@ Please notice, CalibrateDebevec command will only have 1 instance.
 
 Please notice, MergeDebevec command will only have 1 instance.
 
+    ::cv::MergeMertens ?contrast_weight saturation_weight exposure_weight?
+    MergeMertens process matrix_list
+    MergeMertens close
+
+Please notice, MergeMertens command will only have 1 instance.
+
     ::cv::TonemapDrago ?gamma saturation bias?
     TonemapDrago process hdrDebevec
     TonemapDrago close

@@ -778,6 +778,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) MergeDebevec,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::MergeMertens",
+        (Tcl_ObjCmdProc *) MergeMertens,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::TonemapDrago",
         (Tcl_ObjCmdProc *) TonemapDrago,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
