@@ -300,6 +300,44 @@ Please notice, BackgroundSubtractorMOG2 command will only have 1 instance.
     ::cv::pencilSketch matrix ?sigma_s sigma_r shade_factor?
     ::cv::stylization matrix ?sigma_s sigma_r?
 
+Below are High Dynamic Range Imaging related commands:
+
+    ::cv::AlignMTB ?max_bits exclude_range cut?
+    AlignMTB process matrix_list
+    AlignMTB close
+
+Please notice, AlignMTB command will only have 1 instance.
+
+    ::cv::CalibrateDebevec ?samples lambda random?
+    CalibrateDebevec process matrix_list times_list
+    CalibrateDebevec close
+
+Please notice, CalibrateDebevec command will only have 1 instance.
+
+    ::cv::MergeDebevec
+    MergeDebevec process matrix_list times_list response
+    MergeDebevec close
+
+Please notice, MergeDebevec command will only have 1 instance.
+
+    ::cv::TonemapDrago ?gamma saturation bias?
+    TonemapDrago process hdrDebevec
+    TonemapDrago close
+
+Please notice, TonemapDrago command will only have 1 instance.
+
+    ::cv::TonemapMantiuk ?gamma scale saturation?
+    TonemapMantiuk process hdrDebevec
+    TonemapMantiuk close
+
+Please notice, TonemapMantiuk command will only have 1 instance.
+
+    ::cv::TonemapReinhard ?gamma intensity light_adapt color_adapt?
+    TonemapReinhard process hdrDebevec
+    TonemapReinhard close
+
+Please notice, TonemapReinhard command will only have 1 instance.
+
 ### stitching
 
     ::cv::Stitcher mode
@@ -2000,6 +2038,82 @@ Feature Matching + Homography to find Objects -
         $match1 close
         $img1 close
         $img2 close
+    } on error {em} {
+        puts $em
+    }
+
+High Dynamic Range Imaging test -
+
+    package require opencv
+
+    #
+    # From https://en.wikipedia.org/wiki/High-dynamic-range_imaging
+    # Download the four exposured images and test.
+    #
+    set times [list 0.0333 0.25 2.5 15.0]
+    set files [list 1.JPG 2.JPG 3.JPG 4.JPG]
+    set images [list]
+
+    try {
+
+        foreach f $files {
+            set img [::cv::imread $f]
+            lappend images $img
+        }
+
+        set a [::cv::AlignMTB]
+        set newimages [$a process $images]
+
+        for {set i 0} {$i < [llength $images]} {incr i} {
+            [lindex $images $i] close
+        }
+
+        set c [::cv::CalibrateDebevec]
+        set responseDebevec [$c process $newimages $times]
+
+        set mergeDebevec [::cv::MergeDebevec]
+        set hdrDebevec [$mergeDebevec process $newimages $times $responseDebevec]
+        ::cv::imwrite "hdrDebevec.exr" $hdrDebevec
+
+        for {set i 0} {$i < [llength $newimages]} {incr i} {
+            [lindex $newimages $i] close
+        }
+
+        $responseDebevec close
+
+        set tonemapDrago [::cv::TonemapDrago 1.0 0.7 0.85]
+        set result [$tonemapDrago process $hdrDebevec]
+        set result2 [$result multiply 3]
+        set result3 [$result2 multiply 255]
+        ::cv::imwrite "ldr-Drago.jpg" $result3
+
+        $tonemapDrago close
+        $result close
+        $result2 close
+        $result3 close
+
+        set tonemapMantiuk [::cv::TonemapMantiuk 2.2 0.85 1.2]
+        set result [$tonemapMantiuk process $hdrDebevec]
+        set result2 [$result multiply 3]
+        set result3 [$result2 multiply 255]
+        ::cv::imwrite "ldr-Mantiuk.jpg" $result3
+
+        $tonemapMantiuk close
+        $result close
+        $result2 close
+        $result3 close
+
+        set tonemapReinhard [::cv::TonemapReinhard 1.5 0 0 0]
+        set result [$tonemapReinhard process $hdrDebevec]
+        set result2 [$result multiply 255]
+        ::cv::imwrite "ldr-Reinhard.jpg" $result2
+
+        $tonemapReinhard close
+        $result close
+        $result2 close
+
+        $hdrDebevec close
+
     } on error {em} {
         puts $em
     }

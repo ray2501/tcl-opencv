@@ -1,5 +1,6 @@
 2021-09-08 Danilo Chang
 
+	* Add HDR imaging related commands
 	* Bump version to v0.6
 	* Implement command: findHomography, perspectiveTransform
 

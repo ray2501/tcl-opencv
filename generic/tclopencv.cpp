@@ -766,6 +766,30 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) stylization,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::AlignMTB",
+        (Tcl_ObjCmdProc *) AlignMTB,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::CalibrateDebevec",
+        (Tcl_ObjCmdProc *) CalibrateDebevec,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::MergeDebevec",
+        (Tcl_ObjCmdProc *) MergeDebevec,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::TonemapDrago",
+        (Tcl_ObjCmdProc *) TonemapDrago,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::TonemapMantiuk",
+        (Tcl_ObjCmdProc *) TonemapMantiuk,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::TonemapReinhard",
+        (Tcl_ObjCmdProc *) TonemapReinhard,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
     /*
      * For Stitcher
      */
