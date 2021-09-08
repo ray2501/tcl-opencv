@@ -1,0 +1,92 @@
+2021-09-08 Danilo Chang
+
+	* Bump version to v0.6
+	* Implement command: findHomography, perspectiveTransform
+
+2021-09-07 Danilo Chang
+
+	* Implement command: FastFeatureDetector, ORB, BFMatcher
+
+2021-09-06 Danilo Chang
+
+	* Implement command: cornerSubPix, cornerHarris
+
+2021-09-05 Danilo Chang
+
+	* Bump version to v0.5
+	* Implement command: sum, pow, abs, mulSpectrums
+	* Update bitwise_and, bitwise_or, bitwise_xor and bitwise_not command
+
+2021-09-04 Danilo Chang
+
+	* Implement command: selectROI
+	* Implement command: textureFlattening, seamlessClone
+	* Implement command: decolor, colorChange, illuminationChange
+	* Implement command: detailEnhance, edgePreservingFilter, pencilSketch
+
+2021-09-03 Danilo Chang
+
+	* Implement command: fastNlMeansDenoisingColored, inpaint, stylization
+	* Implement command: convexHull, remap
+	* Implement command: QRCodeDetector
+
+2021-09-02 Danilo Chang
+
+	* Implement command: MATRIX diag, colRange, rowRange, inv, *
+	* Implement command: ::cv::getRectSubPix, ::cv::getAffineTransform
+
+2021-08-30 Danilo Chang
+
+	* Implement command: meanShift and CamShift
+
+2021-08-28 Danilo Chang
+
+	* Implement command: Stitcher
+
+2021-08-26 Danilo Chang
+
+	* Implement command: blobFromImage
+	* Implement command: MatWithDims
+	* Re-design Mat at and size command
+
+2021-08-25 Danilo Chang
+
+	* Implement command: CascadeClassifier
+
+2021-08-24 Danilo Chang
+
+	* Implement command: findContours, drawContours
+	* Implement command: bitwise_not, bitwise_and, bitwise_or, bitwise_xor
+
+2021-08-23 Danilo Chang
+
+	* Implement command: getPerspectiveTransform, warpPerspective
+
+2021-08-22 Danilo Chang
+
+	* Implement command: setMouseCallback, createTrackbar, getTrackbarPos
+
+2021-08-21  Danilo Chang
+
+	* Implement command: filter2D
+	* Implement command: at and Mat function
+
+2021-08-19  Danilo Chang
+
+	* Implement command: VideoWriter
+
+2021-08-18  Danilo Chang
+
+	* Implement command: VideoCapture
+
+2021-08-17  Danilo Chang
+
+	* Implement command: getRotationMatrix2D and warpAffine function
+	* Implement command: get rows and cols
+
+2021-08-16  Danilo Chang
+
+	* Implement imread and imwrite command to test
+	* Update package name, and link to OpenCV library
+	* Dump the sample extension
+

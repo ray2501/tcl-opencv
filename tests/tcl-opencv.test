@@ -1,0 +1,942 @@
+# tcl-opencv.test --
+#
+#   Tests for tcl-opencv
+#------------------------------------------------------------------------------
+
+lappend auto_path .
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest 2
+    namespace import -force ::tcltest::*
+}
+loadTestedCommands
+package require opencv
+
+#-------------------------------------------------------------------------------
+
+test opencv-1.1 {read image, wrong # args} {*}{
+    -body {
+        ::cv::imread
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.2 {read image, no image} {*}{
+    -body {
+        ::cv::imread aaa
+    }
+    -returnCodes error
+    -match glob
+    -result {*no image data}
+}
+
+test opencv-1.3 {write image, wrong # args} {*}{
+    -body {
+        ::cv::imwrite
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.4 {write image, wrong # args} {*}{
+    -body {
+        ::cv::imwrite aaa
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.5 {read image} {*}{
+    -body {
+        set image [::cv::imread "tests/logoLarge.png"]
+    }
+    -returnCodes ok
+    -result {cv-mat0}
+}
+
+test opencv-1.6 {resize image, wrong # args} {*}{
+    -body {
+        set image2 [::cv::resize $image 177]
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.7 {resize image} {*}{
+    -body {
+        set image2 [::cv::resize $image 177 260]
+        $image2 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.8 {image color space, wrong # args} {*}{
+    -body {
+        set image3 [::cv::cvtColor $image]
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.9 {image color space} {*}{
+    -body {
+        set image3 [::cv::cvtColor $image $::cv::COLOR_BGR2RGB]
+        $image3 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.10 {crop image, wrong # args} {*}{
+    -body {
+        set image4 [$image crop]
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.11 {crop image} {*}{
+    -body {
+        set image4 [$image crop 110 110 210 410]
+        $image4 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.12 {getRotationMatrix2D, wrong # args} {*}{
+    -body {
+        set image5 [::cv::getRotationMatrix2D]
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.13 {warpAffine, wrong # args} {*}{
+    -body {
+        set image5 [::cv::warpAffine]
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.14 {Rotate} {*}{
+    -body {
+        set x [expr [$image cols] / 2]
+        set y [expr [$image rows] / 2]
+        set image5 [::cv::getRotationMatrix2D $x $y 45.0 1.0]
+        set image6 [::cv::warpAffine $image $image5 [$image cols] [$image rows]]
+        $image6 close
+        $image5 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.15 {VideoCapture, wrong # args} {*}{
+    -body {
+        set v [::cv::VideoCapture]
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.16 {Draw a line, wrong # args} {*}{
+    -body {
+        ::cv::line $image
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.17 {Draw a line} {*}{
+    -body {
+        ::cv::line $image 50 50 250 400 [list 255 255 0 0] 5 $::cv::LINE_AA 0
+    }
+    -returnCodes ok
+}
+
+test opencv-1.18 {Draw a line} {*}{
+    -body {
+        ::cv::line $image 60 60 260 310 [list 255 0 255 0] 1
+    }
+    -returnCodes ok
+}
+
+
+test opencv-1.19 {Draw a arrowedLine, wrong # args} {*}{
+    -body {
+        ::cv::arrowedLine $image
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.20 {Draw a arrowedLine} {*}{
+    -body {
+        set scalar [list 0 0 255 0]
+        ::cv::arrowedLine $image 50 40 40 410 $scalar 3 $::cv::LINE_8 0 0.1
+    }
+    -returnCodes ok
+}
+
+test opencv-1.21 {Draw a arrowedLine} {*}{
+    -body {
+        set scalar [list 128 128 64 0]
+        ::cv::arrowedLine $image 150 40 40 410 $scalar 1
+    }
+    -returnCodes ok
+}
+
+test opencv-1.22 {Draw a circle, wrong # args} {*}{
+    -body {
+        ::cv::circle $image
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.23 {Draw a circle} {*}{
+    -body {
+        set scalar [list 0 255 0 0]
+        ::cv::circle $image 170 250 50 $scalar -1 $::cv::LINE_8 0
+    }
+    -returnCodes ok
+}
+
+test opencv-1.24 {Draw a circle} {*}{
+    -body {
+        set scalar [list 255 255 0 0]
+        ::cv::circle $image 170 250 100 $scalar 1
+    }
+    -returnCodes ok
+}
+
+test opencv-1.25 {clipLine, wrong # args} {*}{
+    -body {
+        ::cv::clipLine
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.26 {clipLine test} {*}{
+    -body {
+        set result [::cv::clipLine [list 300 500] [list 5 5] [list 250 450]]
+    }
+    -returnCodes ok
+    -result {1}
+}
+
+test opencv-1.27 {drawMarker test} {*}{
+    -body {
+        ::cv::drawMarker $image 150 150 [list 0 255 255 0]
+    }
+    -returnCodes ok
+}
+
+test opencv-1.28 {drawMarker test} {*}{
+    -body {
+        ::cv::drawMarker $image 150 300 [list 255 63 128 0] \
+                         $::cv::MARKER_STAR 30 3 $::cv::LINE_4
+    }
+    -returnCodes ok
+}
+
+test opencv-1.29 {Draw a rectangle, wrong # args} {*}{
+    -body {
+        ::cv::rectangle $image
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.30 {Draw a rectangle} {*}{
+    -body {
+        ::cv::rectangle $image 250 10 300 200 [list 0 128 255 0] 4 $::cv::LINE_8 0
+    }
+    -returnCodes ok
+}
+
+test opencv-1.31 {Draw a rectangle} {*}{
+    -body {
+        ::cv::rectangle $image 310 210 100 400 [list 63 128 255 0] 1
+    }
+    -returnCodes ok
+}
+
+test opencv-1.32 {Put a text, wrong # args} {*}{
+    -body {
+        ::cv::putText $image
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.33 {Put a text} {*}{
+    -body {
+        ::cv::putText $image "Let go!" 10 410 $::cv::FONT_ITALIC 1.5 [list 250 225 100 0] 1
+    }
+    -returnCodes ok
+}
+
+test opencv-1.34 {Put a text} {*}{
+    -body {
+        set color [list 100 225 250 0]
+        ::cv::putText $image "Tcl/Tk" 100 460 $::cv::FONT_HERSHEY_COMPLEX 1.5 $color 5 $::cv::LINE_4 0
+    }
+    -returnCodes ok
+}
+
+test opencv-1.35 {Draw a ellipse, wrong # args} {*}{
+    -body {
+        ::cv::ellipse $image
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.36 {Draw a ellipse} {*}{
+    -body {
+        ::cv::ellipse $image 210 210 150 75 0 0 360 [list 240 0 100 0] 1
+    }
+    -returnCodes ok
+}
+
+test opencv-1.37 {Draw a ellipse} {*}{
+    -body {
+        ::cv::ellipse $image 210 210 100 50 0 0 180 [list 0 191 191 0] -2 $::cv::LINE_AA 0
+    }
+    -returnCodes ok
+}
+
+test opencv-1.38 {namedWindow} {*}{
+    -body {
+        ::cv::namedWindow "Display"
+    }
+    -returnCodes ok
+}
+
+test opencv-1.39 {destroyAllWindows} {*}{
+    -body {
+        ::cv::destroyAllWindows
+    }
+    -returnCodes ok
+}
+
+test opencv-1.40 {threshold, wrong # args} {*}{
+    -body {
+        ::cv::threshold $image
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.41 {threshold test} {*}{
+    -body {
+        set image8 [::cv::imread "tests/logoLarge.png" $::cv::IMREAD_GRAYSCALE]
+        set image9 [::cv::threshold $image8 128 255 0]
+        $image9 close
+        $image8 close
+
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.42 {equalizeHist test} {*}{
+    -body {
+        set image10 [::cv::cvtColor $image $::cv::COLOR_BGR2GRAY]
+        set image11 [::cv::equalizeHist $image10]
+        $image11 close
+        $image10 close
+
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.43 {Sobel test} {*}{
+    -body {
+        set image12 [::cv::cvtColor $image $::cv::COLOR_BGR2GRAY]
+        set image13 [::cv::Sobel $image12 1 0]
+        $image13 close
+        $image12 close
+
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.44 {Sobel test} {*}{
+    -body {
+        set image12 [::cv::cvtColor $image $::cv::COLOR_BGR2GRAY]
+        set image13 [::cv::Sobel $image12 0 1 5 1.0 0.0 $::cv::BORDER_DEFAULT]
+        $image13 close
+        $image12 close
+
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.45 {Sobel test} {*}{
+    -body {
+        set image12 [::cv::cvtColor $image $::cv::COLOR_BGR2GRAY]
+        set image13 [::cv::Sobel $image12 1 1 5 1.0 0.0 $::cv::BORDER_ISOLATED]
+        $image13 close
+        $image12 close
+
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.46 {Scharr test} {*}{
+    -body {
+        set image12 [::cv::cvtColor $image $::cv::COLOR_BGR2GRAY]
+        set image13 [::cv::Scharr $image12 1 0 1.0 0.0 $::cv::BORDER_ISOLATED]
+        $image13 close
+        $image12 close
+
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.47 {Scharr test} {*}{
+    -body {
+        set image12 [::cv::cvtColor $image $::cv::COLOR_BGR2GRAY]
+        set image13 [::cv::Scharr $image12 0 1 1.0 0.0 $::cv::BORDER_ISOLATED]
+        $image13 close
+        $image12 close
+
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.48 {Canny test} {*}{
+    -body {
+        set image12 [::cv::cvtColor $image $::cv::COLOR_BGR2GRAY]
+        set image13 [::cv::Canny $image12 100 200 3 0]
+        $image13 close
+        $image12 close
+
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.49 {Canny test} {*}{
+    -body {
+        set image12 [::cv::cvtColor $image $::cv::COLOR_BGR2GRAY]
+        set image13 [::cv::Canny $image12 100 200]
+        $image13 close
+        $image12 close
+
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.50 {Draw a polylines, wrong # args} {*}{
+    -body {
+        ::cv::polylines $image
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.51 {Draw a polylines} {*}{
+    -body {
+        ::cv::polylines $image [list 50 50 300 50 350 200 300 150 150 350 100 100] \
+                               1 0 [list 31 255 0 0] 1
+    }
+    -returnCodes ok
+}
+
+test opencv-1.52 {Draw a fillConvexPoly, wrong # args} {*}{
+    -body {
+        ::cv::fillConvexPoly $image [list 0 0 100 100 200 200]
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.53 {Draw a fillConvexPoly} {*}{
+    -body {
+        ::cv::fillConvexPoly $image [list 0 0 100 100 200 200] [list 0 255 31 0]
+    }
+    -returnCodes ok
+}
+
+test opencv-1.54 {Draw a fillConvexPoly, with zeros image} {*}{
+    -body {
+        set image14 [::cv::Mat::zeros 600 800 [::cv::CV_8UC 3]]
+        set points [list 0 0 50 150 400 400 410 50]
+        ::cv::fillConvexPoly $image14 $points [list 0 255 63 0] $::cv::LINE_8 0
+        $image14 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.55 {Draw a polylines, with ones image} {*}{
+    -body {
+        set image14 [::cv::Mat::ones 600 800 [::cv::CV_8UC 1]]
+        ::cv::polylines $image14 [list 50 50 300 50 550 200 400 150 160 500 100 100] 1 1 [list 128 0 0 0] 5 $::cv::LINE_8 0
+        $image14 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.56 {Eye image} {*}{
+    -body {
+        set image15 [::cv::Mat::eye 4 4 $::cv::CV_64FC1]
+        $image15 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.57 {Split and merge image} {*}{
+    -body {
+        set imgList [::cv::split $image]
+        set len [llength $imgList]
+        set img2 [::cv::merge $imgList]
+
+        for {set i 0} {$i < $len} {incr i} {
+            set myimage [lindex $imgList $i]
+            $myimage close
+        }
+
+    }
+    -returnCodes ok
+}
+
+
+test opencv-1.58 {Split and merge image} {*}{
+    -body {
+        set imgList [::cv::split $image]
+        set len [llength $imgList]
+        set img2 [::cv::cvtColor $image $::cv::COLOR_BGR2YCrCb]
+        set simg [::cv::split $img2]
+        set simg0 [lindex $simg 0]
+        set simg1 [lindex $simg 1]
+        set simg2 [lindex $simg 2]
+
+        set simg0m [::cv::equalizeHist $simg0]
+        set afterimg [list $simg0m $simg1 $simg2]
+
+        set img3 [::cv::merge $afterimg]
+        set img4 [::cv::cvtColor $img3 $::cv::COLOR_YCrCb2BGR]
+
+        $simg0 close
+        $simg1 close
+        $simg2 close
+        $simg0m close
+        $img2 close
+        $img3 close
+        $img4 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.59 {flip image} {*}{
+    -body {
+        set img [::cv::flip $image 0]
+        $img close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.60 {morphologyEx test} {*}{
+    -body {
+        set matrix [cv::getStructuringElement $::cv::MORPH_RECT 5 5]
+        set img [::cv::morphologyEx $image $::cv::MORPH_ERODE $matrix]
+        $matrix close
+        $img close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.61 {morphologyEx test} {*}{
+    -body {
+        set matrix [cv::getStructuringElement $::cv::MORPH_RECT 5 5]
+        set img [::cv::morphologyEx $image $::cv::MORPH_DILATE $matrix -1 -1 1]
+        $matrix close
+        $img close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.62 {Matrix at test} {*}{
+    -body {
+        set matrix [::cv::Mat::Mat 1 1 $::cv::CV_64FC1 [list 1 0 0 0]]
+        set matrix2 [::cv::multiply $matrix $matrix 2]
+        $matrix2 at [list 0 0] 0
+    }
+    -returnCodes ok
+    -result {2.0}
+}
+
+test opencv-1.63 {Matrix convertTo test} {*}{
+    -body {
+        set matrix3 [$matrix2 convertTo [::cv::CV_8UC 1]]
+        $matrix3 at [list 0 0] 0
+    }
+    -returnCodes ok
+    -result {2}
+}
+
+test opencv-1.64 {Matrix close test} {*}{
+    -body {
+        $matrix close
+        $matrix2 close
+        $matrix3 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.65 {copyMakeBorder and floodFill image} {*}{
+    -body {
+        set img [::cv::copyMakeBorder $image 20 20 20 20 $::cv::BORDER_CONSTANT [list 255 31 31 0]]
+
+        ::cv::floodFill $img 150 50 [list 127 255 127 0] [list 0 0 0 0] \
+                  [list 20 20 20 0] [list 20 20 20 0] [expr 4  | $::cv::FLOODFILL_FIXED_RANGE]
+
+        $img close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.66 {absdiff test} {*}{
+    -body {
+        set matrix [::cv::Mat::Mat 1 3 [::cv::CV_8UC 1] [list 10 0 0 0]]
+        set matrix2 [::cv::Mat::Mat 1 3 [::cv::CV_8UC 1] [list 40 0 0 0]]
+        set matrix3 [::cv::absdiff $matrix $matrix2]
+        $matrix3 at [list 0 0] 0
+    }
+    -returnCodes ok
+    -result {30}
+}
+
+test opencv-1.67 {matrix size test} {*}{
+    -body {
+        set nmatrix [::cv::Mat::MatWithDims 3 [list 1 3 1] [::cv::CV_8UC 1] [list 10 0 0 0]]
+        $nmatrix size
+    }
+    -returnCodes ok
+    -result {1 3 1}
+}
+
+test opencv-1.68 {MatWithDims test} {*}{
+    -body {
+        set nmatrix [::cv::Mat::MatWithDims 3 [list 1 3 1] [::cv::CV_8UC 1] [list]]
+    }
+    -returnCodes error
+    -match glob
+    -result {matwithdims invalid color data*}
+}
+
+test opencv-1.69 {dft test} {*}{
+    -body {
+        set img [::cv::imread "tests/logoLarge.png" $::cv::IMREAD_GRAYSCALE]
+
+        set width [::cv::getOptimalDFTSize [$img cols]]
+        set height [::cv::getOptimalDFTSize [$img rows]]
+
+        set zeros [::cv::Mat::zeros [$img rows] [$img cols] $::cv::CV_32FC1]
+        set newimage [$img convertTo $::cv::CV_32FC1 1 0]
+        set merges [::cv::merge [list $newimage $zeros]]
+        set dft_result [::cv::dft $merges]
+        set splits [::cv::split $dft_result]
+        set magI [::cv::magnitude [lindex $splits 0] [lindex $splits 1]]
+
+        $zeros close
+        $newimage close
+        $merges close
+        $dft_result close
+        [lindex $splits 0] close
+        [lindex $splits 1] close
+
+        set mat [::cv::Mat::ones [$magI rows] [$magI cols] $::cv::CV_32FC1]
+        set magI2 [::cv::add $magI $mat]
+        set magI3 [::cv::log $magI2]
+        set magI4 [$magI3 crop 0 0 [expr [$magI3 cols] & -2] [expr [$magI3 rows] & -2]]
+
+        $mat close
+        $magI close
+        $magI2 close
+        $magI3 close
+
+        set cx [expr [$magI4 cols]/2]
+        set cy [expr [$magI4 rows]/2]
+
+        set q0 [$magI4 rect 0 0 $cx $cy]
+        set q1 [$magI4 rect $cx 0 $cx $cy]
+        set q2 [$magI4 rect 0 $cy $cx $cy]
+        set q3 [$magI4 rect $cx $cy $cx $cy]
+
+        set tmp [::cv::Mat::Mat $cy $cx $::cv::CV_32FC1]
+        $q0 copyTo $tmp
+        $q3 copyTo $q0
+        $tmp copyTo $q3
+
+        $q1 copyTo $tmp
+        $q2 copyTo $q1
+        $tmp copyTo $q2
+
+        $q0 close
+        $q1 close
+        $q2 close
+        $q3 close
+        $tmp close
+
+        set img2 [::cv::normalize $magI4 0 1 $::cv::NORM_MINMAX]
+
+        # Display code
+        #::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        #::cv::imshow "Display Image" $img2
+        #::cv::waitKey 0
+        #::cv::destroyAllWindows
+
+        $magI4 close
+        $img close
+        $img2 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.70 {blobFromImage test} {*}{
+    -body {
+        set blob [::cv::dnn::blobFromImage $image 1.0 [$image cols] [$image rows] \
+                  [list 104 177 123 0] 1 1]
+        $blob dims
+    }
+    -returnCodes ok
+    -result {4}
+}
+
+test opencv-1.71 {match test} {*}{
+    -body {
+        set method $::cv::TM_SQDIFF
+        set mimage [::cv::matchTemplate $image $image $method]
+
+        set mimage2 [::cv::normalize $mimage 0 1 $::cv::NORM_MINMAX]
+        set result [::cv::minMaxLoc $mimage2]
+        set matchLoc_x [lindex [lindex $result 0] 1]
+        set matchLoc_y [lindex [lindex $result 0] 2]
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::rectangle $image $matchLoc_x $matchLoc_y \
+            [expr $matchLoc_x + [$image cols]] \
+            [expr $matchLoc_y + [$image rows]] \
+            [list 0 0 255 0] 5 $::cv::LINE_8 0
+
+        #::cv::imshow "Display Image" $image
+        #::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $mimage close
+        $mimage2 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.72 {match test} {*}{
+    -body {
+        set method $::cv::TM_CCOEFF
+        set mimage [::cv::matchTemplate $image $image $method]
+
+        set mimage2 [::cv::normalize $mimage 0 1 $::cv::NORM_MINMAX]
+        set result [::cv::minMaxLoc $mimage2]
+        set matchLoc_x [lindex [lindex $result 1] 1]
+        set matchLoc_y [lindex [lindex $result 1] 2]
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::rectangle $image $matchLoc_x $matchLoc_y \
+            [expr $matchLoc_x + [$image cols]] \
+            [expr $matchLoc_y + [$image rows]] \
+            [list 0 0 255 0] 5 $::cv::LINE_8 0
+
+        #::cv::imshow "Display Image" $image
+        #::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $mimage close
+        $mimage2 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.73 {calcHist test} {*}{
+    -body {
+        set hbins 30
+        set sbins 32
+        set hsv [::cv::cvtColor $image $::cv::COLOR_BGR2HSV]
+        set mask [::cv::Mat::Mat 0 0 $::cv::CV_8U]
+        set dst [::cv::calcHist $hsv [list 0 1] $mask 2 [list $hbins $sbins] \
+                [list 0 180 0 256] \
+                1 0]
+
+        set minmax [::cv::minMaxLoc $dst]
+        set minvalue [lindex [lindex $minmax 0] 0]
+        set maxvalue [lindex [lindex $minmax 1] 0]
+
+        set histImg [::cv::Mat::zeros [expr $sbins*10] [expr $hbins*10] $::cv::CV_8UC3]
+
+        for {set i 0} {$i < $hbins} {incr i} {
+            for {set j 0} {$j < $sbins} {incr j} {
+                set binval [$dst at [list $i $j] 0]
+                set intensity [expr round($binval * 255 / $maxvalue)]
+                ::cv::rectangle $histImg [expr $i * 10] [expr $j * 10] \
+                    [expr ($i + 1) * 10 - 1] [expr ($j + 1) * 10 - 1] \
+                    [list $intensity $intensity $intensity $intensity] -1 $::cv::LINE_8 0
+            }
+        }
+
+        #::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        #::cv::imshow "Display Image" $histImg
+        #::cv::waitKey 0
+        #::cv::destroyAllWindows
+
+        $hsv close
+        $dst close
+        $mask close
+        $histImg close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.74 {Stitcher create test} {*}{
+    -body {
+        set colorimage [::cv::applyColorMap $image $::cv::COLORMAP_RAINBOW]
+        $colorimage close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.75 {Stitcher create test} {*}{
+    -body {
+        set s [::cv::Stitcher $::cv::PANORAMA]
+        $s close
+    }
+    -returnCodes ok
+}
+
+test opencv-1.76 {diag test} {*}{
+    -body {
+        set mat1 [::cv::Mat::Mat 3 3 $::cv::CV_8U]
+        $mat1 setData [list 1 2 3 4 5 6 7 8 9]
+        set mat2 [$mat1 diag 0]
+        set mat3 [::cv::Mat::diag $mat2]
+        $mat3 size
+    }
+    -returnCodes ok
+    -result {3 3}
+}
+
+test opencv-1.77 {inv test} {*}{
+    -body {
+        set tmatrix1 [::cv::Mat::Mat 2 2 $::cv::CV_32F]
+        $tmatrix1 setData [list 3 2 -6 6]
+        set tmatrix2 [::cv::Mat::Mat 2 1 $::cv::CV_32F]
+        $tmatrix2 setData [list 7 6]
+        set tmatrix3 [$tmatrix1 inv]
+        set tmatrix4 [$tmatrix3 * $tmatrix2]
+        $tmatrix4 at [list 1 0] 0
+    }
+    -returnCodes ok
+    -result {2.0}
+}
+
+test opencv-1.78 {remap test} {*}{
+    -body {
+        set map1 [::cv::Mat::Mat [$image rows] [$image cols] $::cv::CV_32FC1]
+        set map2 [::cv::Mat::Mat [$image rows] [$image cols] $::cv::CV_32FC1]
+
+        for {set i 0} {$i < [$map1 rows]} {incr i} {
+            for {set j 0} {$j < [$map1 cols]} {incr j} {
+                $map1 at [list $i $j] 0 $j
+                $map2 at [list $i $j] 0 [expr [$map1 rows] - $i]
+            }
+        }
+
+        set imagedst [::cv::remap $image $map1 $map2 $::cv::INTER_LINEAR]
+        #::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        #::cv::imshow "Display Image" $imagedst
+
+        #::cv::waitKey 0
+        #::cv::destroyAllWindows
+
+        $map1 close
+        $map2 close
+        $imagedst close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+
+test opencv-1.79 {Close test} {*}{
+    -body {
+        ::cv::imwrite output.png $image
+        $tmatrix1 close
+        $tmatrix2 close
+        $tmatrix3 close
+        $tmatrix4 close
+        $mat1 close
+        $mat2 close
+        $mat3 close
+        $blob close
+        $nmatrix close
+        $matrix close
+        $matrix2 close
+        $matrix3 close
+        $image close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+
+#-------------------------------------------------------------------------------
+
+removeFile output.png
+
+cleanupTests
+return

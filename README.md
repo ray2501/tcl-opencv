@@ -1,0 +1,2182 @@
+tcl-opencv
+=====
+
+This project is a Tcl extension for [OpenCV](https://opencv.org/) library.
+
+OpenCV (Open Source Computer Vision Library) is a library of programming
+functions mainly aimed at real-time computer vision.
+
+This extension requires OpenCV 4.x.
+
+
+Implement commands
+=====
+
+### Matrix
+
+    MATRIX dims
+    MATRIX size
+    MATRIX rows
+    MATRIX cols
+    MATRIX channels
+    MATRIX depth
+    MATRIX type
+    MATRIX empty
+    MATRIX at index_list channel ?value?
+    MATRIX inv ?method?
+    MATRIX dot matrix
+    MATRIX cross matrix
+    MATRIX * matrix
+    MATRIX add value
+    MATRIX subtract value
+    MATRIX multiply value
+    MATRIX divide value
+    MATRIX transpose
+    MATRIX diag ?d?
+    MATRIX crop x y width height
+    MATRIX rect x y width height
+    MATRIX copyTo matrix ?mask?
+    MATRIX convertTo type ?scale shift?
+    MATRIX colRange startcol endcol
+    MATRIX rowRange startcol endcol
+    MATRIX reshape cn ?rows?
+    MATRIX setData list_data
+    MATRIX setTo color_list ?mask?
+    MATRIX close
+
+    ::cv::CV_8UC num
+    ::cv::CV_8SC num
+    ::cv::CV_16UC num
+    ::cv::CV_16SC num
+    ::cv::CV_32SC num
+    ::cv::CV_32FC num
+    ::cv::CV_64FC num
+
+    ::cv::Mat::Mat rows cols type ?color_list?
+    ::cv::Mat::MatWithDims dims size_list type ?color_list?
+    ::cv::Mat::diag matrix
+    ::cv::Mat::eye rows cols type
+    ::cv::Mat::ones rows cols type
+    ::cv::Mat::zeros rows cols type
+
+    ::cv::abs matrix
+    ::cv::absdiff matrix_1 matrix_2
+    ::cv::add matrix_1 matrix_2
+    ::cv::addWeighted matrix_1 alpha matrix_2 beta gamma
+    ::cv::bitwise_and matrix1 matrix_2 ?mask?
+    ::cv::bitwise_or matrix1 matrix_2 ?mask?
+    ::cv::bitwise_xor matrix1 matrix_2 ?mask?
+    ::cv::bitwise_not matrix ?mask?
+    ::cv::cartToPolar matrix1 matrix_2 ?angleInDegrees?
+    ::cv::convertScaleAbs matrix alpha beta
+    ::cv::copyMakeBorder matrix top bottom left right borderType ?color_list?
+    ::cv::divide matrix_1 matrix_2 ?scale?
+    ::cv::flip matrix flipCode
+    ::cv::getOptimalDFTSize vecsize
+    ::cv::dft matrix ?falgs nonzeroRows?
+    ::cv::inRange matrix color_list1 color_list2
+    ::cv::log matrix
+    ::cv::LUT matrix1 matrix2
+    ::cv::magnitude matrix1 matrix2
+    ::cv::meanStdDev matrix
+    ::cv::minMaxLoc matrix
+    ::cv::multiply matrix_1 matrix_2 ?scale?
+    ::cv::mulSpectrums matrix_1 matrix_2 flags ?conjB?
+    ::cv::split matrix
+    ::cv::merge matrix_list
+    ::cv::norm matrix norm_type
+    ::cv::normalize matrix alpha beta norm_type
+    ::cv::pow matrix power
+    ::cv::randu matrix min max
+    ::cv::subtract matrix_1 matrix_2
+    ::cv::sum matrix
+
+    ::cv::perspectiveTransform src_list transformation_matrix
+
+    ::cv::getTickCount
+    ::cv::getTickFrequency
+
+    ::cv::TermCriteria
+    TermCriteria close
+
+### imgcodecs
+
+    ::cv::imread filename ?flags?
+    ::cv::imwrite filename matrix
+
+### imgproc
+
+    ::cv::applyColorMap matrix colormap
+    ::cv::cvtColor src_matrix code ?dstCn?
+    ::cv::calcBackProject matrix channels hist_matrix ranges_list ?scale uniform?
+    ::cv::calcHist matrix channels mask dims histSize_list ranges_list ?uniform accumulate?
+    ::cv::equalizeHist matrix
+    ::cv::floodFill matrix seed_x seed_y color_list ?rect_list loDiff_color upDiff_color flags?
+    ::cv::grabCut matrix x y width height iterCount
+    ::cv::matchTemplate matrix templ_matrix method
+    ::cv::getRotationMatrix2D x y angle scale
+    ::cv::getRectSubPix matrix width height center_x center_y
+    ::cv::remap matrix map1 map2 interpolation
+    ::cv::resize matrix width height ?flags?
+    ::cv::threshold matrix thresh maxval type
+    ::cv::adaptiveThreshold matrix maxValue adaptiveMethod thresholdType blockSize C
+    ::cv::getAffineTransform src_list dst_list
+    ::cv::warpAffine src_matrix transformation_matrix width height ?flags?
+    ::cv::getPerspectiveTransform src_list dst_list ?solveMethod?
+    ::cv::warpPerspective src_matrix transformation_matrix width height ?flags?
+
+    ::cv::filter2D src_matrix kernel_matrix ?anchor_x anchor_y delta borderType?
+    ::cv::getGaborKernel ksize_width ksize_height sigma theta lambd gamma ?psi type?
+    ::cv::blur src_matrix ksize_width ksize_height ?anchor_x anchor_y borderType?
+    ::cv::GaussianBlur src_matrix ksize_width ksize_height sigmaX ?sigmaY borderType?
+    ::cv::medianBlur src_matrix ksize
+    ::cv::bilateralFilter src_matrix d sigmaColor sigmaSpace ?borderType?
+    ::cv::boxFilter src_matrix ksize_width ksize_height ?anchor_x anchor_y normalize borderType?
+    ::cv::sqrBoxFilter src_matrix ksize_width ksize_height ?anchor_x anchor_y normalize borderType?
+
+    ::cv::getStructuringElement shape ksize_width ksize_height ?anchor_x anchor_y?
+    ::cv::dilate src_matrix kernel_matrix ?anchor_x anchor_y iterations?
+    ::cv::erode src_matrix kernel_matrix ?anchor_x anchor_y iterations?
+    ::cv::morphologyEx src_matrix op kernel_matrix ?anchor_x anchor_y iterations?
+    ::cv::pyrUp src_matrix ?dstsize_width dstsize_height borderType?
+    ::cv::pyrDown src_matrix ?dstsize_width dstsize_height borderType?
+    ::cv::pyrMeanShiftFiltering src_matrix sp sr ?maxLevel?
+
+    ::cv::Canny matrix threshold1 threshold2 ?apertureSize L2gradient?
+    ::cv::Sobel matrix dx dy ?ksize scale delta borderType?
+    ::cv::Scharr matrix dx dy ?scale delta borderType?
+    ::cv::Laplacian matrix ?ksize scale delta borderType?
+    ::cv::distanceTransform matrix distanceType maskSize
+    ::cv::connectedComponents matrix ?connectivity?
+    ::cv::watershed matrix markers
+    ::cv::goodFeaturesToTrack matrix maxCorners qualityLevel minDistance ?mask blockSize useHarrisDetector k?
+    ::cv::cornerHarris matrix blockSize ksize k ?borderType?
+    ::cv::cornerSubPix matrix corners winSize_width winSize_height zeroZone_widht zeroZone_height termCriteria
+    ::cv::HoughCircles matrix method dp minDist ?param1 param2 minRadius maxRadius?
+    ::cv::HoughLines matrix rho theta threshold ?srn stn min_theta max_theta?
+    ::cv::HoughLinesP matrix rho theta threshold ?minLineLength maxLineGap?
+
+    ::cv::findContours matrix mode method ?offset_point_x offset_point_y?
+    ::cv::drawContours matrix contours_list contourIdx color_list ?thickness lineType maxLevel offset_point_x offset_point_y?
+    ::cv::contourArea contour oriented
+    ::cv::boundingRect contour
+    ::cv::minAreaRect contour
+    ::cv::boxPoints contour
+    ::cv::minEnclosingCircle contour
+    ::cv::convexHull contour ?clockwise?
+
+    ::cv::arrowedLine matrix point_x1 point_y1 point_x2 point_y2 color_list thickness ?lineType shift tipLength?
+    ::cv::circle matrix center_x center_y radius color_list thickness ?lineType shift?
+    ::cv::clipLine size_list point1_list point2_list
+    ::cv::drawMarker matrix point_x point_y color_list ?markerType markerSize thickness line_type?
+    ::cv::ellipse matrix center_x center_y width hgieht angle startAngle endAngle color_list thickness ?lineType shift?
+    ::cv::fillConvexPoly matrix point_list color_list ?lineType shift?
+    ::cv::line matrix point_x1 point_y1 point_x2 point_y2 color_list thickness ?lineType shift?
+    ::cv::polylines matrix point_list ncontours isClosed color_list thickness ?lineType shift?
+    ::cv::putText matrix text point_x point_y fontFace fontScale color_list thickness ?lineType bottomLeftOrigin?
+    ::cv::rectangle matrix point_x1 point_y1 point_x2 point_y2 color_list thickness ?lineType shift?
+
+### videoio
+
+    ::cv::VideoCapture file/index filename/number ?flags?
+    VideoCapture isOpened
+    VideoCapture read
+    VideoCapture get propId
+    VideoCapture set propId value
+    VideoCapture close
+
+`::cv::VideoCapture` is using to open video file or open a camera for video
+capturing. Second argument is `file` or `index`, then the third arugment
+is filename or camera id.
+
+    ::cv::VideoWriter filename fourcc fps width height ?isColor?
+    VideoWriter isOpened
+    VideoWriter write matrix
+    VideoWriter get propId
+    VideoWriter set propId value
+    VideoWriter close
+
+### highgui
+
+    ::cv::namedWindow winname ?flags?
+    ::cv::imshow winname matrix
+    ::cv::waitKey delay
+    ::cv::moveWindow winname x y
+    ::cv::destroyWindow winname
+    ::cv::destroyAllWindows
+    ::cv::selectROI matrix ?showCrosshair fromCenter?
+    ::cv::setMouseCallback winname callback_code
+    ::cv::createTrackbar trackbarname winname init_value max_value callback_code
+    ::cv::getTrackbarPos trackbarname winname
+
+### features2d
+
+    ::cv::drawKeypoints matrix keypoints dst_image color_list ?flags?
+
+    ::cv::drawMatches matrix1 keypoints1 matrix2 keypoints2 matches1to2 dst_image matchColor_list singlePointColor_list ?flags?
+
+If users setup dst_image to `None`, then flags should not set to `$::cv::DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG`.
+If flags is set to `$::cv::DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG`, users should provide a dst matrix.
+
+    ::cv::FastFeatureDetector ?threshold nonmaxSuppression type?
+    FastFeatureDetector detect matrix
+    FastFeatureDetector getNonmaxSuppression
+    FastFeatureDetector getThreshold
+    FastFeatureDetector getType
+    FastFeatureDetector setNonmaxSuppression value
+    FastFeatureDetector setThreshold value
+    FastFeatureDetector setType value
+    FastFeatureDetector close
+
+Please notice, FastFeatureDetector command will only have 1 instance.
+
+    ::cv::ORB ?nfeatures scaleFactor nlevels edgeThreshold firstLevel WTA_K scoreType patchSize fastThreshold?
+    ORB detect matrix
+    ORB compute matrix keypoints
+    ORB detectAndCompute matrix
+    ORB getEdgeThreshold
+    ORB getFastThreshold
+    ORB getFirstLevel
+    ORB getMaxFeatures
+    ORB getNLevels
+    ORB getPatchSize
+    ORB getScaleFactor
+    ORB getScoreType
+    ORB getWTA_K
+    ORB setEdgeThreshold value
+    ORB setFastThreshold value
+    ORB setFirstLevel value
+    ORB setMaxFeatures value
+    ORB setNLevels value
+    ORB setPatchSize value
+    ORB setScaleFactor value
+    ORB setScoreType value
+    ORB setWTA_K value
+    ORB close
+
+Please notice, ORB command will only have 1 instance.
+
+    ::cv::BFMatcher normType crossCheck
+    BFMatcher match queryDescriptors trainDescriptors
+    BFMatcher knnMatch queryDescriptors trainDescriptors k
+    BFMatcher close
+
+Please notice, BFMatcher command will only have 1 instance.
+
+### calib3d
+
+    ::cv::findHomography srcPoints dstPoints ?method ransacReprojThreshold?
+
+Note that whenever an H matrix cannot be estimated, an empty one will be returned.
+You can use MATRIX `empty` to check this.
+
+### video
+
+    ::cv::BackgroundSubtractorMOG2 history varThreshold detectShadows
+    BackgroundSubtractorMOG2 apply matrix
+    BackgroundSubtractorMOG2 close
+
+Please notice, BackgroundSubtractorMOG2 command will only have 1 instance.
+
+    ::cv::meanShift matrix x y width height termCriteria
+    ::cv::CamShift matrix x y width height termCriteria
+    ::cv::calcOpticalFlowPyrLK prevImg nextImg prevPts winSize_width winSize_height maxLevel termCriteria
+    ::cv::calcOpticalFlowFarneback prevImg nextImg pyr_scale levels winsize iterations poly_n poly_sigma flags
+
+### photo
+
+    ::cv::inpaint matrix inpaintMask inpaintRadius flags
+    ::cv::decolor matrix
+
+    ::cv::fastNlMeansDenoisingColored matrix ?h hColor templateWindowSize searchWindowSize?
+
+    ::cv::colorChange matrix mask red_mul green_mul blue_mul
+    ::cv::illuminationChange matrix mask alpha beta
+    ::cv::textureFlattening matrix mask low_threshold high_threshold ?kernel_size?
+    ::cv::seamlessClone src_matrix dst_matrix mask x y flags
+
+    ::cv::detailEnhance matrix ?sigma_s sigma_r?
+    ::cv::edgePreservingFilter matrix ?flags sigma_s sigma_r?
+    ::cv::pencilSketch matrix ?sigma_s sigma_r shade_factor?
+    ::cv::stylization matrix ?sigma_s sigma_r?
+
+### stitching
+
+    ::cv::Stitcher mode
+    Stitcher stitch image_list
+    Stitcher close
+
+Please notice, Stitcher command will only have 1 instance.
+
+### objdetect
+
+    ::cv::CascadeClassifier filename
+    CascadeClassifier detectMultiScale matrix ?scaleFactor minNeighbors minWidth minHeight maxWidth maxHeight?
+    CascadeClassifier close
+
+    :cv::QRCodeDetector
+    QRCodeDetector detect matrix
+    QRCodeDetector detectAndDecode matrix
+    QRCodeDetector close
+
+Please notice, QRCodeDetector looks like have issues
+if encoded QR Code data is long when I test it.
+
+### dnn
+
+    ::cv::dnn::blobFromImage matrix scalefactor width height mean_color_list swapRB crop
+    ::cv::dnn::readNet model ?config framework?
+    READNET setPreferableBackend backendId
+    READNET setPreferableTarget targetId
+    READNET setInput blob ?name scalefactor mean_color_list?
+    READNET forward ?name?
+    READNET close
+
+If you want to know supported framework, you can check
+[Deep Learning in OpenCV](https://github.com/opencv/opencv/wiki/Deep-Learning-in-OpenCV).
+
+Users could check
+[official OpenCV documentation](https://docs.opencv.org/master/d6/d0f/group__dnn.html#ga3b34fe7a29494a6a4295c169a7d32422) to know about the different frameworks,
+their model files and the configuration files.
+
+
+Variables
+=====
+
+This extension defined below namespace vriables:
+
+Types -
+
+    ::cv::CV_8U
+    ::cv::CV_8S
+    ::cv::CV_16U
+    ::cv::CV_16S
+    ::cv::CV_32S
+    ::cv::CV_32F
+    ::cv::CV_64F
+
+    ::cv::CV_8UC1
+    ::cv::CV_8UC2
+    ::cv::CV_8UC3
+    ::cv::CV_8UC4
+    ::cv::CV_8SC1
+    ::cv::CV_8SC2
+    ::cv::CV_8SC3
+    ::cv::CV_8SC4
+    ::cv::CV_16UC1
+    ::cv::CV_16UC2
+    ::cv::CV_16UC3
+    ::cv::CV_16UC4
+    ::cv::CV_16SC1
+    ::cv::CV_16SC2
+    ::cv::CV_16SC3
+    ::cv::CV_16SC4
+    ::cv::CV_32SC1
+    ::cv::CV_32SC2
+    ::cv::CV_32SC3
+    ::cv::CV_32SC4
+    ::cv::CV_32FC1
+    ::cv::CV_32FC2
+    ::cv::CV_32FC3
+    ::cv::CV_32FC4
+    ::cv::CV_64FC1
+    ::cv::CV_64FC2
+    ::cv::CV_64FC3
+    ::cv::CV_64FC4
+
+`::cv::imread` flags -
+
+    ::cv::IMREAD_UNCHANGED
+    ::cv::IMREAD_GRAYSCALE
+    ::cv::IMREAD_COLOR
+    ::cv::IMREAD_ANYDEPTH
+    ::cv::IMREAD_ANYCOLOR
+    ::cv::IMREAD_LOAD_GDAL
+    ::cv::IMREAD_REDUCED_GRAYSCALE_2
+    ::cv::IMREAD_REDUCED_COLOR_2
+    ::cv::IMREAD_REDUCED_GRAYSCALE_4
+    ::cv::IMREAD_REDUCED_COLOR_4
+    ::cv::IMREAD_REDUCED_GRAYSCALE_8
+    ::cv::IMREAD_REDUCED_COLOR_8
+    ::cv::IMREAD_IGNORE_ORIENTATION
+
+`VideoCapture` command flags -
+
+    ::cv::CAP_ANY
+    ::cv::CAP_VFW
+    ::cv::CAP_V4L
+    ::cv::CAP_V4L2
+    ::cv::CAP_FIREWIRE
+    ::cv::CAP_FIREWARE
+    ::cv::CAP_IEEE1394
+    ::cv::CAP_DC1394
+    ::cv::CAP_CMU1394
+    ::cv::CAP_QT
+    ::cv::CAP_UNICAP
+    ::cv::CAP_DSHOW
+    ::cv::CAP_PVAPI
+    ::cv::CAP_OPENNI
+    ::cv::CAP_OPENNI_ASUS
+    ::cv::CAP_ANDROID
+    ::cv::CAP_XIAPI
+    ::cv::CAP_AVFOUNDATION
+    ::cv::CAP_GIGANETIX
+    ::cv::CAP_MSMF
+    ::cv::CAP_WINRT
+    ::cv::CAP_INTELPERC
+    ::cv::CAP_REALSENSE
+    ::cv::CAP_OPENNI2
+    ::cv::CAP_OPENNI2_ASUS
+    ::cv::CAP_OPENNI2_ASTRA
+    ::cv::CAP_GPHOTO2
+    ::cv::CAP_GSTREAMER
+    ::cv::CAP_FFMPEG
+    ::cv::CAP_IMAGES
+    ::cv::CAP_ARAVIS
+    ::cv::CAP_OPENCV_MJPEG
+    ::cv::CAP_INTEL_MFX
+    ::cv::CAP_XINE
+    ::cv::CAP_UEYE
+
+`VideoCapture` and `VideoWriter` propId -
+
+    ::cv::CAP_PROP_POS_MSEC
+    ::cv::CAP_PROP_POS_FRAMES
+    ::cv::CAP_PROP_POS_AVI_RATIO
+    ::cv::CAP_PROP_FRAME_WIDTH
+    ::cv::CAP_PROP_FRAME_HEIGHT
+    ::cv::CAP_PROP_FPS
+    ::cv::CAP_PROP_FOURCC
+    ::cv::CAP_PROP_FRAME_COUNT
+    ::cv::CAP_PROP_FORMAT
+    ::cv::CAP_PROP_MODE
+    ::cv::CAP_PROP_BRIGHTNESS
+    ::cv::CAP_PROP_CONTRAST
+    ::cv::CAP_PROP_SATURATION
+    ::cv::CAP_PROP_HUE
+    ::cv::CAP_PROP_GAIN
+    ::cv::CAP_PROP_EXPOSURE
+    ::cv::CAP_PROP_CONVERT_RGB
+    ::cv::CAP_PROP_WHITE_BALANCE_BLUE_U
+    ::cv::CAP_PROP_RECTIFICATION
+    ::cv::CAP_PROP_MONOCHROME
+    ::cv::CAP_PROP_SHARPNESS
+    ::cv::CAP_PROP_AUTO_EXPOSURE
+    ::cv::CAP_PROP_GAMMA
+    ::cv::CAP_PROP_TEMPERATURE
+    ::cv::CAP_PROP_TRIGGER
+    ::cv::CAP_PROP_TRIGGER_DELAY
+    ::cv::CAP_PROP_WHITE_BALANCE_RED_V
+    ::cv::CAP_PROP_ZOOM
+    ::cv::CAP_PROP_FOCUS
+    ::cv::CAP_PROP_GUID
+    ::cv::CAP_PROP_ISO_SPEED
+    ::cv::CAP_PROP_BACKLIGHT
+    ::cv::CAP_PROP_PAN
+    ::cv::CAP_PROP_TILT
+    ::cv::CAP_PROP_ROLL
+    ::cv::CAP_PROP_IRIS
+    ::cv::CAP_PROP_SETTINGS
+    ::cv::CAP_PROP_BUFFERSIZE
+    ::cv::CAP_PROP_AUTOFOCUS
+    ::cv::CAP_PROP_SAR_NUM
+    ::cv::CAP_PROP_SAR_DEN
+    ::cv::CAP_PROP_BACKEND
+    ::cv::CAP_PROP_CHANNEL
+    ::cv::CAP_PROP_AUTO_WB
+    ::cv::CAP_PROP_WB_TEMPERATURE
+    ::cv::CAP_PROP_CODEC_PIXEL_FORMAT
+    ::cv::CAP_PROP_BITRATE
+    ::cv::CAP_PROP_ORIENTATION_META
+    ::cv::CAP_PROP_ORIENTATION_AUTO
+    ::cv::CAP_PROP_HW_ACCELERATION
+    ::cv::CAP_PROP_HW_DEVICE
+
+`VideoWriter` propId -
+
+    ::cv::VIDEOWRITER_PROP_QUALITY
+    ::cv::VIDEOWRITER_PROP_FRAMEBYTES
+    ::cv::VIDEOWRITER_PROP_NSTRIPES
+    ::cv::VIDEOWRITER_PROP_IS_COLOR
+    ::cv::VIDEOWRITER_PROP_DEPTH
+    ::cv::VIDEOWRITER_PROP_HW_ACCELERATION
+    ::cv::VIDEOWRITER_PROP_HW_DEVICE
+
+`::cv::cvtColor` code -
+
+    ::cv::COLOR_BGR2BGRA
+    ::cv::COLOR_RGB2RGBA
+    ::cv::COLOR_BGRA2BGR
+    ::cv::COLOR_RGBA2RGB
+    ::cv::COLOR_BGR2RGBA
+    ::cv::COLOR_RGB2BGRA
+    ::cv::COLOR_RGBA2BGR
+    ::cv::COLOR_BGRA2RGB
+    ::cv::COLOR_BGR2RGB
+    ::cv::COLOR_RGB2BGR
+    ::cv::COLOR_BGRA2RGBA
+    ::cv::COLOR_RGBA2BGRA
+    ::cv::COLOR_BGR2GRAY
+    ::cv::COLOR_RGB2GRAY
+    ::cv::COLOR_GRAY2BGR
+    ::cv::COLOR_GRAY2RGB
+    ::cv::COLOR_GRAY2BGRA
+    ::cv::COLOR_GRAY2RGBA
+    ::cv::COLOR_BGRA2GRAY
+    ::cv::COLOR_RGBA2GRAY
+    ::cv::COLOR_BGR2BGR565
+    ::cv::COLOR_RGB2BGR565
+    ::cv::COLOR_BGR5652BGR
+    ::cv::COLOR_BGR5652RGB
+    ::cv::COLOR_BGRA2BGR565
+    ::cv::COLOR_RGBA2BGR565
+    ::cv::COLOR_BGR5652BGRA
+    ::cv::COLOR_BGR5652RGBA
+    ::cv::COLOR_GRAY2BGR565
+    ::cv::COLOR_BGR5652GRAY
+    ::cv::COLOR_BGR2BGR555
+    ::cv::COLOR_RGB2BGR555
+    ::cv::COLOR_BGR5552BGR
+    ::cv::COLOR_BGR5552RGB
+    ::cv::COLOR_BGRA2BGR555
+    ::cv::COLOR_RGBA2BGR555
+    ::cv::COLOR_BGR5552BGRA
+    ::cv::COLOR_BGR5552RGBA
+    ::cv::COLOR_GRAY2BGR555
+    ::cv::COLOR_BGR5552GRAY
+    ::cv::COLOR_BGR2XYZ
+    ::cv::COLOR_RGB2XYZ
+    ::cv::COLOR_XYZ2BGR
+    ::cv::COLOR_XYZ2RGB
+    ::cv::COLOR_BGR2YCrCb
+    ::cv::COLOR_RGB2YCrCb
+    ::cv::COLOR_YCrCb2BGR
+    ::cv::COLOR_YCrCb2RGB
+    ::cv::COLOR_BGR2HSV
+    ::cv::COLOR_RGB2HSV
+    ::cv::COLOR_BGR2Lab
+    ::cv::COLOR_RGB2Lab
+    ::cv::COLOR_BGR2Luv
+    ::cv::COLOR_RGB2Luv
+    ::cv::COLOR_BGR2HLS
+    ::cv::COLOR_RGB2HLS
+    ::cv::COLOR_HSV2BGR
+    ::cv::COLOR_HSV2RGB
+    ::cv::COLOR_Lab2BGR
+    ::cv::COLOR_Lab2RGB
+    ::cv::COLOR_Luv2BGR
+    ::cv::COLOR_Luv2RGB
+    ::cv::COLOR_HLS2BGR
+    ::cv::COLOR_HLS2RGB
+    ::cv::COLOR_BGR2HSV_FULL
+    ::cv::COLOR_RGB2HSV_FULL
+    ::cv::COLOR_BGR2HLS_FULL
+    ::cv::COLOR_RGB2HLS_FULL
+    ::cv::COLOR_HSV2BGR_FULL
+    ::cv::COLOR_HSV2RGB_FULL
+    ::cv::COLOR_HLS2BGR_FULL
+    ::cv::COLOR_HLS2RGB_FULL
+    ::cv::COLOR_LBGR2Lab
+    ::cv::COLOR_LRGB2Lab
+    ::cv::COLOR_LBGR2Luv
+    ::cv::COLOR_LRGB2Luv
+    ::cv::COLOR_Lab2LBGR
+    ::cv::COLOR_Lab2LRGB
+    ::cv::COLOR_Luv2LBGR
+    ::cv::COLOR_Luv2LRGB
+    ::cv::COLOR_BGR2YUV
+    ::cv::COLOR_RGB2YUV
+    ::cv::COLOR_YUV2BGR
+    ::cv::COLOR_YUV2RGB
+    ::cv::COLOR_YUV2RGB_NV12
+    ::cv::COLOR_YUV2BGR_NV12
+    ::cv::COLOR_YUV2RGB_NV21
+    ::cv::COLOR_YUV2BGR_NV21
+    ::cv::COLOR_YUV420sp2RGB
+    ::cv::COLOR_YUV420sp2BGR
+    ::cv::COLOR_YUV2RGBA_NV12
+    ::cv::COLOR_YUV2BGRA_NV12
+    ::cv::COLOR_YUV2RGBA_NV21
+    ::cv::COLOR_YUV2BGRA_NV21
+    ::cv::COLOR_YUV420sp2RGBA
+    ::cv::COLOR_YUV420sp2BGRA
+    ::cv::COLOR_YUV2RGB_YV12
+    ::cv::COLOR_YUV2BGR_YV12
+    ::cv::COLOR_YUV2RGB_IYUV
+    ::cv::COLOR_YUV2BGR_IYUV
+    ::cv::COLOR_YUV2RGB_I420
+    ::cv::COLOR_YUV2BGR_I420
+    ::cv::COLOR_YUV420p2RGB
+    ::cv::COLOR_YUV420p2BGR
+    ::cv::COLOR_YUV2RGBA_YV12
+    ::cv::COLOR_YUV2BGRA_YV12
+    ::cv::COLOR_YUV2RGBA_IYUV
+    ::cv::COLOR_YUV2BGRA_IYUV
+    ::cv::COLOR_YUV2RGBA_I420
+    ::cv::COLOR_YUV2BGRA_I420
+    ::cv::COLOR_YUV420p2RGBA
+    ::cv::COLOR_YUV420p2BGRA
+    ::cv::COLOR_YUV2GRAY_420
+    ::cv::COLOR_YUV2GRAY_NV21
+    ::cv::COLOR_YUV2GRAY_NV12
+    ::cv::COLOR_YUV2GRAY_YV12
+    ::cv::COLOR_YUV2GRAY_IYUV
+    ::cv::COLOR_YUV2GRAY_I420
+    ::cv::COLOR_YUV420sp2GRAY
+    ::cv::COLOR_YUV420p2GRAY
+    ::cv::COLOR_YUV2RGB_UYVY
+    ::cv::COLOR_YUV2BGR_UYVY
+    ::cv::COLOR_YUV2RGB_Y422
+    ::cv::COLOR_YUV2BGR_Y422
+    ::cv::COLOR_YUV2RGB_UYNV
+    ::cv::COLOR_YUV2BGR_UYNV
+    ::cv::COLOR_YUV2RGBA_UYVY
+    ::cv::COLOR_YUV2BGRA_UYVY
+    ::cv::COLOR_YUV2RGBA_Y422
+    ::cv::COLOR_YUV2BGRA_Y422
+    ::cv::COLOR_YUV2RGBA_UYNV
+    ::cv::COLOR_YUV2BGRA_UYNV
+    ::cv::COLOR_YUV2RGB_YUY2
+    ::cv::COLOR_YUV2BGR_YUY2
+    ::cv::COLOR_YUV2RGB_YVYU
+    ::cv::COLOR_YUV2BGR_YVYU
+    ::cv::COLOR_YUV2RGB_YUYV
+    ::cv::COLOR_YUV2BGR_YUYV
+    ::cv::COLOR_YUV2RGB_YUNV
+    ::cv::COLOR_YUV2BGR_YUNV
+    ::cv::COLOR_YUV2RGBA_YUY2
+    ::cv::COLOR_YUV2BGRA_YUY2
+    ::cv::COLOR_YUV2RGBA_YVYU
+    ::cv::COLOR_YUV2BGRA_YVYU
+    ::cv::COLOR_YUV2RGBA_YUYV
+    ::cv::COLOR_YUV2BGRA_YUYV
+    ::cv::COLOR_YUV2RGBA_YUNV
+    ::cv::COLOR_YUV2BGRA_YUNV
+    ::cv::COLOR_YUV2GRAY_UYVY
+    ::cv::COLOR_YUV2GRAY_YUY2
+    ::cv::COLOR_YUV2GRAY_Y422
+    ::cv::COLOR_YUV2GRAY_UYNV
+    ::cv::COLOR_YUV2GRAY_YVYU
+    ::cv::COLOR_YUV2GRAY_YUYV
+    ::cv::COLOR_YUV2GRAY_YUNV
+    ::cv::COLOR_RGBA2mRGBA
+    ::cv::COLOR_mRGBA2RGBA
+    ::cv::COLOR_RGB2YUV_I420
+    ::cv::COLOR_BGR2YUV_I420
+    ::cv::COLOR_RGB2YUV_IYUV
+    ::cv::COLOR_BGR2YUV_IYUV
+    ::cv::COLOR_RGBA2YUV_I420
+    ::cv::COLOR_BGRA2YUV_I420
+    ::cv::COLOR_RGBA2YUV_IYUV
+    ::cv::COLOR_BGRA2YUV_IYUV
+    ::cv::COLOR_RGB2YUV_YV12
+    ::cv::COLOR_BGR2YUV_YV12
+    ::cv::COLOR_RGBA2YUV_YV12
+    ::cv::COLOR_BGRA2YUV_YV12
+    ::cv::COLOR_BayerBG2BGR
+    ::cv::COLOR_BayerGB2BGR
+    ::cv::COLOR_BayerRG2BGR
+    ::cv::COLOR_BayerGR2BGR
+    ::cv::COLOR_BayerBG2RGB
+    ::cv::COLOR_BayerGB2RGB
+    ::cv::COLOR_BayerRG2RGB
+    ::cv::COLOR_BayerGR2RGB
+    ::cv::COLOR_BayerBG2GRAY
+    ::cv::COLOR_BayerGB2GRAY
+    ::cv::COLOR_BayerRG2GRAY
+    ::cv::COLOR_BayerGR2GRAY
+    ::cv::COLOR_BayerBG2BGR_VNG
+    ::cv::COLOR_BayerGB2BGR_VNG
+    ::cv::COLOR_BayerRG2BGR_VNG
+    ::cv::COLOR_BayerGR2BGR_VNG
+    ::cv::COLOR_BayerBG2RGB_VNG
+    ::cv::COLOR_BayerGB2RGB_VNG
+    ::cv::COLOR_BayerRG2RGB_VNG
+    ::cv::COLOR_BayerGR2RGB_VNG
+    ::cv::COLOR_BayerBG2BGR_EA
+    ::cv::COLOR_BayerGB2BGR_EA
+    ::cv::COLOR_BayerRG2BGR_EA
+    ::cv::COLOR_BayerGR2BGR_EA
+    ::cv::COLOR_BayerBG2RGB_EA
+    ::cv::COLOR_BayerGB2RGB_EA
+    ::cv::COLOR_BayerRG2RGB_EA
+    ::cv::COLOR_BayerGR2RGB_EA
+    ::cv::COLOR_BayerBG2BGRA
+    ::cv::COLOR_BayerGB2BGRA
+    ::cv::COLOR_BayerRG2BGRA
+    ::cv::COLOR_BayerGR2BGRA
+    ::cv::COLOR_BayerBG2RGBA
+    ::cv::COLOR_BayerGB2RGBA
+    ::cv::COLOR_BayerRG2RGBA
+    ::cv::COLOR_BayerGR2RGBA
+    ::cv::COLOR_COLORCVT_MAX
+
+Line Types -
+
+    ::cv::FILLED
+    ::cv::LINE_4
+    ::cv::LINE_8
+    ::cv::LINE_AA
+
+`::cv::drawMarker` Marker Types -
+
+    ::cv::MARKER_CROSS
+    ::cv::MARKER_TILTED_CROSS
+    ::cv::MARKER_STAR
+    ::cv::MARKER_DIAMOND
+    ::cv::MARKER_SQUARE
+    ::cv::MARKER_TRIANGLE_UP
+    ::cv::MARKER_TRIANGLE_DOWN
+
+`::cv::putText` fontFace -
+
+    ::cv::FONT_HERSHEY_SIMPLEX
+    ::cv::FONT_HERSHEY_PLAIN
+    ::cv::FONT_HERSHEY_DUPLEX
+    ::cv::FONT_HERSHEY_COMPLEX
+    ::cv::FONT_HERSHEY_TRIPLEX
+    ::cv::FONT_HERSHEY_COMPLEX_SMALL
+    ::cv::FONT_HERSHEY_SCRIPT_SIMPLEX
+    ::cv::FONT_HERSHEY_SCRIPT_COMPLEX
+    ::cv::FONT_ITALIC
+
+`::cv::threshold` type -
+
+    ::cv::THRESH_BINARY
+    ::cv::THRESH_BINARY_INV
+    ::cv::THRESH_TRUNC
+    ::cv::THRESH_TOZERO
+    ::cv::THRESH_TOZERO_INV
+    ::cv::THRESH_MASK
+    ::cv::THRESH_OTSU
+    ::cv::THRESH_TRIANGLE
+
+`::cv::adaptiveThreshold` method -
+
+    ::cv::ADAPTIVE_THRESH_MEAN_C
+    ::cv::ADAPTIVE_THRESH_GAUSSIAN_C
+
+`::cv::copyMakeBorder` border type -
+
+    ::cv::BORDER_CONSTANT
+    ::cv::BORDER_REPLICATE
+    ::cv::BORDER_REFLECT
+    ::cv::BORDER_WRAP
+    ::cv::BORDER_REFLECT_101
+    ::cv::BORDER_TRANSPARENT
+    ::cv::BORDER_REFLECT101
+    ::cv::BORDER_DEFAULT
+    ::cv::BORDER_ISOLATED
+
+`::cv::getStructuringElement` morph shapes -
+
+    ::cv::MORPH_RECT
+    ::cv::MORPH_CROSS
+    ::cv::MORPH_ELLIPSE
+
+`::cv::morphologyEx` op type -
+
+    ::cv::MORPH_ERODE
+    ::cv::MORPH_DILATE
+    ::cv::MORPH_OPEN
+    ::cv::MORPH_CLOSE
+    ::cv::MORPH_GRADIENT
+    ::cv::MORPH_TOPHAT
+    ::cv::MORPH_BLACKHAT
+    ::cv::MORPH_HITMISS
+
+`::cv::applyColorMap` colormap -
+
+    ::cv::COLORMAP_AUTUMN
+    ::cv::COLORMAP_BONE
+    ::cv::COLORMAP_JET
+    ::cv::COLORMAP_WINTER
+    ::cv::COLORMAP_RAINBOW
+    ::cv::COLORMAP_OCEAN
+    ::cv::COLORMAP_SUMMER
+    ::cv::COLORMAP_SPRING
+    ::cv::COLORMAP_COOL
+    ::cv::COLORMAP_HSV
+    ::cv::COLORMAP_PINK
+    ::cv::COLORMAP_HOT
+    ::cv::COLORMAP_PARULA
+    ::cv::COLORMAP_MAGMA
+    ::cv::COLORMAP_INFERNO
+    ::cv::COLORMAP_PLASMA
+    ::cv::COLORMAP_VIRIDIS
+    ::cv::COLORMAP_CIVIDIS
+    ::cv::COLORMAP_TWILIGHT
+    ::cv::COLORMAP_TWILIGHT_SHIFTED
+    ::cv::COLORMAP_TURBO
+    ::cv::COLORMAP_DEEPGREEN
+
+`::cv::namedWindow` flags -
+
+    ::cv::WINDOW_NORMAL
+    ::cv::WINDOW_AUTOSIZE
+    ::cv::WINDOW_OPENGL
+    ::cv::WINDOW_FULLSCREEN
+    ::cv::WINDOW_FREERATIO
+    ::cv::WINDOW_KEEPRATIO
+    ::cv::WINDOW_GUI_EXPANDED
+    ::cv::WINDOW_GUI_NORMAL
+
+`::cv::setMouseCallback` event -
+
+    ::cv::EVENT_MOUSEMOVE
+    ::cv::EVENT_LBUTTONDOWN
+    ::cv::EVENT_RBUTTONDOWN
+    ::cv::EVENT_MBUTTONDOWN
+    ::cv::EVENT_LBUTTONUP
+    ::cv::EVENT_RBUTTONUP
+    ::cv::EVENT_MBUTTONUP
+    ::cv::EVENT_LBUTTONDBLCLK
+    ::cv::EVENT_RBUTTONDBLCLK
+    ::cv::EVENT_MBUTTONDBLCLK
+    ::cv::EVENT_MOUSEWHEEL
+    ::cv::EVENT_MOUSEHWHEEL
+
+    ::cv::EVENT_FLAG_LBUTTON
+    ::cv::EVENT_FLAG_RBUTTON
+    ::cv::EVENT_FLAG_MBUTTON
+    ::cv::EVENT_FLAG_CTRLKEY
+    ::cv::EVENT_FLAG_SHIFTKEY
+    ::cv::EVENT_FLAG_ALTKEY
+
+`::cv::dft` command flags -
+
+    ::cv::DFT_INVERSE
+    ::cv::DFT_SCALE
+    ::cv::DFT_ROWS
+    ::cv::DFT_COMPLEX_OUTPUT
+    ::cv::DFT_REAL_OUTPUT
+    ::cv::DFT_COMPLEX_INPUT
+    ::cv::DCT_INVERSE
+    ::cv::DCT_ROWS
+
+`::cv::norm`, `::cv::normalize` and `BFMatcher`norm_type -
+
+    ::cv::NORM_INF
+    ::cv::NORM_L1
+    ::cv::NORM_L2
+    ::cv::NORM_L2SQR
+    ::cv::NORM_HAMMING
+    ::cv::NORM_HAMMING2
+    ::cv::NORM_TYPE_MASK
+    ::cv::NORM_RELATIVE
+    ::cv::NORM_MINMAX
+
+`::cv::floodFill` command flag -
+
+    ::cv::FLOODFILL_FIXED_RANGE
+
+`:cv::remap`interpolation,
+`::cv::resize`, `::cv::warpAffine` and `::cv::warpPerspective` command flag -
+
+    ::cv::INTER_NEAREST
+    ::cv::INTER_LINEAR
+    ::cv::INTER_CUBIC
+    ::cv::INTER_AREA
+    ::cv::INTER_LANCZOS4
+    ::cv::INTER_LINEAR_EXACT
+    ::cv::INTER_NEAREST_EXACT
+    ::cv::INTER_MAX
+    ::cv::WARP_FILL_OUTLIERS
+    ::cv::WARP_INVERSE_MAP
+
+`MATRIX inv` method and
+`::cv::getPerspectiveTransform` command solveMethod -
+
+    ::cv::DECOMP_LU
+    ::cv::DECOMP_SVD
+    ::cv::DECOMP_EIG
+    ::cv::DECOMP_CHOLESKY
+    ::cv::DECOMP_QR
+    ::cv::DECOMP_NORMAL
+
+`::cv::findContours` mode -
+
+    ::cv::RETR_EXTERNAL
+    ::cv::RETR_LIST
+    ::cv::RETR_CCOMP
+    ::cv::RETR_TREE
+    ::cv::RETR_FLOODFILL
+
+`::cv::findContours` method -
+
+    ::cv::CHAIN_APPROX_NONE
+    ::cv::CHAIN_APPROX_SIMPLE
+    ::cv::CHAIN_APPROX_TC89_L1
+    ::cv::CHAIN_APPROX_TC89_KCOS
+
+`::cv::HoughCircles` method -
+
+    ::cv::HOUGH_GRADIENT
+    ::cv::HOUGH_GRADIENT_ALT
+
+`::cv::matchTemplate` method -
+
+    ::cv::TM_SQDIFF
+    ::cv::TM_SQDIFF_NORMED
+    ::cv::TM_CCORR
+    ::cv::TM_CCORR_NORMED
+    ::cv::TM_CCOEFF
+    ::cv::TM_CCOEFF_NORMED
+
+`::cv::distanceTransform` distanceType -
+
+    ::cv::DIST_L1
+    ::cv::DIST_L2
+    ::cv::DIST_C
+    ::cv::DIST_L12
+    ::cv::DIST_FAIR
+    ::cv::DIST_WELSCH
+    ::cv::DIST_HUBER
+
+GrabCut classes -
+
+    ::cv::GC_BGD
+    ::cv::GC_FGD
+    ::cv::GC_PR_BGD
+    ::cv::GC_PR_FGD
+
+TermCriteria type -
+
+    ::cv::COUNT
+    ::cv::EPS
+
+`FastFeatureDetector` detector type -
+
+    ::cv::DetectorType_TYPE_5_8
+    ::cv::DetectorType_TYPE_7_12
+    ::cv::DetectorType_TYPE_9_16
+
+`ORB` Score type -
+
+    ::cv::ORB_HARRIS_SCORE
+    ::cv::ORB_FAST_SCORE
+
+`drawKeypoints` and `drawMatches` flags
+
+    ::cv::DRAW_MATCHES_FLAGS_DEFAULT
+    ::cv::DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG
+    ::cv::DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS
+    ::cv::DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
+
+`findHomography` method -
+
+    ::cv::LMEDS
+    ::cv::RANSAC
+    ::cv::RHO
+
+Photo inpaint flags -
+
+    ::cv::INPAINT_NS
+    ::cv::INPAINT_TELEA
+
+Photo edgePreservingFilter flags -
+
+    ::cv::RECURS_FILTER
+    ::cv::NORMCONV_FILTER
+
+Photo seamlessClone flags -
+
+    ::cv::NORMAL_CLONE
+    ::cv::MIXED_CLONE
+    ::cv::MONOCHROME_TRANSFER
+
+Stitcher mode -
+
+    ::cv::PANORAMA
+    ::cv::SCANS
+
+READNET `setPreferableBackend` backendId -
+
+    ::cv::dnn::DNN_BACKEND_DEFAULT
+    ::cv::dnn::DNN_BACKEND_HALIDE
+    ::cv::dnn::DNN_BACKEND_OPENCV
+    ::cv::dnn::DNN_BACKEND_VKCOM
+    ::cv::dnn::DNN_BACKEND_CUDA
+
+READNET `setPreferableTarget` targetId -
+
+    ::cv::dnn::DNN_TARGET_CPU
+    ::cv::dnn::DNN_TARGET_OPENCL
+    ::cv::dnn::DNN_TARGET_OPENCL_FP16
+    ::cv::dnn::DNN_TARGET_MYRIAD
+    ::cv::dnn::DNN_TARGET_VULKAN
+    ::cv::dnn::DNN_TARGET_CUDA
+    ::cv::dnn::DNN_TARGET_CUDA_FP16
+    ::cv::dnn::DNN_TARGET_HDDL
+
+
+UNIX BUILD
+=====
+
+Before building tcl-opencv, you need have OpenCV developmen files.
+
+You also need a c++ compiler and `pkg-config`.
+
+Building under most UNIX systems is easy, just run the configure script
+and then run make. For more information about the build process, see
+the tcl/unix/README file in the Tcl src dist. The following minimal
+example will install the extension in the /opt/tcl directory.
+
+    $ export CC=g++
+    $ cd tcl-opencv
+    $ ./configure --prefix=/opt/tcl
+    $ make
+    $ make install
+
+If you need setup directory containing tcl configuration (tclConfig.sh),
+below is an example:
+
+    $ export CC=g++
+    $ cd tcl-opencv
+    $ ./configure --with-tcl=/opt/activetcl/lib
+    $ make
+    $ make install
+
+
+Windows BUILD
+=====
+
+### MSYS2
+
+[Msys2](https://www.msys2.org/)  provides a Unix-style build while generating
+native Windows binaries. Using the Msys2 build tools means that you can use
+the same configure script as per the Unix build to create a Makefile.
+
+Using below command to install x86_64 OpenCV packages for Mingw-w64:
+
+    pacman -S mingw-w64-x86_64-opencv
+
+If you need setup directory containing tcl configuration (tclConfig.sh),
+below is an example:
+
+    $ export CC=g++
+    $ cd tcl-opencv
+    $ ./configure --prefix=/opt/tcl --with-tcl=/opt/tcl/lib
+    $ make
+    $ make install
+
+### Visual Studio 2017
+
+I use [Magicsplat Tcl/Tk for Windows](https://www.magicsplat.com/tcl-installer/index.html)
+to test, and install path is `c:\Tcl`.
+
+Users require download and install
+[opencv-4.5.3-vc14_vc15.exe](https://sourceforge.net/projects/opencvlibrary/files/4.5.3/),
+and install path is `c:\opencv`.
+
+Or you can modify `win\makefile.vc` file to specify OpenCV path:
+
+    PRJ_INCLUDES = -I"C:\opencv\build\include"
+    PRJ_LIBS = C:\opencv\build\x64\vc15\lib\opencv_world453.lib
+
+Change folder to `win` folder and using below command to bulid:
+
+    nmake /s /nologo /f makefile.vc INSTALLDIR=c:\tcl
+
+Then install:
+
+    nmake /s /nologo /f makefile.vc INSTALLDIR=c:\tcl install
+
+
+Examples
+=====
+
+Below is an example to apply a color map -
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set img [::cv::imread $filename $::cv::IMREAD_COLOR]
+
+        set img2 [::cv::applyColorMap $img $::cv::COLORMAP_RAINBOW]
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $img
+        ::cv::namedWindow "Display Image 2" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image 2" $img2
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $img close
+        $img2 close
+    } on error {em} {
+        puts $em
+    }
+
+Image Rotation and Translation -
+
+    package require opencv
+
+    if {$argc != 1} {
+        puts "Please give a file name."
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set img1 [cv::imread $filename]
+
+        # Rotation
+        set matrix1 [::cv::getRotationMatrix2D [expr [$img1 cols]/2] [expr [$img1 rows]/2] 45 1]
+        set img2 [::cv::warpAffine $img1 $matrix1 [$img1 cols] [$img1 rows]]
+
+        # Translation
+        set matrix2 [cv::Mat::Mat 2 3 $::cv::CV_64FC1]
+        $matrix2 setData [list 1.0 0.0 100 0.0 1.0 100]
+        set img3 [::cv::warpAffine $img1 $matrix2 [$img1 cols] [$img1 rows]]
+
+        # Wrap
+        set cols [$img1 cols]
+        set rows [$img1 rows]
+        set matrix3 [::cv::getAffineTransform \
+              [list 0 0 [expr $cols-1] 0 0 [expr $rows-1]] \
+              [list 0 [expr $rows * 0.33] [expr $cols*0.85] [expr $rows*0.25] \
+                   [expr $cols*0.15] [expr $rows*0.7]]]
+        set img4 [::cv::warpAffine $img1 $matrix3 [$img1 cols] [$img1 rows]]
+
+        # Output
+        ::cv::imwrite "rotation.jpg" $img2
+        ::cv::imwrite "translation.jpg" $img3
+        ::cv::imwrite "wrap.jpg" $img4
+
+        $matrix1 close
+        $matrix2 close
+        $matrix3 close
+        $img1 close
+        $img2 close
+        $img3 close
+        $img4 close
+    } on error {em} {
+        puts $em
+    }
+
+Morphological Operations example -
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set img [::cv::imread $filename $::cv::IMREAD_COLOR]
+
+        set kernel [::cv::getStructuringElement $::cv::MORPH_ELLIPSE 5 5]
+        set dst [::cv::morphologyEx $img $::cv::MORPH_ERODE $kernel]
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $img
+        ::cv::namedWindow "Display Image 2" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image 2" $dst
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $img close
+        $dst close
+        $kernel close
+    } on error {em} {
+        puts $em
+    }
+
+Below is an exmaple for Laplacian Operator:
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set img [::cv::imread $filename $::cv::IMREAD_COLOR]
+
+        # Remove noise by applying a Gaussian blur
+        set img2 [::cv::GaussianBlur $img 3 3 0 0 $::cv::BORDER_DEFAULT]
+
+        # Convert the original image to grayscale
+        set img3 [::cv::cvtColor $img2 $::cv::COLOR_BGR2GRAY]
+
+        # Applies a Laplacian operator to the grayscale image
+        set img4 [::cv::Laplacian $img3 3 1.0 0.0 $::cv::BORDER_DEFAULT]
+
+        # Display
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::moveWindow "Display Image" 0 0
+        ::cv::imshow "Display Image" $img4
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $img close
+        $img2 close
+        $img3 close
+        $img4 close
+    } on error {em} {
+        puts $em
+    }
+
+Below is an example that apply OpenCV Look Up Table (LUT) to an image -
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set img [::cv::imread $filename $::cv::IMREAD_COLOR]
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+
+        set luv_mat [cv::Mat::Mat 1 256 $::cv::CV_8UC1]
+        for {set i 0} {$i < 256} {incr i} {
+            if {$i > 64 && $i < 196} {
+                $luv_mat at [list 0 $i] 0 0
+            } else {
+                $luv_mat at [list 0 $i] 0 $i
+            }
+        }
+
+        set img2 [::cv::LUT $img $luv_mat]
+        ::cv::imshow "Display Image" $img2
+
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $luv_mat close
+        $img close
+        $img2 close
+    } on error {em} {
+        puts $em
+    }
+
+Below is an example to add 2 images:
+
+    package require opencv
+
+    if {$argc != 2} {
+        puts "Please give 2 image file name."
+        exit
+    }
+
+    set file1 [lindex $argv 0]
+    set file2 [lindex $argv 1]
+
+    try {
+        set img1 [::cv::imread $file1 $::cv::IMREAD_COLOR]
+        set img2 [::cv::imread $file2 $::cv::IMREAD_COLOR]
+
+        if {[$img1 rows] < [$img2 rows] || [$img1 cols] < [$img2 cols]} {
+            puts "Image 1 has to bigger than image 2."
+        }
+
+        set img1rect [$img1 rect 0 0 [$img2 cols] [$img2 rows]]
+        set addimage [::cv::addWeighted $img1rect 0.5 $img2 0.5 0]
+        $addimage copyTo $img1rect
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $img1
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $img1rect close
+        $addimage close
+        $img1 close
+        $img2 close
+    } on error {em} {
+        puts $em
+    }
+
+Play a video file -
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+    set v [::cv::VideoCapture file $filename]
+    if {[$v isOpened]==0} {
+        puts "Open Video file $filename failed."
+        exit
+    } else {
+        set fps [$v get $::cv::CAP_PROP_FPS]
+        puts "Frames per second : $fps"
+
+        set frame_count [$v get $::cv::CAP_PROP_FRAME_COUNT]
+        puts "Frame count : $frame_count"
+    }
+
+    while {[$v isOpened]==1} {
+        try {
+            set f [$v read]
+            ::cv::imshow "Frame" $f
+            $f close
+        } on error {em} {
+            break
+        }
+
+        set key [::cv::waitKey 10]
+        if {$key==[scan "q" %c] || $key == 27} {
+            break
+        }
+    }
+    $v close
+    ::cv::destroyAllWindows
+
+Access camera using OpenCV and save to a video file -
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set index [lindex $argv 0]
+    set v [::cv::VideoCapture index $index]
+    if {[$v isOpened]==0} {
+        puts "Open camera $index failed."
+        exit
+    }
+
+    set width [$v get 3]
+    set height [$v get 4]
+    set w [::cv::VideoWriter output.avi MJPG 20.0 $width $height 1]
+    while {[$v isOpened]==1} {
+        try {
+            set f [$v read]
+            ::cv::imshow "Frame" $f
+            $w write $f
+            $f close
+        } on error {em} {
+            puts $em
+            exit
+        }
+
+        set key [::cv::waitKey 10]
+        if {$key==[scan "q" %c]} {
+            exit
+        }
+    }
+    $w close
+    $v close
+    ::cv::destroyAllWindows
+
+Video CamShift example -
+
+    package require opencv
+
+    # The example file can be downloaded from:
+    # https://www.bogotobogo.com/python/OpenCV_Python/images/mean_shift_tracking/slow_traffic_small.mp4
+
+    set filename "slow_traffic_small.mp4"
+    set v [::cv::VideoCapture file $filename]
+    if {[$v isOpened]==0} {
+        puts "Open Video file $filename failed."
+        exit
+    }
+
+    # Setup initial location of track window, simply hardcoded the values
+    set x 300
+    set y 200
+    set width 100
+    set height 50
+
+    # calcHist parameters
+    set channels [list 0]
+    set histSize [list 180]
+    set ranges [list 0 180]
+
+    set frame [$v read]
+
+    set roi [$frame crop $x $y $width $height]
+    set hsv_roi [::cv::cvtColor $roi $::cv::COLOR_BGR2HSV]
+    set mask [::cv::inRange $hsv_roi [list 0 60 32 0] [list 180 255 255 0]]
+    set hsv_hist [::cv::calcHist $hsv_roi $channels $mask 1 $histSize $ranges]
+    set roi_hist [::cv::normalize $hsv_hist 0 255 $::cv::NORM_MINMAX]
+
+    $frame close
+    $roi close
+    $hsv_roi close
+    $mask close
+    $hsv_hist close
+
+    set term [::cv::TermCriteria [expr $::cv::EPS | $::cv::COUNT] 10 1]
+
+    while {[$v isOpened]==1} {
+        try {
+            set frame [$v read]
+
+            if {$x < 550 || $y < 200} {
+                set hsv [cv::cvtColor $frame $::cv::COLOR_BGR2HSV]
+                set dst [cv::calcBackProject $hsv [list 0] $roi_hist [list 0 180]]
+                set result [::cv::CamShift $dst $x $y $width $height $term]
+                set x [lindex [lindex $result 0] 0]
+                set y [lindex [lindex $result 0] 1]
+                set width [lindex [lindex $result 0] 2]
+                set hehgit [lindex [lindex $result 0] 3]
+
+                set points [lindex $result 1]
+                set p0_x [lindex $points 0]
+                set p0_y [lindex $points 1]
+                set p1_x [lindex $points 2]
+                set p1_y [lindex $points 3]
+                set p2_x [lindex $points 4]
+                set p2_y [lindex $points 5]
+                set p3_x [lindex $points 6]
+                set p3_y [lindex $points 7]
+
+                ::cv::line $frame $p0_x $p0_y $p1_x $p1_y [list 255 0 0 0] 3
+                ::cv::line $frame $p1_x $p1_y $p2_x $p2_y [list 255 0 0 0] 3
+                ::cv::line $frame $p2_x $p2_y $p3_x $p3_y [list 255 0 0 0] 3
+                ::cv::line $frame $p3_x $p3_y $p0_x $p0_y [list 255 0 0 0] 3
+
+                $hsv close
+                $dst close
+            }
+
+            ::cv::imshow "Frame" $frame
+
+            $frame close
+        } on error {em} {
+            break
+        }
+
+        set key [::cv::waitKey 10]
+        if {$key==[scan "q" %c] || $key == 27} {
+            break
+        }
+    }
+    $term close
+    $v close
+    ::cv::destroyAllWindows
+
+Lucas-Kanade Optical Flow in OpenCV -
+
+    package require opencv
+
+    # The example file can be downloaded from:
+    # https://www.bogotobogo.com/python/OpenCV_Python/images/mean_shift_tracking/slow_traffic_small.mp4
+
+    set filename "slow_traffic_small.mp4"
+    set v [::cv::VideoCapture file $filename]
+    if {[$v isOpened]==0} {
+        puts "Open Video file $filename failed."
+        exit
+    }
+
+    # Create some random colors
+    set colors [list]
+    for {set i 0} {$i < 100} {incr i} {
+        lappend colors [list [expr int(rand() * 255)] [expr int(rand() * 255)] [expr int(rand() * 255)] 0]
+    }
+
+    set frame [$v read]
+    set oldGray [::cv::cvtColor $frame $::cv::COLOR_BGR2GRAY]
+    set emptymask [::cv::Mat::Mat 0 0 $::cv::CV_8U]
+    set p0 [::cv::goodFeaturesToTrack $oldGray 100 0.3 7 $emptymask 7 0 0.04]
+
+    # Create a mask image for drawing purposes
+    set mask [::cv::Mat::Mat [$frame rows] [$frame cols] [$frame type] [list 0 0 0 0]]
+
+    $emptymask close
+    $frame close
+
+    while {[$v isOpened]==1} {
+        try {
+            set term [::cv::TermCriteria [expr $::cv::EPS | $::cv::COUNT] 10 0.03]
+            set frame [$v read]
+            set frameGray [::cv::cvtColor $frame $::cv::COLOR_BGR2GRAY]
+
+            set result [::cv::calcOpticalFlowPyrLK $oldGray $frameGray $p0 15 15 2 $term]
+            set p1 [lindex $result 0]
+            set status [lindex $result 1]
+            set err [lindex $result 2]
+
+            for {set i 0} {$i < [$p1 rows]} {incr i} {
+                for {set j 0} {$j < [$p1 cols]} {incr j} {
+                    set oldx [expr int([$p0 at [list $i $j] 0])]
+                    set oldy [expr int([$p0 at [list $i $j] 1])]
+                    set x [expr int([$p1 at [list $i $j] 0])]
+                    set y [expr int([$p1 at [list $i $j] 1])]
+
+                    if {[$status at [list $i $j] 0]==1} {
+                        ::cv::line $mask $x $y $oldx $oldy [lindex $colors $i] 2
+                        ::cv::circle $frame $x $y 5 [lindex $colors $i] -1
+                    }
+                }
+            }
+            set frame2 [::cv::add $frame $mask]
+
+            ::cv::imshow "Frame" $frame2
+
+            $err close
+            $status close
+            $p0 close
+            $oldGray close
+
+            set p0 $p1
+            set oldGray $frameGray
+
+            $frame close
+            $frame2 close
+            $term close
+        } on error {em} {
+            break
+        }
+
+        set key [::cv::waitKey 10]
+        if {$key==[scan "q" %c] || $key == 27} {
+            break
+        }
+    }
+    $p1 close
+    $frameGray close
+    $v close
+    ::cv::destroyAllWindows
+
+Dense Optical Flow Example -
+
+    package require opencv
+
+    # The example file can be downloaded from:
+    # https://github.com/opencv/opencv/blob/master/samples/data/vtest.avi
+
+    set filename "vtest.avi"
+    set v [::cv::VideoCapture file $filename]
+    if {[$v isOpened]==0} {
+        puts "Open Video file $filename failed."
+        exit
+    }
+
+    set frame [$v read]
+    set oldGray [::cv::cvtColor $frame $::cv::COLOR_BGR2GRAY]
+    $frame close
+
+    while {[$v isOpened]==1} {
+        try {
+            set frame [$v read]
+            set frameGray [::cv::cvtColor $frame $::cv::COLOR_BGR2GRAY]
+
+            set flow [cv::calcOpticalFlowFarneback $oldGray $frameGray 0.5 3 15 3 5 1.2 0]
+            set flowlist [cv::split $flow]
+            set uvalue [lindex $flowlist 0]
+            set vvalue [lindex $flowlist 1]
+
+            set result [cv::cartToPolar $uvalue $vvalue 1]
+            set mag [lindex $result 0]
+            set ang [lindex $result 1]
+
+            set hsv0 [$ang multiply [expr ((1.0 / 360.0) * (180.0 / 255.0))]]
+            set hsv1 [::cv::Mat::ones [$frame rows] [$frame cols] $::cv::CV_32F]
+            set hsv2 [cv::normalize $mag 0 1 $::cv::NORM_MINMAX]
+            set hsv [::cv::merge [list $hsv0 $hsv1 $hsv2]]
+
+            set hsv8 [$hsv convertTo $::cv::CV_8U 255.0 0]
+            set frame2 [::cv::cvtColor $hsv8 $::cv::COLOR_HSV2BGR]
+            ::cv::imshow "Frame" $frame2
+
+            $flow close
+            $uvalue close
+            $vvalue close
+            $mag close
+            $ang close
+            $hsv0 close
+            $hsv1 close
+            $hsv2 close
+            $hsv close
+            $hsv8 close
+            $oldGray close
+
+            set oldGray $frameGray
+
+            $frame close
+            $frame2 close
+        } on error {em} {
+            break
+        }
+
+        set key [::cv::waitKey 10]
+        if {$key==[scan "q" %c] || $key == 27} {
+            break
+        }
+    }
+    $frameGray close
+    $v close
+    ::cv::destroyAllWindows
+
+Below is a selectROI example -
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set img [::cv::imread $filename $::cv::IMREAD_COLOR]
+
+        set rect [::cv::selectROI $img]
+        set x [lindex $rect 0]
+        set y [lindex $rect 1]
+        set width [lindex $rect 2]
+        set height [lindex $rect 3]
+
+        # Create a mask for the ROI
+        set mask [::cv::Mat::zeros [$img rows] [$img cols] [$img type]]
+        ::cv::rectangle $mask $x $y [expr $x+$width] [expr $y+$height] [list 255 255 255 0] -1
+
+        set img2 [::cv::colorChange $img $mask 2.0 0.5 0.5]
+
+        ::cv::namedWindow "Display Result" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Result" $img2
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $img close
+        $mask close
+        $img2 close
+    } on error {em} {
+        puts $em
+    }
+
+Below is a setMouseCallback test -
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    proc drawit {event x y flags} {
+        if {$event == $::cv::EVENT_LBUTTONUP} {
+            set scalar [list 0 0 255 0]
+            ::cv::circle $::img $x $y 25 $scalar 3 $::cv::LINE_8 0
+            ::cv::imshow "Display Image" $::img
+        }
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set img [::cv::imread $filename $::cv::IMREAD_COLOR]
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::setMouseCallback "Display Image" drawit
+        ::cv::imshow "Display Image" $img
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $img close
+    } on error {em} {
+        puts $em
+    }
+
+Below is a createTrackbar test -
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    proc changeit {value} {
+        set img2 [::cv::Sobel $::img 1 0 $value 1.0 0.0 $::cv::BORDER_DEFAULT]
+        ::cv::imshow "Display Image" $img2
+        $img2 close
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set img [::cv::imread $filename $::cv::IMREAD_COLOR]
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::createTrackbar "Trackbar1" "Display Image" 3 21 changeit
+        changeit 3
+
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $img close
+    } on error {em} {
+        puts $em
+    }
+
+Contours test -
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set image1 [::cv::imread $filename]
+        set image2 [::cv::cvtColor $image1 $::cv::COLOR_RGB2GRAY]
+        set image3 [::cv::threshold $image2 20 255 $::cv::THRESH_BINARY]
+        set contours [::cv::findContours $image3 $::cv::RETR_EXTERNAL $::cv::CHAIN_APPROX_SIMPLE]
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $image1
+
+        ::cv::namedWindow "Display Image 2" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image 2" $image3
+
+        set length [llength $contours]
+        set max 0
+        set maxindex 0
+        set bounding_rect [list]
+        set mycircle [list]
+        set myrect [list]
+        for {set i 0} {$i < $length} {incr i} {
+            set value [::cv::contourArea [lindex $contours $i] 0]
+            if {$value > $max} {
+                set max $value
+                set maxindex $i
+                set bounding_rect [::cv::boundingRect [lindex $contours $i]]
+                set mycircle [::cv::minEnclosingCircle [lindex $contours $i]]
+                set myrect [::cv::minAreaRect [lindex $contours $i]]
+            }
+        }
+
+        ::cv::drawContours $image1 $contours -1 [list 255 0 0 0] -1 $::cv::LINE_8 2 0 0
+
+        set x1 [lindex $bounding_rect 0]
+        set y1 [lindex $bounding_rect 1]
+        set x2 [expr $x1 + [lindex $bounding_rect 2]]
+        set y2 [expr $y1 + [lindex $bounding_rect 3]]
+        set color [list 255 255 0 0]
+        ::cv::rectangle $image1 $x1 $y1 $x2 $y2 $color 1
+
+        set x1 [lindex $mycircle 0]
+        set y1 [lindex $mycircle 1]
+        set r [lindex $mycircle 2]
+        set color [list 0 255 255 0]
+        ::cv::circle $image1 $x1 $y1 $r $color 1
+
+        set box [::cv::boxPoints $myrect]
+        set color [list 255 0 255 0]
+        ::cv::drawContours $image1 [list $box] -1 $color 3 $::cv::LINE_8 2 0 0
+
+        ::cv::namedWindow "Display Image 3" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image 3" $image1
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $image3 close
+        $image2 close
+        $image1 close
+    } on error {em} {
+        puts $em
+    }
+
+Brute-Force Matching with ORB Descriptors -
+
+    package require opencv
+
+    proc mysortproc {x y} {
+        set distance1 [lindex $x 3]
+        set distance2 [lindex $y 3]
+
+        if {$distance1 > $distance2} {
+            return 1
+        } elseif {$distance1 < $distance2} {
+            return -1
+        } else {
+            return 0
+        }
+    }
+
+    #
+    # From https://github.com/opencv/opencv/tree/master/samples/data
+    #
+    set filename1 "box.png"
+    set filename2 "box_in_scene.png"
+
+    try {
+        set img1 [::cv::imread $filename1 0]
+        set img2 [::cv::imread $filename2 0]
+
+        set orb [::cv::ORB]
+
+        set result1 [$orb detectAndCompute $img1]
+        set result2 [$orb detectAndCompute $img2]
+        set kp1 [lindex $result1 0]
+        set d1 [lindex $result1 1]
+        set kp2 [lindex $result2 0]
+        set d2 [lindex $result2 1]
+
+        set bmatcher [::cv::BFMatcher $::cv::NORM_HAMMING 1]
+        set match [$bmatcher match $d1 $d2]
+        set match [lsort -command mysortproc $match]
+        set matches [lrange $match 0 10]
+
+        set mcolor [list 255 0 0 0]
+        set scolor [list 0 0 255 0]
+        set match1 [::cv::drawMatches $img1 $kp1 $img2 $kp2 $matches None \
+                    $mcolor $scolor $::cv::DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS]
+
+        $d1 close
+        $d2 close
+        $orb close
+        $bmatcher close
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $match1
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $match1 close
+        $img1 close
+        $img2 close
+    } on error {em} {
+        puts $em
+    }
+
+Brute-Force Matching with ORB Descriptors and Ratio Test -
+
+    package require opencv
+
+    #
+    # From https://github.com/opencv/opencv/tree/master/samples/data
+    #
+    set filename1 "box.png"
+    set filename2 "box_in_scene.png"
+
+    try {
+        set img1 [::cv::imread $filename1 0]
+        set img2 [::cv::imread $filename2 0]
+
+        set orb [::cv::ORB]
+        $orb setWTA_K 3
+
+        set result1 [$orb detectAndCompute $img1]
+        set result2 [$orb detectAndCompute $img2]
+        set kp1 [lindex $result1 0]
+        set d1 [lindex $result1 1]
+        set kp2 [lindex $result2 0]
+        set d2 [lindex $result2 1]
+
+        set bmatcher [::cv::BFMatcher $::cv::NORM_HAMMING 0]
+        set matches [$bmatcher knnMatch $d1 $d2 2]
+
+        # Apply ratio test
+        set good [list]
+        foreach match $matches {
+            foreach {m n} $match {
+                set mdistance [lindex $m 3]
+                set ndistance [lindex $n 3]
+                if {$mdistance < [expr 0.7 * $ndistance]} {
+                    lappend good $m
+                }
+            }
+        }
+
+        set mcolor [list 255 0 0 0]
+        set scolor [list 0 0 255 0]
+        set match1 [::cv::drawMatches $img1 $kp1 $img2 $kp2 $good None \
+                    $mcolor $scolor $::cv::DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS]
+
+        $d1 close
+        $d2 close
+        $orb close
+        $bmatcher close
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $match1
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $match1 close
+        $img1 close
+        $img2 close
+    } on error {em} {
+        puts $em
+    }
+
+Feature Matching + Homography to find Objects -
+
+    package require opencv
+
+    proc mysortproc {x y} {
+        set distance1 [lindex $x 3]
+        set distance2 [lindex $y 3]
+
+        if {$distance1 > $distance2} {
+            return 1
+        } elseif {$distance1 < $distance2} {
+            return -1
+        } else {
+            return 0
+        }
+    }
+
+    #
+    # From https://github.com/opencv/opencv/tree/master/samples/data
+    #
+    set filename1 "box.png"
+    set filename2 "box_in_scene.png"
+
+    try {
+        set img1 [::cv::imread $filename1 0]
+        set img2 [::cv::imread $filename2 0]
+
+        set orb [::cv::ORB]
+
+        set result1 [$orb detectAndCompute $img1]
+        set result2 [$orb detectAndCompute $img2]
+        set kp1 [lindex $result1 0]
+        set d1 [lindex $result1 1]
+        set kp2 [lindex $result2 0]
+        set d2 [lindex $result2 1]
+
+        set bmatcher [::cv::BFMatcher $::cv::NORM_HAMMING 1]
+        set match [$bmatcher match $d1 $d2]
+        set match [lsort -command mysortproc $match]
+        set dmatches [lrange $match 0 20]
+
+        set srcPts [list]
+        set dstPts [list]
+        for {set i 0} {$i < [llength $dmatches]} {incr i} {
+            set m [lindex $match $i]
+            set spoint [lindex $kp1 [lindex $m 0]]
+            set dpoint [lindex $kp2 [lindex $m 1]]
+
+            lappend srcPts [lindex $spoint 0] [lindex $spoint 1]
+            lappend dstPts [lindex $dpoint 0] [lindex $dpoint 1]
+        }
+
+        # Find homography matrix and do perspective transform
+        set src_pts [::cv::Mat::Mat 1 [expr [llength $srcPts]/2] $::cv::CV_32FC2]
+        $src_pts setData $srcPts
+        set dst_pts [::cv::Mat::Mat 1 [expr [llength $dstPts]/2] $::cv::CV_32FC2]
+        $dst_pts setData $dstPts
+        set M [::cv::findHomography $src_pts $dst_pts $::cv::RANSAC 5.0]
+        if {![$M empty]} {
+            set h [$img1 rows]
+            set w [$img1 cols]
+            set pts [list 0 0 0 [expr $h-1] [expr $w-1] [expr $h-1] [expr $w-1] 0]
+            set dst [::cv::perspectiveTransform $pts $M]
+            ::cv::polylines $img2 $dst 1 1 [list 255 255 255 0] 5
+        }
+
+        $M close
+        $src_pts close
+        $dst_pts close
+
+        set mcolor [list 255 0 0 0]
+        set scolor [list 0 0 255 0]
+        set match1 [::cv::drawMatches $img1 $kp1 $img2 $kp2 $dmatches None \
+                    $mcolor $scolor $::cv::DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS]
+
+        $d1 close
+        $d2 close
+        $orb close
+        $bmatcher close
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $match1
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $match1 close
+        $img1 close
+        $img2 close
+    } on error {em} {
+        puts $em
+    }
+
+Stitcher test -
+
+    package require opencv
+
+    if {$argc < 1} {
+        puts "Please give an image list."
+        exit
+    }
+
+    try {
+        set imagelist [list]
+        for {set i 0} {$i < $argc} {incr i} {
+            set img [::cv::imread [lindex $argv $i] $::cv::IMREAD_COLOR]
+            lappend imagelist $img
+        }
+
+        set s [::cv::Stitcher $::cv::PANORAMA]
+        set result [$s stitch $imagelist]
+        $s close
+
+        ::cv::imwrite output.png $result
+        $result close
+    } on error {em} {
+        puts $em
+    }
+
+QRCodeDetector example -
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set img [::cv::imread $filename $::cv::IMREAD_COLOR]
+        set qrdetect [::cv::QRCodeDetector]
+        set result [$qrdetect detectAndDecode $img]
+
+        puts "Decode result: [lindex $result 0]"
+
+        set box [lindex $result 1]
+        set code [lindex $result 2]
+        set m [$box rows]
+        set n [$box cols]
+
+        if {[$box empty] != 1} {
+            for {set i 0} {$i < $m} {incr i} {
+                for {set j 0} {$j < $n} {incr j} {
+                    set x1 [expr int([$box at [list $i $j] 0])]
+                    set y1 [expr int([$box at [list $i $j] 1])]
+                    set x2 [expr int([$box at [list $i [expr ($j+1)%$n]] 0])]
+                    set y2 [expr int([$box at [list $i [expr ($j+1)%$n]] 1])]
+
+                    cv::line $img $x1 $y1 $x2 $y2 [list 255 128 0 0] 5
+                }
+            }
+        }
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $img
+
+        if {[$code empty] != 1} {
+            ::cv::namedWindow "Display QR code image" $::cv::WINDOW_AUTOSIZE
+            ::cv::imshow "Display QR code image" $code
+        }
+
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $box close
+        $code close
+        $img close
+    } on error {em} {
+        puts $em
+    }
+
+The following program shows how to detect faces in an image (using CascadeClassifier).
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set img1 [::cv::imread $filename $::cv::IMREAD_COLOR]
+        set img2 [::cv::cvtColor $img1 $::cv::COLOR_BGR2GRAY]
+        set img3 [::cv::equalizeHist $img2]
+
+        $img2 close
+
+        #
+        # From https://github.com/opencv/opencv/tree/master/data/lbpcascades
+        # For test ::cv::CascadeClassifier command
+        #
+        set xmlfile "lbpcascades/lbpcascade_frontalface.xml"
+        set classifier [::cv::CascadeClassifier $xmlfile]
+        set rects [$classifier detectMultiScale $img3]
+        set length [llength $rects]
+        for {set i 0} {$i < $length} {incr i} {
+            set rlist [lindex $rects $i]
+			set x1 [lindex $rlist 0]
+			set y1 [lindex $rlist 1]
+			set x2 [expr $x1 + [lindex $rlist 2]]
+			set y2 [expr $y1 + [lindex $rlist 3]]
+			set color [list 255 0 0 0]
+			::cv::rectangle $img1 $x1 $y1 $x2 $y2 $color 2 $::cv::LINE_AA 0
+        }
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $img1
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $classifier close
+        $img1 close
+        $img3 close
+    } on error {em} {
+        puts $em
+    }
+
+Below is an DNN example (face detector) -
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set img1 [::cv::imread $filename $::cv::IMREAD_COLOR]
+        set blob [::cv::dnn::blobFromImage $img1 1.0 300 300 \
+                [list 104 117 123 0] 1 1]
+
+        # From https://github.com/opencv/opencv/tree/master/samples/dnn
+        # model is from models.yml and config is from face_detector folder's file
+        # Just download to test
+        set model "res10_300x300_ssd_iter_140000.caffemodel"
+        set config "deploy.prototxt"
+        set net [::cv::dnn::readNet $model $config Caffe]
+        $net setPreferableBackend $::cv::dnn::DNN_BACKEND_DEFAULT
+        $net setPreferableTarget $::cv::dnn::DNN_TARGET_CPU
+        $net setInput $blob
+        set data [$net forward]
+
+        set msize [$data size]
+        for {set i 0} {$i < [lindex $msize 2]} {incr i} {
+            set confidence [$data at [list 0 0 $i 2] 0]
+            if {$confidence > 0.9} {
+                set startX [expr int([$data at [list 0 0 $i 3] 0] * [$img1 cols])]
+                set startY [expr int([$data at [list 0 0 $i 4] 0] * [$img1 rows])]
+                set endX [expr int([$data at [list 0 0 $i 5] 0] * [$img1 cols])]
+                set endY [expr int([$data at [list 0 0 $i 6] 0] * [$img1 rows])]
+
+                cv::rectangle $img1 $startX $startY $endX $endY [list 255 0 0 0] 1
+            }
+        }
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $img1
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $net close
+        $blob close
+        $img1 close
+    } on error {em} {
+        puts $em
+    }
+

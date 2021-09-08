@@ -1,0 +1,433 @@
+#include "tclopencv.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int namedWindow(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    char *winname = NULL;
+    int len = 0;
+  	int flags = cv::WINDOW_AUTOSIZE;
+
+    if (objc !=2 && objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "winname ?flags?");
+        return TCL_ERROR;
+    }
+
+    winname = Tcl_GetStringFromObj(objv[1], &len);
+    if( !winname || len < 1 ){
+        Tcl_SetResult(interp, (char *) "namedWindow invalid winname", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    if (objc == 3) {
+        if(Tcl_GetIntFromObj(interp, objv[2], &flags) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::namedWindow(winname, flags);
+    } catch (...){
+        Tcl_SetResult(interp, (char *) "namedWindow failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    return TCL_OK;
+}
+
+
+int imshow(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    char *winname = NULL;
+    int len = 0;
+    Tcl_HashEntry *hashEntryPtr;
+    char *handle;
+    MatrixInfo *info;
+
+    if (objc !=3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "winname matrix");
+        return TCL_ERROR;
+    }
+
+    winname = Tcl_GetStringFromObj(objv[1], &len);
+    if( !winname || len < 1 ){
+        Tcl_SetResult(interp, (char *) "imshow invalid winname", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    handle = Tcl_GetStringFromObj(objv[2], 0);
+    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
+    if( !hashEntryPtr ) {
+        if( interp ) {
+            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
+            Tcl_AppendStringsToObj( resultObj, "imshow invalid MATRIX handle ",
+                                    handle, (char *)NULL );
+        }
+
+        return TCL_ERROR;
+    }
+
+    info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
+    if ( !info ) {
+        Tcl_SetResult(interp, (char *) "imshow invalid info data", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::imshow(winname, *(info->matrix));
+    } catch (...){
+        Tcl_SetResult(interp, (char *) "imshow failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+
+int waitKey(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    int delay = 0;
+    int result = 0;
+
+    if (objc !=2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "delay");
+        return TCL_ERROR;
+    }
+
+    if(Tcl_GetIntFromObj(interp, objv[1], &delay) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        result = cv::waitKey(delay);
+    } catch (...){
+        Tcl_SetResult(interp, (char *) "waitKey failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    Tcl_SetObjResult(interp, Tcl_NewIntObj( result ));
+    return TCL_OK;
+}
+
+
+int moveWindow(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    char *winname = NULL;
+    int len = 0, x = 0, y = 0;
+
+    if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "winname x y");
+        return TCL_ERROR;
+    }
+
+    winname = Tcl_GetStringFromObj(objv[1], &len);
+    if( !winname || len < 1 ){
+        Tcl_SetResult(interp, (char *) "moveWindow Iinvalid winname", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    if(Tcl_GetIntFromObj(interp, objv[2], &x) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if(Tcl_GetIntFromObj(interp, objv[3], &y) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::moveWindow(winname, x, y);
+    } catch (...){
+        Tcl_SetResult(interp, (char *) "moveWindow failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+
+int destroyWindow(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    char *winname = NULL;
+    int len = 0;
+
+    if (objc !=2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "winname");
+        return TCL_ERROR;
+    }
+
+    winname = Tcl_GetStringFromObj(objv[1], &len);
+    if( !winname || len < 1 ){
+        Tcl_SetResult(interp, (char *) "destroyWindow invalid winname", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::destroyWindow(winname);
+    } catch (...){
+        Tcl_SetResult(interp, (char *) "destroyWindow failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+
+int destroyAllWindows(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp, 0, objv, "destroyAllWindows");
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::destroyAllWindows();
+    } catch (...){
+        Tcl_SetResult(interp, (char *) "destroyAllWindows failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+
+int selectROI(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    int showCrosshair = 1, fromCenter = 0;
+    Tcl_HashEntry *hashEntryPtr;
+    char *handle;
+    MatrixInfo *info;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Rect rect;
+
+    if (objc != 2 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix ?showCrosshair fromCenter?");
+        return TCL_ERROR;
+    }
+
+    handle = Tcl_GetStringFromObj(objv[1], 0);
+    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
+    if( !hashEntryPtr ) {
+        if( interp ) {
+            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
+            Tcl_AppendStringsToObj( resultObj, "selectROI invalid MATRIX handle ",
+                                    handle, (char *)NULL );
+        }
+
+        return TCL_ERROR;
+    }
+
+    info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
+    if ( !info ) {
+        Tcl_SetResult(interp, (char *) "selectROI invalid info data", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    if (objc == 4) {
+        if(Tcl_GetBooleanFromObj(interp, objv[2], &showCrosshair) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if(Tcl_GetBooleanFromObj(interp, objv[3], &fromCenter) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        rect = cv::selectROI(*(info->matrix), showCrosshair, fromCenter);
+    } catch (...){
+        Tcl_SetResult(interp, (char *) "selectROI failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj( (int) rect.x ));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj( (int) rect.y ));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj( (int) rect.width ));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj( (int) rect.height ));
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
+void CallBackFunc(int event, int x, int y, int flags, void *userdata)
+{
+    if (userdata) {
+        CvCallbackInfo *callbackinfo = (CvCallbackInfo *) userdata;
+        Tcl_Obj *script_obj[5];
+        int i = 0;
+
+        script_obj[0] = Tcl_NewStringObj(callbackinfo->callback_code, -1);
+        script_obj[1] = Tcl_NewIntObj(event);
+        script_obj[2] = Tcl_NewIntObj(x);
+        script_obj[3] = Tcl_NewIntObj(y);
+        script_obj[4] = Tcl_NewIntObj(flags);
+
+        for (i = 0; i < 5; i++) {
+            Tcl_IncrRefCount(script_obj[i]);
+        }
+
+        Tcl_EvalObjv(callbackinfo->interp, 5, script_obj, 0);
+
+        for (i = 0; i < 5; i++) {
+            Tcl_DecrRefCount(script_obj[i]);
+        }
+    }
+}
+
+
+int setMouseCallback(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    char *winname = NULL, *callback_code = NULL;
+    int len = 0;
+    CvCallbackInfo *callbackinfo;
+    Tcl_HashEntry *newHashEntryPtr;
+    char handleName[16 + TCL_INTEGER_SPACE];
+    int newvalue;
+
+    if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "winname callback_code");
+        return TCL_ERROR;
+    }
+
+    winname = Tcl_GetStringFromObj(objv[1], &len);
+    if( !winname || len < 1 ){
+        Tcl_SetResult(interp, (char *) "setMouseCallback invalid winname", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    callback_code = Tcl_GetStringFromObj(objv[2], &len);
+    if( !callback_code || len < 1 ){
+        Tcl_SetResult(interp, (char *) "setMouseCallback invalid callback_code", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    try {
+        callbackinfo = (CvCallbackInfo *) ckalloc (sizeof (CvCallbackInfo));
+        callbackinfo->interp = interp;
+        callbackinfo->callback_code = callback_code;
+        callbackinfo->value = 0;
+        cv::setMouseCallback(winname, CallBackFunc, callbackinfo);
+    } catch (...){
+        Tcl_SetResult(interp, (char *) "setMouseCallback failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    Tcl_MutexLock(&myMutex);
+    sprintf( handleName, "cv-callback%d", callback_count++ );
+    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
+    Tcl_SetHashValue(newHashEntryPtr, callbackinfo);
+    Tcl_MutexUnlock(&myMutex);
+
+    return TCL_OK;
+}
+
+
+void TrackbarCallback(int value, void *userdata)
+{
+    if (userdata) {
+        CvCallbackInfo *callbackinfo = (CvCallbackInfo *) userdata;
+        Tcl_Obj *script_obj[2];
+        int i = 0;
+
+        script_obj[0] = Tcl_NewStringObj(callbackinfo->callback_code, -1);
+        script_obj[1] = Tcl_NewIntObj(value);
+
+        for (i = 0; i < 2; i++) {
+            Tcl_IncrRefCount(script_obj[i]);
+        }
+
+        Tcl_EvalObjv(callbackinfo->interp, 2, script_obj, 0);
+
+        for (i = 0; i < 2; i++) {
+            Tcl_DecrRefCount(script_obj[i]);
+        }
+    }
+}
+
+
+int createTrackbar(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    char *trackbarname = NULL, *winname = NULL, *callback_code = NULL;
+    int init_value = 0, max_value = 0;
+    int len = 0;
+    CvCallbackInfo *callbackinfo;
+    Tcl_HashEntry *newHashEntryPtr;
+    char handleName[16 + TCL_INTEGER_SPACE];
+    int newvalue;
+
+    if (objc != 6) {
+        Tcl_WrongNumArgs(interp, 1, objv, "trackbarname winname init_value max_value callback_code");
+        return TCL_ERROR;
+    }
+    trackbarname = Tcl_GetStringFromObj(objv[1], &len);
+    if( !trackbarname || len < 1 ){
+        Tcl_SetResult(interp, (char *) "createTrackbar invalid trackbarname", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    winname = Tcl_GetStringFromObj(objv[2], &len);
+    if( !winname || len < 1 ){
+        Tcl_SetResult(interp, (char *) "createTrackbar invalid winname", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    if(Tcl_GetIntFromObj(interp, objv[3], &init_value) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if(Tcl_GetIntFromObj(interp, objv[4], &max_value) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    callback_code = Tcl_GetStringFromObj(objv[5], &len);
+    if( !callback_code || len < 1 ){
+        Tcl_SetResult(interp, (char *) "createTrackbar invalid callback_code", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    try {
+        callbackinfo = (CvCallbackInfo *) ckalloc (sizeof (CvCallbackInfo));
+        callbackinfo->interp = interp;
+        callbackinfo->callback_code = callback_code;
+        callbackinfo->value = init_value;
+
+        cv::createTrackbar(trackbarname, winname, &(callbackinfo->value),
+                           max_value, TrackbarCallback, callbackinfo);
+    } catch (...){
+        Tcl_SetResult(interp, (char *) "createTrackbar failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    Tcl_MutexLock(&myMutex);
+    sprintf( handleName, "cv-callback%d", callback_count++ );
+    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
+    Tcl_SetHashValue(newHashEntryPtr, callbackinfo);
+    Tcl_MutexUnlock(&myMutex);
+
+    return TCL_OK;
+}
+
+
+int getTrackbarPos(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    char *trackbarname = NULL, *winname = NULL;
+    int len = 0;
+    int value;
+
+    if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "trackbarname winname");
+        return TCL_ERROR;
+    }
+    trackbarname = Tcl_GetStringFromObj(objv[1], &len);
+    if( !trackbarname || len < 1 ){
+        Tcl_SetResult(interp, (char *) "getTrackbarPos invalid trackbarname", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    winname = Tcl_GetStringFromObj(objv[2], &len);
+    if( !winname || len < 1 ){
+        Tcl_SetResult(interp, (char *) "getTrackbarPos invalid winname", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    try {
+        value = cv::getTrackbarPos(trackbarname, winname);
+    } catch (...){
+        Tcl_SetResult(interp, (char *) "getTrackbarPos failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+    return TCL_OK;
+}
+#ifdef __cplusplus
+}
+#endif
