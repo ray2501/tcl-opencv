@@ -271,6 +271,8 @@ Please notice, BFMatcher command will only have 1 instance.
     SimpleBlobDetector detect matrix
     SimpleBlobDetector close
 
+Please notice, SimpleBlobDetector command will only have 1 instance.
+
 ### calib3d
 
     ::cv::findHomography srcPoints dstPoints ?method ransacReprojThreshold?
