@@ -2074,6 +2074,40 @@ Feature Matching + Homography to find Objects -
         puts $em
     }
 
+Non-Photorealistic Rendering -
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set img [::cv::imread $filename $::cv::IMREAD_COLOR]
+        set img2 [::cv::detailEnhance $img]
+        set img3 [::cv::edgePreservingFilter $img2]
+
+        set img4 [::cv::stylization $img3]
+        ::cv::imwrite "stylization.png" $img4
+
+        set penresult [::cv::pencilSketch $img3]
+        set img5 [lindex $penresult 0]
+        set img6 [lindex $penresult 1]
+        ::cv::imwrite "pencilSketch_1.png" $img5
+        ::cv::imwrite "pencilSketch_2.png" $img6
+
+        $img close
+        $img2 close
+        $img3 close
+        $img4 close
+        $img5 close
+        $img6 close
+    } on error {em} {
+        puts $em
+    }
+
 High Dynamic Range Imaging test -
 
     package require opencv
