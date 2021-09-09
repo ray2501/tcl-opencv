@@ -3262,6 +3262,72 @@ int mat_divide(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 }
 
 
+int mat_exp(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    cv::Mat image;
+    Tcl_HashEntry *hashEntryPtr;
+    char *ahandle;
+    Tcl_HashEntry *newHashEntryPtr;
+    char handleName[16 + TCL_INTEGER_SPACE];
+    Tcl_Obj *pResultStr = NULL;
+    int newvalue;
+    MatrixInfo *info1;
+    MatrixInfo *flip_info;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix");
+        return TCL_ERROR;
+    }
+
+    ahandle = Tcl_GetStringFromObj(objv[1], 0);
+    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, ahandle );
+    if( !hashEntryPtr ) {
+        if( interp ) {
+            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
+            Tcl_AppendStringsToObj( resultObj, "exp invalid MATRIX handle ",
+                                    ahandle, (char *)NULL );
+        }
+
+        return TCL_ERROR;
+    }
+
+    info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
+    if ( !info1 ) {
+        Tcl_SetResult(interp, (char *) "exp invalid info data", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::exp(*(info1->matrix), image);
+    } catch (...){
+        Tcl_SetResult(interp, (char *) "exp failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    flip_info = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
+    if (!flip_info) {
+        Tcl_SetResult(interp, (char *) "exp malloc MatrixInfo failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    flip_info->matrix = new cv::Mat(image);
+
+    Tcl_MutexLock(&myMutex);
+    sprintf( handleName, "cv-mat%zd", matrix_count++ );
+
+    pResultStr = Tcl_NewStringObj( handleName, -1 );
+
+    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
+    Tcl_SetHashValue(newHashEntryPtr, flip_info);
+    Tcl_MutexUnlock(&myMutex);
+
+    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int mat_flip(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     cv::Mat image;
     int flipCode = 0;

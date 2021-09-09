@@ -51,6 +51,7 @@ int mat_cartToPolar(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int mat_convertScaleAbs(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int mat_copyMakeBorder(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int mat_divide(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+int mat_exp(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int mat_flip(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int mat_getOptimalDFTSize(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int mat_dft(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);

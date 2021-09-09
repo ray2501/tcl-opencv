@@ -71,6 +71,7 @@ Implement commands
     ::cv::convertScaleAbs matrix alpha beta
     ::cv::copyMakeBorder matrix top bottom left right borderType ?color_list?
     ::cv::divide matrix_1 matrix_2 ?scale?
+    ::cv::exp matrix
     ::cv::flip matrix flipCode
     ::cv::getOptimalDFTSize vecsize
     ::cv::dft matrix ?falgs nonzeroRows?
