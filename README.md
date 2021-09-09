@@ -267,6 +267,10 @@ Please notice, ORB command will only have 1 instance.
 
 Please notice, BFMatcher command will only have 1 instance.
 
+    ::cv::SimpleBlobDetector ?-minThreshold value? ?-maxThreshold value? ?-filterByArea boolean? ?-minArea value? ?-maxArea value? ?-filterByCircularity boolean? ?-minCircularity value? ?-maxCircularity value? ?-filterByConvexity boolean? ?-minConvexity value? ?-maxConvexity value? ?-filterByInertia boolean? ?-minInertiaRatio value? ?-maxInertiaRatio value?
+    SimpleBlobDetector detect matrix
+    SimpleBlobDetector close
+
 ### calib3d
 
     ::cv::findHomography srcPoints dstPoints ?method ransacReprojThreshold?

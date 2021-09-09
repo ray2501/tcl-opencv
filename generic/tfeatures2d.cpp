@@ -19,6 +19,12 @@ static cv::Ptr< cv::ORB > orbdetector;
  */
 static cv::Ptr< cv::BFMatcher > bfmatcher;
 
+/*
+ * OpenCV SimpleBlobDetector uses smart pointer to handle its memory.
+ * Here I create a static object to use it.
+ */
+static cv::Ptr< cv::SimpleBlobDetector > simpleBlobDetector;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -1971,6 +1977,235 @@ int BFMatcher(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     pResultStr = Tcl_NewStringObj( "cv-bfmatcher", -1 );
 
     Tcl_CreateObjCommand(interp, "cv-bfmatcher", (Tcl_ObjCmdProc *) BFMatcher_FUNCTION,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
+int SimpleBlobDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    int choice;
+    char *handle;
+
+    static const char *FUNC_strs[] = {
+        "detect",
+        "close",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_DETECT,
+        FUNC_CLOSE,
+    };
+
+    if( objc < 2 ){
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+        return TCL_ERROR;
+    }
+
+    handle = Tcl_GetStringFromObj(objv[0], 0);
+
+    switch( (enum FUNC_enum)choice ){
+        case FUNC_DETECT: {
+            std::vector< cv::KeyPoint > keypoints;
+            Tcl_HashEntry *hashEntryPtr;
+            char *handle;
+            MatrixInfo *info;
+            Tcl_Obj *pResultStr = NULL;
+
+            if( objc != 3 ){
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            handle = Tcl_GetStringFromObj(objv[2], 0);
+            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
+            if( !hashEntryPtr ) {
+                if( interp ) {
+                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
+                    Tcl_AppendStringsToObj( resultObj, "detect invalid MATRIX handle ",
+                                            handle, (char *)NULL );
+                }
+
+                return TCL_ERROR;
+            }
+
+            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
+            if ( !info ) {
+                Tcl_SetResult(interp, (char *) "detect invalid info data", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            try {
+                simpleBlobDetector->detect(*(info->matrix), keypoints);
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "detect failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *pListStr = NULL;
+                pListStr = Tcl_NewListObj(0, NULL);
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+            }
+
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if( objc != 2 ){
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            simpleBlobDetector.reset();
+            Tcl_DeleteCommand(interp, handle);
+
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    Tcl_Obj *pResultStr = NULL;
+    char *zArg = NULL;
+    double minThreshold = 0, maxThreshold = 0;
+    double minArea = 0, minCircularity = 0, minConvexity = 0, minInertiaRatio = 0;
+    double maxArea = 0, maxCircularity = 0, maxConvexity = 0, maxInertiaRatio = 0;
+    int filterByArea = 1, filterByCircularity = 1, filterByConvexity = 1, filterByInertia = 1;
+    cv::SimpleBlobDetector::Params params;
+
+    if ((objc&1)!=1) {
+        Tcl_WrongNumArgs(interp, 1, objv, "?-minThreshold value? ?-maxThreshold value? ?-filterByArea boolean? ?-minArea value? ?-maxArea value? ?-filterByCircularity boolean? ?-minCircularity value? ?-maxCircularity value? ?-filterByConvexity boolean? ?-minConvexity value? ?-maxConvexity value? ?-filterByInertia boolean? ?-minInertiaRatio value? ?-maxInertiaRatio value?");
+        return TCL_ERROR;
+    }
+
+    for(int i=1; i+1<objc; i+=2){
+        zArg = Tcl_GetStringFromObj(objv[i], 0);
+
+        if( strcmp(zArg, "-minThreshold")==0 ){
+            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &minThreshold) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.minThreshold = (float) minThreshold;
+        } else if( strcmp(zArg, "-maxThreshold")==0 ){
+            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &maxThreshold) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.maxThreshold = (float) maxThreshold;
+        } else if( strcmp(zArg, "-filterByArea")==0 ){
+            if(Tcl_GetBooleanFromObj(interp, objv[i+1], &filterByArea) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.filterByArea = (bool) filterByArea;
+        } else if( strcmp(zArg, "-minArea")==0 ){
+            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &minArea) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.minArea = (float) minArea;
+        } else if( strcmp(zArg, "-maxArea")==0 ){
+            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &maxArea) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.maxArea = (float) maxArea;
+        } else if( strcmp(zArg, "-filterByCircularity")==0 ){
+            if(Tcl_GetBooleanFromObj(interp, objv[i+1], &filterByCircularity) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.filterByCircularity = (bool) filterByCircularity;
+        } else if( strcmp(zArg, "-minCircularity")==0 ){
+            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &minCircularity) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.minCircularity = (float) minCircularity;
+        } else if( strcmp(zArg, "-maxCircularity")==0 ){
+            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &maxCircularity) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.maxCircularity = (float) maxCircularity;
+        } else if( strcmp(zArg, "-filterByConvexity")==0 ){
+            if(Tcl_GetBooleanFromObj(interp, objv[i+1], &filterByConvexity) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.filterByConvexity = (bool) filterByConvexity;
+        } else if( strcmp(zArg, "-minConvexity")==0 ){
+            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &minConvexity) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.minConvexity = (float) minConvexity;
+        } else if( strcmp(zArg, "-maxConvexity")==0 ){
+            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &maxConvexity) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.maxConvexity = (float) maxConvexity;
+        } else if( strcmp(zArg, "-filterByInertia")==0 ){
+            if(Tcl_GetBooleanFromObj(interp, objv[i+1], &filterByInertia) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.filterByInertia = (bool) filterByInertia;
+        } else if( strcmp(zArg, "-minInertiaRatio")==0 ){
+            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &minInertiaRatio) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.minInertiaRatio = (float) minInertiaRatio;
+        } else if( strcmp(zArg, "-maxInertiaRatio")==0 ){
+            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &maxInertiaRatio) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.maxInertiaRatio = (float) maxInertiaRatio;
+        } else {
+            Tcl_SetResult(interp, (char *) "SimpleBlobDetector invalid parameter", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        simpleBlobDetector = cv::SimpleBlobDetector::create(params);
+
+        if (simpleBlobDetector == nullptr) {
+            Tcl_SetResult(interp, (char *) "simpleBlobDetector create failed", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...){
+        Tcl_SetResult(interp, (char *) "SimpleBlobDetector failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewStringObj( "cv-simpleBlobDetector", -1 );
+
+    Tcl_CreateObjCommand(interp, "cv-simpleBlobDetector", (Tcl_ObjCmdProc *) SimpleBlobDetector_FUNCTION,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_SetObjResult(interp, pResultStr);

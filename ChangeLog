@@ -1,5 +1,6 @@
 2021-09-09 Danilo Chang
 
+	* Implement command: SimpleBlobDetector
 	* Implement command: StereoBM
 	* Implement command: sqrt, exp, hconcat, vconcat
 
