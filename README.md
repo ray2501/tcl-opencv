@@ -274,6 +274,22 @@ Please notice, BFMatcher command will only have 1 instance.
 Note that whenever an H matrix cannot be estimated, an empty one will be returned.
 You can use MATRIX `empty` to check this.
 
+    ::cv::StereoBM ?numDisparities blockSize?
+    StereoBM compute matrix1 matrix2
+    StereoBM getPreFilterCap
+    StereoBM getPreFilterSize
+    StereoBM getPreFilterType
+    StereoBM getTextureThreshold
+    StereoBM getUniquenessRatio
+    StereoBM setPreFilterCap value
+    StereoBM setPreFilterSize value
+    StereoBM setPreFilterType value
+    StereoBM setTextureThreshold value
+    StereoBM setUniquenessRatio value
+    StereoBM close
+
+Please notice, StereoBM command will only have 1 instance.
+
 ### video
 
     ::cv::BackgroundSubtractorMOG2 history varThreshold detectShadows
@@ -1017,6 +1033,11 @@ TermCriteria type -
     ::cv::LMEDS
     ::cv::RANSAC
     ::cv::RHO
+
+StereoBM PreFilter type -
+
+    ::cv::PREFILTER_NORMALIZED_RESPONSE
+    ::cv::PREFILTER_XSOBEL
 
 Photo inpaint flags -
 

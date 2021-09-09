@@ -1,5 +1,6 @@
 2021-09-09 Danilo Chang
 
+	* Implement command: StereoBM
 	* Implement command: sqrt, exp, hconcat, vconcat
 
 2021-09-08 Danilo Chang

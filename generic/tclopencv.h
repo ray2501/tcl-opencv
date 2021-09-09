@@ -199,9 +199,12 @@ int BFMatcher(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 
 int findHomography(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 
+int StereoBM(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+
 /*
  * OpenCV video
  */
+
 int BackgroundSubtractorMOG2(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int meanShift(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int CamShift(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);

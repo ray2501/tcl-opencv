@@ -710,6 +710,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) findHomography,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::StereoBM",
+        (Tcl_ObjCmdProc *) StereoBM,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
     /*
      * For Video
      */
@@ -3049,7 +3053,6 @@ Opencv_Init(Tcl_Interp *interp)
     setupValue = Tcl_NewIntObj( (int) cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-
     /*
      * findHomography method
      */
@@ -3064,6 +3067,18 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj( "::" NS "::RHO", -1 );
     setupValue = Tcl_NewIntObj( cv::RHO );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * StereoBM PreFilter type
+     */
+
+    strValue = Tcl_NewStringObj( "::" NS "::PREFILTER_NORMALIZED_RESPONSE", -1 );
+    setupValue = Tcl_NewIntObj( cv::StereoBM::PREFILTER_NORMALIZED_RESPONSE );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj( "::" NS "::PREFILTER_XSOBEL", -1 );
+    setupValue = Tcl_NewIntObj( cv::StereoBM::PREFILTER_XSOBEL );
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*
