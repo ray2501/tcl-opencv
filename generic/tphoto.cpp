@@ -1258,7 +1258,7 @@ int AlignMTB(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     Tcl_Obj *pResultStr = NULL;
 
     if (objc != 1 && objc != 4) {
-        Tcl_WrongNumArgs(interp, 1, objv, "max_bits exclude_range cut");
+        Tcl_WrongNumArgs(interp, 1, objv, "?max_bits exclude_range cut?");
         return TCL_ERROR;
     }
 
@@ -1455,7 +1455,7 @@ int CalibrateDebevec(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv)
     Tcl_Obj *pResultStr = NULL;
 
     if (objc != 1 && objc != 4) {
-        Tcl_WrongNumArgs(interp, 1, objv, "samples lambda random");
+        Tcl_WrongNumArgs(interp, 1, objv, "?samples lambda random?");
         return TCL_ERROR;
     }
 
