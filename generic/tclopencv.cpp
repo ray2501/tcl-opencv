@@ -326,6 +326,14 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_sum,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::hconcat",
+        (Tcl_ObjCmdProc *) mat_hconcat,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::vconcat",
+        (Tcl_ObjCmdProc *) mat_vconcat,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::perspectiveTransform",
         (Tcl_ObjCmdProc *) perspectiveTransform,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);

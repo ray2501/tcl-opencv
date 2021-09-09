@@ -92,6 +92,8 @@ Implement commands
     ::cv::sqrt matrix
     ::cv::subtract matrix_1 matrix_2
     ::cv::sum matrix
+    ::cv::hconcat matrix_1 matrix_2
+    ::cv::vconcat matrix_1 matrix_2
 
     ::cv::perspectiveTransform src_list transformation_matrix
 
