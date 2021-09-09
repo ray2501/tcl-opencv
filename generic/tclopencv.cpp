@@ -310,6 +310,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_randu,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::sqrt",
+        (Tcl_ObjCmdProc *) mat_sqrt,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::subtract",
         (Tcl_ObjCmdProc *) mat_subtract,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);

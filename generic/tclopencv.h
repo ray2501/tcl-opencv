@@ -68,6 +68,7 @@ int mat_norm(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int mat_normalize(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int mat_pow(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int mat_randu(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+int mat_sqrt(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int mat_subtract(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int mat_sum(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 
