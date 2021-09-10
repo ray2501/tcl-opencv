@@ -1,5 +1,7 @@
 2021-09-10 Danilo Chang
 
+	* Update FlannBasedMatcher for SIFT command
+	* Implement command: SIFT (required version 4.4)
 	* Implement command: StereoSGBM
 	* Implement command: FlannBasedMatcher
 	* Implement command: AgastFeatureDetector

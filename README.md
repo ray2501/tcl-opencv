@@ -6,7 +6,7 @@ This project is a Tcl extension for [OpenCV](https://opencv.org/) library.
 OpenCV (Open Source Computer Vision Library) is a library of programming
 functions mainly aimed at real-time computer vision.
 
-This extension requires OpenCV 4.x.
+This extension requires OpenCV 4.4.x.
 
 
 Implement commands
@@ -302,6 +302,14 @@ Please notice, AKAZE command will only have 1 instance.
 
 Please notice, BRISK command will only have 1 instance.
 
+    ::cv::SIFT ?nfeatures nOctaveLayers contrastThreshold edgeThreshold sigma?
+    SIFT detect matrix
+    SIFT compute matrix keypoints
+    SIFT detectAndCompute matrix
+    SIFT close
+
+Please notice, SIFT command will only have 1 instance.
+
     ::cv::BFMatcher normType crossCheck
     BFMatcher match queryDescriptors trainDescriptors
     BFMatcher knnMatch queryDescriptors trainDescriptors k
@@ -309,12 +317,15 @@ Please notice, BRISK command will only have 1 instance.
 
 Please notice, BFMatcher command will only have 1 instance.
 
-    ::cv::FlannBasedMatcher ?indexParams?
+    ::cv::FlannBasedMatcher ?algorithm indexParams?
     FlannBasedMatcher match queryDescriptors trainDescriptors
     FlannBasedMatcher knnMatch queryDescriptors trainDescriptors k
     FlannBasedMatcher close
 
-`indexParams` is a list of LshIndexParams parameters (table_number, key_size, multi_probe_level).
+`algorithm` can specify `FLANN_INDEX_LSH` or `FLANN_INDEX_KDTREE`. Default is FLANN_INDEX_LSH.
+
+`indexParams` is a list of LshIndexParams parameters (table_number, key_size, multi_probe_level) or
+KDTreeIndexParams parameters (trees).
 
 Please notice, FlannBasedMatcher command will only have 1 instance.
 
@@ -2087,7 +2098,7 @@ Flann-based descriptor matcher with BRISK Descriptors -
         set kp2 [lindex $result2 0]
         set d2 [lindex $result2 1]
 
-        set fmatcher [::cv::FlannBasedMatcher [list 6 12 1]]
+        set fmatcher [::cv::FlannBasedMatcher FLANN_INDEX_LSH [list 6 12 1]]
         set match [$fmatcher match $d1 $d2]
         set match [lsort -command mysortproc $match]
         set matches [lrange $match 0 10]
@@ -2198,7 +2209,7 @@ Flann-based descriptor matcher with AKAZE Descriptors and Ratio Test -
         set kp2 [lindex $result2 0]
         set d2 [lindex $result2 1]
 
-        set fmatcher [::cv::FlannBasedMatcher [list 6 12 1]]
+        set fmatcher [::cv::FlannBasedMatcher FLANN_INDEX_LSH [list 6 12 1]]
         set matches [$fmatcher knnMatch $d1 $d2 2]
 
         # Apply ratio test
@@ -2402,6 +2413,94 @@ AKAZE, Feature Matching + Homography to find Objects -
         $d2 close
         $akaze close
         $bmatcher close
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $match1
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $match1 close
+        $img1 close
+        $img2 close
+    } on error {em} {
+        puts $em
+    }
+
+SIFT, Feature Matching + Homography to find Objects -
+
+    package require opencv
+
+    #
+    # From https://github.com/opencv/opencv/tree/master/samples/data
+    #
+    set filename1 "box.png"
+    set filename2 "box_in_scene.png"
+
+    try {
+        set img1 [::cv::imread $filename1 0]
+        set img2 [::cv::imread $filename2 0]
+
+        set sift [::cv::SIFT]
+
+        set result1 [$sift detectAndCompute $img1]
+        set result2 [$sift detectAndCompute $img2]
+        set kp1 [lindex $result1 0]
+        set d1 [lindex $result1 1]
+        set kp2 [lindex $result2 0]
+        set d2 [lindex $result2 1]
+
+        set fmatcher [::cv::FlannBasedMatcher FLANN_INDEX_KDTREE [list 5]]
+        set matches [$fmatcher knnMatch $d1 $d2 2]
+
+        # Apply ratio test
+        set dmatches [list]
+        foreach match $matches {
+            foreach {m n} $match {
+                set mdistance [lindex $m 3]
+                set ndistance [lindex $n 3]
+                if {$mdistance < [expr 0.7 * $ndistance]} {
+                    lappend dmatches $m
+                }
+            }
+        }
+
+        set srcPts [list]
+        set dstPts [list]
+        foreach match $dmatches {
+            set spoint [lindex $kp1 [lindex $match 0]]
+            set dpoint [lindex $kp2 [lindex $match 1]]
+
+            lappend srcPts [lindex $spoint 0] [lindex $spoint 1]
+            lappend dstPts [lindex $dpoint 0] [lindex $dpoint 1]
+        }
+
+        # Find homography matrix and do perspective transform
+        set src_pts [::cv::Mat::Mat 1 [expr [llength $srcPts]/2] $::cv::CV_32FC2]
+        $src_pts setData $srcPts
+        set dst_pts [::cv::Mat::Mat 1 [expr [llength $dstPts]/2] $::cv::CV_32FC2]
+        $dst_pts setData $dstPts
+        set M [::cv::findHomography $src_pts $dst_pts $::cv::RANSAC 5.0]
+        if {![$M empty]} {
+            set h [$img1 rows]
+            set w [$img1 cols]
+            set pts [list 0 0 0 [expr $h-1] [expr $w-1] [expr $h-1] [expr $w-1] 0]
+            set dst [::cv::perspectiveTransform $pts $M]
+            ::cv::polylines $img2 $dst 1 1 [list 255 255 255 0] 5
+        }
+
+        $M close
+        $src_pts close
+        $dst_pts close
+
+        set mcolor [list 255 0 0 0]
+        set scolor [list 0 0 255 0]
+        set match1 [::cv::drawMatches $img1 $kp1 $img2 $kp2 $dmatches None \
+                    $mcolor $scolor $::cv::DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS]
+
+        $d1 close
+        $d2 close
+        $sift close
+        $fmatcher close
 
         ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
         ::cv::imshow "Display Image" $match1

@@ -16,9 +16,9 @@ BuildRequires: autoconf
 BuildRequires: make
 BuildRequires: gcc-c++
 BuildRequires: tcl-devel >= 8.6
-BuildRequires: opencv-devel >= 4.0
+BuildRequires: opencv-devel >= 4.4
 Requires:      tcl >= 8.6
-Requires:      opencv >= 4.0
+Requires:      opencv >= 4.4
 BuildRoot:     %{buildroot}
 
 %description

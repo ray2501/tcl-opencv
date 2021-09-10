@@ -710,6 +710,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) BRISK,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::SIFT",
+        (Tcl_ObjCmdProc *) SIFT,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::BFMatcher",
         (Tcl_ObjCmdProc *) BFMatcher,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
