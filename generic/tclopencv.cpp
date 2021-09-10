@@ -694,6 +694,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) FastFeatureDetector,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::AgastFeatureDetector",
+        (Tcl_ObjCmdProc *) AgastFeatureDetector,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::ORB",
         (Tcl_ObjCmdProc *) ORB,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
@@ -3035,6 +3039,26 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj( "::" NS "::DetectorType_TYPE_9_16", -1 );
     setupValue = Tcl_NewIntObj( cv::FastFeatureDetector::TYPE_9_16 );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * AgastFeatureDetector Detector type
+     */
+
+    strValue = Tcl_NewStringObj( "::" NS "::DetectorType_AGAST_5_8", -1 );
+    setupValue = Tcl_NewIntObj( cv::AgastFeatureDetector::AGAST_5_8 );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj( "::" NS "::DetectorType_AGAST_7_12d", -1 );
+    setupValue = Tcl_NewIntObj( cv::AgastFeatureDetector::AGAST_7_12d );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj( "::" NS "::DetectorType_AGAST_7_12s", -1 );
+    setupValue = Tcl_NewIntObj( cv::AgastFeatureDetector::AGAST_7_12s );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj( "::" NS "::DetectorType_OAST_9_16", -1 );
+    setupValue = Tcl_NewIntObj( cv::AgastFeatureDetector::OAST_9_16 );
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*

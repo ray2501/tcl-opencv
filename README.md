@@ -234,6 +234,18 @@ If flags is set to `$::cv::DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG`, users should pr
 
 Please notice, FastFeatureDetector command will only have 1 instance.
 
+    ::cv::AgastFeatureDetector ?threshold nonmaxSuppression type?
+    AgastFeatureDetector detect matrix
+    AgastFeatureDetector getNonmaxSuppression
+    AgastFeatureDetector getThreshold
+    AgastFeatureDetector getType
+    AgastFeatureDetector setNonmaxSuppression value
+    AgastFeatureDetector setThreshold value
+    AgastFeatureDetector setType value
+    AgastFeatureDetector close
+
+Please notice, AgastFeatureDetector command will only have 1 instance.
+
     ::cv::ORB ?nfeatures scaleFactor nlevels edgeThreshold firstLevel WTA_K scoreType patchSize fastThreshold?
     ORB detect matrix
     ORB compute matrix keypoints
@@ -1060,6 +1072,13 @@ TermCriteria type -
     ::cv::DetectorType_TYPE_5_8
     ::cv::DetectorType_TYPE_7_12
     ::cv::DetectorType_TYPE_9_16
+
+`AgastFeatureDetector` detector type -
+
+    ::cv::DetectorType_AGAST_5_8
+    ::cv::DetectorType_AGAST_7_12d
+    ::cv::DetectorType_AGAST_7_12s
+    ::cv::DetectorType_OAST_9_16
 
 `ORB` Score type -
 
@@ -1913,6 +1932,35 @@ Contours test -
         $image3 close
         $image2 close
         $image1 close
+    } on error {em} {
+        puts $em
+    }
+
+AGAST Algorithm for Corner Detection -
+
+    package require opencv
+
+    #
+    # From https://github.com/opencv/opencv/tree/master/samples/data
+    #
+    set filename1 "blox.jpg"
+
+    try {
+        set img1 [::cv::imread $filename1 0]
+
+        set agast [::cv::AgastFeatureDetector]
+        set kp1 [$agast detect $img1]
+
+        set kpoint1 [::cv::drawKeypoints $img1 $kp1 None [list 255 0 0 0] \
+                    $::cv::DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS]
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $kpoint1
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $kpoint1 close
+        $img1 close
     } on error {em} {
         puts $em
     }

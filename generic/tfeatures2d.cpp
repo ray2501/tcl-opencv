@@ -8,6 +8,12 @@
 static cv::Ptr< cv::FastFeatureDetector > fastdetector;
 
 /*
+ * OpenCV AgastFeatureDetector uses smart pointer to handle its memory.
+ * Here I create a static object to use it.
+ */
+static cv::Ptr< cv::AgastFeatureDetector > agastdetector;
+
+/*
  * OpenCV ORB uses smart pointer to handle its memory.
  * Here I create a static object to use it.
  */
@@ -936,6 +942,281 @@ int FastFeatureDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*ob
     pResultStr = Tcl_NewStringObj( "cv-fastdetector", -1 );
 
     Tcl_CreateObjCommand(interp, "cv-fastdetector", (Tcl_ObjCmdProc *) FastFeatureDetector_FUNCTION,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
+int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    int choice;
+    char *handle;
+
+    static const char *FUNC_strs[] = {
+        "detect",
+        "getNonmaxSuppression",
+        "getThreshold",
+        "getType",
+        "setNonmaxSuppression",
+        "setThreshold",
+        "setType",
+        "close",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_DETECT,
+        FUNC_GETNONMAXSUPPRESSION,
+        FUNC_GETTHRESHOLD,
+        FUNC_GETTYPE,
+        FUNC_SETNONMAXSUPPRESSION,
+        FUNC_SETTHRESHOLD,
+        FUNC_SETTYPE,
+        FUNC_CLOSE,
+    };
+
+    if( objc < 2 ){
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+        return TCL_ERROR;
+    }
+
+    handle = Tcl_GetStringFromObj(objv[0], 0);
+
+    switch( (enum FUNC_enum)choice ){
+        case FUNC_DETECT: {
+            std::vector< cv::KeyPoint > keypoints;
+            Tcl_HashEntry *hashEntryPtr;
+            char *handle;
+            MatrixInfo *info;
+            Tcl_Obj *pResultStr = NULL;
+
+            if( objc != 3 ){
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            handle = Tcl_GetStringFromObj(objv[2], 0);
+            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
+            if( !hashEntryPtr ) {
+                if( interp ) {
+                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
+                    Tcl_AppendStringsToObj( resultObj, "detect invalid MATRIX handle ",
+                                            handle, (char *)NULL );
+                }
+
+                return TCL_ERROR;
+            }
+
+            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
+            if ( !info ) {
+                Tcl_SetResult(interp, (char *) "detect invalid info data", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            try {
+                agastdetector->detect(*(info->matrix), keypoints);
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "detect failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *pListStr = NULL;
+                pListStr = Tcl_NewListObj(0, NULL);
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+            }
+
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_GETNONMAXSUPPRESSION: {
+            int nonmaxSuppression = 0;
+
+            if( objc != 2 ){
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                nonmaxSuppression = agastdetector->getNonmaxSuppression();
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "getNonmaxSuppression failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewBooleanObj (nonmaxSuppression) );
+            break;
+        }
+        case FUNC_GETTHRESHOLD: {
+            int threshold = 0;
+
+            if( objc != 2 ){
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                threshold = agastdetector->getThreshold();
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "getThreshold failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj (threshold) );
+            break;
+        }
+        case FUNC_GETTYPE: {
+            int type = 0;
+
+            if( objc != 2 ){
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                type = (int) agastdetector->getType();
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "getType failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj (type) );
+            break;
+        }
+        case FUNC_SETNONMAXSUPPRESSION: {
+            int nonmaxSuppression = 0;
+
+            if( objc != 3 ){
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if(Tcl_GetBooleanFromObj(interp, objv[2], &nonmaxSuppression) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                agastdetector->setNonmaxSuppression(nonmaxSuppression);
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "setNonmaxSuppression failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_SETTHRESHOLD: {
+            int threshold = 0;
+
+            if( objc != 3 ){
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if(Tcl_GetIntFromObj(interp, objv[2], &threshold) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                agastdetector->setThreshold(threshold);
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "setThreshold failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_SETTYPE: {
+            int type = 0;
+
+            if( objc != 3 ){
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if(Tcl_GetIntFromObj(interp, objv[2], &type) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                agastdetector->setType((cv::AgastFeatureDetector::DetectorType) type);
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "setType failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if( objc != 2 ){
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            agastdetector.reset();
+            Tcl_DeleteCommand(interp, handle);
+
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int AgastFeatureDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    int threshold = 10, nonmaxSuppression = 1, type = ::cv::AgastFeatureDetector::OAST_9_16;
+    Tcl_Obj *pResultStr = NULL;
+
+    if (objc != 1 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "?threshold nonmaxSuppression type?");
+        return TCL_ERROR;
+    }
+
+    if (objc == 4) {
+        if(Tcl_GetIntFromObj(interp, objv[1], &threshold) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if(Tcl_GetBooleanFromObj(interp, objv[2], &nonmaxSuppression) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if(Tcl_GetIntFromObj(interp, objv[3], &type) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        agastdetector = cv::AgastFeatureDetector::create( threshold, (bool) nonmaxSuppression,
+                                                (cv::AgastFeatureDetector::DetectorType) type);
+
+        if (agastdetector == nullptr) {
+            Tcl_SetResult(interp, (char *) "AgastFeatureDetector create failed", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...){
+        Tcl_SetResult(interp, (char *) "AgastFeatureDetector failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewStringObj( "cv-agastdetector", -1 );
+
+    Tcl_CreateObjCommand(interp, "cv-agastdetector", (Tcl_ObjCmdProc *) AgastFeatureDetector_FUNCTION,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_SetObjResult(interp, pResultStr);

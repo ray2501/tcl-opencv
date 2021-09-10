@@ -190,6 +190,7 @@ int getTrackbarPos(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int drawKeypoints(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int FastFeatureDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+int AgastFeatureDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int ORB(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int AKAZE(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int BRISK(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
