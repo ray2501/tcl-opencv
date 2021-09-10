@@ -294,7 +294,7 @@ Please notice, BFMatcher command will only have 1 instance.
     FlannBasedMatcher knnMatch queryDescriptors trainDescriptors k
     FlannBasedMatcher close
 
-`indexParams` is a list of LshIndexParams paratmers (table_number, key_size, multi_probe_level).
+`indexParams` is a list of LshIndexParams parameters (table_number, key_size, multi_probe_level).
 
 Please notice, FlannBasedMatcher command will only have 1 instance.
 
