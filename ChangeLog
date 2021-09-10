@@ -1,5 +1,6 @@
 2021-09-10 Danilo Chang
 
+	* Implement command: FlannBasedMatcher
 	* Implement command: AKAZE
 
 2021-09-09 Danilo Chang

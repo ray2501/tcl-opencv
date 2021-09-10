@@ -706,6 +706,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) BFMatcher,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::FlannBasedMatcher",
+        (Tcl_ObjCmdProc *) FlannBasedMatcher,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::SimpleBlobDetector",
         (Tcl_ObjCmdProc *) SimpleBlobDetector,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);

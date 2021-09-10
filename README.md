@@ -289,6 +289,15 @@ Please notice, AKAZE command will only have 1 instance.
 
 Please notice, BFMatcher command will only have 1 instance.
 
+    ::cv::FlannBasedMatcher ?indexParams?
+    FlannBasedMatcher match queryDescriptors trainDescriptors
+    FlannBasedMatcher knnMatch queryDescriptors trainDescriptors k
+    FlannBasedMatcher close
+
+`indexParams` is a list of LshIndexParams paratmers (table_number, key_size, multi_probe_level).
+
+Please notice, FlannBasedMatcher command will only have 1 instance.
+
     ::cv::SimpleBlobDetector ?-minThreshold value? ?-maxThreshold value? ?-filterByArea boolean? ?-minArea value? ?-maxArea value? ?-filterByCircularity boolean? ?-minCircularity value? ?-maxCircularity value? ?-filterByConvexity boolean? ?-minConvexity value? ?-maxConvexity value? ?-filterByInertia boolean? ?-minInertiaRatio value? ?-maxInertiaRatio value?
     SimpleBlobDetector detect matrix
     SimpleBlobDetector close
@@ -2011,6 +2020,66 @@ Brute-Force Matching with ORB Descriptors and Ratio Test -
         $d2 close
         $orb close
         $bmatcher close
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $match1
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $match1 close
+        $img1 close
+        $img2 close
+    } on error {em} {
+        puts $em
+    }
+
+Flann-based descriptor matcher with AKAZE Descriptors and Ratio Test -
+
+    package require opencv
+
+    #
+    # From https://github.com/opencv/opencv/tree/master/samples/data
+    #
+    set filename1 "box.png"
+    set filename2 "box_in_scene.png"
+
+    try {
+        set img1 [::cv::imread $filename1 0]
+        set img2 [::cv::imread $filename2 0]
+
+        set akaze [::cv::AKAZE]
+
+        set result1 [$akaze detectAndCompute $img1]
+        set result2 [$akaze detectAndCompute $img2]
+        set kp1 [lindex $result1 0]
+        set d1 [lindex $result1 1]
+        set kp2 [lindex $result2 0]
+        set d2 [lindex $result2 1]
+
+        set fmatcher [::cv::FlannBasedMatcher [list 6 12 1]]
+        set matches [$fmatcher knnMatch $d1 $d2 2]
+
+        # Apply ratio test
+        set good [list]
+        foreach match $matches {
+            foreach {m n} $match {
+                set mdistance [lindex $m 3]
+                set ndistance [lindex $n 3]
+                if {$mdistance < [expr 0.7 * $ndistance]} {
+                    lappend good $m
+                }
+            }
+        }
+
+        set mcolor [list 255 0 0 0]
+        set scolor [list 0 0 255 0]
+        set match1 [::cv::drawMatches $img1 $kp1 $img2 $kp2 $good None \
+                    $mcolor $scolor $::cv::DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS]
+
+        $d1 close
+        $d2 close
+        $akaze close
+        $fmatcher close
 
         ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
         ::cv::imshow "Display Image" $match1
