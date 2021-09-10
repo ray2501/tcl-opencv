@@ -6,7 +6,7 @@ This project is a Tcl extension for [OpenCV](https://opencv.org/) library.
 OpenCV (Open Source Computer Vision Library) is a library of programming
 functions mainly aimed at real-time computer vision.
 
-This extension requires OpenCV 4.4.x.
+This extension requires OpenCV 4.4.x or newer.
 
 
 Implement commands
