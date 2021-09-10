@@ -1,5 +1,6 @@
 2021-09-10 Danilo Chang
 
+	* Implement command: StereoSGBM
 	* Implement command: FlannBasedMatcher
 	* Implement command: AgastFeatureDetector
 	* Implement command: AKAZE, BRISK

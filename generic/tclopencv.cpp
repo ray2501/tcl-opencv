@@ -734,6 +734,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) StereoBM,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::StereoSGBM",
+        (Tcl_ObjCmdProc *) StereoSGBM,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
     /*
      * For Video
      */
@@ -3159,6 +3163,26 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj( "::" NS "::PREFILTER_XSOBEL", -1 );
     setupValue = Tcl_NewIntObj( cv::StereoBM::PREFILTER_XSOBEL );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * StereoSGBM mode
+     */
+
+    strValue = Tcl_NewStringObj( "::" NS "::StereoSGBM_MODE_SGBM", -1 );
+    setupValue = Tcl_NewIntObj( cv::StereoSGBM::MODE_SGBM );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj( "::" NS "::StereoSGBM_MODE_HH", -1 );
+    setupValue = Tcl_NewIntObj( cv::StereoSGBM::MODE_HH );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj( "::" NS "::StereoSGBM_MODE_SGBM_3WAY", -1 );
+    setupValue = Tcl_NewIntObj( cv::StereoSGBM::MODE_SGBM_3WAY );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj( "::" NS "::StereoSGBM_MODE_HH4", -1 );
+    setupValue = Tcl_NewIntObj( cv::StereoSGBM::MODE_HH4 );
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*

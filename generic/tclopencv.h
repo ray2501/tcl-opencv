@@ -205,6 +205,7 @@ int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*obj
 int findHomography(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 
 int StereoBM(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+int StereoSGBM(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 
 /*
  * OpenCV video

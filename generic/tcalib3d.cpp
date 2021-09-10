@@ -6,6 +6,12 @@
  */
 static cv::Ptr< cv::StereoBM > stereoBM;
 
+/*
+ * OpenCV StereoSGBM uses smart pointer to handle its memory.
+ * Here I create a static object to use it.
+ */
+static cv::Ptr< cv::StereoSGBM > stereoSGBM;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -486,6 +492,434 @@ int StereoBM(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     pResultStr = Tcl_NewStringObj( "cv-stereoBM", -1 );
 
     Tcl_CreateObjCommand(interp, "cv-stereoBM", (Tcl_ObjCmdProc *) StereoBM_FUNCTION,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
+int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    int choice;
+    char *handle;
+
+    static const char *FUNC_strs[] = {
+        "compute",
+        "getMode",
+        "getP1",
+        "getP2",
+        "getPreFilterCap",
+        "getUniquenessRatio",
+        "setMode",
+        "setP1",
+        "setP2",
+        "setPreFilterCap",
+        "setUniquenessRatio",
+        "close",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_COMPUTE,
+        FUMC_getMode,
+        FUNC_getP1,
+        FUNC_getP2,
+        FUNC_getPreFilterCap,
+        FUNC_getUniquenessRatio,
+        FUNC_setMode,
+        FUNC_setP1,
+        FUNC_setP2,
+        FUNC_setPreFilterCap,
+        FUNC_setUniquenessRatio,
+        FUNC_CLOSE,
+    };
+
+    if( objc < 2 ){
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+        return TCL_ERROR;
+    }
+
+    handle = Tcl_GetStringFromObj(objv[0], 0);
+
+    switch( (enum FUNC_enum)choice ){
+        case FUNC_COMPUTE: {
+            cv::Mat dst;
+            Tcl_HashEntry *hashEntryPtr;
+            char *ahandle, *bhandle;
+            Tcl_HashEntry *newHashEntryPtr;
+            char handleName[16 + TCL_INTEGER_SPACE];
+            Tcl_Obj *pResultStr = NULL;
+            int newvalue;
+            MatrixInfo *info1, *info2;
+            MatrixInfo *mat_info;
+
+            if( objc != 4 ){
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix1 matrix2");
+                return TCL_ERROR;
+            }
+
+            ahandle = Tcl_GetStringFromObj(objv[2], 0);
+            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, ahandle );
+            if( !hashEntryPtr ) {
+                if( interp ) {
+                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
+                    Tcl_AppendStringsToObj( resultObj, "compute: invalid MATRIX handle ",
+                                            ahandle, (char *)NULL );
+                }
+
+                return TCL_ERROR;
+            }
+
+            info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
+            if ( !info1 ) {
+                Tcl_SetResult(interp, (char *) "compute: invalid info data", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            bhandle = Tcl_GetStringFromObj(objv[3], 0);
+            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, bhandle );
+            if( !hashEntryPtr ) {
+                if( interp ) {
+                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
+                    Tcl_AppendStringsToObj( resultObj, "compute: invalid MATRIX handle ",
+                                            bhandle, (char *)NULL );
+                }
+
+                return TCL_ERROR;
+            }
+
+            info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
+            if ( !info2 ) {
+                Tcl_SetResult(interp, (char *) "compute: invalid info data", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            try {
+                stereoSGBM->compute(*(info1->matrix), *(info2->matrix), dst);
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "compute failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            mat_info = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
+            if (!mat_info) {
+                Tcl_SetResult(interp, (char *) "compute: malloc MatrixInfo failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            mat_info->matrix = new cv::Mat(dst);
+
+            Tcl_MutexLock(&myMutex);
+            sprintf( handleName, "cv-mat%zd", matrix_count++ );
+
+            pResultStr = Tcl_NewStringObj( handleName, -1 );
+
+            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
+            Tcl_SetHashValue(newHashEntryPtr, mat_info);
+            Tcl_MutexUnlock(&myMutex);
+
+            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
+                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUMC_getMode: {
+            int value;
+
+            if( objc != 2 ){
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = stereoSGBM->getMode();
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "getMode failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            break;
+        }
+        case FUNC_getP1: {
+            int value;
+
+            if( objc != 2 ){
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = stereoSGBM->getP1();
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "getP1 failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            break;
+        }
+        case FUNC_getP2: {
+            int value;
+
+            if( objc != 2 ){
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = stereoSGBM->getP2();
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "getP2 failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            break;
+        }
+        case FUNC_getPreFilterCap: {
+            int value;
+
+            if( objc != 2 ){
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = stereoSGBM->getPreFilterCap();
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "getPreFilterCap failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            break;
+        }
+        case FUNC_getUniquenessRatio: {
+            int value;
+
+            if( objc != 2 ){
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = stereoSGBM->getUniquenessRatio();
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "getUniquenessRatio failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            break;
+        }
+        case FUNC_setMode: {
+            int value;
+
+            if( objc != 3 ){
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                stereoSGBM->setMode(value);
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "setMode failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setP1: {
+            int value;
+
+            if( objc != 3 ){
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                stereoSGBM->setP1(value);
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "setP1 failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setP2: {
+            int value;
+
+            if( objc != 3 ){
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                stereoSGBM->setP2(value);
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "setP2 failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setPreFilterCap: {
+            int value;
+
+            if( objc != 3 ){
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                stereoSGBM->setPreFilterCap(value);
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "setPreFilterCap failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setUniquenessRatio: {
+            int value;
+
+            if( objc != 3 ){
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                stereoSGBM->setUniquenessRatio(value);
+            } catch (...){
+                Tcl_SetResult(interp, (char *) "setUniquenessRatio failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if( objc != 2 ){
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            stereoSGBM.reset();
+            Tcl_DeleteCommand(interp, handle);
+
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int StereoSGBM(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    int minDisparity = 0, numDisparities = 16,  blockSize = 3,  P1  = 0, P2  = 0;
+    int disp12MaxDiff  = 0, preFilterCap  = 0, uniquenessRatio  = 0, speckleWindowSize  = 0;
+    int speckleRange = 0, mode = cv::StereoSGBM::MODE_SGBM;
+    Tcl_Obj *pResultStr = NULL;
+
+    if (objc != 1 && objc != 12) {
+        Tcl_WrongNumArgs(interp, 1, objv, "?minDisparity numDisparities blockSize P1 P2 disp12MaxDiff preFilterCap uniquenessRatio speckleWindowSize speckleRange mode?");
+        return TCL_ERROR;
+    }
+
+    if (objc == 12) {
+        if(Tcl_GetIntFromObj(interp, objv[1], &minDisparity) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if(Tcl_GetIntFromObj(interp, objv[2], &numDisparities) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if(Tcl_GetIntFromObj(interp, objv[3], &blockSize) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if(Tcl_GetIntFromObj(interp, objv[4], &P1) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if(Tcl_GetIntFromObj(interp, objv[5], &P2) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if(Tcl_GetIntFromObj(interp, objv[6], &disp12MaxDiff) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if(Tcl_GetIntFromObj(interp, objv[7], &preFilterCap) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if(Tcl_GetIntFromObj(interp, objv[8], &uniquenessRatio) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if(Tcl_GetIntFromObj(interp, objv[9], &speckleWindowSize) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if(Tcl_GetIntFromObj(interp, objv[10], &speckleRange) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if(Tcl_GetIntFromObj(interp, objv[11], &mode) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        stereoSGBM = cv::StereoSGBM::create( minDisparity,
+                                             numDisparities,
+                                             blockSize,
+                                             P1, P2,
+                                             disp12MaxDiff,
+                                             preFilterCap,
+                                             uniquenessRatio,
+                                             speckleWindowSize,
+                                             speckleRange,
+                                             mode);
+        if (stereoSGBM == nullptr) {
+            Tcl_SetResult(interp, (char *) "StereoSGBM create failed", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...){
+        Tcl_SetResult(interp, (char *) "StereoSGBM failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewStringObj( "cv-stereoSGBM", -1 );
+
+    Tcl_CreateObjCommand(interp, "cv-stereoSGBM", (Tcl_ObjCmdProc *) StereoSGBM_FUNCTION,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_SetObjResult(interp, pResultStr);

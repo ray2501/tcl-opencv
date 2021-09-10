@@ -347,6 +347,22 @@ You can use MATRIX `empty` to check this.
 
 Please notice, StereoBM command will only have 1 instance.
 
+    ::cv::StereoSGBM ?minDisparity numDisparities blockSize P1 P2 disp12MaxDiff preFilterCap uniquenessRatio speckleWindowSize speckleRange mode?
+    StereoSGBM compute matrix1 matrix2
+    StereoSGBM getMode
+    StereoSGBM getP1
+    StereoSGBM getP2
+    StereoSGBM getPreFilterCap
+    StereoSGBM getUniquenessRatio
+    StereoSGBM setMode value
+    StereoSGBM setP1 value
+    StereoSGBM setP2 value
+    StereoSGBM setPreFilterCap value
+    StereoSGBM setUniquenessRatio value
+    StereoSGBM close
+
+Please notice, StereoSGBM command will only have 1 instance.
+
 ### video
 
     ::cv::BackgroundSubtractorMOG2 history varThreshold detectShadows
@@ -1116,6 +1132,13 @@ StereoBM PreFilter type -
 
     ::cv::PREFILTER_NORMALIZED_RESPONSE
     ::cv::PREFILTER_XSOBEL
+
+StereoSGBM mode -
+
+    ::cv::StereoSGBM_MODE_SGBM
+    ::cv::StereoSGBM_MODE_HH
+    ::cv::StereoSGBM_MODE_SGBM_3WAY
+    ::cv::StereoSGBM_MODE_HH4
 
 Photo inpaint flags -
 
