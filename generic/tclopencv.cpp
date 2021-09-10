@@ -698,6 +698,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) ORB,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::AKAZE",
+        (Tcl_ObjCmdProc *) AKAZE,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::BFMatcher",
         (Tcl_ObjCmdProc *) BFMatcher,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
@@ -3035,6 +3039,46 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj( "::" NS "::ORB_FAST_SCORE", -1 );
     setupValue = Tcl_NewIntObj( cv::ORB::ScoreType::FAST_SCORE  );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * AKAZE descriptor type
+     */
+
+    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DESCRIPTOR_KAZE_UPRIGHT", -1 );
+    setupValue = Tcl_NewIntObj( cv::AKAZE::DESCRIPTOR_KAZE_UPRIGHT );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DESCRIPTOR_KAZE", -1 );
+    setupValue = Tcl_NewIntObj( cv::AKAZE::DESCRIPTOR_KAZE  );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DESCRIPTOR_MLDB_UPRIGHT", -1 );
+    setupValue = Tcl_NewIntObj( cv::AKAZE::DESCRIPTOR_MLDB_UPRIGHT );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DESCRIPTOR_MLDB", -1 );
+    setupValue = Tcl_NewIntObj( cv::AKAZE::DESCRIPTOR_MLDB  );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * AKAZE Diffusivity type
+     */
+
+    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DIFF_PM_G1", -1 );
+    setupValue = Tcl_NewIntObj( cv::KAZE::DiffusivityType::DIFF_PM_G1 );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DIFF_PM_G2", -1 );
+    setupValue = Tcl_NewIntObj( cv::KAZE::DiffusivityType::DIFF_PM_G2  );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DIFF_WEICKERT", -1 );
+    setupValue = Tcl_NewIntObj( cv::KAZE::DiffusivityType::DIFF_WEICKERT );
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DIFF_CHARBONNIER", -1 );
+    setupValue = Tcl_NewIntObj( cv::KAZE::DiffusivityType::DIFF_CHARBONNIER  );
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*

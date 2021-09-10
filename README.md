@@ -260,6 +260,28 @@ Please notice, FastFeatureDetector command will only have 1 instance.
 
 Please notice, ORB command will only have 1 instance.
 
+    ::cv::AKAZE ?descriptor_type descriptor_size descriptor_channels threshold nOctaves nOctaveLayers diffusivity?
+    AKAZE detect matrix
+    AKAZE compute matrix keypoints
+    AKAZE detectAndCompute matrix
+    AKAZE getDescriptorChannels
+    AKAZE getDescriptorSize
+    AKAZE getDescriptorType
+    AKAZE getDiffusivity
+    AKAZE getNOctaveLayers
+    AKAZE getNOctaves
+    AKAZE getThreshold
+    AKAZE setDescriptorChannels value
+    AKAZE setDescriptorSize value
+    AKAZE setDescriptorType value
+    AKAZE setDiffusivity value
+    AKAZE setNOctaveLayers value
+    AKAZE setNOctaves value
+    AKAZE setThreshold value
+    AKAZE close
+
+Please notice, AKAZE command will only have 1 instance.
+
     ::cv::BFMatcher normType crossCheck
     BFMatcher match queryDescriptors trainDescriptors
     BFMatcher knnMatch queryDescriptors trainDescriptors k
@@ -1026,6 +1048,20 @@ TermCriteria type -
 
     ::cv::ORB_HARRIS_SCORE
     ::cv::ORB_FAST_SCORE
+
+`AKAZE` descriptor type -
+
+    ::cv::AKAZE_DESCRIPTOR_KAZE_UPRIGHT
+    ::cv::AKAZE_DESCRIPTOR_KAZE
+    ::cv::AKAZE_DESCRIPTOR_MLDB_UPRIGHT
+    ::cv::AKAZE_DESCRIPTOR_MLDB
+
+`AKAZE` Diffusivity type -
+
+    ::cv::AKAZE_DIFF_PM_G1
+    ::cv::AKAZE_DIFF_PM_G2
+    ::cv::AKAZE_DIFF_WEICKERT
+    ::cv::AKAZE_DIFF_CHARBONNIER
 
 `drawKeypoints` and `drawMatches` flags
 
@@ -1988,7 +2024,7 @@ Brute-Force Matching with ORB Descriptors and Ratio Test -
         puts $em
     }
 
-Feature Matching + Homography to find Objects -
+ORB, Feature Matching+ Homography to find Objects -
 
     package require opencv
 
@@ -2066,6 +2102,94 @@ Feature Matching + Homography to find Objects -
         $d1 close
         $d2 close
         $orb close
+        $bmatcher close
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $match1
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $match1 close
+        $img1 close
+        $img2 close
+    } on error {em} {
+        puts $em
+    }
+
+AKAZE, Feature Matching + Homography to find Objects -
+
+    package require opencv
+
+    #
+    # From https://github.com/opencv/opencv/tree/master/samples/data
+    #
+    set filename1 "box.png"
+    set filename2 "box_in_scene.png"
+
+    try {
+        set img1 [::cv::imread $filename1 0]
+        set img2 [::cv::imread $filename2 0]
+
+        set akaze [::cv::AKAZE]
+
+        set result1 [$akaze detectAndCompute $img1]
+        set result2 [$akaze detectAndCompute $img2]
+        set kp1 [lindex $result1 0]
+        set d1 [lindex $result1 1]
+        set kp2 [lindex $result2 0]
+        set d2 [lindex $result2 1]
+
+        set bmatcher [::cv::BFMatcher $::cv::NORM_HAMMING 0]
+        set matches [$bmatcher knnMatch $d1 $d2 2]
+
+        # Apply ratio test
+        set dmatches [list]
+        foreach match $matches {
+            foreach {m n} $match {
+                set mdistance [lindex $m 3]
+                set ndistance [lindex $n 3]
+                if {$mdistance < [expr 0.7 * $ndistance]} {
+                    lappend dmatches $m
+                }
+            }
+        }
+
+        set srcPts [list]
+        set dstPts [list]
+        foreach match $dmatches {
+            set spoint [lindex $kp1 [lindex $match 0]]
+            set dpoint [lindex $kp2 [lindex $match 1]]
+
+            lappend srcPts [lindex $spoint 0] [lindex $spoint 1]
+            lappend dstPts [lindex $dpoint 0] [lindex $dpoint 1]
+        }
+
+        # Find homography matrix and do perspective transform
+        set src_pts [::cv::Mat::Mat 1 [expr [llength $srcPts]/2] $::cv::CV_32FC2]
+        $src_pts setData $srcPts
+        set dst_pts [::cv::Mat::Mat 1 [expr [llength $dstPts]/2] $::cv::CV_32FC2]
+        $dst_pts setData $dstPts
+        set M [::cv::findHomography $src_pts $dst_pts $::cv::RANSAC 5.0]
+        if {![$M empty]} {
+            set h [$img1 rows]
+            set w [$img1 cols]
+            set pts [list 0 0 0 [expr $h-1] [expr $w-1] [expr $h-1] [expr $w-1] 0]
+            set dst [::cv::perspectiveTransform $pts $M]
+            ::cv::polylines $img2 $dst 1 1 [list 255 255 255 0] 5
+        }
+
+        $M close
+        $src_pts close
+        $dst_pts close
+
+        set mcolor [list 255 0 0 0]
+        set scolor [list 0 0 255 0]
+        set match1 [::cv::drawMatches $img1 $kp1 $img2 $kp2 $dmatches None \
+                    $mcolor $scolor $::cv::DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS]
+
+        $d1 close
+        $d2 close
+        $akaze close
         $bmatcher close
 
         ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
