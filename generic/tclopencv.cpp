@@ -702,6 +702,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) AKAZE,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::BRISK",
+        (Tcl_ObjCmdProc *) BRISK,
+        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::BFMatcher",
         (Tcl_ObjCmdProc *) BFMatcher,
         (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);

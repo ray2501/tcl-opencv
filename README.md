@@ -282,6 +282,14 @@ Please notice, ORB command will only have 1 instance.
 
 Please notice, AKAZE command will only have 1 instance.
 
+    ::cv::BRISK ?thresh octaves patternScale?
+    BRISK detect matrix
+    BRISK compute matrix keypoints
+    BRISK detectAndCompute matrix
+    BRISK close
+
+Please notice, BRISK command will only have 1 instance.
+
     ::cv::BFMatcher normType crossCheck
     BFMatcher match queryDescriptors trainDescriptors
     BFMatcher knnMatch queryDescriptors trainDescriptors k
@@ -1959,6 +1967,69 @@ Brute-Force Matching with ORB Descriptors -
         $d2 close
         $orb close
         $bmatcher close
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $match1
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $match1 close
+        $img1 close
+        $img2 close
+    } on error {em} {
+        puts $em
+    }
+
+Flann-based descriptor matcher with BRISK Descriptors -
+
+    package require opencv
+
+    proc mysortproc {x y} {
+        set distance1 [lindex $x 3]
+        set distance2 [lindex $y 3]
+
+        if {$distance1 > $distance2} {
+            return 1
+        } elseif {$distance1 < $distance2} {
+            return -1
+        } else {
+            return 0
+        }
+    }
+
+    #
+    # From https://github.com/opencv/opencv/tree/master/samples/data
+    #
+    set filename1 "box.png"
+    set filename2 "box_in_scene.png"
+
+    try {
+        set img1 [::cv::imread $filename1 0]
+        set img2 [::cv::imread $filename2 0]
+
+        set brisk [::cv::BRISK]
+
+        set result1 [$brisk detectAndCompute $img1]
+        set result2 [$brisk detectAndCompute $img2]
+        set kp1 [lindex $result1 0]
+        set d1 [lindex $result1 1]
+        set kp2 [lindex $result2 0]
+        set d2 [lindex $result2 1]
+
+        set fmatcher [::cv::FlannBasedMatcher [list 6 12 1]]
+        set match [$fmatcher match $d1 $d2]
+        set match [lsort -command mysortproc $match]
+        set matches [lrange $match 0 10]
+
+        set mcolor [list 255 0 0 0]
+        set scolor [list 0 0 255 0]
+        set match1 [::cv::drawMatches $img1 $kp1 $img2 $kp2 $matches None \
+                    $mcolor $scolor $::cv::DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS]
+
+        $d1 close
+        $d2 close
+        $brisk close
+        $fmatcher close
 
         ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
         ::cv::imshow "Display Image" $match1

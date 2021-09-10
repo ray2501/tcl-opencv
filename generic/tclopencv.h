@@ -192,6 +192,7 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int FastFeatureDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int ORB(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int AKAZE(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+int BRISK(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int BFMatcher(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
