@@ -349,11 +349,13 @@ You can use MATRIX `empty` to check this.
     StereoBM getPreFilterType
     StereoBM getTextureThreshold
     StereoBM getUniquenessRatio
+    StereoBM getSmallerBlockSize
     StereoBM setPreFilterCap value
     StereoBM setPreFilterSize value
     StereoBM setPreFilterType value
     StereoBM setTextureThreshold value
     StereoBM setUniquenessRatio value
+    StereoBM setSmallerBlockSize value
     StereoBM close
 
 Please notice, StereoBM command will only have 1 instance.
