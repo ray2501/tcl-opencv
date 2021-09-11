@@ -736,6 +736,8 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 with_tcl
+with_opencv4
+with_sift
 with_tclinclude
 enable_threads
 enable_shared
@@ -1377,6 +1379,8 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-tcl              directory containing tcl configuration
                           (tclConfig.sh)
+  --with-opencv4          use opencv4
+  --with-sift             enable sift
   --with-tclinclude       directory containing the public Tcl header files
 
 Some influential environment variables:
@@ -4939,6 +4943,43 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
 
 
 
+# Check whether --with-opencv4 was given.
+if test "${with_opencv4+set}" = set; then :
+  withval=$with_opencv4; tcl_ok=$withval
+else
+  tcl_ok=yes
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $tcl_ok" >&5
+$as_echo "$tcl_ok" >&6; }
+if test $tcl_ok = yes; then
+
+    PKG_CFLAGS="$PKG_CFLAGS -DTCL_USE_OPENCV4=1"
+
+
+fi
+
+# Check whether --with-sift was given.
+if test "${with_sift+set}" = set; then :
+  withval=$with_sift; tcl_ok=$withval
+else
+  tcl_ok=yes
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $tcl_ok" >&5
+$as_echo "$tcl_ok" >&6; }
+if test $tcl_ok = yes; then
+
+    PKG_CFLAGS="$PKG_CFLAGS -DTCL_USE_SIFT=1"
+
+
+fi
+
+
+    PKG_CFLAGS="$PKG_CFLAGS `pkg-config opencv4 --cflags`"
+
+
+
     vars="`pkg-config opencv4 --libs`"
     for i in $vars; do
 	if test "${TEA_PLATFORM}" = "windows" -a "$GCC" = "yes" ; then
@@ -4947,10 +4988,6 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
 	fi
 	PKG_LIBS="$PKG_LIBS $i"
     done
-
-
-
-    PKG_CFLAGS="$PKG_CFLAGS `pkg-config opencv4 --cflags`"
 
 
 

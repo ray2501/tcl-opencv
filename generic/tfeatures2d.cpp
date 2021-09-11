@@ -1,102 +1,29 @@
 #include "tclopencv.h"
 
-
-/*
- * OpenCV FastFeatureDetector uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::FastFeatureDetector > fastdetector;
-
-/*
- * OpenCV AgastFeatureDetector uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::AgastFeatureDetector > agastdetector;
-
-/*
- * OpenCV ORB uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::ORB > orbdetector;
-
-/*
- * OpenCV AKAZE uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::AKAZE > akazedetector;
-
-/*
- * OpenCV BRISK uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::BRISK > briskdetector;
-
-/*
- * OpenCV SIFT uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::SIFT > siftdetector;
-
-/*
- * OpenCV BFMatcher uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::BFMatcher > bfmatcher;
-
-/*
- * OpenCV FlannBasedMatcher uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::FlannBasedMatcher > flannBasedMatcher;
-
-/*
- * OpenCV SimpleBlobDetector uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::SimpleBlobDetector > simpleBlobDetector;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int drawKeypoints(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int drawKeypoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     cv::Mat dst_image;
     std::vector< cv::KeyPoint > keypoints;
     int count = 0, flags = 0, new_B = 0, new_G = 0, new_R = 0, new_A = 0;
     int nodstimage = 0;
-    Tcl_HashEntry *hashEntryPtr;
-    char *ahandle, *bhandle;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
     Tcl_Obj *pResultStr = NULL;
-    int newvalue;
-    MatrixInfo *info1, *info2;
-    MatrixInfo *dstinfo;
+    cv::Mat *mat1, *mat2 = NULL, *dstmat;
 
     if (objc != 5 && objc != 6) {
         Tcl_WrongNumArgs(interp, 1, objv, "matrix keypoints dst_image color_list ?flags?");
         return TCL_ERROR;
     }
 
-    ahandle = Tcl_GetStringFromObj(objv[1], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, ahandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "drawKeypoints invalid MATRIX handle ",
-                                    ahandle, (char *)NULL );
-        }
-
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
         return TCL_ERROR;
     }
 
-    info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info1 ) {
-        Tcl_SetResult(interp, (char *) "drawKeypoints invalid info data", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
-    if(Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+    if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
         Tcl_SetResult(interp, (char *) "drawKeypoints invalid list data", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -110,7 +37,7 @@ int drawKeypoints(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             int sub_count = 0;
             Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
 
-            if(Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "drawKeypoints invalid keypoints data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -124,41 +51,41 @@ int drawKeypoints(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
                 int octave, class_id;
 
                 Tcl_ListObjIndex(interp, elemListPtr, 0, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 1, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 2, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 3, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 4, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 5, &elemListSubPtr);
-                if(Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 6, &elemListSubPtr);
-                if(Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
-                cv::KeyPoint keypoint(cv::Point2f( (float) x, (float)y), (float) size,
+                cv::KeyPoint keypoint(cv::Point2f((float) x, (float)y), (float) size,
                                       (float) angle, (float) response,
                                       octave, class_id);
 
@@ -171,31 +98,18 @@ int drawKeypoints(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
      * If users give the handle to "None", then setup a nodstimage to indicate
      * this thing. This flag is used to decide the argument.
      */
-    bhandle = Tcl_GetStringFromObj(objv[3], 0);
-    if (strcmp(bhandle, "None")==0) {
+    if (strcmp(Tcl_GetString(objv[3]), "None") == 0) {
         nodstimage = 1;
     } else {
         nodstimage = 0;
 
-        hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, bhandle );
-        if( !hashEntryPtr ) {
-            if( interp ) {
-                Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                Tcl_AppendStringsToObj( resultObj, "drawKeypoints invalid MATRIX handle ",
-                                        bhandle, (char *)NULL );
-            }
-
-            return TCL_ERROR;
-        }
-
-        info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-        if ( !info2 ) {
-            Tcl_SetResult(interp, (char *) "drawKeypoints invalid info data", TCL_STATIC);
+        mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+        if (!mat2) {
             return TCL_ERROR;
         }
     }
 
-    if(Tcl_ListObjLength(interp, objv[4], &count) != TCL_OK) {
+    if (Tcl_ListObjLength(interp, objv[4], &count) != TCL_OK) {
         Tcl_SetResult(interp, (char *) "drawKeypoints invalid list data", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -207,28 +121,28 @@ int drawKeypoints(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         Tcl_Obj *elemListPtr = NULL;
 
         Tcl_ListObjIndex(interp, objv[4], 0, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &new_B) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &new_B) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[4], 1, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &new_G) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &new_G) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[4], 2, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &new_R) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &new_R) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[4], 3, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &new_A) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &new_A) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     if (objc == 6) {
-        if(Tcl_GetIntFromObj(interp, objv[5], &flags) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[5], &flags) != TCL_OK) {
             return TCL_ERROR;
         }
     }
@@ -237,40 +151,34 @@ int drawKeypoints(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         cv::Scalar color(new_B, new_G, new_R, new_A);
 
         if (nodstimage == 0 && (flags & (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG)==1) {
-                dst_image = *(info2->matrix);
-                cv::drawKeypoints(*(info1->matrix), keypoints, dst_image, color,
-                                  (cv::DrawMatchesFlags) flags);
+                dst_image = *mat2;
+                cv::drawKeypoints(*mat1, keypoints, dst_image, color,
+#ifdef TCL_USE_OPENCV4
+                                  (cv::DrawMatchesFlags) flags
+#else
+                                  flags
+#endif
+                                 );
         } else if (nodstimage == 1 && (flags & (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG)==0) {
-                cv::drawKeypoints(*(info1->matrix), keypoints, dst_image, color,
-                                  (cv::DrawMatchesFlags) flags);
+                cv::drawKeypoints(*mat1, keypoints, dst_image, color,
+#ifdef TCL_USE_OPENCV4
+                                  (cv::DrawMatchesFlags) flags
+#else
+                                  flags
+#endif
+                                 );
         } else {
             Tcl_SetResult(interp, (char *) "drawKeypoints arguments is invalid", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "drawKeypoints failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo) {
-        Tcl_SetResult(interp, (char *) "drawKeypoints malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
+    dstmat = new cv::Mat(dst_image);
 
-    dstinfo->matrix = new cv::Mat(dst_image);
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-    pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
     Tcl_SetObjResult(interp, pResultStr);
 
@@ -278,21 +186,16 @@ int drawKeypoints(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 }
 
 
-int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int drawMatches(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     cv::Mat mask, dst_image;
     std::vector< cv::KeyPoint > keypoints1, keypoints2;
     std::vector< cv::DMatch > matches1to2;
     int count = 0, flags = 0, B1 = 0, G1 = 0, R1 = 0, A1 = 0;
     int B2 = 0, G2 = 0, R2 = 0, A2 = 0;
     int nodstimage = 0;
-    Tcl_HashEntry *hashEntryPtr;
-    char *ahandle, *bhandle, *dhandle;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
     Tcl_Obj *pResultStr = NULL;
-    int newvalue;
-    MatrixInfo *info1, *info2, *info3;
-    MatrixInfo *dstinfo;
+    cv::Mat *mat1, *mat2, *mat3 = NULL, *dstmat;
 
     if (objc != 9 && objc != 10) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -300,25 +203,12 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         return TCL_ERROR;
     }
 
-    ahandle = Tcl_GetStringFromObj(objv[1], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, ahandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "drawMatches invalid MATRIX handle ",
-                                    ahandle, (char *)NULL );
-        }
-
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
         return TCL_ERROR;
     }
 
-    info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info1 ) {
-        Tcl_SetResult(interp, (char *) "drawMatches invalid info data", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
-    if(Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+    if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
         Tcl_SetResult(interp, (char *) "drawMatches invalid list data", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -332,7 +222,7 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             int sub_count = 0;
             Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
 
-            if(Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "drawMatches invalid keypoints data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -346,41 +236,41 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
                 int octave, class_id;
 
                 Tcl_ListObjIndex(interp, elemListPtr, 0, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 1, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 2, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 3, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 4, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 5, &elemListSubPtr);
-                if(Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 6, &elemListSubPtr);
-                if(Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
-                cv::KeyPoint keypoint(cv::Point2f( (float) x, (float)y), (float) size,
+                cv::KeyPoint keypoint(cv::Point2f((float) x, (float)y), (float) size,
                                       (float) angle, (float) response,
                                       octave, class_id);
 
@@ -389,25 +279,12 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         }
     }
 
-    bhandle = Tcl_GetStringFromObj(objv[3], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, bhandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "drawMatches invalid MATRIX handle ",
-                                    bhandle, (char *)NULL );
-        }
-
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+    if (!mat2) {
         return TCL_ERROR;
     }
 
-    info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info2 ) {
-        Tcl_SetResult(interp, (char *) "drawMatches invalid info data", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
-    if(Tcl_ListObjLength(interp, objv[4], &count) != TCL_OK) {
+    if (Tcl_ListObjLength(interp, objv[4], &count) != TCL_OK) {
         Tcl_SetResult(interp, (char *) "drawMatches invalid list data", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -421,7 +298,7 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             int sub_count = 0;
             Tcl_ListObjIndex(interp, objv[4], i, &elemListPtr);
 
-            if(Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "drawMatches invalid keypoints data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -435,41 +312,41 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
                 int octave, class_id;
 
                 Tcl_ListObjIndex(interp, elemListPtr, 0, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 1, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 2, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 3, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 4, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 5, &elemListSubPtr);
-                if(Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 6, &elemListSubPtr);
-                if(Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
-                cv::KeyPoint keypoint(cv::Point2f( (float) x, (float)y), (float) size,
+                cv::KeyPoint keypoint(cv::Point2f((float) x, (float)y), (float) size,
                                       (float) angle, (float) response,
                                       octave, class_id);
 
@@ -481,7 +358,7 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     /*
      * Matches from the first image to the second one
      */
-    if(Tcl_ListObjLength(interp, objv[5], &count) != TCL_OK) {
+    if (Tcl_ListObjLength(interp, objv[5], &count) != TCL_OK) {
         Tcl_SetResult(interp, (char *) "drawMatches invalid list data", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -495,7 +372,7 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             int sub_count = 0;
             Tcl_ListObjIndex(interp, objv[5], i, &elemListPtr);
 
-            if(Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "drawMatches invalid matches1to2 data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -509,22 +386,22 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
                 double distance;
 
                 Tcl_ListObjIndex(interp, elemListPtr, 0, &elemListSubPtr);
-                if(Tcl_GetIntFromObj(interp, elemListSubPtr, &queryIdx) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, elemListSubPtr, &queryIdx) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 1, &elemListSubPtr);
-                if(Tcl_GetIntFromObj(interp, elemListSubPtr, &trainIdx) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, elemListSubPtr, &trainIdx) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 2, &elemListSubPtr);
-                if(Tcl_GetIntFromObj(interp, elemListSubPtr, &imgIdx) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, elemListSubPtr, &imgIdx) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, elemListPtr, 3, &elemListSubPtr);
-                if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &distance) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &distance) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
@@ -538,31 +415,18 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
      * If users give the handle to "None", then setup a nodstimage to indicate
      * this thing. This flag is used to decide the argument.
      */
-    dhandle = Tcl_GetStringFromObj(objv[6], 0);
-    if (strcmp(dhandle, "None")==0) {
+    if (strcmp(Tcl_GetString(objv[6]), "None") == 0) {
         nodstimage = 1;
     } else {
         nodstimage = 0;
 
-        hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, dhandle );
-        if( !hashEntryPtr ) {
-            if( interp ) {
-                Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                Tcl_AppendStringsToObj( resultObj, "drawMatches invalid MATRIX handle ",
-                                        dhandle, (char *)NULL );
-            }
-
-            return TCL_ERROR;
-        }
-
-        info3 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-        if ( !info3 ) {
-            Tcl_SetResult(interp, (char *) "drawMatches invalid info data", TCL_STATIC);
+        mat3 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[6]);
+        if (!mat3) {
             return TCL_ERROR;
         }
     }
 
-    if(Tcl_ListObjLength(interp, objv[7], &count) != TCL_OK) {
+    if (Tcl_ListObjLength(interp, objv[7], &count) != TCL_OK) {
         Tcl_SetResult(interp, (char *) "drawMatches invalid list data", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -574,27 +438,27 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         Tcl_Obj *elemListPtr = NULL;
 
         Tcl_ListObjIndex(interp, objv[7], 0, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &B1) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &B1) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[7], 1, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &G1) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &G1) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[7], 2, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &R1) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &R1) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[7], 3, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &A1) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &A1) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
-    if(Tcl_ListObjLength(interp, objv[8], &count) != TCL_OK) {
+    if (Tcl_ListObjLength(interp, objv[8], &count) != TCL_OK) {
         Tcl_SetResult(interp, (char *) "drawMatches invalid list data", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -606,28 +470,28 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         Tcl_Obj *elemListPtr = NULL;
 
         Tcl_ListObjIndex(interp, objv[8], 0, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &B2) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &B2) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[8], 1, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &G2) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &G2) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[8], 2, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &R2) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &R2) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[8], 3, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &A2) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &A2) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     if (objc == 10) {
-        if(Tcl_GetIntFromObj(interp, objv[9], &flags) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[9], &flags) != TCL_OK) {
             return TCL_ERROR;
         }
     }
@@ -637,42 +501,40 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         cv::Scalar color2(B2, G2, R2, A2);
 
         if (nodstimage == 0 && (flags & (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG)==1) {
-                dst_image = *(info3->matrix);
-                cv::drawMatches(*(info1->matrix), keypoints1, *(info2->matrix), keypoints2,
+                dst_image = *mat3;
+                cv::drawMatches(*mat1, keypoints1, *mat2, keypoints2,
                                 matches1to2, dst_image, color1, color2,
-                                mask, (cv::DrawMatchesFlags) flags);
+                                mask,
+#ifdef TCL_USE_OPENCV4
+                                (cv::DrawMatchesFlags) flags
+#else
+
+                                flags
+#endif
+                               );
         } else if (nodstimage == 1 && (flags & (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG)==0) {
-                cv::drawMatches(*(info1->matrix), keypoints1, *(info2->matrix), keypoints2,
+                cv::drawMatches(*mat1, keypoints1, *mat2, keypoints2,
                                 matches1to2, dst_image, color1, color2,
-                                mask, (cv::DrawMatchesFlags) flags);
+                                mask,
+#ifdef TCL_USE_OPENCV4
+                                (cv::DrawMatchesFlags) flags
+#else
+
+                                flags
+#endif
+                               );
         } else {
             Tcl_SetResult(interp, (char *) "drawMatches arguments is invalid", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "drawMatches failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo) {
-        Tcl_SetResult(interp, (char *) "drawMatches malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
+    dstmat = new cv::Mat(dst_image);
 
-    dstinfo->matrix = new cv::Mat(dst_image);
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-    pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
     Tcl_SetObjResult(interp, pResultStr);
 
@@ -680,9 +542,21 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 }
 
 
-int FastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static void FastFeatureDetector_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->fastdetector) {
+        cvd->fastdetector.release();
+    }
+    cvd->cmd_fastdetector = NULL;
+}
+
+
+static int FastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "detect",
@@ -707,51 +581,39 @@ int FastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj 
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->fastdetector == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
             std::vector< cv::KeyPoint > keypoints;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle;
-            MatrixInfo *info;
+            cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "detect invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info ) {
-                Tcl_SetResult(interp, (char *) "detect invalid info data", TCL_STATIC);
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
             try {
-                fastdetector->detect(*(info->matrix), keypoints);
-            } catch (...){
+                cvd->fastdetector->detect(*mat, keypoints);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "detect failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -760,13 +622,13 @@ int FastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj 
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
             }
@@ -778,72 +640,72 @@ int FastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj 
         case FUNC_GETNONMAXSUPPRESSION: {
             int nonmaxSuppression = 0;
 
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
-                nonmaxSuppression = fastdetector->getNonmaxSuppression();
-            } catch (...){
+                nonmaxSuppression = cvd->fastdetector->getNonmaxSuppression();
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getNonmaxSuppression failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewBooleanObj (nonmaxSuppression) );
+            Tcl_SetObjResult(interp, Tcl_NewBooleanObj(nonmaxSuppression));
             break;
         }
         case FUNC_GETTHRESHOLD: {
             int threshold = 0;
 
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
-                threshold = fastdetector->getThreshold();
-            } catch (...){
+                threshold = cvd->fastdetector->getThreshold();
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getThreshold failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (threshold) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(threshold));
             break;
         }
         case FUNC_GETTYPE: {
             int type = 0;
 
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
-                type = (int) fastdetector->getType();
-            } catch (...){
+                type = (int) cvd->fastdetector->getType();
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getType failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (type) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(type));
             break;
         }
         case FUNC_SETNONMAXSUPPRESSION: {
             int nonmaxSuppression = 0;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetBooleanFromObj(interp, objv[2], &nonmaxSuppression) != TCL_OK) {
+            if (Tcl_GetBooleanFromObj(interp, objv[2], &nonmaxSuppression) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                fastdetector->setNonmaxSuppression(nonmaxSuppression);
-            } catch (...){
+                cvd->fastdetector->setNonmaxSuppression(nonmaxSuppression);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setNonmaxSuppression failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -853,18 +715,18 @@ int FastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj 
         case FUNC_SETTHRESHOLD: {
             int threshold = 0;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &threshold) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &threshold) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                fastdetector->setThreshold(threshold);
-            } catch (...){
+                cvd->fastdetector->setThreshold(threshold);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setThreshold failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -874,18 +736,22 @@ int FastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj 
         case FUNC_SETTYPE: {
             int type = 0;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &type) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &type) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                fastdetector->setType((cv::FastFeatureDetector::DetectorType) type);
-            } catch (...){
+#ifdef TCL_USE_OPENCV4
+                cvd->fastdetector->setType((cv::FastFeatureDetector::DetectorType) type);
+#else
+                cvd->fastdetector->setType(type);
+#endif
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setType failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -893,13 +759,14 @@ int FastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj 
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            fastdetector.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->fastdetector) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_fastdetector);
+            }
 
             break;
         }
@@ -909,9 +776,12 @@ int FastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj 
 }
 
 
-int FastFeatureDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int FastFeatureDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int threshold = 10, nonmaxSuppression = 1, type = ::cv::FastFeatureDetector::TYPE_9_16;
     Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::FastFeatureDetector> fastdetector;
 
     if (objc != 1 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "?threshold nonmaxSuppression type?");
@@ -919,45 +789,65 @@ int FastFeatureDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*ob
     }
 
     if (objc == 4) {
-        if(Tcl_GetIntFromObj(interp, objv[1], &threshold) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[1], &threshold) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetBooleanFromObj(interp, objv[2], &nonmaxSuppression) != TCL_OK) {
+        if (Tcl_GetBooleanFromObj(interp, objv[2], &nonmaxSuppression) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[3], &type) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[3], &type) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        fastdetector = cv::FastFeatureDetector::create( threshold, (bool) nonmaxSuppression,
+#ifdef TCL_USE_OPENCV4
+        fastdetector = cv::FastFeatureDetector::create(threshold, (bool) nonmaxSuppression,
                                                 (cv::FastFeatureDetector::DetectorType) type);
-
+#else
+        fastdetector = cv::FastFeatureDetector::create(threshold, (bool) nonmaxSuppression,
+                                                type);
+#endif
         if (fastdetector == nullptr) {
             Tcl_SetResult(interp, (char *) "FastFeatureDetector create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "FastFeatureDetector failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-fastdetector", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-fastdetector", -1);
 
-    Tcl_CreateObjCommand(interp, "cv-fastdetector", (Tcl_ObjCmdProc *) FastFeatureDetector_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_fastdetector =
+        Tcl_CreateObjCommand(interp, "::cv-fastdetector",
+            (Tcl_ObjCmdProc *) FastFeatureDetector_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) FastFeatureDetector_DESTRUCTOR);
+
+    cvd->fastdetector = fastdetector;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
 
 
-int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static void AgastFeatureDetector_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->agastdetector) {
+        cvd->agastdetector.release();
+    }
+    cvd->cmd_agastdetector = NULL;
+}
+
+
+static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "detect",
@@ -991,42 +881,30 @@ int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->agastdetector == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
     switch( (enum FUNC_enum)choice ){
         case FUNC_DETECT: {
             std::vector< cv::KeyPoint > keypoints;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle;
-            MatrixInfo *info;
+            cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "detect invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info ) {
-                Tcl_SetResult(interp, (char *) "detect invalid info data", TCL_STATIC);
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
             try {
-                agastdetector->detect(*(info->matrix), keypoints);
-            } catch (...){
+                cvd->agastdetector->detect(*mat, keypoints);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "detect failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1035,13 +913,13 @@ int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
             }
@@ -1059,7 +937,7 @@ int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj
             }
 
             try {
-                nonmaxSuppression = agastdetector->getNonmaxSuppression();
+                nonmaxSuppression = cvd->agastdetector->getNonmaxSuppression();
             } catch (...){
                 Tcl_SetResult(interp, (char *) "getNonmaxSuppression failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -1077,7 +955,7 @@ int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj
             }
 
             try {
-                threshold = agastdetector->getThreshold();
+                threshold = cvd->agastdetector->getThreshold();
             } catch (...){
                 Tcl_SetResult(interp, (char *) "getThreshold failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -1095,7 +973,7 @@ int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj
             }
 
             try {
-                type = (int) agastdetector->getType();
+                type = (int) cvd->agastdetector->getType();
             } catch (...){
                 Tcl_SetResult(interp, (char *) "getType failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -1117,7 +995,7 @@ int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj
             }
 
             try {
-                agastdetector->setNonmaxSuppression(nonmaxSuppression);
+                cvd->agastdetector->setNonmaxSuppression(nonmaxSuppression);
             } catch (...){
                 Tcl_SetResult(interp, (char *) "setNonmaxSuppression failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -1138,7 +1016,7 @@ int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj
             }
 
             try {
-                agastdetector->setThreshold(threshold);
+                cvd->agastdetector->setThreshold(threshold);
             } catch (...){
                 Tcl_SetResult(interp, (char *) "setThreshold failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -1159,7 +1037,7 @@ int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj
             }
 
             try {
-                agastdetector->setType((cv::AgastFeatureDetector::DetectorType) type);
+                cvd->agastdetector->setType((cv::AgastFeatureDetector::DetectorType) type);
             } catch (...){
                 Tcl_SetResult(interp, (char *) "setType failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -1173,8 +1051,9 @@ int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj
                 return TCL_ERROR;
             }
 
-            agastdetector.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->agastdetector) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_agastdetector);
+            }
 
             break;
         }
@@ -1184,9 +1063,12 @@ int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj
 }
 
 
-int AgastFeatureDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int AgastFeatureDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int threshold = 10, nonmaxSuppression = 1, type = ::cv::AgastFeatureDetector::OAST_9_16;
     Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::AgastFeatureDetector> agastdetector;
 
     if (objc != 1 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "?threshold nonmaxSuppression type?");
@@ -1220,19 +1102,35 @@ int AgastFeatureDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*o
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-agastdetector", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-agastdetector", -1);
 
-    Tcl_CreateObjCommand(interp, "cv-agastdetector", (Tcl_ObjCmdProc *) AgastFeatureDetector_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_agastdetector =
+        Tcl_CreateObjCommand(interp, "::cv-agastdetector",
+            (Tcl_ObjCmdProc *) AgastFeatureDetector_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) AgastFeatureDetector_DESTRUCTOR);
+
+    cvd->agastdetector = agastdetector;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
 
 
-int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static void ORB_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->orbdetector) {
+        cvd->orbdetector.release();
+    }
+    cvd->cmd_orbdetector = NULL;
+}
+
+
+static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "detect",
@@ -1285,51 +1183,39 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->orbdetector == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
             std::vector< cv::KeyPoint > keypoints;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle;
-            MatrixInfo *info;
+            cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "detect invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info ) {
-                Tcl_SetResult(interp, (char *) "detect invalid info data", TCL_STATIC);
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
             try {
-                orbdetector->detect(*(info->matrix), keypoints);
-            } catch (...){
+                cvd->orbdetector->detect(*mat, keypoints);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "detect failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1338,13 +1224,13 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
             }
@@ -1357,39 +1243,20 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             cv::Mat descriptors;
             int count = 0;
             std::vector< cv::KeyPoint > keypoints;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
-            int newvalue;
-            MatrixInfo *info;
-            MatrixInfo *dstinfo;
+            cv::Mat *mat, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
-            if( objc != 4 ){
+            if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix keypoints");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "compute invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
-            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info ) {
-                Tcl_SetResult(interp, (char *) "compute invalid info data", TCL_STATIC);
-                return TCL_ERROR;
-            }
-
-            if(Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "compute invalid list data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1403,7 +1270,7 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
                     int sub_count = 0;
                     Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
 
-                    if(Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
+                    if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
                         Tcl_SetResult(interp, (char *) "compute invalid keypoints data", TCL_STATIC);
                         return TCL_ERROR;
                     }
@@ -1417,41 +1284,41 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
                         int octave, class_id;
 
                         Tcl_ListObjIndex(interp, elemListPtr, 0, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 1, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 2, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 3, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 4, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 5, &elemListSubPtr);
-                        if(Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
+                        if (Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 6, &elemListSubPtr);
-                        if(Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
+                        if (Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
-                        cv::KeyPoint keypoint(cv::Point2f( (float) x, (float)y), (float) size,
+                        cv::KeyPoint keypoint(cv::Point2f((float) x, (float)y), (float) size,
                                             (float) angle, (float) response,
                                             octave, class_id);
 
@@ -1461,8 +1328,8 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                orbdetector->compute(*(info->matrix), keypoints, descriptors);
-            } catch (...){
+                cvd->orbdetector->compute(*mat, keypoints, descriptors);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "compute failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1471,36 +1338,20 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "compute malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(descriptors);
 
-            dstinfo->matrix = new cv::Mat(descriptors);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr2 = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             pResultStr = Tcl_NewListObj(0, NULL);
             Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
@@ -1512,63 +1363,30 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         case FUNC_DETECTANDCOMPUTE: {
             cv::Mat mask, descriptors;
             std::vector< cv::KeyPoint > keypoints;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle, *mask_handle;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
-            int newvalue;
-            MatrixInfo *info1, *info2;
-            MatrixInfo *dstinfo;
+            cv::Mat *mat1, *mat2, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
-            if( objc != 3 && objc != 4){
+            if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix ?mask?");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "detectAndCompute invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info1 ) {
-                Tcl_SetResult(interp, (char *) "detectAndCompute invalid info data", TCL_STATIC);
+            mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat1) {
                 return TCL_ERROR;
             }
 
             if (objc == 4) {
-                mask_handle = Tcl_GetStringFromObj(objv[3], 0);
-                hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, mask_handle );
-                if( !hashEntryPtr ) {
-                    if( interp ) {
-                        Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                        Tcl_AppendStringsToObj( resultObj, "detectAndCompute invalid MATRIX handle ",
-                                                mask_handle, (char *)NULL );
-                    }
-
+                mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+                if (!mat2) {
                     return TCL_ERROR;
                 }
-
-                info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-                if ( !info2 ) {
-                    Tcl_SetResult(interp, (char *) "detectAndCompute invalid info data", TCL_STATIC);
-                    return TCL_ERROR;
-                }
-
-                mask = *(info2->matrix);
+                mask = *mat2;
             }
 
             try {
-                orbdetector->detectAndCompute(*(info1->matrix), mask, keypoints, descriptors);
-            } catch (...){
+                cvd->orbdetector->detectAndCompute(*mat1, mask, keypoints, descriptors);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "detectAndCompute failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1577,36 +1395,20 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "detectAndCompute malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(descriptors);
 
-            dstinfo->matrix = new cv::Mat(descriptors);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr2 = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             pResultStr = Tcl_NewListObj(0, NULL);
             Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
@@ -1617,180 +1419,180 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         }
         case FUNC_getEdgeThreshold: {
             int value = 0;
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
-                value = orbdetector->getEdgeThreshold();
-            } catch (...){
+                value = cvd->orbdetector->getEdgeThreshold();
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getEdgeThreshold failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
 
             break;
         }
         case FUNC_getFastThreshold: {
             int value = 0;
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
-                value = orbdetector->getFastThreshold();
-            } catch (...){
+                value = cvd->orbdetector->getFastThreshold();
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getFastThreshold failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
 
             break;
         }
         case FUNC_getFirstLevel: {
             int value = 0;
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
-                value = orbdetector->getFirstLevel();
-            } catch (...){
+                value = cvd->orbdetector->getFirstLevel();
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getFirstLevel failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
 
             break;
         }
         case FUNC_getMaxFeatures: {
             int value = 0;
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
-                value = orbdetector->getMaxFeatures();
-            } catch (...){
+                value = cvd->orbdetector->getMaxFeatures();
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getMaxFeatures failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
 
             break;
         }
         case FUNC_getNLevels: {
             int value = 0;
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
-                value = orbdetector->getNLevels();
-            } catch (...){
+                value = cvd->orbdetector->getNLevels();
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getNLevels failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
 
             break;
         }
         case FUNC_getPatchSize: {
             int value = 0;
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
-                value = orbdetector->getPatchSize();
-            } catch (...){
+                value = cvd->orbdetector->getPatchSize();
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getPatchSize failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
 
             break;
         }
         case FUNC_getScaleFactor: {
             double value = 0;
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
-                value = orbdetector->getScaleFactor();
-            } catch (...){
+                value = cvd->orbdetector->getScaleFactor();
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getScaleFactor failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewDoubleObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
 
             break;
         }
         case FUNC_getScoreType: {
             int value = 0;
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
-                value = (int) orbdetector->getScoreType();
-            } catch (...){
+                value = (int) cvd->orbdetector->getScoreType();
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getScoreType failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
 
             break;
         }
         case FUNC_getWTA_K: {
             int value = 0;
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
-                value = orbdetector->getWTA_K();
-            } catch (...){
+                value = cvd->orbdetector->getWTA_K();
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getWTA_K failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
 
             break;
         }
         case FUNC_setEdgeThreshold: {
             int value = 0;
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                orbdetector->setEdgeThreshold(value);
-            } catch (...){
+                cvd->orbdetector->setEdgeThreshold(value);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setEdgeThreshold failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1799,18 +1601,18 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         }
         case FUNC_setFastThreshold: {
             int value = 0;
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                orbdetector->setFastThreshold(value);
-            } catch (...){
+                cvd->orbdetector->setFastThreshold(value);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setFastThreshold failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1819,18 +1621,18 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         }
         case FUNC_setFirstLevel: {
             int value = 0;
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                orbdetector->setFirstLevel(value);
-            } catch (...){
+                cvd->orbdetector->setFirstLevel(value);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setFirstLevel failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1839,18 +1641,18 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         }
         case FUNC_setMaxFeatures: {
             int value = 0;
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                orbdetector->setMaxFeatures(value);
-            } catch (...){
+                cvd->orbdetector->setMaxFeatures(value);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setMaxFeatures failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1859,18 +1661,18 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         }
         case FUNC_setNLevels: {
             int value = 0;
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                orbdetector->setNLevels(value);
-            } catch (...){
+                cvd->orbdetector->setNLevels(value);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setNLevels failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1879,18 +1681,18 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         }
         case FUNC_setPatchSize: {
             int value = 0;
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                orbdetector->setPatchSize(value);
-            } catch (...){
+                cvd->orbdetector->setPatchSize(value);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setPatchSize failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1899,18 +1701,18 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         }
         case FUNC_setScaleFactor: {
             double value = 0;
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                orbdetector->setScaleFactor(value);
-            } catch (...){
+                cvd->orbdetector->setScaleFactor(value);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setScaleFactor failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1919,18 +1721,22 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         }
         case FUNC_setScoreType: {
             int value = 0;
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                orbdetector->setScoreType((::cv::ORB::ScoreType) value);
-            } catch (...){
+#ifdef TCL_USE_OPENCV4
+                cvd->orbdetector->setScoreType((::cv::ORB::ScoreType) value);
+#else
+                cvd->orbdetector->setScoreType(value);
+#endif
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setScoreType failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1939,18 +1745,18 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         }
         case FUNC_setWTA_K: {
             int value = 0;
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                orbdetector->setWTA_K(value);
-            } catch (...){
+                cvd->orbdetector->setWTA_K(value);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setWTA_K failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1958,13 +1764,14 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            orbdetector.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->cmd_orbdetector) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_orbdetector);
+            }
 
             break;
         }
@@ -1974,11 +1781,14 @@ int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 }
 
 
-int ORB(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int ORB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int nfeatures = 500, nlevels = 8, edgeThreshold = 31, firstLevel = 0, WTA_K = 2;
     int scoreType = ::cv::ORB::HARRIS_SCORE, patchSize = 31, fastThreshold = 20;
     double scaleFactor = 1.2f;
     Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::ORB> orbdetector;
 
     if (objc != 1 && objc != 10) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -1987,71 +1797,92 @@ int ORB(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     }
 
     if (objc == 10) {
-        if(Tcl_GetIntFromObj(interp, objv[1], &nfeatures) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[1], &nfeatures) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[2], &scaleFactor) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[2], &scaleFactor) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[3], &nlevels) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[3], &nlevels) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[4], &edgeThreshold) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[4], &edgeThreshold) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[5], &firstLevel) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[5], &firstLevel) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[6], &WTA_K) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[6], &WTA_K) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[7], &scoreType) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[7], &scoreType) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[8], &patchSize) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[8], &patchSize) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[9], &fastThreshold) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[9], &fastThreshold) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        orbdetector = cv::ORB::create( nfeatures, (float) scaleFactor, nlevels,
-                                       edgeThreshold, firstLevel, WTA_K,
-                                       (cv::ORB::ScoreType) scoreType, patchSize,
-                                       fastThreshold);
-
+#ifdef TCL_USE_OPENCV4
+        orbdetector = cv::ORB::create(nfeatures, (float) scaleFactor, nlevels,
+                                      edgeThreshold, firstLevel, WTA_K,
+                                      (cv::ORB::ScoreType) scoreType, patchSize,
+                                      fastThreshold);
+#else
+        orbdetector = cv::ORB::create(nfeatures, (float) scaleFactor, nlevels,
+                                      edgeThreshold, firstLevel, WTA_K,
+                                      scoreType, patchSize, fastThreshold);
+#endif
         if (orbdetector == nullptr) {
             Tcl_SetResult(interp, (char *) "ORB create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "ORB failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-orbdetector", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-orbdetector", -1);
 
-    Tcl_CreateObjCommand(interp, "cv-orbdetector", (Tcl_ObjCmdProc *) ORB_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_orbdetector =
+        Tcl_CreateObjCommand(interp, "::cv-orbdetector",
+            (Tcl_ObjCmdProc *) ORB_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) ORB_DESTRUCTOR);
+
+    cvd->orbdetector = orbdetector;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
 
 
-int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static void AKAZE_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->akazedetector) {
+        cvd->akazedetector.release();
+    }
+    cvd->cmd_akazedetector = NULL;
+}
+
+
+static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "detect",
@@ -2105,42 +1936,30 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->akazedetector == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
     switch( (enum FUNC_enum)choice ){
         case FUNC_DETECT: {
             std::vector< cv::KeyPoint > keypoints;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle;
-            MatrixInfo *info;
+            cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "detect invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info ) {
-                Tcl_SetResult(interp, (char *) "detect invalid info data", TCL_STATIC);
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
             try {
-                akazedetector->detect(*(info->matrix), keypoints);
-            } catch (...){
+                cvd->akazedetector->detect(*mat, keypoints);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "detect failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -2149,13 +1968,13 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
             }
@@ -2168,39 +1987,20 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             cv::Mat descriptors;
             int count = 0;
             std::vector< cv::KeyPoint > keypoints;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
-            int newvalue;
-            MatrixInfo *info;
-            MatrixInfo *dstinfo;
+            cv::Mat *mat, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
-            if( objc != 4 ){
+            if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix keypoints");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "compute invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
-            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info ) {
-                Tcl_SetResult(interp, (char *) "compute invalid info data", TCL_STATIC);
-                return TCL_ERROR;
-            }
-
-            if(Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "compute invalid list data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -2214,7 +2014,7 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
                     int sub_count = 0;
                     Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
 
-                    if(Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
+                    if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
                         Tcl_SetResult(interp, (char *) "compute invalid keypoints data", TCL_STATIC);
                         return TCL_ERROR;
                     }
@@ -2228,41 +2028,41 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
                         int octave, class_id;
 
                         Tcl_ListObjIndex(interp, elemListPtr, 0, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 1, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 2, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 3, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 4, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 5, &elemListSubPtr);
-                        if(Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
+                        if (Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 6, &elemListSubPtr);
-                        if(Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
+                        if (Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
-                        cv::KeyPoint keypoint(cv::Point2f( (float) x, (float)y), (float) size,
+                        cv::KeyPoint keypoint(cv::Point2f((float) x, (float)y), (float) size,
                                             (float) angle, (float) response,
                                             octave, class_id);
 
@@ -2272,8 +2072,8 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                akazedetector->compute(*(info->matrix), keypoints, descriptors);
-            } catch (...){
+                cvd->akazedetector->compute(*mat, keypoints, descriptors);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "compute failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -2282,36 +2082,20 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "compute malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(descriptors);
 
-            dstinfo->matrix = new cv::Mat(descriptors);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr2 = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             pResultStr = Tcl_NewListObj(0, NULL);
             Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
@@ -2323,63 +2107,30 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         case FUNC_DETECTANDCOMPUTE: {
             cv::Mat mask, descriptors;
             std::vector< cv::KeyPoint > keypoints;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle, *mask_handle;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
-            int newvalue;
-            MatrixInfo *info1, *info2;
-            MatrixInfo *dstinfo;
+            cv::Mat *mat1, *mat2, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
-            if( objc != 3 && objc != 4){
+            if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix ?mask?");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "detectAndCompute invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info1 ) {
-                Tcl_SetResult(interp, (char *) "detectAndCompute invalid info data", TCL_STATIC);
+            mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat1) {
                 return TCL_ERROR;
             }
 
             if (objc == 4) {
-                mask_handle = Tcl_GetStringFromObj(objv[3], 0);
-                hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, mask_handle );
-                if( !hashEntryPtr ) {
-                    if( interp ) {
-                        Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                        Tcl_AppendStringsToObj( resultObj, "detectAndCompute invalid MATRIX handle ",
-                                                mask_handle, (char *)NULL );
-                    }
-
+                mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+                if (!mat2) {
                     return TCL_ERROR;
                 }
-
-                info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-                if ( !info2 ) {
-                    Tcl_SetResult(interp, (char *) "detectAndCompute invalid info data", TCL_STATIC);
-                    return TCL_ERROR;
-                }
-
-                mask = *(info2->matrix);
+                mask = *mat2;
             }
 
             try {
-                akazedetector->detectAndCompute(*(info1->matrix), mask, keypoints, descriptors);
-            } catch (...){
+                cvd->akazedetector->detectAndCompute(*mat1, mask, keypoints, descriptors);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "detectAndCompute failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -2388,36 +2139,20 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "detectAndCompute malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(descriptors);
 
-            dstinfo->matrix = new cv::Mat(descriptors);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr2 = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             pResultStr = Tcl_NewListObj(0, NULL);
             Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
@@ -2435,7 +2170,7 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                value = akazedetector->getDescriptorChannels();
+                value = cvd->akazedetector->getDescriptorChannels();
             } catch (...){
                 Tcl_SetResult(interp, (char *) "getDescriptorChannels failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -2453,7 +2188,7 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                value = akazedetector->getDescriptorSize();
+                value = cvd->akazedetector->getDescriptorSize();
             } catch (...){
                 Tcl_SetResult(interp, (char *) "getDescriptorSize failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -2471,7 +2206,7 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                value = (int) akazedetector->getDescriptorType();
+                value = (int) cvd->akazedetector->getDescriptorType();
             } catch (...){
                 Tcl_SetResult(interp, (char *) "getDescriptorType failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -2489,7 +2224,7 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                value = (int) akazedetector->getDiffusivity();
+                value = (int) cvd->akazedetector->getDiffusivity();
             } catch (...){
                 Tcl_SetResult(interp, (char *) "getDiffusivity failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -2507,7 +2242,7 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                value = akazedetector->getNOctaveLayers();
+                value = cvd->akazedetector->getNOctaveLayers();
             } catch (...){
                 Tcl_SetResult(interp, (char *) "getNOctaveLayers failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -2525,7 +2260,7 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                value = akazedetector->getNOctaves();
+                value = cvd->akazedetector->getNOctaves();
             } catch (...){
                 Tcl_SetResult(interp, (char *) "getNOctaves failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -2543,7 +2278,7 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                value = akazedetector->getThreshold();
+                value = cvd->akazedetector->getThreshold();
             } catch (...){
                 Tcl_SetResult(interp, (char *) "getThreshold failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -2565,7 +2300,7 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                akazedetector->setDescriptorChannels(value);
+                cvd->akazedetector->setDescriptorChannels(value);
             } catch (...){
                 Tcl_SetResult(interp, (char *) "setDescriptorChannels failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -2585,7 +2320,7 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                akazedetector->setDescriptorSize(value);
+                cvd->akazedetector->setDescriptorSize(value);
             } catch (...){
                 Tcl_SetResult(interp, (char *) "setDescriptorSize failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -2605,7 +2340,7 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                akazedetector->setDescriptorType( (cv::AKAZE::DescriptorType) value);
+                cvd->akazedetector->setDescriptorType( (cv::AKAZE::DescriptorType) value);
             } catch (...){
                 Tcl_SetResult(interp, (char *) "setDescriptorType failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -2625,7 +2360,7 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                akazedetector->setDiffusivity( (cv::KAZE::DiffusivityType) value);
+                cvd->akazedetector->setDiffusivity( (cv::KAZE::DiffusivityType) value);
             } catch (...){
                 Tcl_SetResult(interp, (char *) "setDiffusivity failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -2645,7 +2380,7 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                akazedetector->setNOctaveLayers(value);
+                cvd->akazedetector->setNOctaveLayers(value);
             } catch (...){
                 Tcl_SetResult(interp, (char *) "setNOctaveLayers failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -2665,7 +2400,7 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                akazedetector->setNOctaves(value);
+                cvd->akazedetector->setNOctaves(value);
             } catch (...){
                 Tcl_SetResult(interp, (char *) "setNOctaves failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -2685,7 +2420,7 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                akazedetector->setThreshold(value);
+                cvd->akazedetector->setThreshold(value);
             } catch (...){
                 Tcl_SetResult(interp, (char *) "setThreshold failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -2698,8 +2433,9 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
                 return TCL_ERROR;
             }
 
-            akazedetector.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->cmd_akazedetector) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_akazedetector);
+            }
 
             break;
         }
@@ -2710,11 +2446,13 @@ int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 
 
 int AKAZE(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int descriptor_type = (int) cv::AKAZE::DESCRIPTOR_MLDB, descriptor_size = 0;
     int descriptor_channels = 3, nOctaves = 4, nOctaveLayers = 4;
     int diffusivity = (int) cv::KAZE::DIFF_PM_G2;
     double threshold = 0.001f;
     Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::AKAZE> akazedetector;
 
     if (objc != 1 && objc != 8) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -2767,19 +2505,35 @@ int AKAZE(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-akazedetector", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-akazedetector", -1);
 
-    Tcl_CreateObjCommand(interp, "cv-akazedetector", (Tcl_ObjCmdProc *) AKAZE_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_akazedetector =
+        Tcl_CreateObjCommand(interp, "::cv-akazedetector",
+            (Tcl_ObjCmdProc *) AKAZE_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) AKAZE_DESTRUCTOR);
+
+    cvd->akazedetector = akazedetector;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
 
 
-int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static void BRISK_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->briskdetector) {
+        cvd->briskdetector.release();
+    }
+    cvd->cmd_briskdetector = NULL;
+}
+
+
+static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "detect",
@@ -2805,42 +2559,30 @@ int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->briskdetector == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
     switch( (enum FUNC_enum)choice ){
         case FUNC_DETECT: {
             std::vector< cv::KeyPoint > keypoints;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle;
-            MatrixInfo *info;
+            cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "detect invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info ) {
-                Tcl_SetResult(interp, (char *) "detect invalid info data", TCL_STATIC);
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
             try {
-                briskdetector->detect(*(info->matrix), keypoints);
-            } catch (...){
+                cvd->briskdetector->detect(*mat, keypoints);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "detect failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -2849,13 +2591,13 @@ int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
             }
@@ -2868,39 +2610,20 @@ int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             cv::Mat descriptors;
             int count = 0;
             std::vector< cv::KeyPoint > keypoints;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
-            int newvalue;
-            MatrixInfo *info;
-            MatrixInfo *dstinfo;
+            cv::Mat *mat, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
-            if( objc != 4 ){
+            if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix keypoints");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "compute invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
-            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info ) {
-                Tcl_SetResult(interp, (char *) "compute invalid info data", TCL_STATIC);
-                return TCL_ERROR;
-            }
-
-            if(Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "compute invalid list data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -2914,7 +2637,7 @@ int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
                     int sub_count = 0;
                     Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
 
-                    if(Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
+                    if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
                         Tcl_SetResult(interp, (char *) "compute invalid keypoints data", TCL_STATIC);
                         return TCL_ERROR;
                     }
@@ -2928,41 +2651,41 @@ int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
                         int octave, class_id;
 
                         Tcl_ListObjIndex(interp, elemListPtr, 0, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 1, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 2, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 3, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 4, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 5, &elemListSubPtr);
-                        if(Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
+                        if (Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 6, &elemListSubPtr);
-                        if(Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
+                        if (Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
-                        cv::KeyPoint keypoint(cv::Point2f( (float) x, (float)y), (float) size,
+                        cv::KeyPoint keypoint(cv::Point2f((float) x, (float)y), (float) size,
                                             (float) angle, (float) response,
                                             octave, class_id);
 
@@ -2972,8 +2695,8 @@ int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                briskdetector->compute(*(info->matrix), keypoints, descriptors);
-            } catch (...){
+                cvd->briskdetector->compute(*mat, keypoints, descriptors);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "compute failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -2982,36 +2705,20 @@ int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "compute malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(descriptors);
 
-            dstinfo->matrix = new cv::Mat(descriptors);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr2 = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             pResultStr = Tcl_NewListObj(0, NULL);
             Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
@@ -3023,63 +2730,30 @@ int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         case FUNC_DETECTANDCOMPUTE: {
             cv::Mat mask, descriptors;
             std::vector< cv::KeyPoint > keypoints;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle, *mask_handle;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
-            int newvalue;
-            MatrixInfo *info1, *info2;
-            MatrixInfo *dstinfo;
+            cv::Mat *mat1, *mat2, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
-            if( objc != 3 && objc != 4){
+            if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix ?mask?");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "detectAndCompute invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info1 ) {
-                Tcl_SetResult(interp, (char *) "detectAndCompute invalid info data", TCL_STATIC);
+            mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat1) {
                 return TCL_ERROR;
             }
 
             if (objc == 4) {
-                mask_handle = Tcl_GetStringFromObj(objv[3], 0);
-                hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, mask_handle );
-                if( !hashEntryPtr ) {
-                    if( interp ) {
-                        Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                        Tcl_AppendStringsToObj( resultObj, "detectAndCompute invalid MATRIX handle ",
-                                                mask_handle, (char *)NULL );
-                    }
-
+                mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+                if (!mat2) {
                     return TCL_ERROR;
                 }
-
-                info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-                if ( !info2 ) {
-                    Tcl_SetResult(interp, (char *) "detectAndCompute invalid info data", TCL_STATIC);
-                    return TCL_ERROR;
-                }
-
-                mask = *(info2->matrix);
+                mask = *mat2;
             }
 
             try {
-                briskdetector->detectAndCompute(*(info1->matrix), mask, keypoints, descriptors);
-            } catch (...){
+                cvd->briskdetector->detectAndCompute(*mat1, mask, keypoints, descriptors);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "detectAndCompute failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -3088,36 +2762,20 @@ int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "detectAndCompute malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(descriptors);
 
-            dstinfo->matrix = new cv::Mat(descriptors);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr2 = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             pResultStr = Tcl_NewListObj(0, NULL);
             Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
@@ -3132,8 +2790,9 @@ int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
                 return TCL_ERROR;
             }
 
-            briskdetector.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->cmd_briskdetector) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_briskdetector);
+            }
 
             break;
         }
@@ -3143,10 +2802,13 @@ int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 }
 
 
-int BRISK(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int BRISK(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int thresh = 30, octaves = 3;
     double patternScale = 1.0f;
     Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::BRISK> briskdetector;
 
     if (objc != 1 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "?thresh octaves patternScale?");
@@ -3179,19 +2841,36 @@ int BRISK(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-briskdetector", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-briskdetector", -1);
 
-    Tcl_CreateObjCommand(interp, "cv-briskdetector", (Tcl_ObjCmdProc *) BRISK_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_briskdetector =
+        Tcl_CreateObjCommand(interp, "::cv-briskdetector",
+            (Tcl_ObjCmdProc *) BRISK_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) BRISK_DESTRUCTOR);
+
+    cvd->briskdetector = briskdetector;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
 
 
-int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+#ifdef TCL_USE_SIFT
+static void SIFT_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->siftdetector) {
+        cvd->siftdetector.release();
+    }
+    cvd->cmd_siftdetector = NULL;
+}
+
+
+static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "detect",
@@ -3217,42 +2896,30 @@ int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->siftdetector == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
     switch( (enum FUNC_enum)choice ){
         case FUNC_DETECT: {
             std::vector< cv::KeyPoint > keypoints;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle;
-            MatrixInfo *info;
+            cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "detect invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info ) {
-                Tcl_SetResult(interp, (char *) "detect invalid info data", TCL_STATIC);
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
             try {
-                siftdetector->detect(*(info->matrix), keypoints);
-            } catch (...){
+                cvd->siftdetector->detect(*mat, keypoints);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "detect failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -3261,13 +2928,13 @@ int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
             }
@@ -3280,39 +2947,20 @@ int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             cv::Mat descriptors;
             int count = 0;
             std::vector< cv::KeyPoint > keypoints;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
-            int newvalue;
-            MatrixInfo *info;
-            MatrixInfo *dstinfo;
+            cv::Mat *mat, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
-            if( objc != 4 ){
+            if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix keypoints");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "compute invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
-            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info ) {
-                Tcl_SetResult(interp, (char *) "compute invalid info data", TCL_STATIC);
-                return TCL_ERROR;
-            }
-
-            if(Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "compute invalid list data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -3326,7 +2974,7 @@ int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
                     int sub_count = 0;
                     Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
 
-                    if(Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
+                    if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
                         Tcl_SetResult(interp, (char *) "compute invalid keypoints data", TCL_STATIC);
                         return TCL_ERROR;
                     }
@@ -3340,41 +2988,41 @@ int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
                         int octave, class_id;
 
                         Tcl_ListObjIndex(interp, elemListPtr, 0, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 1, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 2, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 3, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 4, &elemListSubPtr);
-                        if(Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 5, &elemListSubPtr);
-                        if(Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
+                        if (Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
                         Tcl_ListObjIndex(interp, elemListPtr, 6, &elemListSubPtr);
-                        if(Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
+                        if (Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
                             return TCL_ERROR;
                         }
 
-                        cv::KeyPoint keypoint(cv::Point2f( (float) x, (float)y), (float) size,
+                        cv::KeyPoint keypoint(cv::Point2f((float) x, (float)y), (float) size,
                                             (float) angle, (float) response,
                                             octave, class_id);
 
@@ -3384,8 +3032,8 @@ int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             }
 
             try {
-                siftdetector->compute(*(info->matrix), keypoints, descriptors);
-            } catch (...){
+                cvd->siftdetector->compute(*mat, keypoints, descriptors);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "compute failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -3394,36 +3042,20 @@ int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "compute malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(descriptors);
 
-            dstinfo->matrix = new cv::Mat(descriptors);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr2 = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             pResultStr = Tcl_NewListObj(0, NULL);
             Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
@@ -3435,63 +3067,30 @@ int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         case FUNC_DETECTANDCOMPUTE: {
             cv::Mat mask, descriptors;
             std::vector< cv::KeyPoint > keypoints;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle, *mask_handle;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
-            int newvalue;
-            MatrixInfo *info1, *info2;
-            MatrixInfo *dstinfo;
+            cv::Mat *mat1, *mat2, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
-            if( objc != 3 && objc != 4){
+            if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix ?mask?");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "detectAndCompute invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info1 ) {
-                Tcl_SetResult(interp, (char *) "detectAndCompute invalid info data", TCL_STATIC);
+            mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat1) {
                 return TCL_ERROR;
             }
 
             if (objc == 4) {
-                mask_handle = Tcl_GetStringFromObj(objv[3], 0);
-                hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, mask_handle );
-                if( !hashEntryPtr ) {
-                    if( interp ) {
-                        Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                        Tcl_AppendStringsToObj( resultObj, "detectAndCompute invalid MATRIX handle ",
-                                                mask_handle, (char *)NULL );
-                    }
-
+                mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+                if (!mat2) {
                     return TCL_ERROR;
                 }
-
-                info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-                if ( !info2 ) {
-                    Tcl_SetResult(interp, (char *) "detectAndCompute invalid info data", TCL_STATIC);
-                    return TCL_ERROR;
-                }
-
-                mask = *(info2->matrix);
+                mask = *mat2;
             }
 
             try {
-                siftdetector->detectAndCompute(*(info1->matrix), mask, keypoints, descriptors);
-            } catch (...){
+                cvd->siftdetector->detectAndCompute(*mat1, mask, keypoints, descriptors);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "detectAndCompute failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -3500,36 +3099,20 @@ int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "detectAndCompute malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(descriptors);
 
-            dstinfo->matrix = new cv::Mat(descriptors);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr2 = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             pResultStr = Tcl_NewListObj(0, NULL);
             Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
@@ -3544,8 +3127,9 @@ int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
                 return TCL_ERROR;
             }
 
-            siftdetector.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->cmd_siftdetector) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_siftdetector);
+            }
 
             break;
         }
@@ -3555,10 +3139,13 @@ int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 }
 
 
-int SIFT(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int SIFT(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int nfeatures = 0, nOctaveLayers = 3;
     double contrastThreshold = 0.04, edgeThreshold = 10, sigma = 1.6;
     Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::SIFT> siftdetector;
 
     if (objc != 1 && objc != 6) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -3602,19 +3189,35 @@ int SIFT(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-siftdetector", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-siftdetector", -1);
 
-    Tcl_CreateObjCommand(interp, "cv-siftdetector", (Tcl_ObjCmdProc *) SIFT_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_siftdetector =
+        Tcl_CreateObjCommand(interp, "::cv-siftdetector",
+            (Tcl_ObjCmdProc *) SIFT_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) SIFT_DESTRUCTOR);
+
+    cvd->siftdetector = siftdetector;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
+#endif
+
+static void BFMatcher_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->bfmatcher) {
+        cvd->bfmatcher.release();
+    }
+    cvd->cmd_bfmatcher = NULL;
+}
 
 
-int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "match",
@@ -3629,69 +3232,44 @@ int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*obj
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->bfmatcher == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_MATCH: {
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle1, *handle2;
-            MatrixInfo *info1, *info2;
+            cv::Mat *mat1, *mat2;
             std::vector< cv::DMatch > matches;
             Tcl_Obj *pResultStr = NULL;
 
-            if( objc != 4 ){
+            if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "queryDescriptors trainDescriptors");
                 return TCL_ERROR;
             }
 
-            handle1 = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle1 );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "match invalid MATRIX handle ",
-                                            handle1, (char *)NULL );
-                }
-
+            mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat1) {
                 return TCL_ERROR;
             }
 
-            info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info1 ) {
-                Tcl_SetResult(interp, (char *) "match invalid info data", TCL_STATIC);
-                return TCL_ERROR;
-            }
-
-            handle2 = Tcl_GetStringFromObj(objv[3], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle2 );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "match invalid MATRIX handle ",
-                                            handle2, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info2 ) {
-                Tcl_SetResult(interp, (char *) "match invalid info data", TCL_STATIC);
+            mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+            if (!mat2) {
                 return TCL_ERROR;
             }
 
             try {
-                bfmatcher->match(*(info1->matrix), *(info2->matrix), matches);
-            } catch (...){
+                cvd->bfmatcher->match(*mat1, *mat2, matches);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "match failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -3700,10 +3278,10 @@ int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*obj
             for (size_t i = 0; i < matches.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( matches[i].queryIdx ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( matches[i].trainIdx ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( matches[i].imgIdx ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( matches[i].distance ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(matches[i].queryIdx));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(matches[i].trainIdx));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(matches[i].imgIdx));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(matches[i].distance));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
             }
@@ -3712,61 +3290,33 @@ int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*obj
             break;
         }
         case FUNC_KNNMATCH: {
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle1, *handle2;
-            MatrixInfo *info1, *info2;
+            cv::Mat *mat1, *mat2;
             std::vector<std::vector<cv::DMatch> > vmatches;
             Tcl_Obj *pResultStr = NULL;
             int k;
 
-            if( objc != 5 ){
+            if (objc != 5) {
                 Tcl_WrongNumArgs(interp, 2, objv, "queryDescriptors trainDescriptors k");
                 return TCL_ERROR;
             }
 
-            handle1 = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle1 );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "knnMatch invalid MATRIX handle ",
-                                            handle1, (char *)NULL );
-                }
-
+            mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat1) {
                 return TCL_ERROR;
             }
 
-            info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info1 ) {
-                Tcl_SetResult(interp, (char *) "knnMatch invalid info data", TCL_STATIC);
+            mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+            if (!mat2) {
                 return TCL_ERROR;
             }
 
-            handle2 = Tcl_GetStringFromObj(objv[3], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle2 );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "knnMatch invalid MATRIX handle ",
-                                            handle2, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info2 ) {
-                Tcl_SetResult(interp, (char *) "knnMatch invalid info data", TCL_STATIC);
-                return TCL_ERROR;
-            }
-
-            if(Tcl_GetIntFromObj(interp, objv[4], &k) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[4], &k) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                bfmatcher->knnMatch(*(info1->matrix), *(info2->matrix), vmatches, k);
-            } catch (...){
+                cvd->bfmatcher->knnMatch(*mat1, *mat2, vmatches, k);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "knnMatch failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -3780,10 +3330,10 @@ int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*obj
                 for (size_t j = 0; j < matches.size(); j++) {
                     Tcl_Obj *pSubListStr = NULL;
                     pSubListStr = Tcl_NewListObj(0, NULL);
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj( matches[j].queryIdx ));
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj( matches[j].trainIdx ));
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj( matches[j].imgIdx ));
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewDoubleObj( matches[j].distance ));
+                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj(matches[j].queryIdx));
+                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj(matches[j].trainIdx));
+                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj(matches[j].imgIdx));
+                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewDoubleObj(matches[j].distance));
 
                     Tcl_ListObjAppendElement(NULL, pListStr, pSubListStr);
                 }
@@ -3795,13 +3345,14 @@ int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*obj
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            bfmatcher.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->cmd_bfmatcher) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_bfmatcher);
+            }
 
             break;
         }
@@ -3811,9 +3362,12 @@ int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*obj
 }
 
 
-int BFMatcher(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int BFMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int normType = cv::NORM_L2, crossCheck = 0;
     Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::BFMatcher> bfmatcher;
 
     if (objc != 1 && objc != 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "?normType crossCheck?");
@@ -3821,40 +3375,55 @@ int BFMatcher(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     }
 
     if (objc == 3) {
-        if(Tcl_GetIntFromObj(interp, objv[1], &normType) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[1], &normType) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetBooleanFromObj(interp, objv[2], &crossCheck) != TCL_OK) {
+        if (Tcl_GetBooleanFromObj(interp, objv[2], &crossCheck) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        bfmatcher = cv::BFMatcher::create( normType, (bool) crossCheck);
+        bfmatcher = cv::BFMatcher::create(normType, (bool) crossCheck);
 
         if (bfmatcher == nullptr) {
             Tcl_SetResult(interp, (char *) "BFMatcher create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "BFMatcher failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-bfmatcher", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-bfmatcher", -1);
 
-    Tcl_CreateObjCommand(interp, "cv-bfmatcher", (Tcl_ObjCmdProc *) BFMatcher_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_bfmatcher =
+        Tcl_CreateObjCommand(interp, "::cv-bfmatcher",
+            (Tcl_ObjCmdProc *) BFMatcher_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) BFMatcher_DESTRUCTOR);
+
+    cvd->bfmatcher = bfmatcher;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
 
 
-int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static void FlannBasedMatcher_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->flannbasedmatcher) {
+        cvd->flannbasedmatcher.release();
+    }
+    cvd->cmd_flannbasedmatcher = NULL;
+}
+
+
+static int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "match",
@@ -3878,60 +3447,35 @@ int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *c
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->flannbasedmatcher == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_MATCH: {
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle1, *handle2;
-            MatrixInfo *info1, *info2;
+            cv::Mat *mat1, *mat2;
             std::vector< cv::DMatch > matches;
             Tcl_Obj *pResultStr = NULL;
 
-            if( objc != 4 ){
+            if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "queryDescriptors trainDescriptors");
                 return TCL_ERROR;
             }
 
-            handle1 = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle1 );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "match invalid MATRIX handle ",
-                                            handle1, (char *)NULL );
-                }
-
+            mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat1) {
                 return TCL_ERROR;
             }
 
-            info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info1 ) {
-                Tcl_SetResult(interp, (char *) "match invalid info data", TCL_STATIC);
-                return TCL_ERROR;
-            }
-
-            handle2 = Tcl_GetStringFromObj(objv[3], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle2 );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "match invalid MATRIX handle ",
-                                            handle2, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info2 ) {
-                Tcl_SetResult(interp, (char *) "match invalid info data", TCL_STATIC);
+            mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+            if (!mat2) {
                 return TCL_ERROR;
             }
 
             try {
-                flannBasedMatcher->match(*(info1->matrix), *(info2->matrix), matches);
-            } catch (...){
+                cvd->flannbasedmatcher->match(*mat1, *mat2, matches);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "match failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -3940,10 +3484,10 @@ int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *c
             for (size_t i = 0; i < matches.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( matches[i].queryIdx ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( matches[i].trainIdx ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( matches[i].imgIdx ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( matches[i].distance ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(matches[i].queryIdx));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(matches[i].trainIdx));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(matches[i].imgIdx));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(matches[i].distance));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
             }
@@ -3952,61 +3496,33 @@ int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *c
             break;
         }
         case FUNC_KNNMATCH: {
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle1, *handle2;
-            MatrixInfo *info1, *info2;
+            cv::Mat *mat1, *mat2;
             std::vector<std::vector<cv::DMatch> > vmatches;
             Tcl_Obj *pResultStr = NULL;
             int k;
 
-            if( objc != 5 ){
+            if (objc != 5) {
                 Tcl_WrongNumArgs(interp, 2, objv, "queryDescriptors trainDescriptors k");
                 return TCL_ERROR;
             }
 
-            handle1 = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle1 );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "knnMatch invalid MATRIX handle ",
-                                            handle1, (char *)NULL );
-                }
-
+            mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat1) {
                 return TCL_ERROR;
             }
 
-            info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info1 ) {
-                Tcl_SetResult(interp, (char *) "knnMatch invalid info data", TCL_STATIC);
+            mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+            if (!mat2) {
                 return TCL_ERROR;
             }
 
-            handle2 = Tcl_GetStringFromObj(objv[3], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle2 );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "knnMatch invalid MATRIX handle ",
-                                            handle2, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info2 ) {
-                Tcl_SetResult(interp, (char *) "knnMatch invalid info data", TCL_STATIC);
-                return TCL_ERROR;
-            }
-
-            if(Tcl_GetIntFromObj(interp, objv[4], &k) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[4], &k) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                flannBasedMatcher->knnMatch(*(info1->matrix), *(info2->matrix), vmatches, k);
-            } catch (...){
+                cvd->flannbasedmatcher->knnMatch(*mat1, *mat2, vmatches, k);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "knnMatch failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -4020,10 +3536,10 @@ int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *c
                 for (size_t j = 0; j < matches.size(); j++) {
                     Tcl_Obj *pSubListStr = NULL;
                     pSubListStr = Tcl_NewListObj(0, NULL);
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj( matches[j].queryIdx ));
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj( matches[j].trainIdx ));
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj( matches[j].imgIdx ));
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewDoubleObj( matches[j].distance ));
+                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj(matches[j].queryIdx));
+                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj(matches[j].trainIdx));
+                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj(matches[j].imgIdx));
+                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewDoubleObj(matches[j].distance));
 
                     Tcl_ListObjAppendElement(NULL, pListStr, pSubListStr);
                 }
@@ -4035,13 +3551,14 @@ int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *c
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            flannBasedMatcher.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->cmd_flannbasedmatcher) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_flannbasedmatcher);
+            }
 
             break;
         }
@@ -4051,13 +3568,16 @@ int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *c
 }
 
 
-int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     Tcl_Obj *pResultStr = NULL;
     int count = 0, table_number = 6, key_size = 12, multi_probe_level = 1;
     int trees = 5;
     char *algorithm = NULL;
     int len = 0;
     int algo = 0;
+    cv::Ptr<cv::FlannBasedMatcher> flannbasedmatcher;
 
     if (objc != 1 && objc != 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "?algorithm indexParams?");
@@ -4129,7 +3649,7 @@ int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
 
     try {
         if (algo == 0) {
-            flannBasedMatcher = cv::makePtr<cv::FlannBasedMatcher>(
+            flannbasedmatcher = cv::makePtr<cv::FlannBasedMatcher>(
                                                 cv::makePtr<cv::flann::LshIndexParams>(
                                                     table_number,
                                                     key_size,
@@ -4137,14 +3657,14 @@ int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
                                                 )
                                             );
         } else if (algo == 1) {
-            flannBasedMatcher = cv::makePtr<cv::FlannBasedMatcher>(
+            flannbasedmatcher = cv::makePtr<cv::FlannBasedMatcher>(
                                                 cv::makePtr<cv::flann::KDTreeIndexParams>(
                                                     trees
                                                 )
                                             );
         }
 
-        if (flannBasedMatcher == nullptr) {
+        if (flannbasedmatcher == nullptr) {
             Tcl_SetResult(interp, (char *) "flannBasedMatcher create failed", TCL_STATIC);
             return TCL_ERROR;
         }
@@ -4153,19 +3673,35 @@ int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-flannBasedMatcher", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-flannbasedmatcher", -1);
 
-    Tcl_CreateObjCommand(interp, "cv-flannBasedMatcher", (Tcl_ObjCmdProc *) FlannBasedMatcher_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_bfmatcher =
+        Tcl_CreateObjCommand(interp, "::cv-flannbasedmatcher",
+            (Tcl_ObjCmdProc *) FlannBasedMatcher_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) FlannBasedMatcher_DESTRUCTOR);
+
+    cvd->flannbasedmatcher = flannbasedmatcher;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
 
 
-int SimpleBlobDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static void SimpleBlobDetector_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->sbdetector) {
+        cvd->sbdetector.release();
+    }
+    cvd->cmd_sbdetector = NULL;
+}
+
+
+static int SimpleBlobDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "detect",
@@ -4178,51 +3714,39 @@ int SimpleBlobDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->sbdetector == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
             std::vector< cv::KeyPoint > keypoints;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle;
-            MatrixInfo *info;
+            cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "detect invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info ) {
-                Tcl_SetResult(interp, (char *) "detect invalid info data", TCL_STATIC);
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
             try {
-                simpleBlobDetector->detect(*(info->matrix), keypoints);
-            } catch (...){
+                cvd->sbdetector->detect(*mat, keypoints);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "detect failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -4231,13 +3755,13 @@ int SimpleBlobDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].pt.y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].size ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].angle ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj( keypoints[i].response ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].octave ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( keypoints[i].class_id ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
             }
@@ -4247,13 +3771,14 @@ int SimpleBlobDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            simpleBlobDetector.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->cmd_sbdetector) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_sbdetector);
+            }
 
             break;
         }
@@ -4263,7 +3788,9 @@ int SimpleBlobDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *
 }
 
 
-int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     Tcl_Obj *pResultStr = NULL;
     char *zArg = NULL;
     double minThreshold = 0, maxThreshold = 0;
@@ -4271,95 +3798,96 @@ int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*obj
     double maxArea = 0, maxCircularity = 0, maxConvexity = 0, maxInertiaRatio = 0;
     int filterByArea = 1, filterByCircularity = 1, filterByConvexity = 1, filterByInertia = 1;
     cv::SimpleBlobDetector::Params params;
+    cv::Ptr<cv::SimpleBlobDetector> sbdetector;
 
     if ((objc&1)!=1) {
         Tcl_WrongNumArgs(interp, 1, objv, "?-minThreshold value? ?-maxThreshold value? ?-filterByArea boolean? ?-minArea value? ?-maxArea value? ?-filterByCircularity boolean? ?-minCircularity value? ?-maxCircularity value? ?-filterByConvexity boolean? ?-minConvexity value? ?-maxConvexity value? ?-filterByInertia boolean? ?-minInertiaRatio value? ?-maxInertiaRatio value?");
         return TCL_ERROR;
     }
 
-    for(int i=1; i+1<objc; i+=2){
+    for (int i = 1; i + 1 < objc; i += 2) {
         zArg = Tcl_GetStringFromObj(objv[i], 0);
 
-        if( strcmp(zArg, "-minThreshold")==0 ){
-            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &minThreshold) != TCL_OK) {
+        if (strcmp(zArg, "-minThreshold") == 0) {
+            if (Tcl_GetDoubleFromObj(interp, objv[i+1], &minThreshold) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             params.minThreshold = (float) minThreshold;
-        } else if( strcmp(zArg, "-maxThreshold")==0 ){
-            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &maxThreshold) != TCL_OK) {
+        } else if (strcmp(zArg, "-maxThreshold") == 0) {
+            if (Tcl_GetDoubleFromObj(interp, objv[i+1], &maxThreshold) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             params.maxThreshold = (float) maxThreshold;
-        } else if( strcmp(zArg, "-filterByArea")==0 ){
-            if(Tcl_GetBooleanFromObj(interp, objv[i+1], &filterByArea) != TCL_OK) {
+        } else if (strcmp(zArg, "-filterByArea") == 0) {
+            if (Tcl_GetBooleanFromObj(interp, objv[i+1], &filterByArea) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             params.filterByArea = (bool) filterByArea;
-        } else if( strcmp(zArg, "-minArea")==0 ){
-            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &minArea) != TCL_OK) {
+        } else if (strcmp(zArg, "-minArea") == 0) {
+            if (Tcl_GetDoubleFromObj(interp, objv[i+1], &minArea) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             params.minArea = (float) minArea;
-        } else if( strcmp(zArg, "-maxArea")==0 ){
-            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &maxArea) != TCL_OK) {
+        } else if (strcmp(zArg, "-maxArea") == 0) {
+            if (Tcl_GetDoubleFromObj(interp, objv[i+1], &maxArea) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             params.maxArea = (float) maxArea;
-        } else if( strcmp(zArg, "-filterByCircularity")==0 ){
-            if(Tcl_GetBooleanFromObj(interp, objv[i+1], &filterByCircularity) != TCL_OK) {
+        } else if (strcmp(zArg, "-filterByCircularity") == 0) {
+            if (Tcl_GetBooleanFromObj(interp, objv[i+1], &filterByCircularity) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             params.filterByCircularity = (bool) filterByCircularity;
-        } else if( strcmp(zArg, "-minCircularity")==0 ){
-            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &minCircularity) != TCL_OK) {
+        } else if (strcmp(zArg, "-minCircularity") == 0) {
+            if (Tcl_GetDoubleFromObj(interp, objv[i+1], &minCircularity) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             params.minCircularity = (float) minCircularity;
-        } else if( strcmp(zArg, "-maxCircularity")==0 ){
-            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &maxCircularity) != TCL_OK) {
+        } else if (strcmp(zArg, "-maxCircularity") == 0) {
+            if (Tcl_GetDoubleFromObj(interp, objv[i+1], &maxCircularity) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             params.maxCircularity = (float) maxCircularity;
-        } else if( strcmp(zArg, "-filterByConvexity")==0 ){
-            if(Tcl_GetBooleanFromObj(interp, objv[i+1], &filterByConvexity) != TCL_OK) {
+        } else if (strcmp(zArg, "-filterByConvexity") == 0) {
+            if (Tcl_GetBooleanFromObj(interp, objv[i+1], &filterByConvexity) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             params.filterByConvexity = (bool) filterByConvexity;
-        } else if( strcmp(zArg, "-minConvexity")==0 ){
-            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &minConvexity) != TCL_OK) {
+        } else if (strcmp(zArg, "-minConvexity") == 0) {
+            if (Tcl_GetDoubleFromObj(interp, objv[i+1], &minConvexity) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             params.minConvexity = (float) minConvexity;
-        } else if( strcmp(zArg, "-maxConvexity")==0 ){
-            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &maxConvexity) != TCL_OK) {
+        } else if (strcmp(zArg, "-maxConvexity") == 0) {
+            if (Tcl_GetDoubleFromObj(interp, objv[i+1], &maxConvexity) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             params.maxConvexity = (float) maxConvexity;
-        } else if( strcmp(zArg, "-filterByInertia")==0 ){
-            if(Tcl_GetBooleanFromObj(interp, objv[i+1], &filterByInertia) != TCL_OK) {
+        } else if (strcmp(zArg, "-filterByInertia") == 0) {
+            if (Tcl_GetBooleanFromObj(interp, objv[i+1], &filterByInertia) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             params.filterByInertia = (bool) filterByInertia;
-        } else if( strcmp(zArg, "-minInertiaRatio")==0 ){
-            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &minInertiaRatio) != TCL_OK) {
+        } else if (strcmp(zArg, "-minInertiaRatio") == 0) {
+            if (Tcl_GetDoubleFromObj(interp, objv[i+1], &minInertiaRatio) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             params.minInertiaRatio = (float) minInertiaRatio;
-        } else if( strcmp(zArg, "-maxInertiaRatio")==0 ){
-            if(Tcl_GetDoubleFromObj(interp, objv[i+1], &maxInertiaRatio) != TCL_OK) {
+        } else if (strcmp(zArg, "-maxInertiaRatio") == 0) {
+            if (Tcl_GetDoubleFromObj(interp, objv[i+1], &maxInertiaRatio) != TCL_OK) {
                 return TCL_ERROR;
             }
 
@@ -4371,21 +3899,25 @@ int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*obj
     }
 
     try {
-        simpleBlobDetector = cv::SimpleBlobDetector::create(params);
+        sbdetector = cv::SimpleBlobDetector::create(params);
 
-        if (simpleBlobDetector == nullptr) {
+        if (sbdetector == nullptr) {
             Tcl_SetResult(interp, (char *) "simpleBlobDetector create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "SimpleBlobDetector failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-simpleBlobDetector", -1 );
+    pResultStr = Tcl_NewStringObj( "::cv-sbdetector", -1 );
 
-    Tcl_CreateObjCommand(interp, "cv-simpleBlobDetector", (Tcl_ObjCmdProc *) SimpleBlobDetector_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_sbdetector =
+        Tcl_CreateObjCommand(interp, "::cv-sbdectector",
+            (Tcl_ObjCmdProc *) SimpleBlobDetector_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) SimpleBlobDetector_DESTRUCTOR);
+
+    cvd->sbdetector = sbdetector;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;

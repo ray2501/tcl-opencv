@@ -4,17 +4,21 @@
 extern "C" {
 #endif
 
+#ifdef TCL_USE_OPENCV4
 
-int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Obj *cvo = (Opencv_Obj *)cd;
     int choice;
-    Tcl_HashEntry *hashEntryPtr;
-    char *handle;
-    QRCodeDetectorInfo *info;
+    cv::QRCodeDetector *qrdet;
 
     static const char *FUNC_strs[] = {
         "detect",
         "detectAndDecode",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
@@ -22,212 +26,144 @@ int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *cons
         FUNC_DETECT,
         FUNC_DETECTANDDECODE,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "QRCodeDetector: invalid QRCodeDetector handle ",
-                                    handle, (char *)NULL );
-        }
-
-        return TCL_ERROR;
+    cd = cvo->top;
+    qrdet = (cv::QRCodeDetector *) cvo->obj;
+    if (!qrdet) {
+        Tcl_Panic("null QRCodeDetector object");
     }
 
-    info = (QRCodeDetectorInfo *) Tcl_GetHashValue( hashEntryPtr );
-
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
-            Tcl_HashEntry *hashImageEntryPtr;
-            char *imagehandle;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
             Tcl_Obj *pResultStr = NULL;
-            int newvalue;
-            MatrixInfo *srcinfo;
-            MatrixInfo *dstinfo;
+            cv::Mat *srcmat, *dstmat;
             cv::Mat points_matrix;
             bool result;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix");
                 return TCL_ERROR;
             }
 
-            imagehandle = Tcl_GetStringFromObj(objv[2], 0);
-            hashImageEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, imagehandle );
-            if( !hashImageEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "detect invalid MATRIX handle ",
-                                            imagehandle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            srcinfo = (MatrixInfo *) Tcl_GetHashValue( hashImageEntryPtr );
-            if ( !srcinfo ) {
-                Tcl_SetResult(interp, (char *) "detect invalid info data", TCL_STATIC);
+            srcmat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!srcmat) {
                 return TCL_ERROR;
             }
 
             try {
-                result = info->qrcodedetector->detect(*(srcinfo->matrix), points_matrix);
+                result = qrdet->detect(*srcmat, points_matrix);
                 if (!result) {
                     Tcl_SetResult(interp, (char *) "detect result failed", TCL_STATIC);
                     return TCL_ERROR;
                 }
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "detect failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "detect malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(points_matrix);
 
-            dstinfo->matrix = new cv::Mat(points_matrix);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             Tcl_SetObjResult(interp, pResultStr);
 
             break;
         }
         case FUNC_DETECTANDDECODE: {
-            Tcl_HashEntry *hashImageEntryPtr;
-            char *imagehandle;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
-            int newvalue;
-            MatrixInfo *srcinfo;
-            MatrixInfo *dstinfo, *code_info;
+            cv::Mat *srcmat, *dstmat, *codemat;
             cv::Mat points_matrix, code_matrix;
             std::string result;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix");
                 return TCL_ERROR;
             }
 
-            imagehandle = Tcl_GetStringFromObj(objv[2], 0);
-            hashImageEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, imagehandle );
-            if( !hashImageEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "detectAndDecode invalid MATRIX handle ",
-                                            imagehandle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            srcinfo = (MatrixInfo *) Tcl_GetHashValue( hashImageEntryPtr );
-            if ( !srcinfo ) {
-                Tcl_SetResult(interp, (char *) "detectAndDecode invalid info data", TCL_STATIC);
+            srcmat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!srcmat) {
                 return TCL_ERROR;
             }
 
             try {
-                result = info->qrcodedetector->detectAndDecode(*(srcinfo->matrix),
-                                                               points_matrix,
-                                                               code_matrix);
-            } catch (...){
+                result = qrdet->detectAndDecode(*srcmat,
+                                                points_matrix,
+                                                code_matrix);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "detectAndDecode failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "detectAndDecode malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(points_matrix);
 
-            dstinfo->matrix = new cv::Mat(points_matrix);
+            pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
+            codemat = new cv::Mat(code_matrix);
 
-            pResultStr1 = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-
-            code_info = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!code_info) {
-                Tcl_SetResult(interp, (char *) "detectAndDecode malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
-
-            code_info->matrix = new cv::Mat(code_matrix);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr2 = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, code_info);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, codemat);
 
             pResultStr = Tcl_NewListObj(0, NULL);
             Tcl_ListObjAppendElement(NULL, pResultStr,
-                                     Tcl_NewStringObj( result.c_str(), result.length() ));
+                                     Tcl_NewStringObj(result.c_str(), result.length()));
 
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1 );
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2 );
+            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
 
             Tcl_SetObjResult(interp, pResultStr);
 
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            delete info->qrcodedetector;
-            ckfree(info);
+            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
 
-            Tcl_MutexLock(&myMutex);
-            if( hashEntryPtr )  Tcl_DeleteHashEntry(hashEntryPtr);
-            Tcl_MutexUnlock(&myMutex);
+            break;
+        }
+        case FUNC__COMMAND: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
 
-            Tcl_DeleteCommand(interp, handle);
+            obj = Tcl_NewObj();
+            Tcl_GetCommandFullName(interp, cvo->cmd, obj);
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__NAME: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
 
+            Tcl_SetObjResult(interp, Tcl_NewStringObj(cvo->key, -1));
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::QRCodeDetector", TCL_STATIC);
             break;
         }
     }
@@ -236,13 +172,10 @@ int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *cons
 }
 
 
-int QRCodeDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
-    cv::QRCodeDetector *qrcodedetector;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
+int QRCodeDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::QRCodeDetector *qrdet;
     Tcl_Obj *pResultStr = NULL;
-    int newvalue;
-    QRCodeDetectorInfo *info;
 
     if (objc != 1) {
         Tcl_WrongNumArgs(interp, 1, objv, 0);
@@ -250,144 +183,111 @@ int QRCodeDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     }
 
     try {
-        qrcodedetector = new cv::QRCodeDetector();
-    } catch (...){
+        qrdet = new cv::QRCodeDetector();
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "QRCodeDetector failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    info = (QRCodeDetectorInfo *) ckalloc(sizeof(QRCodeDetectorInfo));
-    if (!info) {
-        Tcl_SetResult(interp, (char *) "QRCodeDetector: malloc QRCodeDetectorInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
-    info->qrcodedetector = qrcodedetector;
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-qdetect%d", detect_count++ );
-
-    pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, info);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) QRCodeDetector_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_QDETECT, qrdet);
 
     Tcl_SetObjResult(interp, pResultStr);
 
     return TCL_OK;
 }
 
+#endif /* TCL_USE_OPENCV4 */
 
-int CascadeClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+
+int CascadeClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Obj *cvo = (Opencv_Obj *)cd;
     int choice;
-    Tcl_HashEntry *hashEntryPtr;
-    char *handle;
-    CascadeClassifierInfo *info;
+    cv::CascadeClassifier *cas;
 
     static const char *FUNC_strs[] = {
         "detectMultiScale",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
     enum FUNC_enum {
         FUNC_DETECTMULTISCALE,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "CascadeClassifier: invalid CascadeClassifier handle ",
-                                    handle, (char *)NULL );
-        }
-
-        return TCL_ERROR;
+    cd = cvo->top;
+    cas = (cv::CascadeClassifier *) cvo->obj;
+    if (!cas) {
+        Tcl_Panic("null CascadeClassifier object");
     }
 
-    info = (CascadeClassifierInfo *) Tcl_GetHashValue( hashEntryPtr );
-
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_DETECTMULTISCALE: {
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle;
             double scaleFactor = 1.1;
             int minNeighbors = 3, minWidth = 0, minHeight = 0, maxWidth = 0, maxHeight = 0;
             std::vector< cv::Rect > rect;
             Tcl_Obj *pResultStr = NULL;
-            MatrixInfo *matrix_info;
+            cv::Mat *mat;
 
-            if( objc != 3 && objc != 9 ){
+            if (objc != 3 && objc != 9) {
                 Tcl_WrongNumArgs(interp, 2, objv,
                         "matrix ?scaleFactor minNeighbors minWidth minHeight maxWidth maxHeight?");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "CascadeClassifier: invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            matrix_info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !matrix_info ) {
-                Tcl_SetResult(interp, (char *) "CascadeClassifier invalid info data", TCL_STATIC);
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
             if (objc == 9) {
-                if(Tcl_GetDoubleFromObj(interp, objv[3], &scaleFactor) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, objv[3], &scaleFactor) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
-                if(Tcl_GetIntFromObj(interp, objv[4], &minNeighbors) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, objv[4], &minNeighbors) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
-                if(Tcl_GetIntFromObj(interp, objv[5], &minWidth) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, objv[5], &minWidth) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
-                if(Tcl_GetIntFromObj(interp, objv[6], &minHeight) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, objv[6], &minHeight) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
-                if(Tcl_GetIntFromObj(interp, objv[7], &maxWidth) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, objv[7], &maxWidth) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
-                if(Tcl_GetIntFromObj(interp, objv[8], &maxHeight) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, objv[8], &maxHeight) != TCL_OK) {
                     return TCL_ERROR;
                 }
             }
 
             try {
-                info->classifier->detectMultiScale(*(matrix_info->matrix),
-                                            rect, scaleFactor, minNeighbors, 0,
-                                            cv::Size(minWidth, minHeight),
-                                            cv::Size(maxWidth, maxHeight));
-            } catch (...){
+                cas->detectMultiScale(*mat,
+                                      rect, scaleFactor, minNeighbors, 0,
+                                      cv::Size(minWidth, minHeight),
+                                      cv::Size(maxWidth, maxHeight));
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "detectMultiScale failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -396,10 +296,10 @@ int CascadeClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *c
             for (size_t i = 0; i < rect.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
                 pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( rect[i].x ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( rect[i].y ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( rect[i].width ));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj( rect[i].height ));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(rect[i].x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(rect[i].y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(rect[i].width));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(rect[i].height));
 
                 Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
             }
@@ -408,20 +308,43 @@ int CascadeClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *c
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            delete info->classifier;
-            ckfree(info);
+            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
 
-            Tcl_MutexLock(&myMutex);
-            if( hashEntryPtr )  Tcl_DeleteHashEntry(hashEntryPtr);
-            Tcl_MutexUnlock(&myMutex);
+            break;
+        }
+        case FUNC__COMMAND: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
 
-            Tcl_DeleteCommand(interp, handle);
+            obj = Tcl_NewObj();
+            Tcl_GetCommandFullName(interp, cvo->cmd, obj);
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__NAME: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
 
+            Tcl_SetObjResult(interp, Tcl_NewStringObj(cvo->key, -1));
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::CascadeClassifier", TCL_STATIC);
             break;
         }
     }
@@ -430,15 +353,12 @@ int CascadeClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *c
 }
 
 
-int CascadeClassifier(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int CascadeClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     char *filename = NULL;
     int len = 0;
-    cv::CascadeClassifier *classifier;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
+    cv::CascadeClassifier *cas;
     Tcl_Obj *pResultStr = NULL;
-    int newvalue;
-    CascadeClassifierInfo *info;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "filename");
@@ -446,42 +366,24 @@ int CascadeClassifier(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
     }
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
-    if( !filename || len < 1 ){
+    if (!filename || len < 1) {
         Tcl_SetResult(interp, (char *) "CascadeClassifier: invalid file name", TCL_STATIC);
         return TCL_ERROR;
     }
 
     try {
-        classifier = new cv::CascadeClassifier(filename);
+        cas = new cv::CascadeClassifier(filename);
 
-        if (classifier->empty() == true) {
+        if (cas->empty() == true) {
             Tcl_SetResult(interp, (char *) "CascadeClassifier load file failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "CascadeClassifier failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    info = (CascadeClassifierInfo *) ckalloc(sizeof(CascadeClassifierInfo));
-    if (!info) {
-        Tcl_SetResult(interp, (char *) "CascadeClassifier: malloc CascadeClassifierInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
-    info->classifier = classifier;
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-odetect%d", detect_count++ );
-
-    pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, info);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) CascadeClassifier_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_ODETECT, cas);
 
     Tcl_SetObjResult(interp, pResultStr);
 

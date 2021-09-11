@@ -45,7 +45,7 @@ PRJ_OBJS = \
 
 
 # Define any additional compiler flags that might be required for the project
-PRJ_DEFINES = -D_CRT_SECURE_NO_DEPRECATE
+PRJ_DEFINES = -D_CRT_SECURE_NO_DEPRECATE -DTCL_USE_OPENCV4=1 -DTCL_USE_SIFT=1
 
 # Define the standard targets
 !include "$(_RULESDIR)\targets.vc"

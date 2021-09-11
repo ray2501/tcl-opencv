@@ -10,290 +10,368 @@ extern "C" {
 
 #include <tcl.h>
 
-extern Tcl_HashTable *cv_hashtblPtr;
-extern size_t matrix_count;
-extern int video_count;
-extern int callback_count;
-extern int detect_count;
-extern int term_count;
-
-extern Tcl_Mutex myMutex;
-
 #define NS "cv"
+
+#ifndef MODULE_SCOPE
+#define MODULE_SCOPE
+#endif
 
 /*
  * OpenCV core
  */
-int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 
-int tcl_CV_8UC(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int tcl_CV_8SC(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int tcl_CV_16UC(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int tcl_CV_16SC(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int tcl_CV_32SC(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int tcl_CV_32FC(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int tcl_CV_64FC(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_mat(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_matwithdims(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_diag(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_eye(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_ones(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_zeros(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_abs(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_absdiff(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_add(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_addWeighted(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_bitwise_and(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_bitwise_or(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_bitwise_xor(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_bitwise_not(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_cartToPolar(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_convertScaleAbs(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_copyMakeBorder(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_divide(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_exp(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_flip(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_getOptimalDFTSize(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_dft(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_inRange(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_log(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_lut(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_magnitude(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_meanStdDev(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_minMaxLoc(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_multiply(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_mulSpectrums(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_split(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_merge(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_norm(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_normalize(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_pow(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_randu(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_sqrt(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_subtract(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_sum(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_hconcat(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int mat_vconcat(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int tcl_CV_8UC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int tcl_CV_8SC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int tcl_CV_16UC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int tcl_CV_16SC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int tcl_CV_32SC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int tcl_CV_32FC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int tcl_CV_64FC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_mat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_matwithdims(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_diag(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_eye(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_ones(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_zeros(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_abs(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_absdiff(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_add(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_addWeighted(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_bitwise_and(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_bitwise_or(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_bitwise_xor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_bitwise_not(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_cartToPolar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_convertScaleAbs(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_copyMakeBorder(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_divide(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_exp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_flip(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_getOptimalDFTSize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_dft(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_inRange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_log(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_lut(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_magnitude(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_meanStdDev(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_minMaxLoc(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_multiply(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_mulSpectrums(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_split(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_merge(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_norm(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_normalize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_pow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_randu(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_sqrt(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_subtract(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_sum(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_hconcat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_vconcat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
-int perspectiveTransform(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int perspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
-int getTickCount(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int getTickFrequency(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int getTickCount(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int getTickFrequency(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
-int TermCriteria(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int TermCriteria(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
  * OpenCV imgcodecs
  */
-int imread(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int imwrite(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int imread(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int imwrite(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
  * OpenCV imgproc
  */
 
-int applyColorMap(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int cvtColor(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int calcBackProject(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int calcHist(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int equalizeHist(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int floodFill(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int grabCut(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int matchTemplate(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int getRotationMatrix2D(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int getRectSubPix(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int remap(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int resize(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int threshold(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int adaptiveThreshold(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int getAffineTransform(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int warpAffine(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int getPerspectiveTransform(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int warpPerspective(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int applyColorMap(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int cvtColor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int calcBackProject(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int equalizeHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int floodFill(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int grabCut(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int matchTemplate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int getRotationMatrix2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int getRectSubPix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int remap(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int resize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int threshold(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int adaptiveThreshold(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int getAffineTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int warpAffine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int getPerspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int warpPerspective(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
-int filter2D(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int getGaborKernel(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int blur(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int GaussianBlur(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int medianBlur(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int bilateralFilter(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int boxFilter(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int sqrBoxFilter(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int filter2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int getGaborKernel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int blur(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int GaussianBlur(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int medianBlur(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int bilateralFilter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int boxFilter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int sqrBoxFilter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
-int getStructuringElement(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int dilate(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int erode(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int morphologyEx(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int pyrUp(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int pyrDown(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int pyrMeanShiftFiltering(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int getStructuringElement(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int dilate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int erode(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int morphologyEx(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int pyrUp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int pyrDown(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int pyrMeanShiftFiltering(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
-int Canny(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int Sobel(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int Scharr(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int Laplacian(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int distanceTransform(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int connectedComponents(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int watershed(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int goodFeaturesToTrack(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int cornerHarris(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int cornerSubPix(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int HoughCircles(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int HoughLines(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int HoughLinesP(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int Canny(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int Sobel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int Scharr(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int Laplacian(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int distanceTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int connectedComponents(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int watershed(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int goodFeaturesToTrack(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int cornerHarris(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int cornerSubPix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int HoughCircles(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int HoughLines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int HoughLinesP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
-int findContours(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int drawContours(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int contourArea(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int boundingRect(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int minAreaRect(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int boxPoints(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int minEnclosingCircle(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int convexHull(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int findContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int drawContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int contourArea(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int boundingRect(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int minAreaRect(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int boxPoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int minEnclosingCircle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int convexHull(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
-int arrowedLine(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int circle(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int clipLine(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int drawMarker(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int ellipse(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int fillConvexPoly(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int line(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int polylines(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int putText(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int rectangle(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int arrowedLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int circle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int clipLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int drawMarker(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int ellipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int fillConvexPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int line(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int polylines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int putText(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int rectangle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
  * For videoio
  */
 
-int VideoCapture(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int VideoWriter(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int VideoCapture(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int VideoWriter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
  * OpenCV highgui
  */
-int namedWindow(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int imshow(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int waitKey(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int moveWindow(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int destroyWindow(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int destroyAllWindows(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int selectROI(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int setMouseCallback(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int createTrackbar(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int getTrackbarPos(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int namedWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int imshow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int waitKey(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int moveWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int destroyWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int destroyAllWindows(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#ifdef TCL_USE_OPENCV4
+MODULE_SCOPE int selectROI(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
+MODULE_SCOPE int setMouseCallback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int createTrackbar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int getTrackbarPos(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
  * OpenCV features2d
  */
 
-int drawKeypoints(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int drawMatches(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int FastFeatureDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int AgastFeatureDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int ORB(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int AKAZE(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int BRISK(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int SIFT(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int BFMatcher(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int drawKeypoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int drawMatches(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int FastFeatureDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int AgastFeatureDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int ORB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int AKAZE(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int BRISK(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#ifdef TCL_USE_SIFT
+MODULE_SCOPE int SIFT(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
+MODULE_SCOPE int BFMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
  * OpenCV calib3d
  */
 
-int findHomography(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int findHomography(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
-int StereoBM(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int StereoSGBM(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int StereoBM(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int StereoSGBM(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
  * OpenCV video
  */
 
-int BackgroundSubtractorMOG2(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int meanShift(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int CamShift(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int calcOpticalFlowPyrLK(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int calcOpticalFlowFarneback(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int BackgroundSubtractorMOG2(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int meanShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int CamShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int calcOpticalFlowPyrLK(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int calcOpticalFlowFarneback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
  * OpenCV Photo
  */
 
-int inpaint(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int decolor(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int fastNlMeansDenoisingColored(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int colorChange(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int illuminationChange(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int textureFlattening(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int seamlessClone(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int detailEnhance(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int edgePreservingFilter(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int pencilSketch(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int stylization(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int inpaint(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int decolor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int fastNlMeansDenoisingColored(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int colorChange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int illuminationChange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int textureFlattening(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int seamlessClone(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int detailEnhance(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int edgePreservingFilter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int pencilSketch(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int stylization(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
-int AlignMTB(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int CalibrateDebevec(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int MergeDebevec(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int MergeMertens(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int TonemapDrago(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int TonemapMantiuk(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int TonemapReinhard(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int AlignMTB(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int CalibrateDebevec(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int MergeDebevec(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int MergeMertens(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int TonemapDrago(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int TonemapMantiuk(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int TonemapReinhard(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
 
 /*
  * OpenCV Stitcher
  */
-int Stitcher(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int Stitcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
  * OpenCV objdetect
  */
-int CascadeClassifier(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int CascadeClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
-int QRCodeDetector(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+#ifdef TCL_USE_OPENCV4
+MODULE_SCOPE int QRCodeDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
 
 /*
  * OpenCV dnn
  */
-int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-int dnn_readNet(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+#ifdef TCL_USE_OPENCV4
+MODULE_SCOPE int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
 
-
-extern DLLEXPORT int	Opencv_Init(Tcl_Interp * interp);
+extern DLLEXPORT int Opencv_Init(Tcl_Interp * interp);
 
 #ifdef __cplusplus
 }
 #endif
 
-typedef struct MatrixInfo {
-    cv::Mat *matrix;
-} MatrixInfo;
 
-typedef struct VideoCaptureInfo {
-    cv::VideoCapture *capture;
-} VideoCaptureInfo;
+typedef enum {
+    OPENCV_CALLBACK = 0,
+    OPENCV_MAT,
+    OPENCV_VIDEOCAPTURE,
+    OPENCV_VIDEOWRITER,
+    OPENCV_TERMCRITERIA,
+    OPENCV_ODETECT,
+#ifdef TCL_USE_OPENCV4
+    OPENCV_NDETECT,
+    OPENCV_QDETECT,
+#endif
+    OPENCV_MAXTYPE
+} Opencv_Type;
 
-typedef struct VideoWriterInfo {
-    cv::VideoWriter *writer;
-} VideoWriterInfo;
 
-typedef struct TermCriteriaInfo {
-    cv::TermCriteria *termCriteria;
-} TermCriteriaInfo;
+typedef struct {
+    Tcl_HashTable tbl[OPENCV_MAXTYPE];
 
-typedef struct CascadeClassifierInfo {
-    cv::CascadeClassifier *classifier;
-} CascadeClassifierInfo;
+    cv::Ptr<cv::FastFeatureDetector> fastdetector;
+    cv::Ptr<cv::AgastFeatureDetector> agastdetector;
+    cv::Ptr<cv::ORB> orbdetector;
+    cv::Ptr<cv::AKAZE> akazedetector;
+    cv::Ptr<cv::BRISK> briskdetector;
+#ifdef TCL_USE_SIFT
+    cv::Ptr<cv::SIFT> siftdetector;
+#endif
+    cv::Ptr<cv::BFMatcher> bfmatcher;
+    cv::Ptr<cv::FlannBasedMatcher> flannbasedmatcher;
+    cv::Ptr<cv::BackgroundSubtractorMOG2> bgsmog2;
+    cv::Ptr<cv::Stitcher> stitcher;
+    cv::Ptr<cv::SimpleBlobDetector> sbdetector;
+    cv::Ptr<cv::StereoBM> stereobm;
+    cv::Ptr<cv::StereoSGBM> stereosgbm;
+    cv::Ptr<cv::AlignMTB> alignmtb;
+    cv::Ptr<cv::CalibrateDebevec> calibdeb;
+    cv::Ptr<cv::MergeDebevec> mergedeb;
+    cv::Ptr<cv::MergeMertens> mergemer;
+    cv::Ptr<cv::TonemapDrago> tonemapdra;
+    cv::Ptr<cv::TonemapMantiuk> tonemapman;
+    cv::Ptr<cv::TonemapReinhard> tonemaprei;
 
-typedef struct QRCodeDetectorInfo {
-    cv::QRCodeDetector *qrcodedetector;
-} QRCodeDetectorInfo;
+    Tcl_Command cmd_fastdetector;
+    Tcl_Command cmd_agastdetector;
+    Tcl_Command cmd_orbdetector;
+    Tcl_Command cmd_akazedetector;
+    Tcl_Command cmd_briskdetector;
+#ifdef TCL_USE_SIFT
+    Tcl_Command cmd_siftdetector;
+#endif
+    Tcl_Command cmd_bfmatcher;
+    Tcl_Command cmd_flannbasedmatcher;
+    Tcl_Command cmd_bgsmog2;
+    Tcl_Command cmd_stitcher;
+    Tcl_Command cmd_sbdetector;
+    Tcl_Command cmd_stereobm;
+    Tcl_Command cmd_stereosgbm;
+    Tcl_Command cmd_alignmtb;
+    Tcl_Command cmd_calibdeb;
+    Tcl_Command cmd_mergedeb;
+    Tcl_Command cmd_mergemer;
+    Tcl_Command cmd_tonemapdra;
+    Tcl_Command cmd_tonemapman;
+    Tcl_Command cmd_tonemaprei;
+} Opencv_Data;
 
-typedef struct DnnNetInfo {
-    cv::dnn::Net *net;
-} DnnNetInfo;
+
+typedef struct {
+    Opencv_Type type;
+    Opencv_Data *top;
+    char *key;
+    void *obj;
+    Tcl_Command cmd;
+} Opencv_Obj;
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+MODULE_SCOPE Tcl_Obj *Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj);
+MODULE_SCOPE void *Opencv_FindHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, Tcl_Obj *name);
+
+/*
+ * Instance handlers and callbacks.
+ */
+
+MODULE_SCOPE void CallBackFunc(int event, int x, int y, int flags, void *userdata);
+MODULE_SCOPE int CascadeClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#ifdef TCL_USE_OPENCV4
+MODULE_SCOPE int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
+#ifdef TCL_USE_OPENCV4
+MODULE_SCOPE int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
+MODULE_SCOPE int TERM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE void TrackbarCallback(int value, void *userdata);
+MODULE_SCOPE int VideoCapture_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int VideoWriter_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+
+#ifdef __cplusplus
+}
+#endif
 
 typedef struct CvCallbackInfo {
     Tcl_Interp *interp;

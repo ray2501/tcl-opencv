@@ -4,19 +4,16 @@
 extern "C" {
 #endif
 
-int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+#ifdef TCL_USE_OPENCV4
+
+int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     cv::Mat dstimage;
     double scalefactor = 1.0;
     int width = 0, height = 0, swapRB = 0, crop = 0;
     int count = 0, B = 0, G = 0, R = 0, A = 0;
-    Tcl_HashEntry *hashEntryPtr;
-    char *handle;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
     Tcl_Obj *pResultStr = NULL;
-    int newvalue;
-    MatrixInfo *info;
-    MatrixInfo *dstinfo;
+    cv::Mat *mat, *dstmat;
 
     if (objc != 8) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -24,37 +21,24 @@ int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[1], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "blobFromImage invalid MATRIX handle ",
-                                    handle, (char *)NULL );
-        }
-
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
         return TCL_ERROR;
     }
 
-    info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info ) {
-        Tcl_SetResult(interp, (char *) "blobFromImage invalid info data", TCL_STATIC);
+    if (Tcl_GetDoubleFromObj(interp, objv[2], &scalefactor) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    if(Tcl_GetDoubleFromObj(interp, objv[2], &scalefactor) != TCL_OK) {
+    if (Tcl_GetIntFromObj(interp, objv[3], &width) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    if(Tcl_GetIntFromObj(interp, objv[3], &width) != TCL_OK) {
+    if (Tcl_GetIntFromObj(interp, objv[4], &height) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    if(Tcl_GetIntFromObj(interp, objv[4], &height) != TCL_OK) {
-        return TCL_ERROR;
-    }
-
-    if(Tcl_ListObjLength(interp, objv[5], &count) != TCL_OK) {
+    if (Tcl_ListObjLength(interp, objv[5], &count) != TCL_OK) {
         Tcl_SetResult(interp, (char *) "blobFromImage invalid list data", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -66,31 +50,31 @@ int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
         Tcl_Obj *elemListPtr = NULL;
 
         Tcl_ListObjIndex(interp, objv[5], 0, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &B) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &B) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[5], 1, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &G) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &G) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[5], 2, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &R) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &R) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[5], 3, &elemListPtr);
-        if(Tcl_GetIntFromObj(interp, elemListPtr, &A) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &A) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
-    if(Tcl_GetBooleanFromObj(interp, objv[6], &swapRB) != TCL_OK) {
+    if (Tcl_GetBooleanFromObj(interp, objv[6], &swapRB) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    if(Tcl_GetBooleanFromObj(interp, objv[7], &crop) != TCL_OK) {
+    if (Tcl_GetBooleanFromObj(interp, objv[7], &crop) != TCL_OK) {
         return TCL_ERROR;
     }
 
@@ -98,42 +82,26 @@ int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
         cv::Scalar color(B, G, R, A);
         cv::Size size(width, height);
 
-        dstimage = cv::dnn::blobFromImage(*(info->matrix), scalefactor, size, color, swapRB, crop);
-    } catch (...){
+        dstimage = cv::dnn::blobFromImage(*mat, scalefactor, size, color, swapRB, crop);
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "blobFromImage failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo) {
-        Tcl_SetResult(interp, (char *) "blobFromImage malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
+    dstmat = new cv::Mat(dstimage);
 
-    dstinfo->matrix = new cv::Mat(dstimage);
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-    pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
 
 
-int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Obj *cvo = (Opencv_Obj *)cd;
     int choice;
-    Tcl_HashEntry *hashEntryPtr;
-    char *handle;
-    DnnNetInfo *info;
+    cv::dnn::Net *net;
 
     static const char *FUNC_strs[] = {
         "setPreferableBackend",
@@ -141,6 +109,9 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv)
         "setInput",
         "forward",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
@@ -150,47 +121,42 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv)
         FUNC_setInput,
         FUNC_forward,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "invalid Net handle ",
-                                    handle, (char *)NULL );
-        }
-
-        return TCL_ERROR;
+    cd = (void *) cvo->top;
+    net = (cv::dnn::Net *) cvo->obj;
+    if (!net) {
+        Tcl_Panic("null DNN object");
     }
 
-    info = (DnnNetInfo *) Tcl_GetHashValue( hashEntryPtr );
-
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_setPreferableBackend: {
             int backendId;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "backendId");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &backendId) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &backendId) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                info->net->setPreferableBackend(backendId);
-            } catch (...){
+                net->setPreferableBackend(backendId);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setPreferableBackend failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -200,18 +166,18 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv)
         case FUNC_setPreferableTarget: {
             int targetId;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "targetId");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &targetId) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &targetId) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                info->net->setPreferableTarget(targetId);
-            } catch (...){
+                net->setPreferableTarget(targetId);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setPreferableTarget failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -224,46 +190,31 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv)
             int len;
             double scalefactor = 1.0;
             int count = 0, B = 0, G = 0, R = 0, A = 0;
-            Tcl_HashEntry *hashEntryPtr;
-            char *handle;
-            MatrixInfo *matrix_info;
+            cv::Mat *mat;
 
-            if( objc != 3 && objc != 6 ){
+            if (objc != 3 && objc != 6) {
                 Tcl_WrongNumArgs(interp, 2, objv, "blob ?name scalefactor mean_color_list?");
                 return TCL_ERROR;
             }
 
-            handle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "setInput invalid MATRIX handle ",
-                                            handle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            matrix_info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !matrix_info ) {
-                Tcl_SetResult(interp, (char *) "setInput invalid matrix info data", TCL_STATIC);
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
             if (objc == 6) {
                 /* name could be an empty string */
                 name = Tcl_GetStringFromObj(objv[3], &len);
-                if( !name ){
+                if (!name) {
                     Tcl_SetResult(interp, (char *) "setInput invalid name", TCL_STATIC);
                     return TCL_ERROR;
                 }
 
-                if(Tcl_GetDoubleFromObj(interp, objv[4], &scalefactor) != TCL_OK) {
+                if (Tcl_GetDoubleFromObj(interp, objv[4], &scalefactor) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
-                if(Tcl_ListObjLength(interp, objv[5], &count) != TCL_OK) {
+                if (Tcl_ListObjLength(interp, objv[5], &count) != TCL_OK) {
                     Tcl_SetResult(interp, (char *) "setInput invalid list data", TCL_STATIC);
                     return TCL_ERROR;
                 }
@@ -275,36 +226,36 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv)
                     Tcl_Obj *elemListPtr = NULL;
 
                     Tcl_ListObjIndex(interp, objv[5], 0, &elemListPtr);
-                    if(Tcl_GetIntFromObj(interp, elemListPtr, &B) != TCL_OK) {
+                    if (Tcl_GetIntFromObj(interp, elemListPtr, &B) != TCL_OK) {
                         return TCL_ERROR;
                     }
 
                     Tcl_ListObjIndex(interp, objv[5], 1, &elemListPtr);
-                    if(Tcl_GetIntFromObj(interp, elemListPtr, &G) != TCL_OK) {
+                    if (Tcl_GetIntFromObj(interp, elemListPtr, &G) != TCL_OK) {
                         return TCL_ERROR;
                     }
 
                     Tcl_ListObjIndex(interp, objv[5], 2, &elemListPtr);
-                    if(Tcl_GetIntFromObj(interp, elemListPtr, &R) != TCL_OK) {
+                    if (Tcl_GetIntFromObj(interp, elemListPtr, &R) != TCL_OK) {
                         return TCL_ERROR;
                     }
 
                     Tcl_ListObjIndex(interp, objv[5], 3, &elemListPtr);
-                    if(Tcl_GetIntFromObj(interp, elemListPtr, &A) != TCL_OK) {
+                    if (Tcl_GetIntFromObj(interp, elemListPtr, &A) != TCL_OK) {
                         return TCL_ERROR;
                     }
                 }
             }
 
             try {
-                blob = *(matrix_info->matrix);
+                blob = *mat;
                 if (objc == 3) {
-                    info->net->setInput(blob);
+                    net->setInput(blob);
                 } else {
                     cv::Scalar color(B, G, R, A);
-                    info->net->setInput(blob, name, scalefactor, color);
+                    net->setInput(blob, name, scalefactor, color);
                 }
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setInput failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -315,20 +266,17 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv)
             cv::Mat result_mat;
             char *name = NULL;
             int len;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
             Tcl_Obj *pResultStr = NULL;
-            int newvalue;
-            MatrixInfo *img_info;
+            cv::Mat *mat;
 
-            if( objc != 2 && objc != 3 ){
+            if (objc != 2 && objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "?name?");
                 return TCL_ERROR;
             }
 
-            if (objc == 3 ) {
+            if (objc == 3) {
                 name = Tcl_GetStringFromObj(objv[2], &len);
-                if( !name || len < 1 ){
+                if (!name || len < 1) {
                     Tcl_SetResult(interp, (char *) "forward invalid name", TCL_STATIC);
                     return TCL_ERROR;
                 }
@@ -336,53 +284,60 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv)
 
             try {
                 if (objc == 2) {
-                    result_mat = info->net->forward();
+                    result_mat = net->forward();
                 } else {
-                    result_mat = info->net->forward(name);
+                    result_mat = net->forward(name);
                 }
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "forward failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            img_info = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!img_info) {
-                Tcl_SetResult(interp, (char *) "forward malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            mat = new cv::Mat(result_mat);
 
-            img_info->matrix = new cv::Mat(result_mat);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, img_info);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
 
             Tcl_SetObjResult(interp, pResultStr);
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            delete info->net;
-            ckfree(info);
+            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
 
-            Tcl_MutexLock(&myMutex);
-            if( hashEntryPtr )  Tcl_DeleteHashEntry(hashEntryPtr);
-            Tcl_MutexUnlock(&myMutex);
+            break;
+        }
+        case FUNC__COMMAND: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
 
-            Tcl_DeleteCommand(interp, handle);
+            obj = Tcl_NewObj();
+            Tcl_GetCommandFullName(interp, cvo->cmd, obj);
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__NAME: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
 
+            Tcl_SetObjResult(interp, Tcl_NewStringObj(cvo->key, -1));
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::dnn:Net", TCL_STATIC);
             break;
         }
     }
@@ -391,15 +346,12 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv)
 }
 
 
-int dnn_readNet(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     char *model = NULL, *config = NULL, *framework = NULL;
     int len = 0;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
     Tcl_Obj *pResultStr = NULL;
-    int newvalue;
     cv::dnn::Net *net;
-    DnnNetInfo *info;
 
     if (objc != 2 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "model ?config framework?");
@@ -407,20 +359,20 @@ int dnn_readNet(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     }
 
     model = Tcl_GetStringFromObj(objv[1], &len);
-    if( !model || len < 1 ){
+    if (!model || len < 1) {
         Tcl_SetResult(interp, (char *) "readNet invalid model name", TCL_STATIC);
         return TCL_ERROR;
     }
 
     if (objc == 4) {
         config = Tcl_GetStringFromObj(objv[2], &len);
-        if( !config || len < 1 ){
+        if (!config || len < 1) {
             Tcl_SetResult(interp, (char *) "readNet invalid config name", TCL_STATIC);
             return TCL_ERROR;
         }
 
         framework = Tcl_GetStringFromObj(objv[3], &len);
-        if( !framework || len < 1 ){
+        if (!framework || len < 1) {
             Tcl_SetResult(interp, (char *) "readNet invalid framework name", TCL_STATIC);
             return TCL_ERROR;
         }
@@ -433,36 +385,19 @@ int dnn_readNet(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         } else {
             *net = cv::dnn::readNet(model, config, framework);
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "readNet failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    info = (DnnNetInfo *) ckalloc(sizeof(DnnNetInfo));
-    if (!info) {
-        Tcl_SetResult(interp, (char *) "readNet malloc DnnNetInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
-    info->net = net;
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-odetect%d", detect_count++ );
-
-    pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, info);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) READNET_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_NDETECT, net);
 
     Tcl_SetObjResult(interp, pResultStr);
 
     return TCL_OK;
 }
 
+#endif /* TCL_USE_OPENCV4 */
 
 #ifdef __cplusplus
 }

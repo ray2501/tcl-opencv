@@ -1,18 +1,25 @@
 #include "tclopencv.h"
 
-/*
- * OpenCV Stitcher uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::Stitcher > stitcher;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int Stitcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+
+static void Stitcher_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->stitcher) {
+        cvd->stitcher.release();
+    }
+    cvd->cmd_stitcher = NULL;
+}
+
+
+static int Stitcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "stitch",
@@ -25,34 +32,34 @@ int Stitcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->stitcher == nullptr) {
+        Tcl_SetResult(interp, (char *) "no stitcher instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_STITCH: {
             int count = 0;
             std::vector<cv::Mat> imgs;
             cv::Mat result_image;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
             Tcl_Obj *pResultStr = NULL;
-            int newvalue;
-            MatrixInfo *dstinfo;
+            cv::Mat *dstmat;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "image_list");
                 return TCL_ERROR;
             }
 
-            if(Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "stitch invalid list data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -61,81 +68,50 @@ int Stitcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
                 Tcl_SetResult(interp, (char *) "stitch empty list", TCL_STATIC);
                 return TCL_ERROR;
             } else {
-                Tcl_Obj *elemListPtr = NULL;
+                Tcl_Obj *elem = NULL;
                 cv::Mat image;
-                Tcl_HashEntry *hashEntryPtr;
-                char *handle;
-                MatrixInfo *info;
+                cv::Mat *mat;
 
-                for (int i = 0; i <  count; i++) {
-                    Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
-                    handle = Tcl_GetStringFromObj(elemListPtr, 0);
-                    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, handle );
-                    if( !hashEntryPtr ) {
-                        if( interp ) {
-                            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                            Tcl_AppendStringsToObj( resultObj, "stitch invalid MATRIX handle ",
-                                                    handle, (char *)NULL );
-                        }
-
+                for (int i = 0; i < count; i++) {
+                    Tcl_ListObjIndex(interp, objv[2], i, &elem);
+                    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, elem);
+                    if (!mat) {
                         return TCL_ERROR;
                     }
-
-                    info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-                    if ( !info ) {
-                        Tcl_SetResult(interp, (char *) "stitch invalid info data", TCL_STATIC);
-                        return TCL_ERROR;
-                    }
-
-                    image = *(info->matrix);
+                    image = *mat;
                     imgs.push_back(image);
                 }
             }
 
             try {
-                cv::Stitcher::Status status = stitcher->stitch(imgs, result_image);
+                cv::Stitcher::Status status = cvd->stitcher->stitch(imgs, result_image);
 
                 if (status != cv::Stitcher::OK)
                 {
                     Tcl_SetResult(interp, (char *) "stitch can't stitch images", TCL_STATIC);
                     return TCL_ERROR;
                 }
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "stitch failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "stitch malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(result_image);
 
-            dstinfo->matrix = new cv::Mat(result_image);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             Tcl_SetObjResult(interp, pResultStr);
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            stitcher.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->cmd_stitcher) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_stitcher);
+            }
 
             break;
         }
@@ -145,35 +121,42 @@ int Stitcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
 }
 
 
-int Stitcher(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int Stitcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int mode = 0;
     Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::Stitcher> stitcher;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "mode");
         return TCL_ERROR;
     }
 
-    if(Tcl_GetIntFromObj(interp, objv[1], &mode) != TCL_OK) {
+    if (Tcl_GetIntFromObj(interp, objv[1], &mode) != TCL_OK) {
         return TCL_ERROR;
     }
 
     try {
-        stitcher = cv::Stitcher::create( (cv::Stitcher::Mode) mode);
+        stitcher = cv::Stitcher::create((cv::Stitcher::Mode) mode);
 
         if (stitcher == nullptr) {
             Tcl_SetResult(interp, (char *) "Stitcher create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "Stitcher failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-stitcher", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-stitcher", -1);
 
-    Tcl_CreateObjCommand(interp, "cv-stitcher", (Tcl_ObjCmdProc *) Stitcher_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_stitcher =
+        Tcl_CreateObjCommand(interp, "::cv-stitcher",
+            (Tcl_ObjCmdProc *) Stitcher_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) Stitcher_DESTRUCTOR);
+
+    cvd->stitcher = stitcher;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;

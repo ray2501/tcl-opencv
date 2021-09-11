@@ -11,6 +11,8 @@ if {[lsearch [namespace children] ::tcltest] == -1} {
 loadTestedCommands
 package require opencv
 
+testConstraint DNN [expr {[info command ::cv::dnn::blobFromImage] ne {}}]
+
 #-------------------------------------------------------------------------------
 
 test opencv-1.1 {read image, wrong # args} {*}{
@@ -54,7 +56,8 @@ test opencv-1.5 {read image} {*}{
         set image [::cv::imread "tests/logoLarge.png"]
     }
     -returnCodes ok
-    -result {cv-mat0}
+    -match glob
+    -result {cv-mat-*}
 }
 
 test opencv-1.6 {resize image, wrong # args} {*}{
@@ -173,7 +176,6 @@ test opencv-1.18 {Draw a line} {*}{
     }
     -returnCodes ok
 }
-
 
 test opencv-1.19 {Draw a arrowedLine, wrong # args} {*}{
     -body {
@@ -368,7 +370,6 @@ test opencv-1.42 {equalizeHist test} {*}{
         set image11 [::cv::equalizeHist $image10]
         $image11 close
         $image10 close
-
     }
     -returnCodes ok
     -result {0}
@@ -380,7 +381,6 @@ test opencv-1.43 {Sobel test} {*}{
         set image13 [::cv::Sobel $image12 1 0]
         $image13 close
         $image12 close
-
     }
     -returnCodes ok
     -result {0}
@@ -392,7 +392,6 @@ test opencv-1.44 {Sobel test} {*}{
         set image13 [::cv::Sobel $image12 0 1 5 1.0 0.0 $::cv::BORDER_DEFAULT]
         $image13 close
         $image12 close
-
     }
     -returnCodes ok
     -result {0}
@@ -404,7 +403,6 @@ test opencv-1.45 {Sobel test} {*}{
         set image13 [::cv::Sobel $image12 1 1 5 1.0 0.0 $::cv::BORDER_ISOLATED]
         $image13 close
         $image12 close
-
     }
     -returnCodes ok
     -result {0}
@@ -416,7 +414,6 @@ test opencv-1.46 {Scharr test} {*}{
         set image13 [::cv::Scharr $image12 1 0 1.0 0.0 $::cv::BORDER_ISOLATED]
         $image13 close
         $image12 close
-
     }
     -returnCodes ok
     -result {0}
@@ -428,7 +425,6 @@ test opencv-1.47 {Scharr test} {*}{
         set image13 [::cv::Scharr $image12 0 1 1.0 0.0 $::cv::BORDER_ISOLATED]
         $image13 close
         $image12 close
-
     }
     -returnCodes ok
     -result {0}
@@ -440,7 +436,6 @@ test opencv-1.48 {Canny test} {*}{
         set image13 [::cv::Canny $image12 100 200 3 0]
         $image13 close
         $image12 close
-
     }
     -returnCodes ok
     -result {0}
@@ -452,7 +447,6 @@ test opencv-1.49 {Canny test} {*}{
         set image13 [::cv::Canny $image12 100 200]
         $image13 close
         $image12 close
-
     }
     -returnCodes ok
     -result {0}
@@ -531,7 +525,6 @@ test opencv-1.57 {Split and merge image} {*}{
             set myimage [lindex $imgList $i]
             $myimage close
         }
-
     }
     -returnCodes ok
 }
@@ -743,6 +736,7 @@ test opencv-1.70 {blobFromImage test} {*}{
                   [list 104 177 123 0] 1 1]
         $blob dims
     }
+    -constraints DNN
     -returnCodes ok
     -result {4}
 }
@@ -911,7 +905,6 @@ test opencv-1.78 {remap test} {*}{
     -result {0}
 }
 
-
 test opencv-1.79 {StereoBM test} {*}{
     -body {
         set testimg1 [::cv::imread "tests/tsukuba_l.png" 0]
@@ -949,7 +942,9 @@ test opencv-1.80 {Close test} {*}{
         $mat1 close
         $mat2 close
         $mat3 close
-        $blob close
+        if {[info exists blob]} {
+            $blob close
+        }
         $nmatrix close
         $matrix close
         $matrix2 close
@@ -960,10 +955,18 @@ test opencv-1.80 {Close test} {*}{
     -result {0}
 }
 
-
 #-------------------------------------------------------------------------------
 
 removeFile output.png
 
 cleanupTests
+
+puts ====
+puts "Left over objects:"
+puts [cv::_info]
+puts ====
+puts "Left over procs:"
+puts [info command ::cv*]
+puts ====
+
 return

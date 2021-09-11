@@ -1,63 +1,16 @@
 #include "tclopencv.h"
 
-/*
- * OpenCV AlignMTB uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::AlignMTB > alignMTB;
-
-/*
- * OpenCV CalibrateDebevec uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::CalibrateDebevec > calibrateDebevec;
-
-/*
- * OpenCV MergeDebevec uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::MergeDebevec > mergeDebevec;
-
-/*
- * OpenCV MergeMertens uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::MergeMertens > mergeMertens;
-
-/*
- * OpenCV TonemapDrago uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::TonemapDrago > tonemapDrago;
-
-/*
- * OpenCV TonemapMantiuk uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::TonemapMantiuk > tonemapMantiuk;
-
-/*
- * OpenCV TonemapReinhard uses smart pointer to handle its memory.
- * Here I create a static object to use it.
- */
-static cv::Ptr< cv::TonemapReinhard > tonemapReinhard;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
-int inpaint(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int inpaint(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     double inpaintRadius = 0;
     int flags = 0;
     cv::Mat dstimage;
-    Tcl_HashEntry *hashEntryPtr;
-    char *phandle, *mhandle;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
-    int newvalue;
-    MatrixInfo *info1, *info2;
-    MatrixInfo *dstinfo;
+    cv::Mat *mat1, *mat2, *dstmat;
     Tcl_Obj *pResultStr = NULL;
 
     if (objc != 5) {
@@ -66,77 +19,35 @@ int inpaint(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         return TCL_ERROR;
     }
 
-    phandle = Tcl_GetStringFromObj(objv[1], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, phandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "inpaint invalid MATRIX handle ",
-                                    phandle, (char *)NULL );
-        }
-
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
         return TCL_ERROR;
     }
 
-    info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info1 ) {
-        Tcl_SetResult(interp, (char *) "inpaint invalid info data", TCL_STATIC);
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
         return TCL_ERROR;
     }
 
-    mhandle = Tcl_GetStringFromObj(objv[2], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, mhandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "inpaint invalid MATRIX handle ",
-                                    mhandle, (char *)NULL );
-        }
-
+    if (Tcl_GetDoubleFromObj(interp, objv[3], &inpaintRadius) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info2 ) {
-        Tcl_SetResult(interp, (char *) "inpaint invalid info data", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
-    if(Tcl_GetDoubleFromObj(interp, objv[3], &inpaintRadius) != TCL_OK) {
-        return TCL_ERROR;
-    }
-
-    if(Tcl_GetIntFromObj(interp, objv[4], &flags) != TCL_OK) {
+    if (Tcl_GetIntFromObj(interp, objv[4], &flags) != TCL_OK) {
         return TCL_ERROR;
     }
 
     try {
-        cv::inpaint(*(info1->matrix), *(info2->matrix), dstimage,
+        cv::inpaint(*mat1, *mat2, dstimage,
                     inpaintRadius, flags);
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "inpaint failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo) {
-        Tcl_SetResult(interp, (char *) "inpaint malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
+    dstmat = new cv::Mat(dstimage);
 
-    dstinfo->matrix = new cv::Mat(dstimage);
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-    pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
     Tcl_SetObjResult(interp, pResultStr);
 
@@ -144,15 +55,10 @@ int inpaint(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 }
 
 
-int decolor(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int decolor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     cv::Mat dstimage1, dstimage2;
-    Tcl_HashEntry *hashEntryPtr;
-    char *phandle;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
-    int newvalue;
-    MatrixInfo *info1;
-    MatrixInfo *dstinfo1, *dstinfo2;
+    cv::Mat *mat1, *dstmat1, *dstmat2;
     Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
     if (objc != 2) {
@@ -160,74 +66,29 @@ int decolor(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         return TCL_ERROR;
     }
 
-    phandle = Tcl_GetStringFromObj(objv[1], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, phandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "decolor invalid MATRIX handle ",
-                                    phandle, (char *)NULL );
-        }
-
-        return TCL_ERROR;
-    }
-
-    info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info1 ) {
-        Tcl_SetResult(interp, (char *) "decolor invalid info data", TCL_STATIC);
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
         return TCL_ERROR;
     }
 
     try {
-        cv::decolor(*(info1->matrix), dstimage1, dstimage2);
-    } catch (...){
+        cv::decolor(*mat1, dstimage1, dstimage2);
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "decolor failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    dstinfo1 = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo1) {
-        Tcl_SetResult(interp, (char *) "decolor malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
+    dstmat1 = new cv::Mat(dstimage1);
 
-    dstinfo1->matrix = new cv::Mat(dstimage1);
+    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
+    dstmat2 = new cv::Mat(dstimage2);
 
-    pResultStr1 = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo1);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-
-    dstinfo2 = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo2) {
-        Tcl_SetResult(interp, (char *) "decolor malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
-    dstinfo2->matrix = new cv::Mat(dstimage2);
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-    pResultStr2 = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo2);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
     pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1 );
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2 );
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
 
     Tcl_SetObjResult(interp, pResultStr);
 
@@ -235,17 +96,12 @@ int decolor(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 }
 
 
-int fastNlMeansDenoisingColored(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int fastNlMeansDenoisingColored(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     double h = 3, hColor = 3;
     int templateWindowSize = 7, searchWindowSize = 21;
     cv::Mat dstimage;
-    Tcl_HashEntry *hashEntryPtr;
-    char *phandle;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
-    int newvalue;
-    MatrixInfo *info1;
-    MatrixInfo *dstinfo;
+    cv::Mat *mat1, *dstmat;
     Tcl_Obj *pResultStr = NULL;
 
     if (objc != 6) {
@@ -254,71 +110,42 @@ int fastNlMeansDenoisingColored(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *
         return TCL_ERROR;
     }
 
-    phandle = Tcl_GetStringFromObj(objv[1], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, phandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "fastNlMeansDenoisingColored invalid MATRIX handle ",
-                                    phandle, (char *)NULL );
-        }
-
-        return TCL_ERROR;
-    }
-
-    info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info1 ) {
-        Tcl_SetResult(interp, (char *) "fastNlMeansDenoisingColored invalid info data", TCL_STATIC);
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
         return TCL_ERROR;
     }
 
     if (objc == 6) {
-        if(Tcl_GetDoubleFromObj(interp, objv[2], &h) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[2], &h) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[3], &hColor) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[3], &hColor) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[4], &templateWindowSize) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[4], &templateWindowSize) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[5], &searchWindowSize) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[5], &searchWindowSize) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
 
     try {
-        cv::fastNlMeansDenoisingColored(*(info1->matrix), dstimage,
+        cv::fastNlMeansDenoisingColored(*mat1, dstimage,
                                         (float) h, (float) hColor,
                                         templateWindowSize, searchWindowSize);
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "fastNlMeansDenoisingColored failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo) {
-        Tcl_SetResult(interp, (char *) "fastNlMeansDenoisingColored malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
+    dstmat = new cv::Mat(dstimage);
 
-    dstinfo->matrix = new cv::Mat(dstimage);
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-    pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
     Tcl_SetObjResult(interp, pResultStr);
 
@@ -326,16 +153,11 @@ int fastNlMeansDenoisingColored(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *
 }
 
 
-int colorChange(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int colorChange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     double red_mul = 1.0, green_mul = 1.0, blue_mul = 1.0;
     cv::Mat dstimage;
-    Tcl_HashEntry *hashEntryPtr;
-    char *phandle, *mhandle;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
-    int newvalue;
-    MatrixInfo *info1, *info2;
-    MatrixInfo *dstinfo;
+    cv::Mat *mat1, *mat2, *dstmat;
     Tcl_Obj *pResultStr = NULL;
 
     if (objc != 6) {
@@ -343,81 +165,39 @@ int colorChange(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         return TCL_ERROR;
     }
 
-    phandle = Tcl_GetStringFromObj(objv[1], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, phandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "colorChange invalid MATRIX handle ",
-                                    phandle, (char *)NULL );
-        }
-
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
         return TCL_ERROR;
     }
 
-    info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info1 ) {
-        Tcl_SetResult(interp, (char *) "colorChange invalid info data", TCL_STATIC);
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
         return TCL_ERROR;
     }
 
-    mhandle = Tcl_GetStringFromObj(objv[2], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, mhandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "colorChange invalid MATRIX handle ",
-                                    mhandle, (char *)NULL );
-        }
-
+    if (Tcl_GetDoubleFromObj(interp, objv[3], &red_mul) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info2 ) {
-        Tcl_SetResult(interp, (char *) "colorChange invalid info data", TCL_STATIC);
+    if (Tcl_GetDoubleFromObj(interp, objv[4], &green_mul) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    if(Tcl_GetDoubleFromObj(interp, objv[3], &red_mul) != TCL_OK) {
-        return TCL_ERROR;
-    }
-
-    if(Tcl_GetDoubleFromObj(interp, objv[4], &green_mul) != TCL_OK) {
-        return TCL_ERROR;
-    }
-
-    if(Tcl_GetDoubleFromObj(interp, objv[5], &blue_mul) != TCL_OK) {
+    if (Tcl_GetDoubleFromObj(interp, objv[5], &blue_mul) != TCL_OK) {
         return TCL_ERROR;
     }
 
     try {
-        cv::colorChange(*(info1->matrix), *(info2->matrix), dstimage,
+        cv::colorChange(*mat1, *mat2, dstimage,
                         (float) red_mul, (float) green_mul, (float) blue_mul);
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "colorChange failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo) {
-        Tcl_SetResult(interp, (char *) "colorChange malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
+    dstmat = new cv::Mat(dstimage);
 
-    dstinfo->matrix = new cv::Mat(dstimage);
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-    pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
     Tcl_SetObjResult(interp, pResultStr);
 
@@ -425,16 +205,11 @@ int colorChange(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 }
 
 
-int illuminationChange(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int illuminationChange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     double alpha = 0.2, beta = 0.4;
     cv::Mat dstimage;
-    Tcl_HashEntry *hashEntryPtr;
-    char *phandle, *mhandle;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
-    int newvalue;
-    MatrixInfo *info1, *info2;
-    MatrixInfo *dstinfo;
+    cv::Mat *mat1, *mat2, *dstmat;
     Tcl_Obj *pResultStr = NULL;
 
     if (objc != 5) {
@@ -442,43 +217,17 @@ int illuminationChange(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*obj
         return TCL_ERROR;
     }
 
-    phandle = Tcl_GetStringFromObj(objv[1], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, phandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "illuminationChange invalid MATRIX handle ",
-                                    phandle, (char *)NULL );
-        }
-
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
         return TCL_ERROR;
     }
 
-    info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info1 ) {
-        Tcl_SetResult(interp, (char *) "illuminationChange invalid info data", TCL_STATIC);
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
         return TCL_ERROR;
     }
 
-    mhandle = Tcl_GetStringFromObj(objv[2], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, mhandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "illuminationChange invalid MATRIX handle ",
-                                    mhandle, (char *)NULL );
-        }
-
-        return TCL_ERROR;
-    }
-
-    info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info2 ) {
-        Tcl_SetResult(interp, (char *) "illuminationChange invalid info data", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
-    if(Tcl_GetDoubleFromObj(interp, objv[3], &alpha) != TCL_OK) {
+    if (Tcl_GetDoubleFromObj(interp, objv[3], &alpha) != TCL_OK) {
         return TCL_ERROR;
     }
 
@@ -487,7 +236,7 @@ int illuminationChange(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*obj
         return TCL_ERROR;
     }
 
-    if(Tcl_GetDoubleFromObj(interp, objv[4], &beta) != TCL_OK) {
+    if (Tcl_GetDoubleFromObj(interp, objv[4], &beta) != TCL_OK) {
         return TCL_ERROR;
     }
 
@@ -497,32 +246,16 @@ int illuminationChange(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*obj
     }
 
     try {
-        cv::illuminationChange(*(info1->matrix), *(info2->matrix), dstimage,
+        cv::illuminationChange(*mat1, *mat2, dstimage,
                         (float) alpha, (float) beta);
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "illuminationChange failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo) {
-        Tcl_SetResult(interp, (char *) "illuminationChange malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
+    dstmat = new cv::Mat(dstimage);
 
-    dstinfo->matrix = new cv::Mat(dstimage);
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-    pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
     Tcl_SetObjResult(interp, pResultStr);
 
@@ -530,17 +263,12 @@ int illuminationChange(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*obj
 }
 
 
-int textureFlattening(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int textureFlattening(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     double low_threshold = 30, high_threshold = 145;
     int kernel_size = 3;
     cv::Mat dstimage;
-    Tcl_HashEntry *hashEntryPtr;
-    char *phandle, *mhandle;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
-    int newvalue;
-    MatrixInfo *info1, *info2;
-    MatrixInfo *dstinfo;
+    cv::Mat *mat1, *mat2, *dstmat;
     Tcl_Obj *pResultStr = NULL;
 
     if (objc != 5 && objc != 6) {
@@ -549,43 +277,17 @@ int textureFlattening(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
         return TCL_ERROR;
     }
 
-    phandle = Tcl_GetStringFromObj(objv[1], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, phandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "textureFlattening invalid MATRIX handle ",
-                                    phandle, (char *)NULL );
-        }
-
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
         return TCL_ERROR;
     }
 
-    info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info1 ) {
-        Tcl_SetResult(interp, (char *) "textureFlattening invalid info data", TCL_STATIC);
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
         return TCL_ERROR;
     }
 
-    mhandle = Tcl_GetStringFromObj(objv[2], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, mhandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "textureFlattening invalid MATRIX handle ",
-                                    mhandle, (char *)NULL );
-        }
-
-        return TCL_ERROR;
-    }
-
-    info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info2 ) {
-        Tcl_SetResult(interp, (char *) "textureFlattening invalid info data", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
-    if(Tcl_GetDoubleFromObj(interp, objv[3], &low_threshold) != TCL_OK) {
+    if (Tcl_GetDoubleFromObj(interp, objv[3], &low_threshold) != TCL_OK) {
         return TCL_ERROR;
     }
 
@@ -594,7 +296,7 @@ int textureFlattening(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
         return TCL_ERROR;
     }
 
-    if(Tcl_GetDoubleFromObj(interp, objv[4], &high_threshold) != TCL_OK) {
+    if (Tcl_GetDoubleFromObj(interp, objv[4], &high_threshold) != TCL_OK) {
         return TCL_ERROR;
     }
 
@@ -604,38 +306,22 @@ int textureFlattening(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
     }
 
     if (objc == 6) {
-        if(Tcl_GetIntFromObj(interp, objv[5], &kernel_size) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[5], &kernel_size) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        cv::textureFlattening(*(info1->matrix), *(info2->matrix), dstimage,
+        cv::textureFlattening(*mat1, *mat2, dstimage,
                 (float) low_threshold, (float) high_threshold, kernel_size);
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "textureFlattening failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo) {
-        Tcl_SetResult(interp, (char *) "textureFlattening malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
+    dstmat = new cv::Mat(dstimage);
 
-    dstinfo->matrix = new cv::Mat(dstimage);
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-    pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
     Tcl_SetObjResult(interp, pResultStr);
 
@@ -643,16 +329,11 @@ int textureFlattening(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
 }
 
 
-int seamlessClone(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int seamlessClone(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     int x = 0, y = 0, flags = cv::NORMAL_CLONE;
     cv::Mat dstimage;
-    Tcl_HashEntry *hashEntryPtr;
-    char *phandle, *dhandle, *mhandle;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
-    int newvalue;
-    MatrixInfo *info1, *info2, *info3;
-    MatrixInfo *dstinfo;
+    cv::Mat *mat1, *mat2, *mat3, *dstmat;
     Tcl_Obj *pResultStr = NULL;
 
     if (objc != 7) {
@@ -660,57 +341,18 @@ int seamlessClone(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         return TCL_ERROR;
     }
 
-    phandle = Tcl_GetStringFromObj(objv[1], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, phandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "seamlessClone invalid MATRIX handle ",
-                                    phandle, (char *)NULL );
-        }
-
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
         return TCL_ERROR;
     }
 
-    info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info1 ) {
-        Tcl_SetResult(interp, (char *) "seamlessClone invalid info data", TCL_STATIC);
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
         return TCL_ERROR;
     }
 
-    dhandle = Tcl_GetStringFromObj(objv[2], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, dhandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "seamlessClone invalid MATRIX handle ",
-                                    dhandle, (char *)NULL );
-        }
-
-        return TCL_ERROR;
-    }
-
-    info2 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info2 ) {
-        Tcl_SetResult(interp, (char *) "seamlessClone invalid info data", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
-    mhandle = Tcl_GetStringFromObj(objv[3], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, mhandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "seamlessClone invalid MATRIX handle ",
-                                    mhandle, (char *)NULL );
-        }
-
-        return TCL_ERROR;
-    }
-
-    info3 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info3 ) {
-        Tcl_SetResult(interp, (char *) "seamlessClone invalid info data", TCL_STATIC);
+    mat3 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+    if (!mat3) {
         return TCL_ERROR;
     }
 
@@ -718,7 +360,7 @@ int seamlessClone(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
      * Location of the center of the source image in the destination image.
      * Get x location.
      */
-    if(Tcl_GetIntFromObj(interp, objv[4], &x) != TCL_OK) {
+    if (Tcl_GetIntFromObj(interp, objv[4], &x) != TCL_OK) {
         return TCL_ERROR;
     }
 
@@ -726,41 +368,25 @@ int seamlessClone(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
      * Location of the center of the source image in the destination image.
      * Get y location.
      */
-    if(Tcl_GetIntFromObj(interp, objv[5], &y) != TCL_OK) {
+    if (Tcl_GetIntFromObj(interp, objv[5], &y) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    if(Tcl_GetIntFromObj(interp, objv[6], &flags) != TCL_OK) {
+    if (Tcl_GetIntFromObj(interp, objv[6], &flags) != TCL_OK) {
         return TCL_ERROR;
     }
 
     try {
-        cv::seamlessClone(*(info1->matrix), *(info2->matrix), *(info3->matrix),
+        cv::seamlessClone(*mat1, *mat2, *mat3,
                           cv::Point(x, y), dstimage, flags);
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "seamlessClone failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo) {
-        Tcl_SetResult(interp, (char *) "seamlessClone malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
+    dstmat = new cv::Mat(dstimage);
 
-    dstinfo->matrix = new cv::Mat(dstimage);
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-    pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
     Tcl_SetObjResult(interp, pResultStr);
 
@@ -768,16 +394,11 @@ int seamlessClone(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 }
 
 
-int detailEnhance(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int detailEnhance(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     double sigma_s = 10, sigma_r = 0.15;
     cv::Mat dstimage;
-    Tcl_HashEntry *hashEntryPtr;
-    char *phandle;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
-    int newvalue;
-    MatrixInfo *info1;
-    MatrixInfo *dstinfo;
+    cv::Mat *mat1, *dstmat;
     Tcl_Obj *pResultStr = NULL;
 
     if (objc != 2 && objc != 4) {
@@ -785,60 +406,31 @@ int detailEnhance(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         return TCL_ERROR;
     }
 
-    phandle = Tcl_GetStringFromObj(objv[1], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, phandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "detailEnhance invalid MATRIX handle ",
-                                    phandle, (char *)NULL );
-        }
-
-        return TCL_ERROR;
-    }
-
-    info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info1 ) {
-        Tcl_SetResult(interp, (char *) "detailEnhance invalid info data", TCL_STATIC);
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
         return TCL_ERROR;
     }
 
     if (objc == 4) {
-        if(Tcl_GetDoubleFromObj(interp, objv[2], &sigma_s) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[2], &sigma_s) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[3], &sigma_r) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[3], &sigma_r) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        cv::detailEnhance(*(info1->matrix), dstimage, sigma_s, sigma_r);
-    } catch (...){
+        cv::detailEnhance(*mat1, dstimage, sigma_s, sigma_r);
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "detailEnhance failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo) {
-        Tcl_SetResult(interp, (char *) "detailEnhance malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
+    dstmat = new cv::Mat(dstimage);
 
-    dstinfo->matrix = new cv::Mat(dstimage);
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-    pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
     Tcl_SetObjResult(interp, pResultStr);
 
@@ -846,17 +438,12 @@ int detailEnhance(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 }
 
 
-int edgePreservingFilter(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int edgePreservingFilter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     int flags = 1;
     double sigma_s = 60, sigma_r = 0.4;
     cv::Mat dstimage;
-    Tcl_HashEntry *hashEntryPtr;
-    char *phandle;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
-    int newvalue;
-    MatrixInfo *info1;
-    MatrixInfo *dstinfo;
+    cv::Mat *mat1, *dstmat;
     Tcl_Obj *pResultStr = NULL;
 
     if (objc != 2 && objc != 5) {
@@ -864,64 +451,35 @@ int edgePreservingFilter(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*o
         return TCL_ERROR;
     }
 
-    phandle = Tcl_GetStringFromObj(objv[1], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, phandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "edgePreservingFilter invalid MATRIX handle ",
-                                    phandle, (char *)NULL );
-        }
-
-        return TCL_ERROR;
-    }
-
-    info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info1 ) {
-        Tcl_SetResult(interp, (char *) "edgePreservingFilter invalid info data", TCL_STATIC);
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
         return TCL_ERROR;
     }
 
     if (objc == 5) {
-        if(Tcl_GetIntFromObj(interp, objv[2], &flags) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[2], &flags) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[3], &sigma_s) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[3], &sigma_s) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[4], &sigma_r) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[4], &sigma_r) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        cv::edgePreservingFilter(*(info1->matrix), dstimage, flags, (float) sigma_s, (float) sigma_r);
-    } catch (...){
+        cv::edgePreservingFilter(*mat1, dstimage, flags, (float) sigma_s, (float) sigma_r);
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "edgePreservingFilter failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo) {
-        Tcl_SetResult(interp, (char *) "edgePreservingFilter malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
+    dstmat = new cv::Mat(dstimage);
 
-    dstinfo->matrix = new cv::Mat(dstimage);
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-    pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
     Tcl_SetObjResult(interp, pResultStr);
 
@@ -929,16 +487,11 @@ int edgePreservingFilter(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*o
 }
 
 
-int pencilSketch(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int pencilSketch(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     double sigma_s = 60, sigma_r = 0.07, shade_factor = 0.02;
     cv::Mat dstimage1, dstimage2;
-    Tcl_HashEntry *hashEntryPtr;
-    char *phandle;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
-    int newvalue;
-    MatrixInfo *info1;
-    MatrixInfo *dstinfo1, *dstinfo2;
+    cv::Mat *mat1, *dstmat1, *dstmat2;
     Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
     if (objc != 2 && objc != 5) {
@@ -946,89 +499,44 @@ int pencilSketch(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         return TCL_ERROR;
     }
 
-    phandle = Tcl_GetStringFromObj(objv[1], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, phandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "pencilSketch invalid MATRIX handle ",
-                                    phandle, (char *)NULL );
-        }
-
-        return TCL_ERROR;
-    }
-
-    info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info1 ) {
-        Tcl_SetResult(interp, (char *) "pencilSketch invalid info data", TCL_STATIC);
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
         return TCL_ERROR;
     }
 
     if (objc == 5) {
-        if(Tcl_GetDoubleFromObj(interp, objv[2], &sigma_s) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[2], &sigma_s) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[3], &sigma_r) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[3], &sigma_r) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[4], &shade_factor) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[4], &shade_factor) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        cv::pencilSketch(*(info1->matrix), dstimage1, dstimage2,
+        cv::pencilSketch(*mat1, dstimage1, dstimage2,
                          (float) sigma_s, (float) sigma_r, (float) shade_factor);
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "pencilSketch failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    dstinfo1 = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo1) {
-        Tcl_SetResult(interp, (char *) "pencilSketch malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
+    dstmat1 = new cv::Mat(dstimage1);
 
-    dstinfo1->matrix = new cv::Mat(dstimage1);
+    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
+    dstmat2 = new cv::Mat(dstimage2);
 
-    pResultStr1 = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo1);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-
-    dstinfo2 = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo2) {
-        Tcl_SetResult(interp, (char *) "pencilSketch malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
-    dstinfo2->matrix = new cv::Mat(dstimage2);
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-    pResultStr2 = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo2);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
     pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1 );
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2 );
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
 
     Tcl_SetObjResult(interp, pResultStr);
 
@@ -1036,16 +544,11 @@ int pencilSketch(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 }
 
 
-int stylization(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int stylization(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     double sigma_s = 60, sigma_r = 0.45;
     cv::Mat dstimage;
-    Tcl_HashEntry *hashEntryPtr;
-    char *phandle;
-    Tcl_HashEntry *newHashEntryPtr;
-    char handleName[16 + TCL_INTEGER_SPACE];
-    int newvalue;
-    MatrixInfo *info1;
-    MatrixInfo *dstinfo;
+    cv::Mat *mat1, *dstmat;
     Tcl_Obj *pResultStr = NULL;
 
     if (objc != 2 && objc != 4) {
@@ -1053,60 +556,31 @@ int stylization(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
         return TCL_ERROR;
     }
 
-    phandle = Tcl_GetStringFromObj(objv[1], 0);
-    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, phandle );
-    if( !hashEntryPtr ) {
-        if( interp ) {
-            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-            Tcl_AppendStringsToObj( resultObj, "stylization invalid MATRIX handle ",
-                                    phandle, (char *)NULL );
-        }
-
-        return TCL_ERROR;
-    }
-
-    info1 = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-    if ( !info1 ) {
-        Tcl_SetResult(interp, (char *) "stylization invalid info data", TCL_STATIC);
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
         return TCL_ERROR;
     }
 
     if (objc == 4) {
-        if(Tcl_GetDoubleFromObj(interp, objv[2], &sigma_s) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[2], &sigma_s) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[3], &sigma_r) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[3], &sigma_r) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        cv::stylization(*(info1->matrix), dstimage, sigma_s, sigma_r);
-    } catch (...){
+        cv::stylization(*mat1, dstimage, sigma_s, sigma_r);
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "stylization failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-    if (!dstinfo) {
-        Tcl_SetResult(interp, (char *) "stylization malloc MatrixInfo failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
+    dstmat = new cv::Mat(dstimage);
 
-    dstinfo->matrix = new cv::Mat(dstimage);
-
-    Tcl_MutexLock(&myMutex);
-    sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-    pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-    newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-    Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-    Tcl_MutexUnlock(&myMutex);
-
-    Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
     Tcl_SetObjResult(interp, pResultStr);
 
@@ -1114,9 +588,21 @@ int stylization(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
 }
 
 
-int AlignMTB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static void AlignMTB_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->alignmtb) {
+        cvd->alignmtb.release();
+    }
+    cvd->cmd_alignmtb = NULL;
+}
+
+
+static int AlignMTB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "process",
@@ -1129,18 +615,21 @@ int AlignMTB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->alignmtb == nullptr) {
+       Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+       return TCL_ERROR;
+    }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_PROCESS: {
             std::vector< cv::Mat > src;
             std::vector< cv::Mat > dst;
@@ -1148,12 +637,12 @@ int AlignMTB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
             int count;
             Tcl_Obj *pResultStr = NULL;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix_list");
                 return TCL_ERROR;
             }
 
-            if(Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "process invalid list data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1162,73 +651,35 @@ int AlignMTB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
                 Tcl_SetResult(interp, (char *) "process matrix_list invalid data", TCL_STATIC);
                 return TCL_ERROR;
             } else {
-                Tcl_Obj *elemListPtr = NULL;
-                Tcl_HashEntry *hashEntryPtr;
-                char *matrix_handle;
-                MatrixInfo *info;
+                Tcl_Obj *elem = NULL;
+                cv::Mat *mat;
 
                 for (int i = 0; i < count; i++) {
-                    Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
-                    matrix_handle = Tcl_GetStringFromObj(elemListPtr, 0);
-                    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, matrix_handle );
-                    if( !hashEntryPtr ) {
-                        if( interp ) {
-                            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                            Tcl_AppendStringsToObj( resultObj, "process invalid MATRIX handle ",
-                                                    matrix_handle, (char *)NULL );
-                        }
-
+                    Tcl_ListObjIndex(interp, objv[2], i, &elem);
+                    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, elem);
+                    if (!mat) {
                         return TCL_ERROR;
                     }
-
-                    info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-                    if ( !info ) {
-                        Tcl_SetResult(interp, (char *) "process invalid info data", TCL_STATIC);
-                        return TCL_ERROR;
-                    }
-
-                    image = *(info->matrix);
+                    image = *mat;
                     src.push_back(image);
                 }
             }
 
             try {
-                alignMTB->process(src, dst);
-            } catch (...){
+                cvd->alignmtb->process(src, dst);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "process failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
             pResultStr = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < dst.size(); i++) {
-                Tcl_HashEntry *newHashEntryPtr;
-                char handleName[16 + TCL_INTEGER_SPACE];
                 Tcl_Obj *pSubResultStr = NULL;
-                int newvalue;
-                MatrixInfo *dstinfo;
-                cv::Mat dstimage;
+                cv::Mat *dstmat;
 
-                dstimage = dst[i];
+                dstmat = new cv::Mat(dst[i]);
 
-                dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-                if (!dstinfo) {
-                    Tcl_SetResult(interp, (char *) "process malloc MatrixInfo failed", TCL_STATIC);
-                    return TCL_ERROR;
-                }
-
-                dstinfo->matrix = new cv::Mat(dstimage);
-
-                Tcl_MutexLock(&myMutex);
-                sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-                pSubResultStr = Tcl_NewStringObj( handleName, -1 );
-
-                newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-                Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-                Tcl_MutexUnlock(&myMutex);
-
-                Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                    (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+                pSubResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
                 Tcl_ListObjAppendElement(NULL, pResultStr, pSubResultStr);
             }
@@ -1237,13 +688,14 @@ int AlignMTB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            alignMTB.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->cmd_alignmtb) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_alignmtb);
+            }
 
             break;
         }
@@ -1253,9 +705,12 @@ int AlignMTB_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv
 }
 
 
-int AlignMTB(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int AlignMTB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int max_bits = 6, exclude_range = 4, cut = 1;
     Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::AlignMTB> alignmtb;
 
     if (objc != 1 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "?max_bits exclude_range cut?");
@@ -1263,44 +718,59 @@ int AlignMTB(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     }
 
     if (objc == 4) {
-        if(Tcl_GetIntFromObj(interp, objv[1], &max_bits) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[1], &max_bits) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[2], &exclude_range) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[2], &exclude_range) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetBooleanFromObj(interp, objv[3], &cut) != TCL_OK) {
+        if (Tcl_GetBooleanFromObj(interp, objv[3], &cut) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        alignMTB = cv::createAlignMTB( max_bits, exclude_range, (bool) cut);
+        alignmtb = cv::createAlignMTB(max_bits, exclude_range, (bool) cut);
 
-        if (alignMTB == nullptr) {
+        if (alignmtb == nullptr) {
             Tcl_SetResult(interp, (char *) "alignMTB create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "AlignMTB failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-alignMTB", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-alignmtb", -1);
 
-    Tcl_CreateObjCommand(interp, "cv-alignMTB", (Tcl_ObjCmdProc *) AlignMTB_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_alignmtb =
+        Tcl_CreateObjCommand(interp, "::cv-alignmtb",
+            (Tcl_ObjCmdProc *) AlignMTB_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) AlignMTB_DESTRUCTOR);
+
+    cvd->alignmtb = alignmtb;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
 
 
-int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static void CalibrateDebevec_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->calibdeb) {
+        cvd->calibdeb.release();
+    }
+    cvd->cmd_calibdeb = NULL;
+}
+
+int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "process",
@@ -1313,35 +783,35 @@ int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *co
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->calibdeb == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_PROCESS: {
             int count;
             cv::Mat image, responseDebevec;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
-            int newvalue;
-            MatrixInfo *dstinfo;
+            cv::Mat *dstmat;
             Tcl_Obj *pResultStr = NULL;
             std::vector< cv::Mat > src;
             std::vector< float > timesArray;
 
-            if( objc != 4 ){
+            if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix_list times_list");
                 return TCL_ERROR;
             }
 
-            if(Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "process invalid list data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1350,37 +820,21 @@ int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *co
                 Tcl_SetResult(interp, (char *) "process matrix_list invalid data", TCL_STATIC);
                 return TCL_ERROR;
             } else {
-                Tcl_Obj *elemListPtr = NULL;
-                Tcl_HashEntry *hashEntryPtr;
-                char *matrix_handle;
-                MatrixInfo *info;
+                Tcl_Obj *elem = NULL;
+                cv::Mat *mat;
 
                 for (int i = 0; i < count; i++) {
-                    Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
-                    matrix_handle = Tcl_GetStringFromObj(elemListPtr, 0);
-                    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, matrix_handle );
-                    if( !hashEntryPtr ) {
-                        if( interp ) {
-                            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                            Tcl_AppendStringsToObj( resultObj, "process invalid MATRIX handle ",
-                                                    matrix_handle, (char *)NULL );
-                        }
-
+                    Tcl_ListObjIndex(interp, objv[2], i, &elem);
+                    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, elem);
+                    if (!mat) {
                         return TCL_ERROR;
                     }
-
-                    info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-                    if ( !info ) {
-                        Tcl_SetResult(interp, (char *) "process invalid info data", TCL_STATIC);
-                        return TCL_ERROR;
-                    }
-
-                    image = *(info->matrix);
+                    image = *mat;
                     src.push_back(image);
                 }
             }
 
-            if(Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "process invalid list data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1394,52 +848,37 @@ int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *co
 
                 for (int i = 0; i < count; i++) {
                     Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
-                    if(Tcl_GetDoubleFromObj(interp, elemListPtr, &value) != TCL_OK) {
+                    if (Tcl_GetDoubleFromObj(interp, elemListPtr, &value) != TCL_OK) {
                         return TCL_ERROR;
                     }
 
-                    timesArray.push_back( (float) value);
+                    timesArray.push_back((float) value);
                 }
             }
 
             try {
-                calibrateDebevec->process(src, responseDebevec, timesArray);
-            } catch (...){
+                cvd->calibdeb->process(src, responseDebevec, timesArray);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "process failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "process malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(responseDebevec);
 
-            dstinfo->matrix = new cv::Mat(responseDebevec);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             Tcl_SetObjResult(interp, pResultStr);
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            calibrateDebevec.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->cmd_calibdeb) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_calibdeb);
+            }
 
             break;
         }
@@ -1449,10 +888,13 @@ int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *co
 }
 
 
-int CalibrateDebevec(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int CalibrateDebevec(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int samples = 70, random = 0;
     double lambda = 10.0;
     Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::CalibrateDebevec> calibdeb;
 
     if (objc != 1 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "?samples lambda random?");
@@ -1460,44 +902,61 @@ int CalibrateDebevec(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv)
     }
 
     if (objc == 4) {
-        if(Tcl_GetIntFromObj(interp, objv[1], &samples) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[1], &samples) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[2], &lambda) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[2], &lambda) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetBooleanFromObj(interp, objv[3], &random) != TCL_OK) {
+        if (Tcl_GetBooleanFromObj(interp, objv[3], &random) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        calibrateDebevec = cv::createCalibrateDebevec( samples, (float) lambda, (bool) random);
+        calibdeb = cv::createCalibrateDebevec(samples, (float) lambda, (bool) random);
 
-        if (calibrateDebevec == nullptr) {
+        if (calibdeb == nullptr) {
             Tcl_SetResult(interp, (char *) "calibrateDebevec create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "CalibrateDebevec failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-calibrateDebevec", -1 );
 
-    Tcl_CreateObjCommand(interp, "cv-calibrateDebevec", (Tcl_ObjCmdProc *) CalibrateDebevec_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    pResultStr = Tcl_NewStringObj("::cv-calibdeb", -1);
+
+    cvd->cmd_calibdeb =
+        Tcl_CreateObjCommand(interp, "::cv-calibdeb",
+            (Tcl_ObjCmdProc *) CalibrateDebevec_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) CalibrateDebevec_DESTRUCTOR);
+
+    cvd->calibdeb = calibdeb;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
 
 
-int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static void MergeDebevec_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->mergedeb) {
+        cvd->mergedeb.release();
+    }
+    cvd->cmd_mergedeb = NULL;
+}
+
+
+static int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "process",
@@ -1510,38 +969,35 @@ int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->mergedeb == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_PROCESS: {
             int count;
             cv::Mat image, dst;
-            Tcl_HashEntry *hashEntryPtr;
-            char *rhandle;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
-            int newvalue;
-            MatrixInfo *info;
-            MatrixInfo *dstinfo;
+            cv::Mat *mat, *dstmat;
             Tcl_Obj *pResultStr = NULL;
             std::vector< cv::Mat > src;
             std::vector< float > timesArray;
 
-            if( objc != 5 ){
+            if (objc != 5) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix_list times_list response");
                 return TCL_ERROR;
             }
 
-            if(Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "process invalid list data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1550,37 +1006,20 @@ int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*
                 Tcl_SetResult(interp, (char *) "process matrix_list invalid data", TCL_STATIC);
                 return TCL_ERROR;
             } else {
-                Tcl_Obj *elemListPtr = NULL;
-                Tcl_HashEntry *hashEntryPtr;
-                char *matrix_handle;
-                MatrixInfo *info;
+                Tcl_Obj *elem = NULL;
 
                 for (int i = 0; i < count; i++) {
-                    Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
-                    matrix_handle = Tcl_GetStringFromObj(elemListPtr, 0);
-                    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, matrix_handle );
-                    if( !hashEntryPtr ) {
-                        if( interp ) {
-                            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                            Tcl_AppendStringsToObj( resultObj, "process invalid MATRIX handle ",
-                                                    matrix_handle, (char *)NULL );
-                        }
-
+                    Tcl_ListObjIndex(interp, objv[2], i, &elem);
+                    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, elem);
+                    if (!mat) {
                         return TCL_ERROR;
                     }
-
-                    info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-                    if ( !info ) {
-                        Tcl_SetResult(interp, (char *) "process invalid info data", TCL_STATIC);
-                        return TCL_ERROR;
-                    }
-
-                    image = *(info->matrix);
+                    image = *mat;
                     src.push_back(image);
                 }
             }
 
-            if(Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "process invalid list data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1594,70 +1033,42 @@ int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*
 
                 for (int i = 0; i < count; i++) {
                     Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
-                    if(Tcl_GetDoubleFromObj(interp, elemListPtr, &value) != TCL_OK) {
+                    if (Tcl_GetDoubleFromObj(interp, elemListPtr, &value) != TCL_OK) {
                         return TCL_ERROR;
                     }
 
-                    timesArray.push_back( (float) value);
+                    timesArray.push_back((float) value);
                 }
             }
 
-            rhandle = Tcl_GetStringFromObj(objv[4], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, rhandle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "process invalid MATRIX handle ",
-                                            rhandle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info ) {
-                Tcl_SetResult(interp, (char *) "process invalid info data", TCL_STATIC);
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[4]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
             try {
-                mergeDebevec->process(src, dst, timesArray, *(info->matrix));
-            } catch (...){
+                cvd->mergedeb->process(src, dst, timesArray, *mat);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "process failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "process malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(dst);
 
-            dstinfo->matrix = new cv::Mat(dst);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             Tcl_SetObjResult(interp, pResultStr);
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            mergeDebevec.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->cmd_mergedeb) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_mergedeb);
+            }
 
             break;
         }
@@ -1667,39 +1078,58 @@ int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*
 }
 
 
-int MergeDebevec(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int MergeDebevec(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::MergeDebevec> mergedeb;
 
-    if (objc != 1 ) {
+    if (objc != 1) {
         Tcl_WrongNumArgs(interp, 1, objv, 0);
         return TCL_ERROR;
     }
 
     try {
-        mergeDebevec = cv::createMergeDebevec( );
+        mergedeb = cv::createMergeDebevec();
 
-        if (mergeDebevec == nullptr) {
+        if (mergedeb == nullptr) {
             Tcl_SetResult(interp, (char *) "mergeDebevec create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "MergeDebevec failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-mergeDebevec", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-mergedeb", -1);
 
-    Tcl_CreateObjCommand(interp, "cv-mergeDebevec", (Tcl_ObjCmdProc *) MergeDebevec_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_mergedeb =
+        Tcl_CreateObjCommand(interp, "::cv-mergedeb",
+            (Tcl_ObjCmdProc *) MergeDebevec_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) MergeDebevec_DESTRUCTOR);
+
+    cvd->mergedeb = mergedeb;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
 
 
-int MergeMertens_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static void MergeMertens_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->mergemer) {
+        cvd->mergemer.release();
+    }
+    cvd->cmd_mergemer = NULL;
+}
+
+
+static int MergeMertens_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "process",
@@ -1712,34 +1142,34 @@ int MergeMertens_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->mergemer == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_PROCESS: {
             int count;
             cv::Mat image, dst;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
-            int newvalue;
-            MatrixInfo *dstinfo;
+            cv::Mat *dstmat;
             Tcl_Obj *pResultStr = NULL;
             std::vector< cv::Mat > src;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix_list");
                 return TCL_ERROR;
             }
 
-            if(Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "process invalid list data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1748,74 +1178,43 @@ int MergeMertens_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*
                 Tcl_SetResult(interp, (char *) "process matrix_list invalid data", TCL_STATIC);
                 return TCL_ERROR;
             } else {
-                Tcl_Obj *elemListPtr = NULL;
-                Tcl_HashEntry *hashEntryPtr;
-                char *matrix_handle;
-                MatrixInfo *info;
+                Tcl_Obj *elem = NULL;
+                cv::Mat *mat;
 
                 for (int i = 0; i < count; i++) {
-                    Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
-                    matrix_handle = Tcl_GetStringFromObj(elemListPtr, 0);
-                    hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, matrix_handle );
-                    if( !hashEntryPtr ) {
-                        if( interp ) {
-                            Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                            Tcl_AppendStringsToObj( resultObj, "process invalid MATRIX handle ",
-                                                    matrix_handle, (char *)NULL );
-                        }
-
+                    Tcl_ListObjIndex(interp, objv[2], i, &elem);
+                    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, elem);
+                    if (!mat) {
                         return TCL_ERROR;
                     }
-
-                    info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-                    if ( !info ) {
-                        Tcl_SetResult(interp, (char *) "process invalid info data", TCL_STATIC);
-                        return TCL_ERROR;
-                    }
-
-                    image = *(info->matrix);
+                    image = *mat;
                     src.push_back(image);
                 }
             }
 
             try {
-                mergeMertens->process(src, dst);
-            } catch (...){
+                cvd->mergemer->process(src, dst);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "process failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "process malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(dst);
 
-            dstinfo->matrix = new cv::Mat(dst);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             Tcl_SetObjResult(interp, pResultStr);
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            mergeMertens.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->cmd_mergemer) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_mergemer);
+            }
 
             break;
         }
@@ -1825,56 +1224,75 @@ int MergeMertens_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*
 }
 
 
-int MergeMertens(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int MergeMertens(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     double contrast_weight = 1.0, saturation_weight = 1.0, exposure_weight = 0.0;
     Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::MergeMertens> mergemer;
 
     if (objc != 1 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "?contrast_weight saturation_weight exposure_weight?");
         return TCL_ERROR;
     }
 
-    if (objc == 4 ) {
-        if(Tcl_GetDoubleFromObj(interp, objv[1], &contrast_weight) != TCL_OK) {
+    if (objc == 4) {
+        if (Tcl_GetDoubleFromObj(interp, objv[1], &contrast_weight) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[2], &saturation_weight) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[2], &saturation_weight) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[3], &exposure_weight) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[3], &exposure_weight) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        mergeMertens = cv::createMergeMertens( (float) contrast_weight,
-                                               (float) saturation_weight,
-                                               (float) exposure_weight );
+        mergemer = cv::createMergeMertens((float) contrast_weight,
+                                          (float) saturation_weight,
+                                          (float) exposure_weight);
 
-        if (mergeMertens == nullptr) {
+        if (mergemer == nullptr) {
             Tcl_SetResult(interp, (char *) "mergeMertens create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "mergeMertens failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-mergeMertens", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-mergemer", -1);
 
-    Tcl_CreateObjCommand(interp, "cv-mergeMertens", (Tcl_ObjCmdProc *) MergeMertens_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_mergemer =
+        Tcl_CreateObjCommand(interp, "::cv-mergemer",
+            (Tcl_ObjCmdProc *) MergeMertens_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) MergeMertens_DESTRUCTOR);
+
+    cvd->mergemer = mergemer;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
 
 
-int TonemapDrago_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static void TonemapDrago_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->tonemapdra) {
+        cvd->tonemapdra.release();
+    }
+    cvd->cmd_tonemapdra = NULL;
+}
+
+
+static int TonemapDrago_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "process",
@@ -1887,90 +1305,59 @@ int TonemapDrago_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->tonemapdra == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_PROCESS: {
             cv::Mat image, dst;
-            Tcl_HashEntry *hashEntryPtr;
-            char *rhandle;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
-            int newvalue;
-            MatrixInfo *info;
-            MatrixInfo *dstinfo;
+            cv::Mat *mat, *dstmat;
             Tcl_Obj *pResultStr = NULL;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "hdrDebevec");
                 return TCL_ERROR;
             }
 
-            rhandle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, rhandle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "process invalid MATRIX handle ",
-                                            rhandle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info ) {
-                Tcl_SetResult(interp, (char *) "process invalid info data", TCL_STATIC);
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
             try {
-                tonemapDrago->process(*(info->matrix), dst);
-            } catch (...){
+                cvd->tonemapdra->process(*mat, dst);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "process failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "process malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(dst);
 
-            dstinfo->matrix = new cv::Mat(dst);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             Tcl_SetObjResult(interp, pResultStr);
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            tonemapDrago.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->cmd_tonemapdra) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_tonemapdra);
+            }
 
             break;
         }
@@ -1980,9 +1367,12 @@ int TonemapDrago_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*
 }
 
 
-int TonemapDrago(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int TonemapDrago(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     Tcl_Obj *pResultStr = NULL;
     double gamma = 1.0, saturation = 1.0, bias = 0.85;
+    cv::Ptr<cv::TonemapDrago> tonemapdra;
 
     if (objc != 1 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "?gamma saturation bias?");
@@ -1990,44 +1380,60 @@ int TonemapDrago(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     }
 
     if (objc == 4) {
-        if(Tcl_GetDoubleFromObj(interp, objv[1], &gamma) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[1], &gamma) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[2], &saturation) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[2], &saturation) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[3], &bias) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[3], &bias) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        tonemapDrago = cv::createTonemapDrago( gamma, saturation, bias);
+        tonemapdra = cv::createTonemapDrago(gamma, saturation, bias);
 
-        if (tonemapDrago == nullptr) {
+        if (tonemapdra == nullptr) {
             Tcl_SetResult(interp, (char *) "tonemapDrago create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "TonemapDrago failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-tonemapDrago", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-tonemapdra", -1);
 
-    Tcl_CreateObjCommand(interp, "cv-tonemapDrago", (Tcl_ObjCmdProc *) TonemapDrago_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_tonemapdra =
+        Tcl_CreateObjCommand(interp, "::cv-tonemapdra",
+            (Tcl_ObjCmdProc *) TonemapDrago_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) TonemapDrago_DESTRUCTOR);
+
+    cvd->tonemapdra = tonemapdra;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
 
 
-int TonemapMantiuk_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static void TonemapMantiuk_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->tonemapman) {
+        cvd->tonemapman.release();
+    }
+    cvd->cmd_tonemapman = NULL;
+}
+
+
+static int TonemapMantiuk_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "process",
@@ -2040,90 +1446,59 @@ int TonemapMantiuk_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *cons
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->tonemapman == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_PROCESS: {
             cv::Mat image, dst;
-            Tcl_HashEntry *hashEntryPtr;
-            char *rhandle;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
-            int newvalue;
-            MatrixInfo *info;
-            MatrixInfo *dstinfo;
+            cv::Mat *mat, *dstmat;
             Tcl_Obj *pResultStr = NULL;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "hdrDebevec");
                 return TCL_ERROR;
             }
 
-            rhandle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, rhandle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "process invalid MATRIX handle ",
-                                            rhandle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info ) {
-                Tcl_SetResult(interp, (char *) "process invalid info data", TCL_STATIC);
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
             try {
-                tonemapMantiuk->process(*(info->matrix), dst);
-            } catch (...){
+                cvd->tonemapman->process(*mat, dst);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "process failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "process malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(dst);
 
-            dstinfo->matrix = new cv::Mat(dst);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             Tcl_SetObjResult(interp, pResultStr);
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            tonemapMantiuk.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->cmd_tonemapman) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_tonemapman);
+            }
 
             break;
         }
@@ -2133,9 +1508,12 @@ int TonemapMantiuk_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *cons
 }
 
 
-int TonemapMantiuk(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int TonemapMantiuk(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     Tcl_Obj *pResultStr = NULL;
     double gamma = 1.0, scale = 0.7, saturation = 1.0;
+    cv::Ptr<cv::TonemapMantiuk> tonemapman;
 
     if (objc != 1 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "?gamma scale saturation?");
@@ -2143,44 +1521,60 @@ int TonemapMantiuk(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     }
 
     if (objc == 4) {
-        if(Tcl_GetDoubleFromObj(interp, objv[1], &gamma) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[1], &gamma) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[2], &scale) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[2], &scale) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[3], &saturation) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[3], &saturation) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        tonemapMantiuk = cv::createTonemapMantiuk( (float) gamma, (float) scale, (float) saturation);
+        tonemapman = cv::createTonemapMantiuk((float) gamma, (float) scale, (float) saturation);
 
-        if (tonemapMantiuk == nullptr) {
+        if (tonemapman == nullptr) {
             Tcl_SetResult(interp, (char *) "tonemapMantiuk create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "TonemapMantiuk failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-tonemapMantiuk", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-tonemapman", -1);
 
-    Tcl_CreateObjCommand(interp, "cv-tonemapMantiuk", (Tcl_ObjCmdProc *) TonemapMantiuk_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_tonemapman =
+        Tcl_CreateObjCommand(interp, "::cv-tonemapMantiuk",
+            (Tcl_ObjCmdProc *) TonemapMantiuk_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) TonemapMantiuk_DESTRUCTOR);
+
+    cvd->tonemapman = tonemapman;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
 
 
-int TonemapReinhard_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static void TonemapReinhard_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->tonemaprei) {
+        cvd->tonemaprei.release();
+    }
+    cvd->cmd_tonemaprei = NULL;
+}
+
+
+static int TonemapReinhard_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
-    char *handle;
 
     static const char *FUNC_strs[] = {
         "process",
@@ -2193,90 +1587,59 @@ int TonemapReinhard_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *con
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
-    handle = Tcl_GetStringFromObj(objv[0], 0);
+    if (cvd->tonemaprei == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_PROCESS: {
             cv::Mat image, dst;
-            Tcl_HashEntry *hashEntryPtr;
-            char *rhandle;
-            Tcl_HashEntry *newHashEntryPtr;
-            char handleName[16 + TCL_INTEGER_SPACE];
-            int newvalue;
-            MatrixInfo *info;
-            MatrixInfo *dstinfo;
+            cv::Mat *mat, *dstmat;
             Tcl_Obj *pResultStr = NULL;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "hdrDebevec");
                 return TCL_ERROR;
             }
 
-            rhandle = Tcl_GetStringFromObj(objv[2], 0);
-            hashEntryPtr = Tcl_FindHashEntry( cv_hashtblPtr, rhandle );
-            if( !hashEntryPtr ) {
-                if( interp ) {
-                    Tcl_Obj *resultObj = Tcl_GetObjResult( interp );
-                    Tcl_AppendStringsToObj( resultObj, "process invalid MATRIX handle ",
-                                            rhandle, (char *)NULL );
-                }
-
-                return TCL_ERROR;
-            }
-
-            info = (MatrixInfo *) Tcl_GetHashValue( hashEntryPtr );
-            if ( !info ) {
-                Tcl_SetResult(interp, (char *) "process invalid info data", TCL_STATIC);
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
                 return TCL_ERROR;
             }
 
             try {
-                tonemapReinhard->process(*(info->matrix), dst);
-            } catch (...){
+                cvd->tonemaprei->process(*mat, dst);
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "process failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            dstinfo = (MatrixInfo *) ckalloc(sizeof(MatrixInfo));
-            if (!dstinfo) {
-                Tcl_SetResult(interp, (char *) "process malloc MatrixInfo failed", TCL_STATIC);
-                return TCL_ERROR;
-            }
+            dstmat = new cv::Mat(dst);
 
-            dstinfo->matrix = new cv::Mat(dst);
-
-            Tcl_MutexLock(&myMutex);
-            sprintf( handleName, "cv-mat%zd", matrix_count++ );
-
-            pResultStr = Tcl_NewStringObj( handleName, -1 );
-
-            newHashEntryPtr = Tcl_CreateHashEntry(cv_hashtblPtr, handleName, &newvalue);
-            Tcl_SetHashValue(newHashEntryPtr, dstinfo);
-            Tcl_MutexUnlock(&myMutex);
-
-            Tcl_CreateObjCommand(interp, handleName, (Tcl_ObjCmdProc *) MATRIX_FUNCTION,
-                (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             Tcl_SetObjResult(interp, pResultStr);
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
-            tonemapReinhard.reset();
-            Tcl_DeleteCommand(interp, handle);
+            if (cvd->cmd_tonemaprei) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_tonemaprei);
+            }
 
             break;
         }
@@ -2286,9 +1649,12 @@ int TonemapReinhard_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *con
 }
 
 
-int TonemapReinhard(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int TonemapReinhard(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     Tcl_Obj *pResultStr = NULL;
     double gamma = 1.0, intensity = 0.0, light_adapt = 1.0, color_adapt = 0.0;
+    cv::Ptr<cv::TonemapReinhard> tonemaprei;
 
     if (objc != 1 && objc != 5) {
         Tcl_WrongNumArgs(interp, 1, objv, "?gamma intensity light_adapt color_adapt?");
@@ -2296,40 +1662,44 @@ int TonemapReinhard(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     }
 
     if (objc == 5) {
-        if(Tcl_GetDoubleFromObj(interp, objv[1], &gamma) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[1], &gamma) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[2], &intensity) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[2], &intensity) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[3], &light_adapt) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[3], &light_adapt) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[4], &color_adapt) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[4], &color_adapt) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        tonemapReinhard = cv::createTonemapReinhard( (float) gamma, (float) intensity,
-                                                     (float) light_adapt, (float) color_adapt);
+        tonemaprei = cv::createTonemapReinhard((float) gamma, (float) intensity,
+                                               (float) light_adapt, (float) color_adapt);
 
-        if (tonemapReinhard == nullptr) {
+        if (tonemaprei == nullptr) {
             Tcl_SetResult(interp, (char *) "tonemapReinhard create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "TonemapReinhard failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "cv-tonemapReinhard", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-tonemaprei", -1);
 
-    Tcl_CreateObjCommand(interp, "cv-tonemapReinhard", (Tcl_ObjCmdProc *) TonemapReinhard_FUNCTION,
-        (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+    cvd->cmd_tonemaprei =
+        Tcl_CreateObjCommand(interp, "::cv-tonemaprei",
+            (Tcl_ObjCmdProc *) TonemapReinhard_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) TonemapReinhard_DESTRUCTOR);
+
+    cvd->tonemaprei = tonemaprei;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
