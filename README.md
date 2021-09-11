@@ -1228,7 +1228,7 @@ Default is on, below is an exmaple to disable:
 
     $ export CC=g++
     $ cd tcl-opencv
-    $ ./configure --with-sift=0
+    $ ./configure --with-sift=no
     $ make
     $ make install
 
