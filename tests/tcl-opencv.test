@@ -932,7 +932,34 @@ test opencv-1.79 {StereoBM test} {*}{
     -result {0}
 }
 
-test opencv-1.80 {Close test} {*}{
+test opencv-1.80 {StereoSGBM test} {*}{
+    -body {
+        set testimg1 [::cv::imread "tests/tsukuba_l.png"]
+        set testimg2 [::cv::imread "tests/tsukuba_r.png"]
+
+        set stereoSGBM [::cv::StereoSGBM 0 48 9 0 0 0 0 0 0 0 $::cv::StereoSGBM_MODE_SGBM]
+        set disparity [$stereoSGBM compute $testimg1 $testimg2]
+        set mresult [::cv::minMaxLoc $disparity]
+        set min [lindex [lindex $mresult 0] 0]
+        set max [lindex [lindex $mresult 1] 0]
+        set disparity2 [$disparity convertTo $::cv::CV_8UC1 [expr 255/($max-$min)] 0]
+
+        #::cv::namedWindow "Display" $::cv::WINDOW_AUTOSIZE
+        #::cv::imshow "Display" $disparity2
+        #::cv::waitKey 0
+        #::cv::destroyAllWindows
+
+        $stereoSGBM close
+        $disparity close
+        $disparity2 close
+        $testimg1 close
+        $testimg2 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.81 {Close test} {*}{
     -body {
         ::cv::imwrite output.png $image
         $tmatrix1 close
