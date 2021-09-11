@@ -1549,7 +1549,7 @@ int TonemapMantiuk(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     pResultStr = Tcl_NewStringObj("::cv-tonemapman", -1);
 
     cvd->cmd_tonemapman =
-        Tcl_CreateObjCommand(interp, "::cv-tonemapMantiuk",
+        Tcl_CreateObjCommand(interp, "::cv-tonemapman",
             (Tcl_ObjCmdProc *) TonemapMantiuk_FUNCTION,
             cd, (Tcl_CmdDeleteProc *) TonemapMantiuk_DESTRUCTOR);
 
