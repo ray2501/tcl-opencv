@@ -347,15 +347,15 @@ You can use MATRIX `empty` to check this.
     StereoBM getPreFilterCap
     StereoBM getPreFilterSize
     StereoBM getPreFilterType
+    StereoBM getSmallerBlockSize
     StereoBM getTextureThreshold
     StereoBM getUniquenessRatio
-    StereoBM getSmallerBlockSize
     StereoBM setPreFilterCap value
     StereoBM setPreFilterSize value
     StereoBM setPreFilterType value
+    StereoBM setSmallerBlockSize value
     StereoBM setTextureThreshold value
     StereoBM setUniquenessRatio value
-    StereoBM setSmallerBlockSize value
     StereoBM close
 
 Please notice, StereoBM command will only have 1 instance.
@@ -1221,6 +1221,16 @@ below is an example:
     $ make
     $ make install
 
+SIFT (Scale-Invariant Feature Transform) algorithm has been moved to
+the OpenCV main repository in OpenCV 4.4.0 because its patent expired.
+You can use `--with-sift` flag to enable/disable SIFT related code.
+Default is on, below is an exmaple to disable:
+
+    $ export CC=g++
+    $ cd tcl-opencv
+    $ ./configure --with-sift=0
+    $ make
+    $ make install
 
 Windows BUILD
 =====
