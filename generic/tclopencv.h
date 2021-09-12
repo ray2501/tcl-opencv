@@ -253,6 +253,8 @@ MODULE_SCOPE int Stitcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
  */
 MODULE_SCOPE int CascadeClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
+MODULE_SCOPE int HOGDescriptor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+
 #ifdef TCL_USE_OPENCV4
 MODULE_SCOPE int QRCodeDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
@@ -279,6 +281,7 @@ typedef enum {
     OPENCV_VIDEOWRITER,
     OPENCV_TERMCRITERIA,
     OPENCV_ODETECT,
+    OPENCV_OOBJHOG,
 #ifdef TCL_USE_OPENCV4
     OPENCV_NDETECT,
     OPENCV_QDETECT,
@@ -360,6 +363,7 @@ MODULE_SCOPE void *Opencv_FindHandle(void *cd, Tcl_Interp *interp, Opencv_Type t
 
 MODULE_SCOPE void CallBackFunc(int event, int x, int y, int flags, void *userdata);
 MODULE_SCOPE int CascadeClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #ifdef TCL_USE_OPENCV4
 MODULE_SCOPE int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

@@ -62,6 +62,11 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
                 delete cas;
                 break;
             }
+            case OPENCV_OOBJHOG: {
+                cv::HOGDescriptor *hog = (cv::HOGDescriptor *) cvo->obj;
+                delete hog;
+                break;
+            }
 #ifdef TCL_USE_OPENCV4
             case OPENCV_NDETECT: {
                 cv::dnn::Net *net = (cv::dnn::Net *) cvo->obj;
@@ -216,6 +221,11 @@ Opencv_DESTRUCTOR(ClientData cd)
         delete cas;
         break;
     }
+    case OPENCV_OOBJHOG: {
+        cv::HOGDescriptor *hog = (cv::HOGDescriptor *) cvo->obj;
+        delete hog;
+        break;
+    }
 #ifdef TCL_USE_OPENCV4
     case OPENCV_NDETECT: {
         cv::dnn::Net *net = (cv::dnn::Net *) cvo->obj;
@@ -271,6 +281,10 @@ Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj)
     case OPENCV_ODETECT:
         prefix = "cv-odetect";
         proc = CascadeClassifier_FUNCTION;
+        break;
+    case OPENCV_OOBJHOG:
+        prefix = "cv-oobjhog";
+        proc = HOGDescriptor_FUNCTION;
         break;
 #ifdef TCL_USE_OPENCV4
     case OPENCV_NDETECT:
@@ -1150,6 +1164,10 @@ Opencv_Init(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp, "::" NS "::CascadeClassifier",
         (Tcl_ObjCmdProc *) CascadeClassifier,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::HOGDescriptor",
+        (Tcl_ObjCmdProc *) HOGDescriptor,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
 #ifdef TCL_USE_OPENCV4

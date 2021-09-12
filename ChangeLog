@@ -1,5 +1,6 @@
 2021-09-12 Danilo Chang
 
+	* Implement command: HOGDescriptor
 	* Implement command: countNonZero
 	* Implement command: fitEllipse, moments
 

@@ -468,6 +468,10 @@ Please notice, Stitcher command will only have 1 instance.
     CascadeClassifier detectMultiScale matrix ?scaleFactor minNeighbors minWidth minHeight maxWidth maxHeight?
     CascadeClassifier close
 
+    ::cv::HOGDescriptor winSize_width winSize_height blockSize_width blockStride_width blockStride_height blockSize_height cellSize_width cellSize_height nbins ?derivAperture winSigma L2HysThreshold gammaCorrection nlevels signedGradient?
+    HOGDescriptor detectMultiScale matrix ?hitThreshold winStride_width winStride_height padding_width padding_height scale finalThreshold useMeanshiftGrouping?
+    HOGDescriptor close
+
     :cv::QRCodeDetector
     QRCodeDetector detect matrix
     QRCodeDetector detectAndDecode matrix
@@ -2734,6 +2738,80 @@ QRCodeDetector example -
     } on error {em} {
         puts $em
     }
+
+People detect by using HOGDescriptor -
+
+    package require opencv
+
+    # The example file can be downloaded from:
+    # https://github.com/opencv/opencv/blob/master/samples/data/vtest.avi
+
+    set filename "vtest.avi"
+    set v [::cv::VideoCapture file $filename]
+    if {[$v isOpened]==0} {
+        puts "Open Video file $filename failed."
+        exit
+    }
+
+    set hog [cv::HOGDescriptor 64 128 16 16 8 8 8 8 9]
+    set hog_d [cv::HOGDescriptor 48 96 16 16 8 8 8 8 9 1 -1 0.2 0 64 0]
+    set mode 0
+
+    while {[$v isOpened]==1} {
+        try {
+            set frame [$v read]
+
+            set t [::cv::getTickCount]
+            if {$mode == 0} {
+                set rects [$hog detectMultiScale $frame 0 8 8 0 0 1.05 2 0]
+            } else {
+                set rects [$hog_d detectMultiScale $frame 0 8 8 0 0 1.05 2 1]
+            }
+            set t [expr [cv::getTickCount] - $t]
+
+            if {$mode == 0} {
+                set buf "Mode: Default ||| FPS: [format "%0.1f" [expr [::cv::getTickFrequency] / $t]]"
+            } else {
+                set buf "Mode: Daimler ||| FPS: [format "%0.1f" [expr [::cv::getTickFrequency] / $t]]"
+            }
+            ::cv::putText $frame $buf 10 30 $::cv::FONT_HERSHEY_PLAIN 2.0 [list 0 0 255 0] 2
+            set length [llength $rects]
+            for {set i 0} {$i < $length} {incr i} {
+                set rlist [lindex $rects $i]
+
+                # Slightly shrink the rectangles to get a nicer output.
+                set width [lindex $rlist 2]
+                set height [lindex $rlist 3]
+                set x1 [expr int([lindex $rlist 0] + $width * 0.1)]
+                set y1 [expr int([lindex $rlist 1] + $height * 0.07)]
+                set x2 [expr int($x1 + $width * 0.8)]
+                set y2 [expr int($y1 + $height * 0.8)]
+                set color [list 0 255 0 0]
+                ::cv::rectangle $frame $x1 $y1 $x2 $y2 $color 2
+            }
+
+            ::cv::imshow "People detector" $frame
+
+            $frame close
+            set key [::cv::waitKey 1]
+            if {$key==[scan "q" %c] || $key == 27} {
+                break
+            } elseif {$key == [scan " " %c]} {
+                if {$mode == 0} {
+                    set mode 1
+                } else {
+                    set mode 0
+                }
+            }
+        } on error {em} {
+            puts $em
+            break
+        }
+    }
+
+    $hog close
+    $hog_d close
+    ::cv::destroyAllWindows
 
 The following program shows how to detect faces in an image (using CascadeClassifier).
 
