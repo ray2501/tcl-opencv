@@ -2804,7 +2804,6 @@ People detect by using HOGDescriptor -
                 }
             }
         } on error {em} {
-            puts $em
             break
         }
     }
