@@ -145,6 +145,7 @@ MODULE_SCOPE int fitEllipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 MODULE_SCOPE int boxPoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int minEnclosingCircle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int convexHull(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int moments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 MODULE_SCOPE int arrowedLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int circle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

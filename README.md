@@ -169,6 +169,7 @@ Implement commands
     ::cv::boxPoints contour
     ::cv::minEnclosingCircle contour
     ::cv::convexHull contour ?clockwise?
+    ::cv::moments contour
 
     ::cv::arrowedLine matrix point_x1 point_y1 point_x2 point_y2 color_list thickness ?lineType shift tipLength?
     ::cv::circle matrix center_x center_y radius color_list thickness ?lineType shift?
