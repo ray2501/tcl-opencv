@@ -70,6 +70,7 @@ Implement commands
     ::cv::cartToPolar matrix1 matrix_2 ?angleInDegrees?
     ::cv::convertScaleAbs matrix alpha beta
     ::cv::copyMakeBorder matrix top bottom left right borderType ?color_list?
+    ::cv::countNonZero matrix
     ::cv::divide matrix_1 matrix_2 ?scale?
     ::cv::exp matrix
     ::cv::flip matrix flipCode

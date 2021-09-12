@@ -515,6 +515,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_copyMakeBorder,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::countNonZero",
+        (Tcl_ObjCmdProc *) mat_countNonZero,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::exp",
         (Tcl_ObjCmdProc *) mat_exp,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
