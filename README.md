@@ -2739,7 +2739,7 @@ QRCodeDetector example -
         puts $em
     }
 
-People detect by using HOGDescriptor -
+People detection by using HOGDescriptor -
 
     package require opencv
 
