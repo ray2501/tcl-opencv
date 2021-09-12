@@ -165,6 +165,7 @@ Implement commands
     ::cv::contourArea contour oriented
     ::cv::boundingRect contour
     ::cv::minAreaRect contour
+    ::cv::fitEllipse contour
     ::cv::boxPoints contour
     ::cv::minEnclosingCircle contour
     ::cv::convexHull contour ?clockwise?
@@ -1940,14 +1941,21 @@ Contours test -
         set bounding_rect [list]
         set mycircle [list]
         set myrect [list]
+        set myellipse [list]
+        set isellipse 1
         for {set i 0} {$i < $length} {incr i} {
             set value [::cv::contourArea [lindex $contours $i] 0]
             if {$value > $max} {
                 set max $value
                 set maxindex $i
-                set bounding_rect [::cv::boundingRect [lindex $contours $i]]
-                set mycircle [::cv::minEnclosingCircle [lindex $contours $i]]
-                set myrect [::cv::minAreaRect [lindex $contours $i]]
+                set contour [lindex $contours $i]
+                set bounding_rect [::cv::boundingRect $contour]
+                set mycircle [::cv::minEnclosingCircle $contour]
+
+                if {[catch {set myellipse [::cv::fitEllipse $contour]}]} {
+                    set myrect [::cv::minAreaRect $contour]
+                    set isellipse 0
+                }
             }
         }
 
@@ -1966,9 +1974,19 @@ Contours test -
         set color [list 0 255 255 0]
         ::cv::circle $image1 $x1 $y1 $r $color 1
 
-        set box [::cv::boxPoints $myrect]
         set color [list 255 0 255 0]
-        ::cv::drawContours $image1 [list $box] -1 $color 3 $::cv::LINE_8 2 0 0
+        if {$isellipse} {
+            set x1 [lindex $myellipse 0]
+            set y1 [lindex $myellipse 1]
+            set w [expr [lindex $myellipse 2]/2]
+            set h [expr [lindex $myellipse 3]/2]
+            set r [lindex $myellipse 4]
+
+            ::cv::ellipse $image1 $x1 $y1 $w $h $r 0 360 $color 3
+        } else {
+            set box [::cv::boxPoints $myrect]
+            ::cv::drawContours $image1 [list $box] -1 $color 3 $::cv::LINE_8 2 0 0
+        }
 
         ::cv::namedWindow "Display Image 3" $::cv::WINDOW_AUTOSIZE
         ::cv::imshow "Display Image 3" $image1

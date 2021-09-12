@@ -3203,6 +3203,7 @@ int SIFT(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 #endif
 
+
 static void BFMatcher_DESTRUCTOR(void *cd)
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;
@@ -3628,22 +3629,22 @@ int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
                 }
             }
         } else if (algo == 1) {
-                if(Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-                    Tcl_SetResult(interp, (char *) "FlannBasedMatcher invalid list data", TCL_STATIC);
+            if(Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+                Tcl_SetResult(interp, (char *) "FlannBasedMatcher invalid list data", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            if (count != 1) {
+                Tcl_SetResult(interp, (char *) "FlannBasedMatcher invalid indexParams data", TCL_STATIC);
+                return TCL_ERROR;
+            } else {
+                Tcl_Obj *elemListPtr = NULL;
+
+                Tcl_ListObjIndex(interp, objv[2], 0, &elemListPtr);
+                if(Tcl_GetIntFromObj(interp, elemListPtr, &trees) != TCL_OK) {
                     return TCL_ERROR;
                 }
-
-                if (count != 1) {
-                    Tcl_SetResult(interp, (char *) "FlannBasedMatcher invalid indexParams data", TCL_STATIC);
-                    return TCL_ERROR;
-                } else {
-                    Tcl_Obj *elemListPtr = NULL;
-
-                    Tcl_ListObjIndex(interp, objv[2], 0, &elemListPtr);
-                    if(Tcl_GetIntFromObj(interp, elemListPtr, &trees) != TCL_OK) {
-                        return TCL_ERROR;
-                    }
-                }
+            }
         }
     }
 
