@@ -3289,6 +3289,60 @@ int mat_randu(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_reduce(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int dim = 0, rtype = 0, dtype = -1;
+    cv::Mat image;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *mat, *dstmat;
+
+    if (objc != 4 && objc != 5) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix dim rtype ?dtype?");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &dim) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &rtype) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    /*
+     * When negative, the output vector will have the same type as the input
+     * matrix. In case of REDUCE_MAX and REDUCE_MIN , the output image should
+     * have the same type as the source one. In case of REDUCE_SUM and
+     * REDUCE_AVG, the output may have a larger element bit-depth to preserve
+     * accuracy.
+     */
+    if (objc == 5) {
+        if (Tcl_GetIntFromObj(interp, objv[4], &dtype) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::reduce(*mat, image, dim, rtype, dtype);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "reduce failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    dstmat = new cv::Mat(image);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int mat_sqrt(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;

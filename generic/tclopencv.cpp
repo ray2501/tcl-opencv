@@ -709,6 +709,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_randu,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::reduce",
+        (Tcl_ObjCmdProc *) mat_reduce,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::sqrt",
         (Tcl_ObjCmdProc *) mat_sqrt,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
@@ -3405,6 +3409,26 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::CMP_NE", -1);
     setupValue = Tcl_NewIntObj(cv::CMP_NE);
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * Reduce Types
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::REDUCE_SUM", -1);
+    setupValue = Tcl_NewIntObj(cv::REDUCE_SUM);
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::REDUCE_AVG", -1);
+    setupValue = Tcl_NewIntObj(cv::REDUCE_AVG);
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::REDUCE_MAX", -1);
+    setupValue = Tcl_NewIntObj(cv::REDUCE_MAX);
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::REDUCE_MIN", -1);
+    setupValue = Tcl_NewIntObj(cv::REDUCE_MIN);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*

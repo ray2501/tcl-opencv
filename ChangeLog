@@ -2,7 +2,7 @@
 
 	* Re-design randu command for more than 1 channel case
 	* Implement command: randn
-	* Implement command: compare, trace
+	* Implement command: compare, trace, reduce
 	* Implement command: resizeWindow
 	* Merge code from Christian (Refactoring)
 

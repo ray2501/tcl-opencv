@@ -92,6 +92,7 @@ Implement commands
     ::cv::pow matrix power
     ::cv::randn matrix mean_list stddev_list
     ::cv::randu matrix min_list max_list
+    ::cv::reduce matrix dim rtype ?dtype?
     ::cv::sqrt matrix
     ::cv::subtract matrix_1 matrix_2
     ::cv::sum matrix
@@ -1054,6 +1055,13 @@ Line Types -
     ::cv::CMP_LT
     ::cv::CMP_LE
     ::cv::CMP_NE
+
+`::cv::reduce` rtype -
+
+    ::cv::REDUCE_SUM
+    ::cv::REDUCE_AVG
+    ::cv::REDUCE_MAX
+    ::cv::REDUCE_MIN
 
 `MATRIX inv` method and
 `::cv::getPerspectiveTransform` command solveMethod -
