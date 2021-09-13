@@ -97,6 +97,11 @@ AC_ARG_WITH(opencv4,
 AC_MSG_RESULT([$tcl_ok])
 if test "$tcl_ok" = "yes"; then
     TEA_ADD_CFLAGS([-DTCL_USE_OPENCV4=1])
+    TEA_ADD_CFLAGS([`pkg-config opencv4 --cflags`])
+    TEA_ADD_LIBS([`pkg-config opencv4 --libs`])
+else
+    TEA_ADD_CFLAGS([`pkg-config opencv --cflags`])
+    TEA_ADD_LIBS([`pkg-config opencv --libs`])
 fi
 AC_MSG_CHECKING([whether to use sift algorithm])
 AC_ARG_WITH(sift,
@@ -109,8 +114,6 @@ fi
 if test "$use_tkphoto" = "yes"; then
     TEA_ADD_CFLAGS([-DTCL_USE_TKPHOTO=1])
 fi
-TEA_ADD_CFLAGS([`pkg-config opencv4 --cflags`])
-TEA_ADD_LIBS([`pkg-config opencv4 --libs`])
 TEA_ADD_STUB_SOURCES([])
 TEA_ADD_TCL_SOURCES([])
 

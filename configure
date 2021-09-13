@@ -5223,6 +5223,37 @@ if test "$tcl_ok" = "yes"; then
     PKG_CFLAGS="$PKG_CFLAGS -DTCL_USE_OPENCV4=1"
 
 
+
+    PKG_CFLAGS="$PKG_CFLAGS `pkg-config opencv4 --cflags`"
+
+
+
+    vars="`pkg-config opencv4 --libs`"
+    for i in $vars; do
+	if test "${TEA_PLATFORM}" = "windows" -a "$GCC" = "yes" ; then
+	    # Convert foo.lib to -lfoo for GCC.  No-op if not *.lib
+	    i=`echo "$i" | sed -e 's/^\([^-].*\)\.[lL][iI][bB]$/-l\1/'`
+	fi
+	PKG_LIBS="$PKG_LIBS $i"
+    done
+
+
+else
+
+    PKG_CFLAGS="$PKG_CFLAGS `pkg-config opencv --cflags`"
+
+
+
+    vars="`pkg-config opencv --libs`"
+    for i in $vars; do
+	if test "${TEA_PLATFORM}" = "windows" -a "$GCC" = "yes" ; then
+	    # Convert foo.lib to -lfoo for GCC.  No-op if not *.lib
+	    i=`echo "$i" | sed -e 's/^\([^-].*\)\.[lL][iI][bB]$/-l\1/'`
+	fi
+	PKG_LIBS="$PKG_LIBS $i"
+    done
+
+
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use sift algorithm" >&5
 $as_echo_n "checking whether to use sift algorithm... " >&6; }
@@ -5248,21 +5279,6 @@ if test "$use_tkphoto" = "yes"; then
 
 
 fi
-
-    PKG_CFLAGS="$PKG_CFLAGS `pkg-config opencv4 --cflags`"
-
-
-
-    vars="`pkg-config opencv4 --libs`"
-    for i in $vars; do
-	if test "${TEA_PLATFORM}" = "windows" -a "$GCC" = "yes" ; then
-	    # Convert foo.lib to -lfoo for GCC.  No-op if not *.lib
-	    i=`echo "$i" | sed -e 's/^\([^-].*\)\.[lL][iI][bB]$/-l\1/'`
-	fi
-	PKG_LIBS="$PKG_LIBS $i"
-    done
-
-
 
     vars=""
     for i in $vars; do
