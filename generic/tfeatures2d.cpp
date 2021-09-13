@@ -95,8 +95,8 @@ int drawKeypoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     /*
-     * If users give the handle to "None", then setup a nodstimage to indicate
-     * this thing. This flag is used to decide the argument.
+     * If users give the handle to "None", then setup a nodstimage flag to
+     * indicate this thing. This flag is used to decide the argument.
      */
     if (strcmp(Tcl_GetString(objv[3]), "None") == 0) {
         nodstimage = 1;

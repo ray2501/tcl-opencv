@@ -3316,7 +3316,7 @@ int mat_reduce(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     /*
      * When negative, the output vector will have the same type as the input
-     * matrix. In case of REDUCE_MAX and REDUCE_MIN , the output image should
+     * matrix. In case of REDUCE_MAX and REDUCE_MIN, the output image should
      * have the same type as the source one. In case of REDUCE_SUM and
      * REDUCE_AVG, the output may have a larger element bit-depth to preserve
      * accuracy.
