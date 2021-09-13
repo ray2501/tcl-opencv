@@ -2734,6 +2734,7 @@ QRCodeDetector example -
 
         $box close
         $code close
+        $qrdetect close
         $img close
     } on error {em} {
         puts $em
@@ -2810,6 +2811,7 @@ People detection by using HOGDescriptor -
 
     $hog close
     $hog_d close
+    $v close
     ::cv::destroyAllWindows
 
 The following program shows how to detect faces in an image (using CascadeClassifier).
