@@ -959,7 +959,26 @@ test opencv-1.80 {StereoSGBM test} {*}{
     -result {0}
 }
 
-test opencv-1.81 {Close test} {*}{
+test opencv-1.81 {Compare test} {*}{
+    -body {
+        set testimg1 [::cv::imread "tests/tsukuba_l.png"]
+        set testimg2 [::cv::imread "tests/tsukuba_r.png"]
+        set testimg3 [::cv::compare $testimg1 $testimg2 $cv::CMP_NE]
+
+        #::cv::namedWindow "Display" $::cv::WINDOW_AUTOSIZE
+        #::cv::imshow "Display" $testimg3
+        #::cv::waitKey 0
+        #::cv::destroyAllWindows
+
+        $testimg1 close
+        $testimg2 close
+        $testimg3 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.82 {Close test} {*}{
     -body {
         ::cv::imwrite output.png $image
         $tmatrix1 close

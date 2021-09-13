@@ -63,11 +63,12 @@ Implement commands
     ::cv::absdiff matrix_1 matrix_2
     ::cv::add matrix_1 matrix_2
     ::cv::addWeighted matrix_1 alpha matrix_2 beta gamma
-    ::cv::bitwise_and matrix1 matrix_2 ?mask?
-    ::cv::bitwise_or matrix1 matrix_2 ?mask?
-    ::cv::bitwise_xor matrix1 matrix_2 ?mask?
+    ::cv::bitwise_and matrix_1 matrix_2 ?mask?
+    ::cv::bitwise_or matrix_1 matrix_2 ?mask?
+    ::cv::bitwise_xor matrix_1 matrix_2 ?mask?
     ::cv::bitwise_not matrix ?mask?
-    ::cv::cartToPolar matrix1 matrix_2 ?angleInDegrees?
+    ::cv::cartToPolar matrix_1 matrix_2 ?angleInDegrees?
+    ::cv::compare matrix_1 matrix_2 cmpop
     ::cv::convertScaleAbs matrix alpha beta
     ::cv::copyMakeBorder matrix top bottom left right borderType ?color_list?
     ::cv::countNonZero matrix
@@ -1042,6 +1043,15 @@ Line Types -
     ::cv::INTER_MAX
     ::cv::WARP_FILL_OUTLIERS
     ::cv::WARP_INVERSE_MAP
+
+`::cv::compare` cmpop -
+
+    ::cv::CMP_EQ
+    ::cv::CMP_GT
+    ::cv::CMP_GE
+    ::cv::CMP_LT
+    ::cv::CMP_LE
+    ::cv::CMP_NE
 
 `MATRIX inv` method and
 `::cv::getPerspectiveTransform` command solveMethod -

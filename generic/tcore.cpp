@@ -2098,6 +2098,48 @@ int mat_cartToPolar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_compare(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int cmpop = 0;
+    cv::Mat image;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *mat1, *mat2, *dstmat;
+
+    if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix_1 matrix_2 cmpop");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &cmpop) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::compare(*mat1, *mat2, image, cmpop);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "compare failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    dstmat = new cv::Mat(image);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int mat_convertScaleAbs(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double alpha = 1, beta = 0;

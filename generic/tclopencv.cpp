@@ -613,6 +613,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_cartToPolar,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::compare",
+        (Tcl_ObjCmdProc *) mat_compare,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::convertScaleAbs",
         (Tcl_ObjCmdProc *) mat_convertScaleAbs,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
@@ -3365,6 +3369,34 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::WARP_INVERSE_MAP", -1);
     setupValue = Tcl_NewIntObj(cv::WARP_INVERSE_MAP);
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * Cmp Types
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::CMP_EQ", -1);
+    setupValue = Tcl_NewIntObj(cv::CMP_EQ);
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::CMP_GT", -1);
+    setupValue = Tcl_NewIntObj(cv::CMP_GT);
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::CMP_GE", -1);
+    setupValue = Tcl_NewIntObj(cv::CMP_GE);
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::CMP_LT", -1);
+    setupValue = Tcl_NewIntObj(cv::CMP_LT);
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::CMP_LE", -1);
+    setupValue = Tcl_NewIntObj(cv::CMP_LE);
+    Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::CMP_NE", -1);
+    setupValue = Tcl_NewIntObj(cv::CMP_NE);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*

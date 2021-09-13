@@ -1,5 +1,6 @@
 2021-09-13 Danilo Chang
 
+	* Implement command: compare
 	* Implement command: resizeWindow
 	* Merge code from Christian (Refactoring)
 
