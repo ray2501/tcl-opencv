@@ -12,6 +12,10 @@ extern "C" {
 
 #include "tclopencv.h"
 
+#ifdef TCL_USE_TKPHOTO
+#include <tk.h>
+#endif
+
 
 static void
 InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
@@ -381,6 +385,85 @@ Opencv_Info(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+#ifdef TCL_USE_TKPHOTO
+int Opencv_CheckForTk(void *cd, Tcl_Interp *interp)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->tkCheck < 0) {
+        Tcl_SetResult(interp, (char *) "package Tk not available", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    if (cvd->tkCheck == 0) {
+        if (Tcl_PkgPresent(interp, "Tk", "8.6", 0) == NULL) {
+            return TCL_ERROR;
+        }
+#ifdef USE_TK_STUBS
+        if (Tk_InitStubs(interp, "8.6", 0) == NULL) {
+            cvd->tkCheck = -1;
+            return TCL_ERROR;
+        }
+#else
+        if (Tcl_PkgRequire(interp, "Tk", "8.6", 0) == NULL) {
+            cvd->tkCheck = -1;
+            return TCL_ERROR;
+        }
+#endif
+        cvd->tkCheck = 1;
+    }
+    if (Tk_MainWindow(interp) == NULL) {
+        Tcl_SetResult(interp, (char *) "application has been destroyed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+
+static int
+Opencv_FromPhoto(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    char *name;
+    Tk_PhotoHandle photo;
+    Tk_PhotoImageBlock blk;
+    Tcl_Obj *pResultStr;
+    cv::Mat img1, img2, *mat;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "photo");
+        return TCL_ERROR;
+    }
+
+    if (Opencv_CheckForTk(cd, interp) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    name = Tcl_GetString(objv[1]);
+    photo = Tk_FindPhoto(interp, name);
+    if (photo == NULL) {
+        Tcl_SetObjResult(interp, Tcl_ObjPrintf("can't use \"%s\": not a photo image", name));
+        return TCL_ERROR;
+    }
+    Tk_PhotoGetImage(photo, &blk);
+    try {
+        /* Tk always returns RGBA layout */
+        img1 = cv::Mat(blk.height, blk.width, CV_8UC4, blk.pixelPtr, cv::Mat::AUTO_STEP);
+        /* But OpenCV prefers BGRA layout */
+        cv::cvtColor(img1, img2, cv::COLOR_RGBA2BGRA);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "fromPhoto failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    if (img2.empty() || !img2.data) {
+        Tcl_SetResult(interp, (char *) "fromPhoto no data", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    mat = new cv::Mat(img2);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+#endif /* TCL_USE_TKPHOTO */
+
+
 /*
  *----------------------------------------------------------------------
  *
@@ -409,9 +492,15 @@ Opencv_Init(Tcl_Interp *interp)
     Opencv_Data *cvd;
     int i;
 
+#ifdef USE_TCL_STUBS
     if (Tcl_InitStubs(interp, "8.6", 0) == NULL) {
         return TCL_ERROR;
     }
+#else
+    if (Tcl_PkgRequire(interp, "Tcl", "8.6", 0) == NULL) {
+        return TCL_ERROR;
+    }
+#endif
     if (Tcl_PkgProvide(interp, PACKAGE_NAME, PACKAGE_VERSION) != TCL_OK) {
         return TCL_ERROR;
     }
@@ -426,6 +515,9 @@ Opencv_Init(Tcl_Interp *interp)
     for (i = 0; i < OPENCV_MAXTYPE; i++) {
         Tcl_InitHashTable(&cvd->tbl[i], TCL_STRING_KEYS);
     }
+#ifdef TCL_USE_TKPHOTO
+    cvd->tkCheck = 0;
+#endif
 
     Tcl_CallWhenDeleted(interp, InterpDelProc, (ClientData)cvd);
 
@@ -644,6 +736,12 @@ Opencv_Init(Tcl_Interp *interp)
     Tcl_CreateObjCommand(interp, "::" NS "::TermCriteria",
         (Tcl_ObjCmdProc *) TermCriteria,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+#ifdef TCL_USE_TKPHOTO
+    Tcl_CreateObjCommand(interp, "::" NS "::fromPhoto",
+        (Tcl_ObjCmdProc *) Opencv_FromPhoto,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+#endif
 
     /*
      * For imgcodecs
@@ -3463,20 +3561,20 @@ Opencv_Init(Tcl_Interp *interp)
      * AgastFeatureDetector Detector type
      */
 
-    strValue = Tcl_NewStringObj( "::" NS "::DetectorType_AGAST_5_8", -1 );
-    setupValue = Tcl_NewIntObj( cv::AgastFeatureDetector::AGAST_5_8 );
+    strValue = Tcl_NewStringObj("::" NS "::DetectorType_AGAST_5_8", -1);
+    setupValue = Tcl_NewIntObj(cv::AgastFeatureDetector::AGAST_5_8);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj( "::" NS "::DetectorType_AGAST_7_12d", -1 );
-    setupValue = Tcl_NewIntObj( cv::AgastFeatureDetector::AGAST_7_12d );
+    strValue = Tcl_NewStringObj("::" NS "::DetectorType_AGAST_7_12d", -1);
+    setupValue = Tcl_NewIntObj(cv::AgastFeatureDetector::AGAST_7_12d);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj( "::" NS "::DetectorType_AGAST_7_12s", -1 );
-    setupValue = Tcl_NewIntObj( cv::AgastFeatureDetector::AGAST_7_12s );
+    strValue = Tcl_NewStringObj("::" NS "::DetectorType_AGAST_7_12s", -1);
+    setupValue = Tcl_NewIntObj(cv::AgastFeatureDetector::AGAST_7_12s);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj( "::" NS "::DetectorType_OAST_9_16", -1 );
-    setupValue = Tcl_NewIntObj( cv::AgastFeatureDetector::OAST_9_16 );
+    strValue = Tcl_NewStringObj("::" NS "::DetectorType_OAST_9_16", -1);
+    setupValue = Tcl_NewIntObj(cv::AgastFeatureDetector::OAST_9_16);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*
@@ -3503,41 +3601,43 @@ Opencv_Init(Tcl_Interp *interp)
      * AKAZE descriptor type
      */
 
-    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DESCRIPTOR_KAZE_UPRIGHT", -1 );
-    setupValue = Tcl_NewIntObj( cv::AKAZE::DESCRIPTOR_KAZE_UPRIGHT );
+    strValue = Tcl_NewStringObj("::" NS "::AKAZE_DESCRIPTOR_KAZE_UPRIGHT", -1);
+    setupValue = Tcl_NewIntObj(cv::AKAZE::DESCRIPTOR_KAZE_UPRIGHT);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DESCRIPTOR_KAZE", -1 );
-    setupValue = Tcl_NewIntObj( cv::AKAZE::DESCRIPTOR_KAZE  );
+    strValue = Tcl_NewStringObj("::" NS "::AKAZE_DESCRIPTOR_KAZE", -1);
+    setupValue = Tcl_NewIntObj(cv::AKAZE::DESCRIPTOR_KAZE);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DESCRIPTOR_MLDB_UPRIGHT", -1 );
-    setupValue = Tcl_NewIntObj( cv::AKAZE::DESCRIPTOR_MLDB_UPRIGHT );
+    strValue = Tcl_NewStringObj("::" NS "::AKAZE_DESCRIPTOR_MLDB_UPRIGHT", -1);
+    setupValue = Tcl_NewIntObj(cv::AKAZE::DESCRIPTOR_MLDB_UPRIGHT);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DESCRIPTOR_MLDB", -1 );
-    setupValue = Tcl_NewIntObj( cv::AKAZE::DESCRIPTOR_MLDB  );
+    strValue = Tcl_NewStringObj("::" NS "::AKAZE_DESCRIPTOR_MLDB", -1);
+    setupValue = Tcl_NewIntObj(cv::AKAZE::DESCRIPTOR_MLDB);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*
      * AKAZE Diffusivity type
      */
 
-    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DIFF_PM_G1", -1 );
-    setupValue = Tcl_NewIntObj( cv::KAZE::DiffusivityType::DIFF_PM_G1 );
+#ifdef TCL_USE_OPENCV4
+    strValue = Tcl_NewStringObj("::" NS "::AKAZE_DIFF_PM_G1", -1);
+    setupValue = Tcl_NewIntObj(cv::KAZE::DiffusivityType::DIFF_PM_G1);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DIFF_PM_G2", -1 );
-    setupValue = Tcl_NewIntObj( cv::KAZE::DiffusivityType::DIFF_PM_G2  );
+    strValue = Tcl_NewStringObj("::" NS "::AKAZE_DIFF_PM_G2", -1);
+    setupValue = Tcl_NewIntObj(cv::KAZE::DiffusivityType::DIFF_PM_G2);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DIFF_WEICKERT", -1 );
-    setupValue = Tcl_NewIntObj( cv::KAZE::DiffusivityType::DIFF_WEICKERT );
+    strValue = Tcl_NewStringObj("::" NS "::AKAZE_DIFF_WEICKERT", -1);
+    setupValue = Tcl_NewIntObj(cv::KAZE::DiffusivityType::DIFF_WEICKERT);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj( "::" NS "::AKAZE_DIFF_CHARBONNIER", -1 );
-    setupValue = Tcl_NewIntObj( cv::KAZE::DiffusivityType::DIFF_CHARBONNIER  );
+    strValue = Tcl_NewStringObj("::" NS "::AKAZE_DIFF_CHARBONNIER", -1);
+    setupValue = Tcl_NewIntObj(cv::KAZE::DiffusivityType::DIFF_CHARBONNIER);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+#endif
 
     /*
      * drawKeypoints DrawMatches Flags
@@ -3580,33 +3680,35 @@ Opencv_Init(Tcl_Interp *interp)
      * StereoBM PreFilter type
      */
 
-    strValue = Tcl_NewStringObj( "::" NS "::PREFILTER_NORMALIZED_RESPONSE", -1 );
-    setupValue = Tcl_NewIntObj( cv::StereoBM::PREFILTER_NORMALIZED_RESPONSE );
+    strValue = Tcl_NewStringObj("::" NS "::PREFILTER_NORMALIZED_RESPONSE", -1);
+    setupValue = Tcl_NewIntObj(cv::StereoBM::PREFILTER_NORMALIZED_RESPONSE);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj( "::" NS "::PREFILTER_XSOBEL", -1 );
-    setupValue = Tcl_NewIntObj( cv::StereoBM::PREFILTER_XSOBEL );
+    strValue = Tcl_NewStringObj("::" NS "::PREFILTER_XSOBEL", -1);
+    setupValue = Tcl_NewIntObj(cv::StereoBM::PREFILTER_XSOBEL);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*
      * StereoSGBM mode
      */
 
-    strValue = Tcl_NewStringObj( "::" NS "::StereoSGBM_MODE_SGBM", -1 );
-    setupValue = Tcl_NewIntObj( cv::StereoSGBM::MODE_SGBM );
+    strValue = Tcl_NewStringObj("::" NS "::StereoSGBM_MODE_SGBM", -1);
+    setupValue = Tcl_NewIntObj(cv::StereoSGBM::MODE_SGBM);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj( "::" NS "::StereoSGBM_MODE_HH", -1 );
-    setupValue = Tcl_NewIntObj( cv::StereoSGBM::MODE_HH );
+    strValue = Tcl_NewStringObj("::" NS "::StereoSGBM_MODE_HH", -1);
+    setupValue = Tcl_NewIntObj(cv::StereoSGBM::MODE_HH);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj( "::" NS "::StereoSGBM_MODE_SGBM_3WAY", -1 );
-    setupValue = Tcl_NewIntObj( cv::StereoSGBM::MODE_SGBM_3WAY );
+    strValue = Tcl_NewStringObj("::" NS "::StereoSGBM_MODE_SGBM_3WAY", -1);
+    setupValue = Tcl_NewIntObj(cv::StereoSGBM::MODE_SGBM_3WAY);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj( "::" NS "::StereoSGBM_MODE_HH4", -1 );
-    setupValue = Tcl_NewIntObj( cv::StereoSGBM::MODE_HH4 );
+#ifdef TCL_USE_OPENCV4
+    strValue = Tcl_NewStringObj("::" NS "::StereoSGBM_MODE_HH4", -1);
+    setupValue = Tcl_NewIntObj(cv::StereoSGBM::MODE_HH4);
     Tcl_ObjSetVar2 (interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+#endif
 
     /*
      * Photo inpaint flags

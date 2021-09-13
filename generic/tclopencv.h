@@ -80,6 +80,7 @@ MODULE_SCOPE int TermCriteria(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 /*
  * OpenCV imgcodecs
  */
+
 MODULE_SCOPE int imread(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int imwrite(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
@@ -246,11 +247,13 @@ MODULE_SCOPE int TonemapReinhard(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj 
 /*
  * OpenCV Stitcher
  */
+
 MODULE_SCOPE int Stitcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
  * OpenCV objdetect
  */
+
 MODULE_SCOPE int CascadeClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 MODULE_SCOPE int HOGDescriptor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
@@ -262,6 +265,7 @@ MODULE_SCOPE int QRCodeDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj 
 /*
  * OpenCV dnn
  */
+
 #ifdef TCL_USE_OPENCV4
 MODULE_SCOPE int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
@@ -338,6 +342,10 @@ typedef struct {
     Tcl_Command cmd_tonemapdra;
     Tcl_Command cmd_tonemapman;
     Tcl_Command cmd_tonemaprei;
+
+#ifdef TCL_USE_TKPHOTO
+    int tkCheck;
+#endif
 } Opencv_Data;
 
 
@@ -356,6 +364,9 @@ extern "C" {
 
 MODULE_SCOPE Tcl_Obj *Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj);
 MODULE_SCOPE void *Opencv_FindHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, Tcl_Obj *name);
+#ifdef TCL_USE_TKPHOTO
+MODULE_SCOPE int Opencv_CheckForTk(void *cd, Tcl_Interp *interp);
+#endif
 
 /*
  * Instance handlers and callbacks.

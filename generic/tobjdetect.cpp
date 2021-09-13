@@ -561,7 +561,11 @@ int HOGDescriptor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int blockStride_width = 0, blockStride_height = 0, cellSize_width = 0, cellSize_height = 0, nbins = 0;
     int derivAperture = 1, gammaCorrection = 0, nlevels = cv::HOGDescriptor::DEFAULT_NLEVELS, signedGradient = 0;
     double winSigma = -1, L2HysThreshold = 0.2;
+#ifdef TCL_USE_OPENCV4
     cv::HOGDescriptor::HistogramNormType histogramNormType = cv::HOGDescriptor::L2Hys;
+#else
+    int histogramNormType = cv::HOGDescriptor::L2Hys;
+#endif
     cv::HOGDescriptor *hog;
     Tcl_Obj *pResultStr = NULL;
 

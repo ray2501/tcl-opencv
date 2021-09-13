@@ -872,12 +872,12 @@ static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
@@ -886,7 +886,7 @@ static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
         return TCL_ERROR;
     }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
             std::vector< cv::KeyPoint > keypoints;
             cv::Mat *mat;
@@ -931,72 +931,72 @@ static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
         case FUNC_GETNONMAXSUPPRESSION: {
             int nonmaxSuppression = 0;
 
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
                 nonmaxSuppression = cvd->agastdetector->getNonmaxSuppression();
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getNonmaxSuppression failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewBooleanObj (nonmaxSuppression) );
+            Tcl_SetObjResult(interp, Tcl_NewBooleanObj (nonmaxSuppression));
             break;
         }
         case FUNC_GETTHRESHOLD: {
             int threshold = 0;
 
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
                 threshold = cvd->agastdetector->getThreshold();
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getThreshold failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (threshold) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj (threshold));
             break;
         }
         case FUNC_GETTYPE: {
             int type = 0;
 
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
                 type = (int) cvd->agastdetector->getType();
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getType failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (type) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj (type));
             break;
         }
         case FUNC_SETNONMAXSUPPRESSION: {
             int nonmaxSuppression = 0;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetBooleanFromObj(interp, objv[2], &nonmaxSuppression) != TCL_OK) {
+            if (Tcl_GetBooleanFromObj(interp, objv[2], &nonmaxSuppression) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
                 cvd->agastdetector->setNonmaxSuppression(nonmaxSuppression);
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setNonmaxSuppression failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1006,18 +1006,18 @@ static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
         case FUNC_SETTHRESHOLD: {
             int threshold = 0;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &threshold) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &threshold) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
                 cvd->agastdetector->setThreshold(threshold);
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setThreshold failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1027,18 +1027,22 @@ static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
         case FUNC_SETTYPE: {
             int type = 0;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &type) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &type) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
+#ifdef TCL_USE_OPENCV4
                 cvd->agastdetector->setType((cv::AgastFeatureDetector::DetectorType) type);
-            } catch (...){
+#else
+                cvd->agastdetector->setType(type);
+#endif
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setType failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1046,7 +1050,7 @@ static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
@@ -1076,28 +1080,32 @@ int AgastFeatureDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
     }
 
     if (objc == 4) {
-        if(Tcl_GetIntFromObj(interp, objv[1], &threshold) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[1], &threshold) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetBooleanFromObj(interp, objv[2], &nonmaxSuppression) != TCL_OK) {
+        if (Tcl_GetBooleanFromObj(interp, objv[2], &nonmaxSuppression) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[3], &type) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[3], &type) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        agastdetector = cv::AgastFeatureDetector::create( threshold, (bool) nonmaxSuppression,
-                                                (cv::AgastFeatureDetector::DetectorType) type);
-
+#ifdef TCL_USE_OPENCV4
+        agastdetector = cv::AgastFeatureDetector::create(threshold, (bool) nonmaxSuppression,
+                           (cv::AgastFeatureDetector::DetectorType) type);
+#else
+        agastdetector = cv::AgastFeatureDetector::create(threshold, (bool) nonmaxSuppression,
+                           type);
+#endif
         if (agastdetector == nullptr) {
             Tcl_SetResult(interp, (char *) "AgastFeatureDetector create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "AgastFeatureDetector failed", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -1927,12 +1935,12 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
@@ -1941,7 +1949,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         return TCL_ERROR;
     }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
             std::vector< cv::KeyPoint > keypoints;
             cv::Mat *mat;
@@ -2164,144 +2172,144 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         case FUNC_getDescriptorChannels: {
             int value = 0;
 
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
                 value = cvd->akazedetector->getDescriptorChannels();
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getDescriptorChannels failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
             break;
         }
         case FUNC_getDescriptorSize: {
             int value = 0;
 
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
                 value = cvd->akazedetector->getDescriptorSize();
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getDescriptorSize failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
             break;
         }
         case FUNC_getDescriptorType: {
             int value = 0;
 
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
                 value = (int) cvd->akazedetector->getDescriptorType();
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getDescriptorType failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
             break;
         }
         case FUNC_getDiffusivity: {
             int value = 0;
 
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
                 value = (int) cvd->akazedetector->getDiffusivity();
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getDiffusivity failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
             break;
         }
         case FUNC_getNOctaveLayers: {
             int value = 0;
 
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
                 value = cvd->akazedetector->getNOctaveLayers();
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getNOctaveLayers failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
             break;
         }
         case FUNC_getNOctaves: {
             int value = 0;
 
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
                 value = cvd->akazedetector->getNOctaves();
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getNOctaves failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
             break;
         }
         case FUNC_getThreshold: {
             double value = 0;
 
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
 
             try {
                 value = cvd->akazedetector->getThreshold();
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "getThreshold failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewDoubleObj (value) );
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj (value));
             break;
         }
         case FUNC_setDescriptorChannels: {
             int value = 0;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
                 cvd->akazedetector->setDescriptorChannels(value);
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setDescriptorChannels failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -2310,18 +2318,18 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         case FUNC_setDescriptorSize: {
             int value = 0;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
                 cvd->akazedetector->setDescriptorSize(value);
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setDescriptorSize failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -2330,18 +2338,22 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         case FUNC_setDescriptorType: {
             int value = 0;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                cvd->akazedetector->setDescriptorType( (cv::AKAZE::DescriptorType) value);
-            } catch (...){
+#ifdef TCL_USE_OPENCV4
+                cvd->akazedetector->setDescriptorType((cv::AKAZE::DescriptorType) value);
+#else
+                cvd->akazedetector->setDescriptorType(value);
+#endif
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setDescriptorType failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -2350,18 +2362,22 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         case FUNC_setDiffusivity: {
             int value = 0;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
-                cvd->akazedetector->setDiffusivity( (cv::KAZE::DiffusivityType) value);
-            } catch (...){
+#ifdef TCL_USE_OPENCV4
+                cvd->akazedetector->setDiffusivity((cv::KAZE::DiffusivityType) value);
+#else
+                cvd->akazedetector->setDiffusivity(value);
+#endif
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setDiffusivity failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -2370,18 +2386,18 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         case FUNC_setNOctaveLayers: {
             int value = 0;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
                 cvd->akazedetector->setNOctaveLayers(value);
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setNOctaveLayers failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -2390,18 +2406,18 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         case FUNC_setNOctaves: {
             int value = 0;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
                 cvd->akazedetector->setNOctaves(value);
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setNOctaves failed", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -2410,25 +2426,25 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         case FUNC_setThreshold: {
             double value = 0;
 
-            if( objc != 3 ){
+            if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
                 return TCL_ERROR;
             }
 
-            if(Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
                 return TCL_ERROR;
             }
 
             try {
                 cvd->akazedetector->setThreshold(value);
-            } catch (...){
+            } catch (...) {
                 Tcl_SetResult(interp, (char *) "setThreshold failed", TCL_STATIC);
                 return TCL_ERROR;
             }
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
@@ -2445,7 +2461,8 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 }
 
 
-int AKAZE(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+int AKAZE(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     Opencv_Data *cvd = (Opencv_Data *)cd;
     int descriptor_type = (int) cv::AKAZE::DESCRIPTOR_MLDB, descriptor_size = 0;
     int descriptor_channels = 3, nOctaves = 4, nOctaveLayers = 4;
@@ -2461,46 +2478,53 @@ int AKAZE(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
     }
 
     if (objc == 8) {
-        if(Tcl_GetIntFromObj(interp, objv[1], &descriptor_type) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[1], &descriptor_type) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[2], &descriptor_size) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[2], &descriptor_size) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[3], &descriptor_channels) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[3], &descriptor_channels) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[4], &threshold) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[4], &threshold) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[5], &nOctaves) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[5], &nOctaves) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[6], &nOctaveLayers) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[6], &nOctaveLayers) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[7], &diffusivity) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[7], &diffusivity) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        akazedetector = cv::AKAZE::create( (cv::AKAZE::DescriptorType) descriptor_type,
-                                           descriptor_size, descriptor_channels,
-                                           (float ) threshold, nOctaves, nOctaveLayers,
-                                           (cv::KAZE::DiffusivityType) diffusivity);
+#ifdef TCL_USE_OPENCV4
+        akazedetector = cv::AKAZE::create((cv::AKAZE::DescriptorType) descriptor_type,
+                                          descriptor_size, descriptor_channels,
+                                          (float) threshold, nOctaves, nOctaveLayers,
+                                          (cv::KAZE::DiffusivityType) diffusivity);
+#else
+        akazedetector = cv::AKAZE::create(descriptor_type,
+                                          descriptor_size, descriptor_channels,
+                                          (float) threshold, nOctaves, nOctaveLayers,
+                                          diffusivity);
+#endif
 
         if (akazedetector == nullptr) {
             Tcl_SetResult(interp, (char *) "AKAZE create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "AKAZE failed", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -2550,12 +2574,12 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
@@ -2564,7 +2588,7 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         return TCL_ERROR;
     }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
             std::vector< cv::KeyPoint > keypoints;
             cv::Mat *mat;
@@ -2785,7 +2809,7 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
@@ -2816,27 +2840,27 @@ int BRISK(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (objc == 4) {
-        if(Tcl_GetIntFromObj(interp, objv[1], &thresh) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[1], &thresh) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[2], &octaves) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[2], &octaves) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[3], &patternScale) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[3], &patternScale) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        briskdetector = cv::BRISK::create( thresh, octaves, (float) patternScale );
+        briskdetector = cv::BRISK::create(thresh, octaves, (float) patternScale);
 
         if (briskdetector == nullptr) {
             Tcl_SetResult(interp, (char *) "BRISK create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "BRISK failed", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -2887,12 +2911,12 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
@@ -2901,7 +2925,7 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         return TCL_ERROR;
     }
 
-    switch( (enum FUNC_enum)choice ){
+    switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
             std::vector< cv::KeyPoint > keypoints;
             cv::Mat *mat;
@@ -3122,7 +3146,7 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             break;
         }
         case FUNC_CLOSE: {
-            if( objc != 2 ){
+            if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
                 return TCL_ERROR;
             }
@@ -3154,37 +3178,37 @@ int SIFT(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (objc == 6) {
-        if(Tcl_GetIntFromObj(interp, objv[1], &nfeatures) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[1], &nfeatures) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetIntFromObj(interp, objv[2], &nOctaveLayers) != TCL_OK) {
+        if (Tcl_GetIntFromObj(interp, objv[2], &nOctaveLayers) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[3], &contrastThreshold) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[3], &contrastThreshold) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[4], &edgeThreshold) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[4], &edgeThreshold) != TCL_OK) {
             return TCL_ERROR;
         }
 
-        if(Tcl_GetDoubleFromObj(interp, objv[5], &sigma) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, objv[5], &sigma) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        siftdetector = cv::SIFT::create( nfeatures, nOctaveLayers,
-                                         contrastThreshold, edgeThreshold,
-                                         sigma );
+        siftdetector = cv::SIFT::create(nfeatures, nOctaveLayers,
+                                        contrastThreshold, edgeThreshold,
+                                        sigma);
 
         if (siftdetector == nullptr) {
             Tcl_SetResult(interp, (char *) "SIFT create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "SIFT failed", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -3202,7 +3226,6 @@ int SIFT(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     return TCL_OK;
 }
 #endif
-
 
 static void BFMatcher_DESTRUCTOR(void *cd)
 {
@@ -3422,7 +3445,8 @@ static void FlannBasedMatcher_DESTRUCTOR(void *cd)
 }
 
 
-static int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv){
+static int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
     Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;
 
@@ -3439,12 +3463,12 @@ static int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc,Tcl
         FUNC_CLOSE,
     };
 
-    if( objc < 2 ){
+    if (objc < 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
         return TCL_ERROR;
     }
 
-    if( Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice) ){
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
         return TCL_ERROR;
     }
 
@@ -3602,7 +3626,7 @@ int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
         }
 
         if (algo == 0) {
-            if(Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "FlannBasedMatcher invalid list data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -3614,22 +3638,22 @@ int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
                 Tcl_Obj *elemListPtr = NULL;
 
                 Tcl_ListObjIndex(interp, objv[2], 0, &elemListPtr);
-                if(Tcl_GetIntFromObj(interp, elemListPtr, &table_number) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, elemListPtr, &table_number) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, objv[2], 1, &elemListPtr);
-                if(Tcl_GetIntFromObj(interp, elemListPtr, &key_size) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, elemListPtr, &key_size) != TCL_OK) {
                     return TCL_ERROR;
                 }
 
                 Tcl_ListObjIndex(interp, objv[2], 2, &elemListPtr);
-                if(Tcl_GetIntFromObj(interp, elemListPtr, &multi_probe_level) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, elemListPtr, &multi_probe_level) != TCL_OK) {
                     return TCL_ERROR;
                 }
             }
         } else if (algo == 1) {
-            if(Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+            if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
                 Tcl_SetResult(interp, (char *) "FlannBasedMatcher invalid list data", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -3641,7 +3665,7 @@ int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
                 Tcl_Obj *elemListPtr = NULL;
 
                 Tcl_ListObjIndex(interp, objv[2], 0, &elemListPtr);
-                if(Tcl_GetIntFromObj(interp, elemListPtr, &trees) != TCL_OK) {
+                if (Tcl_GetIntFromObj(interp, elemListPtr, &trees) != TCL_OK) {
                     return TCL_ERROR;
                 }
             }
@@ -3669,14 +3693,14 @@ int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
             Tcl_SetResult(interp, (char *) "flannBasedMatcher create failed", TCL_STATIC);
             return TCL_ERROR;
         }
-    } catch (...){
+    } catch (...) {
         Tcl_SetResult(interp, (char *) "FlannBasedMatcher failed", TCL_STATIC);
         return TCL_ERROR;
     }
 
     pResultStr = Tcl_NewStringObj("::cv-flannbasedmatcher", -1);
 
-    cvd->cmd_bfmatcher =
+    cvd->cmd_flannbasedmatcher =
         Tcl_CreateObjCommand(interp, "::cv-flannbasedmatcher",
             (Tcl_ObjCmdProc *) FlannBasedMatcher_FUNCTION,
             cd, (Tcl_CmdDeleteProc *) FlannBasedMatcher_DESTRUCTOR);
@@ -3911,7 +3935,7 @@ int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
         return TCL_ERROR;
     }
 
-    pResultStr = Tcl_NewStringObj( "::cv-sbdetector", -1 );
+    pResultStr = Tcl_NewStringObj("::cv-sbdetector", -1);
 
     cvd->cmd_sbdetector =
         Tcl_CreateObjCommand(interp, "::cv-sbdectector",

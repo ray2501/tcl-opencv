@@ -767,7 +767,8 @@ static void CalibrateDebevec_DESTRUCTOR(void *cd)
     cvd->cmd_calibdeb = NULL;
 }
 
-int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+
+static int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;
     int choice;

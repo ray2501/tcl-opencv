@@ -1239,6 +1239,28 @@ Default is on, below is an exmaple to disable:
     $ make
     $ make install
 
+Thanks for Christian's refactoring code, you can try to build this
+extension by using OpenCV 3.x. You need setup `--with-opencv4` flag
+to no (and maybe also need to setup --with-sift flag to no).
+Default is on, below is an exmaple to disable:
+
+    $ export CC=g++
+    $ cd tcl-opencv
+    $ ./configure --with-opencv4=no
+    $ make
+    $ make install
+
+Christian also provides the configure option `--enable-tkphoto`
+to allow for optional Tk support in the cv::Mat class (toPhoto method)
+and a cv::fromPhoto function to make a cv::Mat from a Tk photo image.
+Default is off, below is an example to enable:
+
+    $ export CC=g++
+    $ cd tcl-opencv
+    $ ./configure --enable-tkphoto
+    $ make
+    $ make install
+
 Windows BUILD
 =====
 

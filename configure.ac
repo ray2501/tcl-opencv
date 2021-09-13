@@ -42,8 +42,21 @@ TEA_LOAD_TCLCONFIG
 # Load the tkConfig.sh file if necessary (Tk extension)
 #--------------------------------------------------------------------
 
-#TEA_PATH_TKCONFIG
-#TEA_LOAD_TKCONFIG
+func_tk_config() {
+    TEA_PATH_TKCONFIG
+    TEA_LOAD_TKCONFIG
+}
+
+AC_MSG_CHECKING([whether to add support for Tk photo images])
+AC_ARG_ENABLE(tkphoto,
+    AC_HELP_STRING([--enable-tkphoto],[add support for Tk photo images]),
+	[use_tkphoto=$enableval],[use_tkphoto=no])
+AC_MSG_RESULT([$use_tkphoto])
+
+if test "$use_tkphoto" = "yes"; then
+    # wrapped in function to make it conditional on --enable-tkphoto
+    func_tk_config
+fi
 
 #-----------------------------------------------------------------------
 # Handle the --prefix=... option by defaulting to what Tcl gave.
@@ -77,21 +90,25 @@ TEA_ADD_SOURCES([tclopencv.cpp tcore.cpp timgproc.cpp timgcodecs.cpp
                  tdnn.cpp])
 TEA_ADD_HEADERS([])
 TEA_ADD_INCLUDES([])
+AC_MSG_CHECKING([whether to use opencv4 package])
 AC_ARG_WITH(opencv4,
     AC_HELP_STRING([--with-opencv4],[use opencv4]),
 	[tcl_ok=$withval],[tcl_ok=yes])
 AC_MSG_RESULT([$tcl_ok])
-if test $tcl_ok = yes; then
+if test "$tcl_ok" = "yes"; then
     TEA_ADD_CFLAGS([-DTCL_USE_OPENCV4=1])
 fi
+AC_MSG_CHECKING([whether to use sift algorithm])
 AC_ARG_WITH(sift,
     AC_HELP_STRING([--with-sift],[enable sift]),
     [tcl_ok=$withval],[tcl_ok=yes])
 AC_MSG_RESULT([$tcl_ok])
-if test $tcl_ok = yes; then
+if test "$tcl_ok" = "yes"; then
     TEA_ADD_CFLAGS([-DTCL_USE_SIFT=1])
 fi
-
+if test "$use_tkphoto" = "yes"; then
+    TEA_ADD_CFLAGS([-DTCL_USE_TKPHOTO=1])
+fi
 TEA_ADD_CFLAGS([`pkg-config opencv4 --cflags`])
 TEA_ADD_LIBS([`pkg-config opencv4 --libs`])
 TEA_ADD_STUB_SOURCES([])
@@ -134,9 +151,21 @@ fi
 TEA_PUBLIC_TCL_HEADERS
 #TEA_PRIVATE_TCL_HEADERS
 
-#TEA_PUBLIC_TK_HEADERS
-#TEA_PRIVATE_TK_HEADERS
-#TEA_PATH_X
+func_tk_headers() {
+    TEA_PUBLIC_TK_HEADERS
+    #TEA_PRIVATE_TK_HEADERS
+    #TEA_PATH_X
+}
+
+if test "$use_tkphoto" = "yes"; then
+    # wrapped in function to make it conditional on --enable-tkphoto
+    func_tk_headers
+else
+    TK_BIN_DIR=""
+    TK_SRC_DIR=""
+    TK_INCLUDES=""
+    TK_XINCLUDES=""
+fi
 
 #--------------------------------------------------------------------
 # Check whether --enable-threads or --disable-threads was given.

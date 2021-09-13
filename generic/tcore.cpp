@@ -1,4 +1,7 @@
 #include "tclopencv.h"
+#ifdef TCL_USE_TKPHOTO
+#include <tk.h>
+#endif
 #include <vector>
 
 #ifdef __cplusplus
@@ -40,6 +43,9 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         "reshape",
         "setData",
         "setTo",
+#ifdef TCL_USE_TKPHOTO
+        "toPhoto",
+#endif
         "close",
         "_command",
         "_name",
@@ -76,6 +82,9 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         FUNC_RESHAPE,
         FUNC_SETDATA,
         FUNC_SETTO,
+#ifdef TCL_USE_TKPHOTO
+        FUNC_TOPHOTO,
+#endif
         FUNC_CLOSE,
         FUNC__COMMAND,
         FUNC__NAME,
@@ -1135,6 +1144,66 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             break;
         }
+#ifdef TCL_USE_TKPHOTO
+        case FUNC_TOPHOTO: {
+            char *name;
+            Tk_PhotoHandle photo;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "photo");
+                return TCL_ERROR;
+            }
+
+            if (Opencv_CheckForTk(cd, interp) != TCL_OK) {
+                return TCL_ERROR;
+            }
+            name = Tcl_GetString(objv[2]);
+            photo = Tk_FindPhoto(interp, name);
+            if (photo == NULL) {
+                Tcl_SetObjResult(interp, Tcl_ObjPrintf("can't use \"%s\": not a photo image", name));
+                return TCL_ERROR;
+            }
+            if ((mat->type() == CV_8UC1 && mat->channels() == 1) ||
+                (mat->type() == CV_8UC2 && mat->channels() == 2) ||
+                (mat->type() == CV_8UC3 && mat->channels() == 3) ||
+                (mat->type() == CV_8UC4 && mat->channels() == 4)) {
+                Tk_PhotoImageBlock blk;
+                unsigned char *data = mat->isContinuous() ? mat->data : mat->clone().data;
+
+                blk.pixelPtr = data;
+                blk.width = mat->cols;
+                blk.height = mat->rows;
+                blk.pitch = blk.width * mat->channels();
+                blk.pixelSize = mat->channels();
+                switch ((int) mat->type()) {
+                    case CV_8UC1:     /* grey */
+                    case CV_8UC2:     /* grey + alpha */
+                        blk.offset[0] = 0;
+                        blk.offset[1] = 0;
+                        blk.offset[2] = 0;
+                        blk.offset[3] = 1;
+                        break;
+                    case CV_8UC3:     /* BGR */
+                    case CV_8UC4:     /* BGRA */
+                        blk.offset[0] = 2;
+                        blk.offset[1] = 1;
+                        blk.offset[2] = 0;
+                        blk.offset[3] = 3;
+                        break;
+                }
+                if (Tk_PhotoSetSize(interp, photo, blk.width, blk.height) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+                if (Tk_PhotoPutBlock(interp, photo, &blk, 0, 0, blk.width, blk.height, TK_PHOTO_COMPOSITE_SET) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            } else {
+                Tcl_SetResult(interp, (char *) "incompatible cv::Mat", TCL_STATIC);
+                return TCL_ERROR;
+            }
+            break;
+        }
+#endif
         case FUNC_CLOSE: {
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
