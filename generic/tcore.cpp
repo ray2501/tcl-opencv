@@ -3097,10 +3097,106 @@ int mat_pow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_randn(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    double mean_B = 0, mean_G = 0, mean_R = 0, mean_A = 0;
+    double stddev_B = 0, stddev_G = 0, stddev_R = 0, stddev_A = 0;
+    int count = 0;
+    cv::Mat *mat;
+
+    if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix mean_list stddev_list");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+        Tcl_SetResult(interp, (char *) "randn invalid list data", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    if (count != 4) {
+        Tcl_SetResult(interp, (char *) "randn invalid mean data", TCL_STATIC);
+        return TCL_ERROR;
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+
+        Tcl_ListObjIndex(interp, objv[2], 0, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &mean_B) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[2], 1, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &mean_G) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[2], 2, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &mean_R) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[2], 3, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &mean_A) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
+        Tcl_SetResult(interp, (char *) "randn invalid list data", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    if (count != 4) {
+        Tcl_SetResult(interp, (char *) "randn invalid stddev data", TCL_STATIC);
+        return TCL_ERROR;
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+
+        Tcl_ListObjIndex(interp, objv[3], 0, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &stddev_B) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[3], 1, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &stddev_G) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[3], 2, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &stddev_R) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[3], 3, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &stddev_A) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        /*
+         * Fills the array with normally distributed random numbers.
+         */
+        cv::randn(*mat, cv::Scalar(mean_B, mean_G, mean_R, mean_A),
+                  cv::Scalar(stddev_B, stddev_G, stddev_R, stddev_A));
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "randn failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    return TCL_OK;
+}
+
+
 int mat_randu(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    int min_B = 0, min_G = 0, min_R = 0, min_A = 0;
-    int max_B = 0, max_G = 0, max_R = 0, max_A = 0;
+    double min_B = 0, min_G = 0, min_R = 0, min_A = 0;
+    double max_B = 0, max_G = 0, max_R = 0, max_A = 0;
     int count = 0;
     cv::Mat *mat;
 
@@ -3126,26 +3222,25 @@ int mat_randu(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         Tcl_Obj *elemListPtr = NULL;
 
         Tcl_ListObjIndex(interp, objv[2], 0, &elemListPtr);
-        if (Tcl_GetIntFromObj(interp, elemListPtr, &min_B) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &min_B) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[2], 1, &elemListPtr);
-        if (Tcl_GetIntFromObj(interp, elemListPtr, &min_G) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &min_G) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[2], 2, &elemListPtr);
-        if (Tcl_GetIntFromObj(interp, elemListPtr, &min_R) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &min_R) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[2], 3, &elemListPtr);
-        if (Tcl_GetIntFromObj(interp, elemListPtr, &min_A) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &min_A) != TCL_OK) {
             return TCL_ERROR;
         }
     }
-
 
     if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
         Tcl_SetResult(interp, (char *) "randu invalid list data", TCL_STATIC);
@@ -3159,22 +3254,22 @@ int mat_randu(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         Tcl_Obj *elemListPtr = NULL;
 
         Tcl_ListObjIndex(interp, objv[3], 0, &elemListPtr);
-        if (Tcl_GetIntFromObj(interp, elemListPtr, &max_B) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &max_B) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[3], 1, &elemListPtr);
-        if (Tcl_GetIntFromObj(interp, elemListPtr, &max_G) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &max_G) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[3], 2, &elemListPtr);
-        if (Tcl_GetIntFromObj(interp, elemListPtr, &max_R) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &max_R) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[3], 3, &elemListPtr);
-        if (Tcl_GetIntFromObj(interp, elemListPtr, &max_A) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &max_A) != TCL_OK) {
             return TCL_ERROR;
         }
     }

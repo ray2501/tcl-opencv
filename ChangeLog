@@ -1,6 +1,7 @@
 2021-09-13 Danilo Chang
 
 	* Re-design randu command for more than 1 channel case
+	* Implement command: randn
 	* Implement command: compare
 	* Implement command: resizeWindow
 	* Merge code from Christian (Refactoring)

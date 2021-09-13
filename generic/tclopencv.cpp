@@ -701,6 +701,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_pow,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::randn",
+        (Tcl_ObjCmdProc *) mat_randn,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::randu",
         (Tcl_ObjCmdProc *) mat_randu,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
