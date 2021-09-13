@@ -209,6 +209,7 @@ is filename or camera id.
     ::cv::imshow winname matrix
     ::cv::waitKey delay
     ::cv::moveWindow winname x y
+    ::cv::resizeWindow winname width height
     ::cv::destroyWindow winname
     ::cv::destroyAllWindows
     ::cv::selectROI matrix ?showCrosshair fromCenter?

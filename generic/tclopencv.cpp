@@ -1055,6 +1055,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) moveWindow,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::resizeWindow",
+        (Tcl_ObjCmdProc *) resizeWindow,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::destroyWindow",
         (Tcl_ObjCmdProc *) destroyWindow,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

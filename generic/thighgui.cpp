@@ -129,6 +129,43 @@ int moveWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int resizeWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    char *winname = NULL;
+    int len = 0, width = 0, height = 0;
+
+    if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "winname width height");
+        return TCL_ERROR;
+    }
+
+    winname = Tcl_GetStringFromObj(objv[1], &len);
+    if (!winname || len < 1) {
+        Tcl_SetResult(interp, (char *) "resizeWindow Iinvalid winname", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &width) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &height) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    /*
+     * Only windows created without cv::WINDOW_AUTOSIZE flag can be resized.
+     */
+    try {
+        cv::resizeWindow(winname, width, height);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "resizeWindow failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+
 int destroyWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *winname = NULL;
