@@ -3099,11 +3099,13 @@ int mat_pow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int mat_randu(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    int min = 0, max = 0;
+    int min_B = 0, min_G = 0, min_R = 0, min_A = 0;
+    int max_B = 0, max_G = 0, max_R = 0, max_A = 0;
+    int count = 0;
     cv::Mat *mat;
 
     if (objc != 4) {
-        Tcl_WrongNumArgs(interp, 1, objv, "matrix min max");
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix min_list max_list");
         return TCL_ERROR;
     }
 
@@ -3112,19 +3114,77 @@ int mat_randu(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return TCL_ERROR;
     }
 
-    if (Tcl_GetIntFromObj(interp, objv[2], &min) != TCL_OK) {
+    if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+        Tcl_SetResult(interp, (char *) "randu invalid list data", TCL_STATIC);
         return TCL_ERROR;
     }
 
-    if (Tcl_GetIntFromObj(interp, objv[3], &max) != TCL_OK) {
+    if (count != 4) {
+        Tcl_SetResult(interp, (char *) "randu invalid min data", TCL_STATIC);
         return TCL_ERROR;
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+
+        Tcl_ListObjIndex(interp, objv[2], 0, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &min_B) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[2], 1, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &min_G) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[2], 2, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &min_R) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[2], 3, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &min_A) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+
+    if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
+        Tcl_SetResult(interp, (char *) "randu invalid list data", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    if (count != 4) {
+        Tcl_SetResult(interp, (char *) "randu invalid max data", TCL_STATIC);
+        return TCL_ERROR;
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+
+        Tcl_ListObjIndex(interp, objv[3], 0, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &max_B) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[3], 1, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &max_G) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[3], 2, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &max_R) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[3], 3, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &max_A) != TCL_OK) {
+            return TCL_ERROR;
+        }
     }
 
     try {
         /*
          * Generates a single uniformly-distributed random number or an array of random numbers.
          */
-        cv::randu(*mat, cv::Scalar(min), cv::Scalar(max));
+        cv::randu(*mat, cv::Scalar(min_B, min_G, min_R, min_A),
+                  cv::Scalar(max_B, max_G, max_R, max_A));
     } catch (...) {
         Tcl_SetResult(interp, (char *) "randu failed", TCL_STATIC);
         return TCL_ERROR;

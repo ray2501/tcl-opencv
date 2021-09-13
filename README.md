@@ -90,7 +90,7 @@ Implement commands
     ::cv::norm matrix norm_type
     ::cv::normalize matrix alpha beta norm_type
     ::cv::pow matrix power
-    ::cv::randu matrix min max
+    ::cv::randu matrix min_list max_list
     ::cv::sqrt matrix
     ::cv::subtract matrix_1 matrix_2
     ::cv::sum matrix
