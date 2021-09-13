@@ -721,6 +721,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_sum,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::trace",
+        (Tcl_ObjCmdProc *) mat_trace,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::hconcat",
         (Tcl_ObjCmdProc *) mat_hconcat,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

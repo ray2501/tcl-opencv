@@ -3392,6 +3392,43 @@ int mat_sum(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_trace(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Scalar result;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *mat;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    /*
+     * Returns the sum of the diagonal elements of the matrix.
+     */
+    try {
+        result = cv::trace(*mat);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "trace failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result[0]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result[1]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result[2]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result[3]));
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int mat_hconcat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
