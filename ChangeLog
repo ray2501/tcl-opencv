@@ -1,3 +1,7 @@
+2021-09-14 Danilo Chang
+
+	* Bump version to v0.8
+
 2021-09-13 Danilo Chang
 
 	* Re-design randu command for more than 1 channel case
