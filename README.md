@@ -111,7 +111,9 @@ Implement commands
 ### imgcodecs
 
     ::cv::imread filename ?flags?
+    ::cv::imdecode bytes ?flags?
     ::cv::imwrite filename matrix
+    ::cv::imencode fileext matrix
 
 ### imgproc
 

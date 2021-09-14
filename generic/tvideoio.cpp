@@ -198,13 +198,14 @@ int VideoWriter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *fourcc = NULL;
     char *filename = NULL;
-    int len = 0;
+    int len, len4;
     double fps = 0, width = 0, height = 0;
     int fourccvalue = 0, isColor = 1;
     cv::VideoWriter *writer;
     Tcl_Obj *pResultStr = NULL;
+    Tcl_DString ds;
 
-    if (objc !=6 && objc != 7) {
+    if (objc != 6 && objc != 7) {
         Tcl_WrongNumArgs(interp, 1, objv, "filename fourcc fps width height ?isColor?");
         return TCL_ERROR;
     }
@@ -216,7 +217,7 @@ int VideoWriter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return TCL_ERROR;
     }
 
-    fourcc = Tcl_GetStringFromObj(objv[2], &len);
+    fourcc = Tcl_GetStringFromObj(objv[2], &len4);
     if (!fourcc || len != 4) {
         Tcl_SetResult(interp, (char *) "VideoWriter: invalid fourcc", TCL_STATIC);
         return TCL_ERROR;
@@ -242,13 +243,16 @@ int VideoWriter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
     }
 
+    filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
     try {
         writer = new cv::VideoWriter(filename, fourccvalue, fps,
                                      cv::Size (width,  height), (bool) isColor);
     } catch (...) {
+        Tcl_DStringFree(&ds);
         Tcl_SetResult(interp, (char *) "VideoWriter failed", TCL_STATIC);
         return TCL_ERROR;
     }
+    Tcl_DStringFree(&ds);
 
     pResultStr = Opencv_NewHandle(cd, interp, OPENCV_VIDEOWRITER, writer);
 
@@ -468,7 +472,7 @@ int VideoCapture(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_Obj *pResultStr = NULL;
     Tcl_DString ds;
 
-    if (objc !=3 && objc != 4) {
+    if (objc != 3 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "file/index filename/number ?flags?");
         return TCL_ERROR;
     }
@@ -502,11 +506,14 @@ int VideoCapture(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
     }
 
+    if (type == 1) {
+        filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
+    } else {
+        Tcl_DStringInit(&ds);
+    }
     try {
         if (type == 1) {
-            filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
             capture = new cv::VideoCapture(filename, flags);
-            Tcl_DStringFree(&ds);
         } else {
 #ifdef TCL_USE_OPENCV4
             capture = new cv::VideoCapture(index, flags);
@@ -515,9 +522,11 @@ int VideoCapture(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 #endif
         }
     } catch (...) {
+        Tcl_DStringFree(&ds);
         Tcl_SetResult(interp, (char *) "VideoCapture failed", TCL_STATIC);
         return TCL_ERROR;
     }
+    Tcl_DStringFree(&ds);
 
     pResultStr = Opencv_NewHandle(cd, interp, OPENCV_VIDEOCAPTURE, capture);
 

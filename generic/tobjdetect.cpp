@@ -359,6 +359,7 @@ int CascadeClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
     int len = 0;
     cv::CascadeClassifier *cas;
     Tcl_Obj *pResultStr = NULL;
+    Tcl_DString ds;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "filename");
@@ -371,17 +372,20 @@ int CascadeClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
         return TCL_ERROR;
     }
 
+    filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
     try {
         cas = new cv::CascadeClassifier(filename);
-
         if (cas->empty() == true) {
+            Tcl_DStringFree(&ds);
             Tcl_SetResult(interp, (char *) "CascadeClassifier load file failed", TCL_STATIC);
             return TCL_ERROR;
         }
     } catch (...) {
+        Tcl_DStringFree(&ds);
         Tcl_SetResult(interp, (char *) "CascadeClassifier failed", TCL_STATIC);
         return TCL_ERROR;
     }
+    Tcl_DStringFree(&ds);
 
     pResultStr = Opencv_NewHandle(cd, interp, OPENCV_ODETECT, cas);
 

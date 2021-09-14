@@ -150,7 +150,7 @@ int drawKeypoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Scalar color(new_B, new_G, new_R, new_A);
 
-        if (nodstimage == 0 && (flags & (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG)==1) {
+        if (nodstimage == 0 && (flags & (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG) == 1) {
                 dst_image = *mat2;
                 cv::drawKeypoints(*mat1, keypoints, dst_image, color,
 #ifdef TCL_USE_OPENCV4
@@ -159,7 +159,7 @@ int drawKeypoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                                   flags
 #endif
                                  );
-        } else if (nodstimage == 1 && (flags & (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG)==0) {
+        } else if (nodstimage == 1 && (flags & (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG) == 0) {
                 cv::drawKeypoints(*mat1, keypoints, dst_image, color,
 #ifdef TCL_USE_OPENCV4
                                   (cv::DrawMatchesFlags) flags
@@ -500,7 +500,7 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         cv::Scalar color1(B1, G1, R1, A1);
         cv::Scalar color2(B2, G2, R2, A2);
 
-        if (nodstimage == 0 && (flags & (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG)==1) {
+        if (nodstimage == 0 && (flags & (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG) == 1) {
                 dst_image = *mat3;
                 cv::drawMatches(*mat1, keypoints1, *mat2, keypoints2,
                                 matches1to2, dst_image, color1, color2,
@@ -512,7 +512,7 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                                 flags
 #endif
                                );
-        } else if (nodstimage == 1 && (flags & (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG)==0) {
+        } else if (nodstimage == 1 && (flags & (int) cv::DrawMatchesFlags::DRAW_OVER_OUTIMG) == 0) {
                 cv::drawMatches(*mat1, keypoints1, *mat2, keypoints2,
                                 matches1to2, dst_image, color1, color2,
                                 mask,
@@ -943,7 +943,7 @@ static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewBooleanObj (nonmaxSuppression));
+            Tcl_SetObjResult(interp, Tcl_NewBooleanObj(nonmaxSuppression));
             break;
         }
         case FUNC_GETTHRESHOLD: {
@@ -961,7 +961,7 @@ static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (threshold));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(threshold));
             break;
         }
         case FUNC_GETTYPE: {
@@ -979,7 +979,7 @@ static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (type));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(type));
             break;
         }
         case FUNC_SETNONMAXSUPPRESSION: {
@@ -2184,7 +2184,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_getDescriptorSize: {
@@ -2202,7 +2202,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_getDescriptorType: {
@@ -2220,7 +2220,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_getDiffusivity: {
@@ -2238,7 +2238,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_getNOctaveLayers: {
@@ -2256,7 +2256,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_getNOctaves: {
@@ -2274,7 +2274,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_getThreshold: {
@@ -2292,7 +2292,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewDoubleObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
             break;
         }
         case FUNC_setDescriptorChannels: {
@@ -3616,9 +3616,9 @@ int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
             return TCL_ERROR;
         }
 
-        if (strcmp(algorithm, "FLANN_INDEX_LSH")==0) {
+        if (strcmp(algorithm, "FLANN_INDEX_LSH") == 0) {
             algo = 0;
-        } else if (strcmp(algorithm, "FLANN_INDEX_KDTREE")==0) {
+        } else if (strcmp(algorithm, "FLANN_INDEX_KDTREE") == 0) {
             algo = 1;
         } else {
             Tcl_SetResult(interp, (char *) "FlannBasedMatcher wrong algorithm name", TCL_STATIC);
@@ -3825,7 +3825,7 @@ int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
     cv::SimpleBlobDetector::Params params;
     cv::Ptr<cv::SimpleBlobDetector> sbdetector;
 
-    if ((objc&1)!=1) {
+    if ((objc&1) != 1) {
         Tcl_WrongNumArgs(interp, 1, objv, "?-minThreshold value? ?-maxThreshold value? ?-filterByArea boolean? ?-minArea value? ?-maxArea value? ?-filterByCircularity boolean? ?-minCircularity value? ?-maxCircularity value? ?-filterByConvexity boolean? ?-minConvexity value? ?-maxConvexity value? ?-filterByInertia boolean? ?-minInertiaRatio value? ?-maxInertiaRatio value?");
         return TCL_ERROR;
     }

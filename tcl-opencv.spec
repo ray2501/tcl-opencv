@@ -47,7 +47,7 @@ CFLAGS="%optflags" ./configure \
 	--prefix=%{directory} \
 	--exec-prefix=%{directory} \
 	--libdir=%{directory}/%{_lib}
-make 
+make
 
 %install
 make DESTDIR=%{buildroot} pkglibdir=%{tcl_archdir}/%{packckname}%{version} install

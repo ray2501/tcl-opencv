@@ -352,6 +352,7 @@ int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int len = 0;
     Tcl_Obj *pResultStr = NULL;
     cv::dnn::Net *net;
+    Tcl_DString ds1, ds2, ds3;
 
     if (objc != 2 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "model ?config framework?");
@@ -363,19 +364,28 @@ int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         Tcl_SetResult(interp, (char *) "readNet invalid model name", TCL_STATIC);
         return TCL_ERROR;
     }
+    model = Tcl_UtfToExternalDString(NULL, model, len, &ds1);
 
     if (objc == 4) {
         config = Tcl_GetStringFromObj(objv[2], &len);
         if (!config || len < 1) {
+            Tcl_DStringFree(&ds1);
             Tcl_SetResult(interp, (char *) "readNet invalid config name", TCL_STATIC);
             return TCL_ERROR;
         }
+        config = Tcl_UtfToExternalDString(NULL, config, len, &ds2);
 
         framework = Tcl_GetStringFromObj(objv[3], &len);
         if (!framework || len < 1) {
+            Tcl_DStringFree(&ds1);
+            Tcl_DStringFree(&ds2);
             Tcl_SetResult(interp, (char *) "readNet invalid framework name", TCL_STATIC);
             return TCL_ERROR;
         }
+        framework = Tcl_UtfToExternalDString(NULL, framework, len, &ds3);
+    } else {
+        Tcl_DStringInit(&ds2);
+        Tcl_DStringInit(&ds3);
     }
 
     try {
@@ -386,9 +396,15 @@ int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             *net = cv::dnn::readNet(model, config, framework);
         }
     } catch (...) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
+        Tcl_DStringFree(&ds3);
         Tcl_SetResult(interp, (char *) "readNet failed", TCL_STATIC);
         return TCL_ERROR;
     }
+    Tcl_DStringFree(&ds1);
+    Tcl_DStringFree(&ds2);
+    Tcl_DStringFree(&ds3);
 
     pResultStr = Opencv_NewHandle(cd, interp, OPENCV_NDETECT, net);
 

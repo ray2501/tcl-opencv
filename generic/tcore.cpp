@@ -832,7 +832,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_COPYTO: {
             cv::Mat image;
-            cv::Mat *mat1, *mat2;
+            cv::Mat *mat1, *mat2 = 0;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 1, objv, "matrix ?mask?");
@@ -856,7 +856,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 if (objc == 3) {
                     image.copyTo(*mat1);
                 } else {
-                    image.copyTo(*mat2, *mat2);
+                    image.copyTo(*mat1, *mat2);
                 }
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "copyTo failed", TCL_STATIC);
@@ -1082,7 +1082,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_SETTO: {
             int B = 0, G = 0, R = 0, A = 0, count = 0;
-            cv::Mat image, *mmat;
+            cv::Mat image, *mmat = 0;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "color_list ?mask?");
@@ -1254,7 +1254,7 @@ int tcl_CV_8UC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int num = 0, result = 0;
 
-    if (objc !=2) {
+    if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "num");
         return TCL_ERROR;
     }
@@ -1273,7 +1273,7 @@ int tcl_CV_8SC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int num = 0, result = 0;
 
-    if (objc !=2) {
+    if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "num");
         return TCL_ERROR;
     }
@@ -1292,7 +1292,7 @@ int tcl_CV_16UC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int num = 0, result = 0;
 
-    if (objc !=2) {
+    if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "num");
         return TCL_ERROR;
     }
@@ -1311,7 +1311,7 @@ int tcl_CV_16SC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int num = 0, result = 0;
 
-    if (objc !=2) {
+    if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "num");
         return TCL_ERROR;
     }
@@ -1330,7 +1330,7 @@ int tcl_CV_32SC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int num = 0, result = 0;
 
-    if (objc !=2) {
+    if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "num");
         return TCL_ERROR;
     }
@@ -1349,7 +1349,7 @@ int tcl_CV_32FC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int num = 0, result = 0;
 
-    if (objc !=2) {
+    if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "num");
         return TCL_ERROR;
     }
@@ -1368,7 +1368,7 @@ int tcl_CV_64FC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int num = 0, result = 0;
 
-    if (objc !=2) {
+    if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "num");
         return TCL_ERROR;
     }
@@ -1485,7 +1485,7 @@ int mat_matwithdims(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return TCL_ERROR;
     }
 
-    index = (int *) ckalloc (sizeof(int) * dims);
+    index = (int *) ckalloc(sizeof(int) * dims);
     if (!index) {
         Tcl_SetResult(interp, (char *) "matwithdims malloc failed", TCL_STATIC);
         return TCL_ERROR;
@@ -1604,7 +1604,7 @@ int mat_eye(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_Obj *pResultStr = NULL;
     cv::Mat *dstmat;
 
-    if (objc !=4) {
+    if (objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "rows cols type");
         return TCL_ERROR;
     }
@@ -1639,7 +1639,7 @@ int mat_ones(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_Obj *pResultStr = NULL;
     cv::Mat *dstmat;
 
-    if (objc !=4) {
+    if (objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "rows cols type");
         return TCL_ERROR;
     }
@@ -1674,7 +1674,7 @@ int mat_zeros(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_Obj *pResultStr = NULL;
     cv::Mat *dstmat;
 
-    if (objc !=4) {
+    if (objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "rows cols type");
         return TCL_ERROR;
     }
@@ -2308,7 +2308,7 @@ int mat_countNonZero(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         return TCL_ERROR;
     }
 
-    Tcl_SetObjResult(interp, Tcl_NewIntObj (result));
+    Tcl_SetObjResult(interp, Tcl_NewIntObj(result));
     return TCL_OK;
 }
 
@@ -3641,7 +3641,7 @@ int getTickCount(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return TCL_ERROR;
     }
 
-    Tcl_SetObjResult(interp, Tcl_NewDoubleObj (result));
+    Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
     return TCL_OK;
 }
 
@@ -3662,7 +3662,7 @@ int getTickFrequency(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         return TCL_ERROR;
     }
 
-    Tcl_SetObjResult(interp, Tcl_NewDoubleObj (result));
+    Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
     return TCL_OK;
 }
 

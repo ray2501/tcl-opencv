@@ -86,7 +86,9 @@ MODULE_SCOPE int TermCriteria(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
  */
 
 MODULE_SCOPE int imread(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int imdecode(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int imwrite(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int imencode(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
  * OpenCV imgproc

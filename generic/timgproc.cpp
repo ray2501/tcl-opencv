@@ -12,7 +12,7 @@ int applyColorMap(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
-    if (objc !=3) {
+    if (objc != 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "matrix colormap");
         return TCL_ERROR;
     }
@@ -121,7 +121,7 @@ int calcBackProject(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         Tcl_Obj *elemListPtr = NULL;
         int size;
 
-        channels = (int *) ckalloc (sizeof(int) * count);
+        channels = (int *) ckalloc(sizeof(int) * count);
         if (!channels) {
             Tcl_SetResult(interp, (char *) "calcBackProject channels malloc memory failed", TCL_STATIC);
             return TCL_ERROR;
@@ -166,7 +166,7 @@ int calcBackProject(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         double min, max;
         rangecount = range;
 
-        ranges = (float **) ckalloc (sizeof(float *) * count);
+        ranges = (float **) ckalloc(sizeof(float *) * count);
         if (!ranges) {
             ckfree(channels);
             Tcl_SetResult(interp, (char *) "calcBackProject ranges malloc memory failed", TCL_STATIC);
@@ -196,7 +196,7 @@ int calcBackProject(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            ranges[i] = (float *) ckalloc (sizeof(float) * 2);
+            ranges[i] = (float *) ckalloc(sizeof(float) * 2);
             if (!ranges[i]) {
                 ckfree(channels);
                 for (--i; i >= 0; --i) {
@@ -295,7 +295,7 @@ int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         Tcl_Obj *elemListPtr = NULL;
         int size;
 
-        channels = (int *) ckalloc (sizeof(int) * count);
+        channels = (int *) ckalloc(sizeof(int) * count);
         if (!channels) {
             Tcl_SetResult(interp, (char *) "calcHist channels malloc memory failed", TCL_STATIC);
             return TCL_ERROR;
@@ -349,7 +349,7 @@ int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         Tcl_Obj *elemListPtr = NULL;
         int size;
 
-        histSize = (int *) ckalloc (sizeof(int) * count);
+        histSize = (int *) ckalloc(sizeof(int) * count);
         if (!histSize) {
             ckfree(channels);
             Tcl_SetResult(interp, (char *) "calcHist histSize malloc memory failed", TCL_STATIC);
@@ -387,7 +387,7 @@ int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         double min, max;
         rangecount = range;
 
-        ranges = (float **) ckalloc (sizeof(float *) * count);
+        ranges = (float **) ckalloc(sizeof(float *) * count);
         if (!ranges) {
             ckfree(channels);
             ckfree(histSize);
@@ -420,7 +420,7 @@ int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            ranges[i] = (float *) ckalloc (sizeof(float) * 2);
+            ranges[i] = (float *) ckalloc(sizeof(float) * 2);
             if (!ranges[i]) {
                 ckfree(channels);
                 ckfree(histSize);
@@ -4297,7 +4297,7 @@ int fillConvexPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         int number_from_list_y;
 
         npts = count / 2;
-        pts = (cv::Point *) ckalloc (sizeof(cv::Point) * npts);
+        pts = (cv::Point *) ckalloc(sizeof(cv::Point) * npts);
 
         for (int i = 0, j = 0; j < npts; i = i + 2, j = j + 1) {
             Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
@@ -4513,7 +4513,7 @@ int polylines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         int number_from_list_y;
 
         npts = count / 2;
-        pts = (cv::Point *) ckalloc (sizeof(cv::Point) * npts);
+        pts = (cv::Point *) ckalloc(sizeof(cv::Point) * npts);
 
         for (int i = 0, j = 0; j < npts; i = i + 2, j = j + 1) {
             Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
@@ -4620,6 +4620,8 @@ int putText(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int x1 = 0, y1 = 0, fontFace = 0, B = 0, G = 0, R = 0, A = 0;
     double fontScale = 1.0;
     int thickness = 1, lineType = cv::LINE_8, bottomLeftOrigin = 0;
+    Tcl_DString ds;
+    Tcl_Encoding enc;
 
     if (objc != 9 && objc != 11) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -4702,15 +4704,20 @@ int putText(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
     }
 
+    enc = Tcl_GetEncoding(NULL, "utf-8");
+    text = Tcl_UtfToExternalDString(enc, text, len, &ds);
+    Tcl_FreeEncoding(enc);
     try {
         cv::Scalar color(B, G, R, A);
 
         cv::putText(image, text, cv::Point(x1, y1), fontFace, fontScale,
                     color, thickness, lineType, (bool) bottomLeftOrigin);
     } catch (...) {
+        Tcl_DStringFree(&ds);
         Tcl_SetResult(interp, (char *) "putText failed", TCL_STATIC);
         return TCL_ERROR;
     }
+    Tcl_DStringFree(&ds);
 
     return TCL_OK;
 }

@@ -171,7 +171,7 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_getPreFilterSize: {
@@ -189,7 +189,7 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_getPreFilterType: {
@@ -207,7 +207,7 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_getSmallerBlockSize: {
@@ -225,7 +225,7 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_getTextureThreshold: {
@@ -243,7 +243,7 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_getUniquenessRatio: {
@@ -261,7 +261,7 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_setPreFilterCap: {
@@ -567,7 +567,7 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_getP1: {
@@ -585,7 +585,7 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_getP2: {
@@ -603,7 +603,7 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_getPreFilterCap: {
@@ -621,7 +621,7 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_getUniquenessRatio: {
@@ -639,7 +639,7 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
                 return TCL_ERROR;
             }
 
-            Tcl_SetObjResult(interp, Tcl_NewIntObj (value));
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
             break;
         }
         case FUNC_setMode: {

@@ -978,7 +978,21 @@ test opencv-1.81 {Compare test} {*}{
     -result {0}
 }
 
-test opencv-1.82 {Close test} {*}{
+test opencv-1.82 {encode/decode image} {*}{
+    -body {
+        set image1 [::cv::imread "tests/logoLarge.png"]
+        set bytes1 [::cv::imencode ".png" $image1]
+        set image2 [::cv::imdecode $bytes1]
+        set bytes2 [::cv::imencode ".png" $image2]
+        $image1 close
+        $image2 close
+        string compare $bytes1 $bytes2
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.83 {Close test} {*}{
     -body {
         ::cv::imwrite output.png $image
         $tmatrix1 close
