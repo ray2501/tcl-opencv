@@ -16,9 +16,17 @@ BuildRequires: autoconf
 BuildRequires: make
 BuildRequires: gcc-c++
 BuildRequires: tcl-devel >= 8.6
+%if 0%{?sle_version} >= 150300 && 0%{?is_opensuse}
 BuildRequires: opencv-devel >= 4.4
+%else
+BuildRequires: opencv-devel >= 3.3
+%endif
 Requires:      tcl >= 8.6
+%if 0%{?sle_version} >= 150300 && 0%{?is_opensuse}
 Requires:      opencv >= 4.4
+%else
+Requires:      opencv >= 3.3
+%endif
 BuildRoot:     %{buildroot}
 
 %description
@@ -33,6 +41,9 @@ functions mainly aimed at real-time computer vision.
 %build
 export CC=g++
 CFLAGS="%optflags" ./configure \
+%if 0%{?sle_version} < 150300 && 0%{?is_opensuse}
+    --with-opencv4=no --with-sift=no \
+%endif
 	--prefix=%{directory} \
 	--exec-prefix=%{directory} \
 	--libdir=%{directory}/%{_lib}
