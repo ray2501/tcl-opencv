@@ -93,6 +93,7 @@ Implement commands
     ::cv::randn matrix mean_list stddev_list
     ::cv::randu matrix min_list max_list
     ::cv::reduce matrix dim rtype ?dtype?
+    ::cv::rotate matrix rotateCode
     ::cv::sqrt matrix
     ::cv::subtract matrix_1 matrix_2
     ::cv::sum matrix
@@ -1065,6 +1066,12 @@ Line Types -
     ::cv::REDUCE_MAX
     ::cv::REDUCE_MIN
 
+`::cv::rotate` rotateCode -
+
+    ::cv::ROTATE_90_CLOCKWISE
+    ::cv::ROTATE_180
+    ::cv::ROTATE_90_COUNTERCLOCKWISE
+
 `MATRIX inv` method and
 `::cv::getPerspectiveTransform` command solveMethod -
 
@@ -1356,6 +1363,41 @@ Below is an example to apply a color map -
 
         $img close
         $img2 close
+    } on error {em} {
+        puts $em
+    }
+
+Flip and Rotate -
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set img [::cv::imread $filename $::cv::IMREAD_COLOR]
+
+        # 0 means flipping around the x-axis
+        set f_img [::cv::flip $img 0]
+
+        # Rotate by 270 degrees clockwise
+        set r_img [::cv::rotate $img $::cv::ROTATE_90_COUNTERCLOCKWISE]
+
+        ::cv::namedWindow "Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Image" $img
+        ::cv::namedWindow "Flip" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Flip" $f_img
+        ::cv::namedWindow "Rotate" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Rotate" $r_img
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $img close
+        $f_img close
+        $r_img close
     } on error {em} {
         puts $em
     }

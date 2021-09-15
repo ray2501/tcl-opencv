@@ -713,6 +713,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_reduce,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::rotate",
+        (Tcl_ObjCmdProc *) mat_rotate,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::sqrt",
         (Tcl_ObjCmdProc *) mat_sqrt,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
@@ -3437,6 +3441,22 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::REDUCE_MIN", -1);
     setupValue = Tcl_NewIntObj(cv::REDUCE_MIN);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * Rotate Flags (rotateCode)
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::ROTATE_90_CLOCKWISE", -1);
+    setupValue = Tcl_NewIntObj(cv::ROTATE_90_CLOCKWISE);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ROTATE_180", -1);
+    setupValue = Tcl_NewIntObj(cv::ROTATE_180);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ROTATE_90_COUNTERCLOCKWISE", -1);
+    setupValue = Tcl_NewIntObj(cv::ROTATE_90_COUNTERCLOCKWISE);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*
