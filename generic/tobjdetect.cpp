@@ -403,6 +403,9 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
     static const char *FUNC_strs[] = {
         "detectMultiScale",
+        "getDefaultPeopleDetector",
+        "getDaimlerPeopleDetector",
+        "setSVMDetector",
         "close",
         "_command",
         "_name",
@@ -412,6 +415,9 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
     enum FUNC_enum {
         FUNC_DETECTMULTISCALE,
+        FUNC_getDefaultPeopleDetector,
+        FUNC_getDaimlerPeopleDetector,
+        FUNC_setSVMDetector,
         FUNC_CLOSE,
         FUNC__COMMAND,
         FUNC__NAME,
@@ -511,6 +517,94 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
             }
 
             Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_getDefaultPeopleDetector: {
+            std::vector<float> coefficients;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                coefficients = cv::HOGDescriptor::getDefaultPeopleDetector();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getDefaultPeopleDetector failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < coefficients.size(); i++) {
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(coefficients[i]));
+            }
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_getDaimlerPeopleDetector: {
+            std::vector<float> coefficients;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                coefficients = cv::HOGDescriptor::getDaimlerPeopleDetector();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getDaimlerPeopleDetector failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < coefficients.size(); i++) {
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(coefficients[i]));
+            }
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_setSVMDetector: {
+            std::vector<float> svmdetector;
+            int count = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "svmdetector");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+                Tcl_SetResult(interp, (char *) "setSVMDetector invalid list data", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            if (count == 0) {
+                Tcl_SetResult(interp, (char *) "setSVMDetector invalid data", TCL_STATIC);
+                return TCL_ERROR;
+            } else {
+                Tcl_Obj *elemListPtr = NULL;
+                double number;
+
+                for (int i = 0; i < count; i++) {
+                    Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
+                    if (Tcl_GetDoubleFromObj(interp, elemListPtr, &number) != TCL_OK) {
+                        return TCL_ERROR;
+                    }
+
+                    svmdetector.push_back((float) number);
+                }
+            }
+
+            try {
+                hog->setSVMDetector(svmdetector);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setSVMDetector failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
             break;
         }
         case FUNC_CLOSE: {
@@ -653,12 +747,6 @@ int HOGDescriptor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         if (hog == nullptr) {
             Tcl_SetResult(interp, (char *) "HOGDescriptor create failed", TCL_STATIC);
             return TCL_ERROR;
-        }
-
-        if (winSize_width == 64 && winSize_height == 128) {
-            hog->setSVMDetector(cv::HOGDescriptor::getDefaultPeopleDetector());
-        } else {
-            hog->setSVMDetector(cv::HOGDescriptor::getDaimlerPeopleDetector());
         }
     } catch (...) {
         Tcl_SetResult(interp, (char *) "HOGDescriptor failed", TCL_STATIC);

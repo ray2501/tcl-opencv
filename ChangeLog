@@ -1,5 +1,6 @@
 2021-09-15 Danilo Chang
 
+	* Improve HOGDescriptor command
 	* Implement command: rotate
 
 2021-09-14 Danilo Chang

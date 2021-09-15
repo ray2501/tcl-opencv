@@ -478,6 +478,9 @@ Please notice, Stitcher command will only have 1 instance.
 
     ::cv::HOGDescriptor winSize_width winSize_height blockSize_width blockStride_width blockStride_height blockSize_height cellSize_width cellSize_height nbins ?derivAperture winSigma L2HysThreshold gammaCorrection nlevels signedGradient?
     HOGDescriptor detectMultiScale matrix ?hitThreshold winStride_width winStride_height padding_width padding_height scale finalThreshold useMeanshiftGrouping?
+    HOGDescriptor getDefaultPeopleDetector
+    HOGDescriptor getDaimlerPeopleDetector
+    HOGDescriptor setSVMDetector svmdetector
     HOGDescriptor close
 
     :cv::QRCodeDetector
@@ -2842,7 +2845,9 @@ People detection by using HOGDescriptor -
     }
 
     set hog [cv::HOGDescriptor 64 128 16 16 8 8 8 8 9]
+    $hog setSVMDetector [$hog getDefaultPeopleDetector]
     set hog_d [cv::HOGDescriptor 48 96 16 16 8 8 8 8 9 1 -1 0.2 0 64 0]
+    $hog_d setSVMDetector [$hog getDaimlerPeopleDetector]
     set mode 0
 
     while {[$v isOpened]==1} {
