@@ -521,7 +521,7 @@ Please notice, TrainData command will only have 1 instance.
     SVM setType value
     SVM setKernel value
     SVM setTermCriteria termCriteria
-    SVM train trainData
+    SVM train trainData ?flags?
     SVM predict samples ?flags?
     SVM save filename
     SVM close
