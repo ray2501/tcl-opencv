@@ -402,6 +402,7 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
     cv::HOGDescriptor *hog;
 
     static const char *FUNC_strs[] = {
+        "compute",
         "detectMultiScale",
         "getDefaultPeopleDetector",
         "getDaimlerPeopleDetector",
@@ -414,6 +415,7 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
     };
 
     enum FUNC_enum {
+        FUNC_COMPUTE,
         FUNC_DETECTMULTISCALE,
         FUNC_getDefaultPeopleDetector,
         FUNC_getDaimlerPeopleDetector,
@@ -440,6 +442,62 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
     }
 
     switch ((enum FUNC_enum)choice) {
+        case FUNC_COMPUTE: {
+            std::vector< float > descriptors;
+            Tcl_Obj *pResultStr = NULL;
+            cv::Mat *mat;
+            int winStride_width = 8, winStride_height = 8, padding_width = 0, padding_height = 0;
+
+            if (objc != 3 && objc != 7) {
+                Tcl_WrongNumArgs(interp, 2, objv,
+                    "matrix ?winStride_width winStride_heigth padding_width padding_height?");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            if (objc == 7) {
+                if (Tcl_GetIntFromObj(interp, objv[3], &winStride_width) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                if (Tcl_GetIntFromObj(interp, objv[4], &winStride_height) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                if (Tcl_GetIntFromObj(interp, objv[5], &padding_width) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                if (Tcl_GetIntFromObj(interp, objv[6], &padding_height) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                if (objc == 3) {
+                    hog->compute(*mat, descriptors);
+                } else {
+                    hog->compute(*mat, descriptors,
+                                 cv::Size(winStride_width, winStride_height),
+                                 cv::Size(padding_width, padding_height));
+                }
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "compute failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < descriptors.size(); i++) {
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(descriptors[i]));
+            }
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
         case FUNC_DETECTMULTISCALE: {
             std::vector< cv::Rect > rect;
             Tcl_Obj *pResultStr = NULL;

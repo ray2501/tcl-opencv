@@ -1,5 +1,6 @@
 2021-09-16 Danilo Chang
 
+	* Improve HOGDescriptor command
 	* Add new file for SVM command
 
 2021-09-15 Danilo Chang

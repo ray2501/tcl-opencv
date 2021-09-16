@@ -477,6 +477,7 @@ Please notice, Stitcher command will only have 1 instance.
     CascadeClassifier close
 
     ::cv::HOGDescriptor winSize_width winSize_height blockSize_width blockStride_width blockStride_height blockSize_height cellSize_width cellSize_height nbins ?derivAperture winSigma L2HysThreshold gammaCorrection nlevels signedGradient?
+    HOGDescriptor compute matrix ?winStride_width winStride_heigth padding_width padding_height?
     HOGDescriptor detectMultiScale matrix ?hitThreshold winStride_width winStride_height padding_width padding_height scale finalThreshold useMeanshiftGrouping?
     HOGDescriptor getDefaultPeopleDetector
     HOGDescriptor getDaimlerPeopleDetector
