@@ -41,7 +41,8 @@ PRJ_OBJS = \
 	$(TMP_DIR)\tvideo.obj \
 	$(TMP_DIR)\tphoto.obj \
 	$(TMP_DIR)\tfeatures2d.obj \
-	$(TMP_DIR)\tcalib3d.obj
+	$(TMP_DIR)\tcalib3d.obj \
+	$(TMP_DIR)\tml.obj
 
 
 # Define any additional compiler flags that might be required for the project

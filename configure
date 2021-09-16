@@ -5154,7 +5154,7 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
     vars="tclopencv.cpp tcore.cpp timgproc.cpp timgcodecs.cpp
                  tvideoio.cpp thighgui.cpp tvideo.cpp tfeatures2d.cpp
                  tcalib3d.cpp tphoto.cpp tstitcher.cpp tobjdetect.cpp
-                 tdnn.cpp"
+                 tdnn.cpp tml.cpp"
     for i in $vars; do
 	case $i in
 	    \$*)

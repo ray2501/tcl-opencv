@@ -491,6 +491,37 @@ Please notice, Stitcher command will only have 1 instance.
 Please notice, QRCodeDetector looks like have issues
 if encoded QR Code data is long when I test it.
 
+### ml
+
+    ::cv::ml::SVM
+    ::cv::ml::SVM::load filename
+    SVM getC
+    SVM getCoef0
+    SVM getDegree
+    SVM getGamma
+    SVM getNu
+    SVM getP
+    SVM getType
+    SVM getKernelType
+    SVM getDecisionFunction
+    SVM getSupportVectors
+    SVM getUncompressedSupportVectors
+    SVM setC value
+    SVM setCoef0 value
+    SVM setDegree value
+    SVM setGamma value
+    SVM setNu value
+    SVM setP value
+    SVM setType value
+    SVM setKernel value
+    SVM setTermCriteria termCriteria
+    SVM train samples layout responses
+    SVM predict samples ?flags?
+    SVM save filename
+    SVM close
+
+Please notice, SVM and SVM::load command will only have 1 instance.
+
 ### dnn
 
     ::cv::dnn::blobFromImage matrix scalefactor width height mean_color_list swapRB crop
@@ -1213,6 +1244,35 @@ Stitcher mode -
 
     ::cv::PANORAMA
     ::cv::SCANS
+
+ML sample types -
+
+    ::cv::ml::ROW_SAMPLE
+    ::cv::ml::COL_SAMPLE
+
+Predict options -
+
+    ::cv::ml::UPDATE_MODEL
+    ::cv::ml::RAW_OUTPUT
+    ::cv::ml::COMPRESSED_INPUT
+    ::cv::ml::PREPROCESSED_INPUT
+
+SVM types -
+
+    ::cv::ml::SVM_C_SVC
+    ::cv::ml::SVM_NU_SVC
+    ::cv::ml::SVM_ONE_CLASS
+    ::cv::ml::SVM_EPS_SVR
+    ::cv::ml::SVM_NU_SVR
+
+SVM kernel types -
+
+    ::cv::ml::SVM_LINEAR
+    ::cv::ml::SVM_POLY
+    ::cv::ml::SVM_RBF
+    ::cv::ml::SVM_SIGMOID
+    ::cv::ml::SVM_CHI2
+    ::cv::ml::SVM_INTER
 
 READNET `setPreferableBackend` backendId -
 

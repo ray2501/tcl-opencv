@@ -87,7 +87,7 @@ TEA_SETUP_COMPILER
 TEA_ADD_SOURCES([tclopencv.cpp tcore.cpp timgproc.cpp timgcodecs.cpp
                  tvideoio.cpp thighgui.cpp tvideo.cpp tfeatures2d.cpp
                  tcalib3d.cpp tphoto.cpp tstitcher.cpp tobjdetect.cpp
-                 tdnn.cpp])
+                 tdnn.cpp tml.cpp])
 TEA_ADD_HEADERS([])
 TEA_ADD_INCLUDES([])
 AC_MSG_CHECKING([whether to use opencv4 package])

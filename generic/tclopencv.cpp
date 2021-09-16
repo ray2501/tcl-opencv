@@ -154,6 +154,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->tonemaprei) {
         cvd->tonemaprei.release();
     }
+    if (cvd->svm) {
+        cvd->svm.release();
+    }
     ckfree(cvd);
 }
 
@@ -1305,6 +1308,18 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) QRCodeDetector,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 #endif
+
+    /*
+     * For ml
+     */
+
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::SVM",
+        (Tcl_ObjCmdProc *) SVM,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::SVM::load",
+        (Tcl_ObjCmdProc *) SVM_load,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     /*
      * For dnn
@@ -3856,6 +3871,90 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::SCANS", -1);
     setupValue = Tcl_NewIntObj(cv::Stitcher::SCANS);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * ML sample types
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::ROW_SAMPLE", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SampleTypes::ROW_SAMPLE);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::COL_SAMPLE", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SampleTypes::COL_SAMPLE);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * Predict options -
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::UPDATE_MODEL", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::StatModel::Flags::UPDATE_MODEL);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::RAW_OUTPUT", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::StatModel::Flags::RAW_OUTPUT);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::COMPRESSED_INPUT", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::StatModel::Flags::COMPRESSED_INPUT);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::PREPROCESSED_INPUT", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::StatModel::Flags::PREPROCESSED_INPUT);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * SVM types
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::SVM_C_SVC", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SVM::Types::C_SVC);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::SVM_NU_SVC", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SVM::Types::NU_SVC);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::SVM_ONE_CLASS", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SVM::Types::ONE_CLASS);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::SVM_EPS_SVR", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SVM::Types::EPS_SVR);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::SVM_NU_SVR", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SVM::Types::NU_SVR);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * SVM kernel types
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::SVM_LINEAR", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SVM::KernelTypes::LINEAR);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::SVM_POLY", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SVM::KernelTypes::POLY);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::SVM_RBF", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SVM::KernelTypes::RBF);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::SVM_SIGMOID", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SVM::KernelTypes::SIGMOID);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::SVM_CHI2", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SVM::KernelTypes::CHI2);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::SVM_INTER", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SVM::KernelTypes::INTER);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*

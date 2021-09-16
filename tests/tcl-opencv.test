@@ -992,7 +992,81 @@ test opencv-1.82 {encode/decode image} {*}{
     -result {0}
 }
 
-test opencv-1.83 {Close test} {*}{
+test opencv-1.83 {Simple SVM test} {*}{
+    -body {
+        set labels [list 1 -1 -1 -1]
+        set trainingData [list 501 10 255 10 501 255 10 501]
+
+        set labelsMat [::cv::Mat::Mat 4 1 $::cv::CV_32SC1]
+        $labelsMat setData $labels
+        set trainingDataMat [::cv::Mat::Mat 4 2 $::cv::CV_32F]
+        $trainingDataMat setData $trainingData
+
+        set term [::cv::TermCriteria $::cv::COUNT 100 0.000001]
+
+        set svm [::cv::ml::SVM]
+        $svm setType $::cv::ml::SVM_C_SVC
+        $svm setKernel $::cv::ml::SVM_LINEAR
+        $svm setTermCriteria $term
+
+        $svm train $trainingDataMat $::cv::ml::ROW_SAMPLE $labelsMat
+
+        set width 512
+        set height 512
+        set result_image [::cv::Mat::zeros $height $width $::cv::CV_8UC3]
+        for {set i 0} {$i < $height} {incr i} {
+            for {set j 0} {$j < $width} {incr j} {
+                set sampleMat [::cv::Mat::Mat 1 2 $::cv::CV_32F]
+                $sampleMat at [list 0 0] 0 $j
+                $sampleMat at [list 0 1] 0 $i
+
+                set response [$svm predict $sampleMat]
+                set retval [lindex $response 0]
+                set results [lindex $response 1]
+
+                set value [$results at [list 0 0] 0]
+
+                if {$value == 1} {
+                    $result_image at [list $i $j] 0 0
+                    $result_image at [list $i $j] 1 255
+                    $result_image at [list $i $j] 2 0
+                } else {
+                    $result_image at [list $i $j] 0 255
+                    $result_image at [list $i $j] 1 0
+                    $result_image at [list $i $j] 2 0
+                }
+
+                $results close
+                $sampleMat close
+            }
+        }
+
+        set thickness -1
+        ::cv::circle $result_image 501 10 5 [list 0 0 0 0] $thickness
+        ::cv::circle $result_image 255 10 5 [list 255 255 255 0] $thickness
+        ::cv::circle $result_image 501 255 5 [list 255 255 255 0] $thickness
+        ::cv::circle $result_image 10 501 5 [list 255 255 255 0] $thickness
+
+        set sv [$svm getUncompressedSupportVectors]
+        for {set i 0} {$i < [$sv rows]} {incr i} {
+            set v0 [expr int([$sv at [list $i 0] 0])]
+            set v1 [expr int([$sv at [list $i 1] 0])]
+            ::cv::circle $result_image $v0 $v1 6 [list 128 128 128 0] 2
+        }
+        $sv close
+
+        ::cv::imwrite "result.png" $result_image
+
+        $svm close
+        $labelsMat close
+        $trainingDataMat close
+        $result_image close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.84 {Close test} {*}{
     -body {
         ::cv::imwrite output.png $image
         $tmatrix1 close
@@ -1017,6 +1091,7 @@ test opencv-1.83 {Close test} {*}{
 
 #-------------------------------------------------------------------------------
 
+removeFile result.png
 removeFile output.png
 
 cleanupTests
