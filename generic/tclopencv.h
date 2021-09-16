@@ -265,6 +265,8 @@ MODULE_SCOPE int Stitcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 MODULE_SCOPE int SVM(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int SVM_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
+MODULE_SCOPE int TrainData(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+
 /*
  * OpenCV objdetect
  */
@@ -335,6 +337,7 @@ typedef struct {
     cv::Ptr<cv::TonemapMantiuk> tonemapman;
     cv::Ptr<cv::TonemapReinhard> tonemaprei;
     cv::Ptr<cv::ml::SVM> svm;
+    cv::Ptr<cv::ml::TrainData> traindata;
 
     Tcl_Command cmd_fastdetector;
     Tcl_Command cmd_agastdetector;
@@ -359,6 +362,7 @@ typedef struct {
     Tcl_Command cmd_tonemapman;
     Tcl_Command cmd_tonemaprei;
     Tcl_Command cmd_svm;
+    Tcl_Command cmd_traindata;
 
 #ifdef TCL_USE_TKPHOTO
     int tkCheck;

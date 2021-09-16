@@ -157,6 +157,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->svm) {
         cvd->svm.release();
     }
+    if (cvd->traindata) {
+        cvd->traindata.release();
+    }
     ckfree(cvd);
 }
 
@@ -1319,6 +1322,10 @@ Opencv_Init(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp, "::" NS "::ml::SVM::load",
         (Tcl_ObjCmdProc *) SVM_load,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::TrainData",
+        (Tcl_ObjCmdProc *) TrainData,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     /*

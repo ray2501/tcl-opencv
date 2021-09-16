@@ -494,6 +494,9 @@ if encoded QR Code data is long when I test it.
 
 ### ml
 
+    ::cv::ml::TrainData samples layout responses
+    TrainData close
+
     ::cv::ml::SVM
     ::cv::ml::SVM::load filename
     SVM getC
@@ -516,7 +519,7 @@ if encoded QR Code data is long when I test it.
     SVM setType value
     SVM setKernel value
     SVM setTermCriteria termCriteria
-    SVM train samples layout responses
+    SVM train trainData
     SVM predict samples ?flags?
     SVM save filename
     SVM close

@@ -508,30 +508,33 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
             break;
         }
         case FUNC_train: {
-            cv::Mat *samples, *responses;
-            int layout;
+            cv::Ptr< cv::ml::TrainData > trainData;
+            char *command = NULL;
+            int len = 0, flags = 0;
 
-           if (objc != 5) {
-                Tcl_WrongNumArgs(interp, 2, objv, "samples layout responses");
+            if (objc != 3 && objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "trainData ?flags?");
                 return TCL_ERROR;
             }
 
-            samples = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
-            if (!samples) {
+            command = Tcl_GetStringFromObj(objv[2], &len);
+            if (!command || len < 1) {
+                Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
                 return TCL_ERROR;
             }
 
-            if (Tcl_GetIntFromObj(interp, objv[3], &layout) != TCL_OK) {
-                return TCL_ERROR;
+            if (strcmp(command, "::cv-mltraindata")==0) {
+                trainData = cvd->traindata;
             }
 
-            responses = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[4]);
-            if (!responses) {
-                return TCL_ERROR;
+            if (objc == 4) {
+                if (Tcl_GetIntFromObj(interp, objv[3], &flags) != TCL_OK) {
+                    return TCL_ERROR;
+                }
             }
 
             try {
-                cvd->svm->train(*samples, layout, *responses);
+                cvd->svm->train(trainData, flags);
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "train failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -546,7 +549,7 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
             int flags = 0;
             float value;
 
-           if (objc != 3 && objc != 4) {
+            if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "samples ?flags?");
                 return TCL_ERROR;
             }
@@ -706,6 +709,117 @@ int SVM_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             cd, (Tcl_CmdDeleteProc *) SVM_DESTRUCTOR);
 
     cvd->svm = svm;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
+static void TrainData_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->traindata) {
+        cvd->traindata.release();
+    }
+    cvd->cmd_traindata = NULL;
+}
+
+
+static int TrainData_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "close",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_CLOSE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->traindata == nullptr) {
+        Tcl_SetResult(interp, (char *) "no traindata instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_traindata) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_traindata);
+            }
+
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int TrainData(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::ml::TrainData> traindata;
+    cv::Mat *samples, *responses;
+    int layout;
+
+    if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "samples layout responses");
+        return TCL_ERROR;
+    }
+
+    samples = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!samples) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &layout) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    responses = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+    if (!responses) {
+        return TCL_ERROR;
+    }
+
+    try {
+        traindata = cv::ml::TrainData::create(*samples, layout, *responses);
+
+        if (traindata == nullptr) {
+            Tcl_SetResult(interp, (char *) "TrainData create failed", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "TrainData failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-mltraindata", -1);
+
+    cvd->cmd_traindata =
+        Tcl_CreateObjCommand(interp, "::cv-mltraindata",
+            (Tcl_ObjCmdProc *) TrainData_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) TrainData_DESTRUCTOR);
+
+    cvd->traindata = traindata;
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;

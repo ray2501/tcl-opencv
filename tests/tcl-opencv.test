@@ -1009,7 +1009,8 @@ test opencv-1.83 {Simple SVM test} {*}{
         $svm setKernel $::cv::ml::SVM_LINEAR
         $svm setTermCriteria $term
 
-        $svm train $trainingDataMat $::cv::ml::ROW_SAMPLE $labelsMat
+        set trainData [::cv::ml::TrainData $trainingDataMat $::cv::ml::ROW_SAMPLE $labelsMat]
+        $svm train $trainData
 
         set width 512
         set height 512
@@ -1057,6 +1058,7 @@ test opencv-1.83 {Simple SVM test} {*}{
 
         ::cv::imwrite "result.png" $result_image
 
+        $trainData close
         $svm close
         $labelsMat close
         $trainingDataMat close
