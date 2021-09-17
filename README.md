@@ -494,11 +494,6 @@ if encoded QR Code data is long when I test it.
 
 ### ml
 
-    ::cv::ml::TrainData samples layout responses
-    TrainData close
-
-Please notice, TrainData command will only have 1 instance.
-
     ::cv::ml::SVM
     ::cv::ml::SVM::load filename
     SVM getC
@@ -527,6 +522,11 @@ Please notice, TrainData command will only have 1 instance.
     SVM close
 
 Please notice, SVM and SVM::load command will only have 1 instance.
+
+    ::cv::ml::TrainData samples layout responses
+    TrainData close
+
+Please notice, TrainData command will only have 1 instance.
 
 ### dnn
 
