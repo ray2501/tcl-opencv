@@ -510,6 +510,8 @@ if encoded QR Code data is long when I test it.
     KNearest save
     KNearest close
 
+Please notice, KNearest and KNearest::load command will only have 1 instance.
+
     ::cv::ml::SVM
     ::cv::ml::SVM::load filename
     SVM getC
