@@ -494,6 +494,22 @@ if encoded QR Code data is long when I test it.
 
 ### ml
 
+    ::cv::ml::KNearest
+    ::cv::ml::KNearest::load filename
+    KNearest getAlgorithmType
+    KNearest getDefaultK
+    KNearest getEmax
+    KNearest getIsClassifier
+    KNearest setAlgorithmType value
+    KNearest setDefaultK value
+    KNearest setEmax
+    KNearest setIsClassifier
+    KNearest findNearest samples k
+    KNearest train
+    KNearest predict
+    KNearest save
+    KNearest close
+
     ::cv::ml::SVM
     ::cv::ml::SVM::load filename
     SVM getC
@@ -1262,6 +1278,11 @@ Predict options -
     ::cv::ml::RAW_OUTPUT
     ::cv::ml::COMPRESSED_INPUT
     ::cv::ml::PREPROCESSED_INPUT
+
+KNearest algorithm -
+
+    ::cv::ml::KNEAREST_BRUTE_FORCE
+    ::cv::ml::KNEAREST_KDTREE
 
 SVM types -
 

@@ -5,6 +5,472 @@ extern "C" {
 #endif
 
 
+static void KNearest_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->knearest) {
+        cvd->knearest.release();
+    }
+    cvd->cmd_knearest = NULL;
+}
+
+
+static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "getAlgorithmType",
+        "getDefaultK",
+        "getEmax",
+        "getIsClassifier",
+        "setAlgorithmType",
+        "setDefaultK",
+        "setEmax",
+        "setIsClassifier",
+        "findNearest",
+        "train",
+        "predict",
+        "save",
+        "close",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_getAlgorithmType,
+        FUNC_getDefaultK,
+        FUNC_getEmax,
+        FUNC_getIsClassifier,
+        FUNC_setAlgorithmType,
+        FUNC_setDefaultK,
+        FUNC_setEmax,
+        FUNC_setIsClassifier,
+        FUNC_findNearest,
+        FUNC_train,
+        FUNC_predict,
+        FUNC_save,
+        FUNC_CLOSE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->knearest == nullptr) {
+        Tcl_SetResult(interp, (char *) "no knearest instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_getAlgorithmType: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->knearest->getAlgorithmType();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getAlgorithmType failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getDefaultK: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->knearest->getDefaultK();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getDefaultK failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getEmax: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->knearest->getEmax();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getEmax failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getIsClassifier: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->knearest->getIsClassifier();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getIsClassifier failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewBooleanObj(value));
+            break;
+        }
+        case FUNC_setAlgorithmType: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->knearest->setAlgorithmType(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setAlgorithmType failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setDefaultK: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->knearest->setDefaultK(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setDefaultK failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setEmax: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->knearest->setEmax(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setEmax failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setIsClassifier: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetBooleanFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->knearest->setIsClassifier( (bool) value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setIsClassifier failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_findNearest: {
+            cv::Mat *samples, *dstmat;
+            cv::Mat results;
+            Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
+            int k = 0;
+            float value;
+
+            if (objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "samples k");
+                return TCL_ERROR;
+            }
+
+            samples = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!samples) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[3], &k) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->knearest->findNearest(*samples, k, results);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "findNearest failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            dstmat = new cv::Mat(results);
+            pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
+            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_train: {
+            cv::Ptr< cv::ml::TrainData > trainData;
+            char *command = NULL;
+            int len = 0, flags = 0;
+
+            if (objc != 3 && objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "trainData ?flags?");
+                return TCL_ERROR;
+            }
+
+            command = Tcl_GetStringFromObj(objv[2], &len);
+            if (!command || len < 1) {
+                Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            if (strcmp(command, "::cv-mltraindata")==0) {
+                trainData = cvd->traindata;
+            }
+
+            if (objc == 4) {
+                if (Tcl_GetIntFromObj(interp, objv[3], &flags) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                cvd->knearest->train(trainData, flags);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "train failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_predict: {
+            cv::Mat *samples, *dstmat;
+            cv::Mat results;
+            Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
+            int flags = 0;
+            float value;
+
+            if (objc != 3 && objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "samples ?flags?");
+                return TCL_ERROR;
+            }
+
+            samples = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!samples) {
+                return TCL_ERROR;
+            }
+
+            if (objc == 4) {
+                if (Tcl_GetIntFromObj(interp, objv[3], &flags) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                value = cvd->knearest->predict(*samples, results, flags);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "predict failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            dstmat = new cv::Mat(results);
+            pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
+            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_save: {
+            char *filename = NULL;
+            int len = 0;
+            Tcl_DString ds;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "filename");
+                return TCL_ERROR;
+            }
+
+            filename = Tcl_GetStringFromObj(objv[2], &len);
+            if (!filename || len < 1) {
+                Tcl_SetResult(interp, (char *) "save invalid file name", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
+            try {
+                cvd->knearest->save(filename);
+            } catch (...) {
+                Tcl_DStringFree(&ds);
+                Tcl_SetResult(interp, (char *) "save failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+            Tcl_DStringFree(&ds);
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_knearest) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_knearest);
+            }
+
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int KNearest(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::ml::KNearest> knearest;
+
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, 0);
+        return TCL_ERROR;
+    }
+
+    try {
+        knearest = cv::ml::KNearest::create();
+
+        if (knearest == nullptr) {
+            Tcl_SetResult(interp, (char *) "KNearest create failed", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "KNearest failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-mlknearest", -1);
+
+    cvd->cmd_knearest =
+        Tcl_CreateObjCommand(interp, "::cv-mlknearest",
+            (Tcl_ObjCmdProc *) KNearest_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) KNearest_DESTRUCTOR);
+
+    cvd->knearest = knearest;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
+int KNearest_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::ml::KNearest> knearest;
+    char *filename = NULL;
+    int len = 0;
+    Tcl_DString ds;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "filename");
+        return TCL_ERROR;
+    }
+
+    filename = Tcl_GetStringFromObj(objv[1], &len);
+    if (!filename || len < 1) {
+        Tcl_SetResult(interp, (char *) "load invalid file name", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
+    try {
+        knearest = cv::ml::KNearest::load(filename);
+
+        if (knearest == nullptr) {
+            Tcl_DStringFree(&ds);
+            Tcl_SetResult(interp, (char *) "KNearest load failed", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...) {
+        Tcl_DStringFree(&ds);
+        Tcl_SetResult(interp, (char *) "KNearest load failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    Tcl_DStringFree(&ds);
+
+    pResultStr = Tcl_NewStringObj("::cv-mlknearest", -1);
+
+    cvd->cmd_knearest =
+        Tcl_CreateObjCommand(interp, "::cv-mlknearest",
+            (Tcl_ObjCmdProc *) KNearest_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) KNearest_DESTRUCTOR);
+
+    cvd->knearest = knearest;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 static void SVM_DESTRUCTOR(void *cd)
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;

@@ -154,6 +154,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->tonemaprei) {
         cvd->tonemaprei.release();
     }
+    if (cvd->knearest) {
+        cvd->knearest.release();
+    }
     if (cvd->svm) {
         cvd->svm.release();
     }
@@ -1315,6 +1318,14 @@ Opencv_Init(Tcl_Interp *interp)
     /*
      * For ml
      */
+
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::KNearest",
+        (Tcl_ObjCmdProc *) KNearest,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::KNearest::load",
+        (Tcl_ObjCmdProc *) KNearest_load,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_CreateObjCommand(interp, "::" NS "::ml::SVM",
         (Tcl_ObjCmdProc *) SVM,
@@ -3910,6 +3921,18 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::ml::PREPROCESSED_INPUT", -1);
     setupValue = Tcl_NewIntObj(cv::ml::StatModel::Flags::PREPROCESSED_INPUT);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * KNearest algorithm
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::KNEAREST_BRUTE_FORCE", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::KNearest::Types::BRUTE_FORCE);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::KNEAREST_KDTREE", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::KNearest::Types::KDTREE);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*
