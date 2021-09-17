@@ -154,6 +154,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->tonemaprei) {
         cvd->tonemaprei.release();
     }
+    if (cvd->bayesclassifier) {
+        cvd->bayesclassifier.release();
+    }
     if (cvd->knearest) {
         cvd->knearest.release();
     }
@@ -1318,6 +1321,14 @@ Opencv_Init(Tcl_Interp *interp)
     /*
      * For ml
      */
+
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::NormalBayesClassifier",
+        (Tcl_ObjCmdProc *) NormalBayesClassifier,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::NormalBayesClassifier::load",
+        (Tcl_ObjCmdProc *) NormalBayesClassifier_load,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_CreateObjCommand(interp, "::" NS "::ml::KNearest",
         (Tcl_ObjCmdProc *) KNearest,

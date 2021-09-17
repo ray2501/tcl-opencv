@@ -5,6 +5,306 @@ extern "C" {
 #endif
 
 
+static void BayesClassifier_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->bayesclassifier) {
+        cvd->bayesclassifier.release();
+    }
+    cvd->cmd_bayesclassifier = NULL;
+}
+
+
+static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "train",
+        "predict",
+        "predictProb",
+        "save",
+        "close",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_train,
+        FUNC_predict,
+        FUNC_predictProb,
+        FUNC_save,
+        FUNC_CLOSE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->bayesclassifier == nullptr) {
+        Tcl_SetResult(interp, (char *) "no bayesclassifier instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_train: {
+            cv::Ptr< cv::ml::TrainData > trainData;
+            char *command = NULL;
+            int len = 0, flags = 0;
+
+            if (objc != 3 && objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "trainData ?flags?");
+                return TCL_ERROR;
+            }
+
+            command = Tcl_GetStringFromObj(objv[2], &len);
+            if (!command || len < 1) {
+                Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            if (strcmp(command, "::cv-mltraindata")==0) {
+                trainData = cvd->traindata;
+            }
+
+            if (objc == 4) {
+                if (Tcl_GetIntFromObj(interp, objv[3], &flags) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                cvd->bayesclassifier->train(trainData, flags);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "train failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_predict: {
+            cv::Mat *samples, *dstmat;
+            cv::Mat results;
+            Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
+            int flags = 0;
+            float value;
+
+            if (objc != 3 && objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "samples ?flags?");
+                return TCL_ERROR;
+            }
+
+            samples = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!samples) {
+                return TCL_ERROR;
+            }
+
+            if (objc == 4) {
+                if (Tcl_GetIntFromObj(interp, objv[3], &flags) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                value = cvd->bayesclassifier->predict(*samples, results, flags);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "predict failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            dstmat = new cv::Mat(results);
+            pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
+            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_predictProb: {
+            cv::Mat *samples, *dstmat1, *dstmat2;
+            cv::Mat outputs, outputProbs;
+            Tcl_Obj *pResultStr = NULL, *pMatResultStr1 = NULL, *pMatResultStr2 = NULL;
+            int flags = 0;
+            float value;
+
+            if (objc != 3 && objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "samples ?flags?");
+                return TCL_ERROR;
+            }
+
+            samples = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!samples) {
+                return TCL_ERROR;
+            }
+
+            if (objc == 4) {
+                if (Tcl_GetIntFromObj(interp, objv[3], &flags) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                value = cvd->bayesclassifier->predictProb(*samples, outputs, outputProbs, flags);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "predictProb failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            dstmat1 = new cv::Mat(outputs);
+            pMatResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+
+            dstmat2 = new cv::Mat(outputProbs);
+            pMatResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
+            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr1);
+            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr2);
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_save: {
+            char *filename = NULL;
+            int len = 0;
+            Tcl_DString ds;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "filename");
+                return TCL_ERROR;
+            }
+
+            filename = Tcl_GetStringFromObj(objv[2], &len);
+            if (!filename || len < 1) {
+                Tcl_SetResult(interp, (char *) "save invalid file name", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
+            try {
+                cvd->bayesclassifier->save(filename);
+            } catch (...) {
+                Tcl_DStringFree(&ds);
+                Tcl_SetResult(interp, (char *) "save failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+            Tcl_DStringFree(&ds);
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_bayesclassifier) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_bayesclassifier);
+            }
+
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int NormalBayesClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::ml::NormalBayesClassifier> bayesclassifier;
+
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, 0);
+        return TCL_ERROR;
+    }
+
+    try {
+        bayesclassifier = cv::ml::NormalBayesClassifier::create();
+
+        if (bayesclassifier == nullptr) {
+            Tcl_SetResult(interp, (char *) "NormalBayesClassifier create failed", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "NormalBayesClassifier failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-mlbayesclassifier", -1);
+
+    cvd->cmd_bayesclassifier =
+        Tcl_CreateObjCommand(interp, "::cv-mlbayesclassifier",
+            (Tcl_ObjCmdProc *) BayesClassifier_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) BayesClassifier_DESTRUCTOR);
+
+    cvd->bayesclassifier = bayesclassifier;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
+int NormalBayesClassifier_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::ml::NormalBayesClassifier> bayesclassifier;
+    char *filename = NULL;
+    int len = 0;
+    Tcl_DString ds;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "filename");
+        return TCL_ERROR;
+    }
+
+    filename = Tcl_GetStringFromObj(objv[1], &len);
+    if (!filename || len < 1) {
+        Tcl_SetResult(interp, (char *) "load invalid file name", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
+    try {
+        bayesclassifier = cv::ml::NormalBayesClassifier::load(filename);
+
+        if (bayesclassifier == nullptr) {
+            Tcl_DStringFree(&ds);
+            Tcl_SetResult(interp, (char *) "NormalBayesClassifier load failed", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...) {
+        Tcl_DStringFree(&ds);
+        Tcl_SetResult(interp, (char *) "NormalBayesClassifier load failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    Tcl_DStringFree(&ds);
+
+    pResultStr = Tcl_NewStringObj("::cv-mlbayesclassifier", -1);
+
+    cvd->cmd_bayesclassifier =
+        Tcl_CreateObjCommand(interp, "::cv-mlbayesclassifier",
+            (Tcl_ObjCmdProc *) BayesClassifier_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) BayesClassifier_DESTRUCTOR);
+
+    cvd->bayesclassifier = bayesclassifier;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 static void KNearest_DESTRUCTOR(void *cd)
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;

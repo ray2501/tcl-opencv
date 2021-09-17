@@ -262,6 +262,9 @@ MODULE_SCOPE int Stitcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
  * OpenCV ml
  */
 
+MODULE_SCOPE int NormalBayesClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int NormalBayesClassifier_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+
 MODULE_SCOPE int KNearest(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int KNearest_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
@@ -339,6 +342,7 @@ typedef struct {
     cv::Ptr<cv::TonemapDrago> tonemapdra;
     cv::Ptr<cv::TonemapMantiuk> tonemapman;
     cv::Ptr<cv::TonemapReinhard> tonemaprei;
+    cv::Ptr<cv::ml::NormalBayesClassifier> bayesclassifier;
     cv::Ptr<cv::ml::KNearest> knearest;
     cv::Ptr<cv::ml::SVM> svm;
     cv::Ptr<cv::ml::TrainData> traindata;
@@ -365,6 +369,7 @@ typedef struct {
     Tcl_Command cmd_tonemapdra;
     Tcl_Command cmd_tonemapman;
     Tcl_Command cmd_tonemaprei;
+    Tcl_Command cmd_bayesclassifier;
     Tcl_Command cmd_knearest;
     Tcl_Command cmd_svm;
     Tcl_Command cmd_traindata;

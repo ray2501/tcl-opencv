@@ -494,6 +494,16 @@ if encoded QR Code data is long when I test it.
 
 ### ml
 
+    ::cv::ml::NormalBayesClassifier
+    ::cv::ml::NormalBayesClassifier::load filename
+    NormalBayesClassifier train trainData ?flags?
+    NormalBayesClassifier predict samples ?flags?
+    NormalBayesClassifier predictProb samples ?flags?
+    NormalBayesClassifier save filename
+    NormalBayesClassifier close
+
+Please notice, NormalBayesClassifier and NormalBayesClassifier::load command will only have 1 instance.
+
     ::cv::ml::KNearest
     ::cv::ml::KNearest::load filename
     KNearest getAlgorithmType
@@ -505,9 +515,9 @@ if encoded QR Code data is long when I test it.
     KNearest setEmax
     KNearest setIsClassifier
     KNearest findNearest samples k
-    KNearest train
-    KNearest predict
-    KNearest save
+    KNearest train trainData ?flags?
+    KNearest predict samples ?flags?
+    KNearest save filename
     KNearest close
 
 Please notice, KNearest and KNearest::load command will only have 1 instance.
