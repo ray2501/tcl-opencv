@@ -75,6 +75,8 @@ MODULE_SCOPE int mat_trace(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 MODULE_SCOPE int mat_hconcat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_vconcat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
+MODULE_SCOPE int kmeans(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+
 MODULE_SCOPE int perspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 MODULE_SCOPE int getTickCount(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

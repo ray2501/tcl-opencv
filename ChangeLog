@@ -1,5 +1,6 @@
 2021-09-17 Danilo Chang
 
+	* Implement command: kmeans
 	* Implement command: KNearest, NormalBayesClassifier
 
 2021-09-16 Danilo Chang

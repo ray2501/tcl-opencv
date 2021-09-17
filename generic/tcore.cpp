@@ -3594,6 +3594,94 @@ int mat_vconcat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int kmeans(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat image, bestLabels;
+    Tcl_Obj *pResultStr = NULL, *pDstResultStr = NULL, *pLabelResultStr = NULL;
+    cv::Mat *matrix = NULL, *labelsmst = NULL, *dstmat = NULL;
+    cv::TermCriteria *termCriteria;
+    int k = 0, attempts = 0, flags = 0;
+    double value;
+    int nolabelmatrix = 0;
+
+    if (objc != 7) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix k bestLabels termCriteria attempts flags");
+        return TCL_ERROR;
+    }
+
+    matrix = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!matrix) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &k) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    /*
+     * If users give the handle to "None", then setup a nolabelmatrix flag to
+     * indicate this thing. This flag is used to decide the argument.
+     */
+    if (strcmp(Tcl_GetString(objv[3]), "None") == 0) {
+        nolabelmatrix = 1;
+    } else {
+        nolabelmatrix = 0;
+
+        labelsmst = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+        if (!labelsmst) {
+            return TCL_ERROR;
+        }
+    }
+
+    termCriteria = (cv::TermCriteria *) Opencv_FindHandle(cd, interp, OPENCV_TERMCRITERIA, objv[4]);
+    if (!termCriteria) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[5], &attempts) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[6], &flags) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        if (nolabelmatrix == 0 && (flags & cv::KMEANS_USE_INITIAL_LABELS) == 1) {
+            bestLabels = *labelsmst;
+            value = cv::kmeans(*matrix, k, bestLabels, *termCriteria, attempts, flags, image);
+        } else if (nolabelmatrix == 1 && (flags & cv::KMEANS_USE_INITIAL_LABELS) == 0) {
+            value = cv::kmeans(*matrix, k, bestLabels, *termCriteria, attempts, flags, image);
+        } else {
+            Tcl_SetResult(interp, (char *) "kmeans arguments is invalid", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "kmeans failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    dstmat = new cv::Mat(image);
+    pDstResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    if (nolabelmatrix == 1) {
+        labelsmst = new cv::Mat(bestLabels);
+        pLabelResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, labelsmst);
+    } else {
+        pLabelResultStr = objv[3];
+    }
+
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
+    Tcl_ListObjAppendElement(NULL, pResultStr, pLabelResultStr);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pDstResultStr);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int perspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int count = 0, npts = 0;

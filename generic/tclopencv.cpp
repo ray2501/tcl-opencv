@@ -753,6 +753,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_vconcat,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::kmeans",
+        (Tcl_ObjCmdProc *) kmeans,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::perspectiveTransform",
         (Tcl_ObjCmdProc *) perspectiveTransform,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
@@ -3667,6 +3671,22 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::GC_PR_FGD", -1);
     setupValue = Tcl_NewIntObj(cv::GC_PR_FGD);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * Kmeans flags
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::KMEANS_RANDOM_CENTERS", -1);
+    setupValue = Tcl_NewIntObj(cv::KMEANS_RANDOM_CENTERS);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::KMEANS_PP_CENTERS", -1);
+    setupValue = Tcl_NewIntObj(cv::KMEANS_PP_CENTERS);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::KMEANS_USE_INITIAL_LABELS", -1);
+    setupValue = Tcl_NewIntObj(cv::KMEANS_USE_INITIAL_LABELS);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*

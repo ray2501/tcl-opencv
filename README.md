@@ -101,6 +101,11 @@ Implement commands
     ::cv::hconcat matrix_1 matrix_2
     ::cv::vconcat matrix_1 matrix_2
 
+    ::cv::kmeans matrix k bestLabels termCriteria attempts flags
+
+If users setup bestLabels to `None`, then flags should not set to `$::cv::KMEANS_USE_INITIAL_LABELS`.
+If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV_32S matrix.
+
     ::cv::perspectiveTransform src_list transformation_matrix
 
     ::cv::getTickCount
@@ -1195,6 +1200,12 @@ GrabCut classes -
     ::cv::GC_FGD
     ::cv::GC_PR_BGD
     ::cv::GC_PR_FGD
+
+Kmeans flags -
+
+    ::cv::KMEANS_RANDOM_CENTERS
+    ::cv::KMEANS_PP_CENTERS
+    ::cv::KMEANS_USE_INITIAL_LABELS
 
 TermCriteria type -
 
