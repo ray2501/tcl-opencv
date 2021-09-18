@@ -140,6 +140,7 @@ MODULE_SCOPE int Scharr(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 MODULE_SCOPE int Laplacian(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int distanceTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int connectedComponents(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int connectedComponentsWithStats(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int watershed(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int goodFeaturesToTrack(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int cornerHarris(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

@@ -2602,6 +2602,58 @@ int connectedComponents(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 }
 
 
+int connectedComponentsWithStats(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat labels, stats, centroids;
+    int ltype = CV_32S;
+    int connectivity = 8;
+    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL, *pResultStr3 = NULL;
+    cv::Mat *mat, *dstmat1, *dstmat2, *dstmat3;
+
+    if (objc != 2 && objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix ?connectivity?");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 3) {
+        if (Tcl_GetIntFromObj(interp, objv[2], &connectivity) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::connectedComponentsWithStats(*mat, labels, stats, centroids, connectivity, ltype);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "connectedComponentsWithStats failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    dstmat1 = new cv::Mat(labels);
+    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+
+    dstmat2 = new cv::Mat(stats);
+    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+
+    dstmat3 = new cv::Mat(centroids);
+    pResultStr3 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat3);
+
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr3);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
 int watershed(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;

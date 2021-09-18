@@ -963,6 +963,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) connectedComponents,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::connectedComponentsWithStats",
+        (Tcl_ObjCmdProc *) connectedComponentsWithStats,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::watershed",
         (Tcl_ObjCmdProc *) watershed,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

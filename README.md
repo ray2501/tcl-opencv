@@ -166,6 +166,7 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     ::cv::Laplacian matrix ?ksize scale delta borderType?
     ::cv::distanceTransform matrix distanceType maskSize
     ::cv::connectedComponents matrix ?connectivity?
+    ::cv::connectedComponentsWithStats matrix ?connectivity?
     ::cv::watershed matrix markers
     ::cv::goodFeaturesToTrack matrix maxCorners qualityLevel minDistance ?mask blockSize useHarrisDetector k?
     ::cv::cornerHarris matrix blockSize ksize k ?borderType?
