@@ -1,5 +1,6 @@
 2021-09-18 Danilo Chang
 
+	* Implement command: integral
 	* Implement command: connectedComponentsWithStats
 	* Implement command: transform
 

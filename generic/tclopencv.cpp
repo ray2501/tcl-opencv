@@ -847,6 +847,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) getRectSubPix,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::integral",
+        (Tcl_ObjCmdProc *) integral,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::remap",
         (Tcl_ObjCmdProc *) remap,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

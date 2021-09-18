@@ -134,6 +134,7 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     ::cv::matchTemplate matrix templ_matrix method
     ::cv::getRotationMatrix2D x y angle scale
     ::cv::getRectSubPix matrix width height center_x center_y
+    ::cv::integral matrix ?sdepth sqdepth?
     ::cv::remap matrix map1 map2 interpolation
     ::cv::resize matrix width height ?flags?
     ::cv::threshold matrix thresh maxval type

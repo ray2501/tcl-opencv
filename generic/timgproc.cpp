@@ -921,6 +921,60 @@ int getRectSubPix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int integral(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat sum, sqsum, tilted;
+    int sdepth = -1, sqdepth = -1;
+    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL, *pResultStr3 = NULL;
+    cv::Mat *mat, *dstmat1, *dstmat2, *dstmat3;
+
+    if (objc != 2 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix ?sdepth sqdepth?");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 4) {
+        if (Tcl_GetIntFromObj(interp, objv[2], &sdepth) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[3], &sqdepth) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::integral(*mat, sum, sqsum, tilted, sqdepth, sqdepth);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "integral failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    dstmat1 = new cv::Mat(sum);
+    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+
+    dstmat2 = new cv::Mat(sqsum);
+    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+
+    dstmat3 = new cv::Mat(tilted);
+    pResultStr3 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat3);
+
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr3);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int remap(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
