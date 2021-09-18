@@ -729,6 +729,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_rotate,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::solve",
+        (Tcl_ObjCmdProc *) mat_solve,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::sqrt",
         (Tcl_ObjCmdProc *) mat_sqrt,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

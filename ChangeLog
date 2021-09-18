@@ -2,7 +2,7 @@
 
 	* Implement command: integral
 	* Implement command: connectedComponentsWithStats
-	* Implement command: transform
+	* Implement command: transform, solve
 
 2021-09-17 Danilo Chang
 

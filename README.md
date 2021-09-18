@@ -94,6 +94,7 @@ Implement commands
     ::cv::randu matrix min_list max_list
     ::cv::reduce matrix dim rtype ?dtype?
     ::cv::rotate matrix rotateCode
+    ::cv::solve matrix_1 matrix_2 ?flags?
     ::cv::sqrt matrix
     ::cv::subtract matrix_1 matrix_2
     ::cv::sum matrix
@@ -1148,7 +1149,7 @@ Line Types -
     ::cv::ROTATE_180
     ::cv::ROTATE_90_COUNTERCLOCKWISE
 
-`MATRIX inv` method and
+`MATRIX inv` method, `cv::solve` flags and
 `::cv::getPerspectiveTransform` command solveMethod -
 
     ::cv::DECOMP_LU

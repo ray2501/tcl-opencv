@@ -3380,6 +3380,55 @@ int mat_rotate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_solve(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat image;
+    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL;
+    cv::Mat *mat1, *mat2, *dstmat;
+    bool result;
+    int flags = cv::DECOMP_LU;
+
+    if (objc != 3 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix_1 matrix_2 ?flags?");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 4) {
+        if (Tcl_GetIntFromObj(interp, objv[3], &flags) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        result = cv::solve(*mat1, *mat2, image, flags);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "solve failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    dstmat = new cv::Mat(image);
+    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewBooleanObj((int) result));
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int mat_sqrt(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
