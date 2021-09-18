@@ -114,6 +114,9 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     ::cv::getTickFrequency
 
     ::cv::PCA matrix flags ?maxComponents?
+    PCA mean
+    PCA eigenvalues
+    PCA eigenvectors
     PCA close
 
     ::cv::TermCriteria type maxCount epsilon
