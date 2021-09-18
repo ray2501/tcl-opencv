@@ -72,6 +72,7 @@ MODULE_SCOPE int mat_sqrt(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 MODULE_SCOPE int mat_subtract(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_sum(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_trace(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_transform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_hconcat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_vconcat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 

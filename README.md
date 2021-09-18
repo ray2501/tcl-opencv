@@ -98,6 +98,7 @@ Implement commands
     ::cv::subtract matrix_1 matrix_2
     ::cv::sum matrix
     ::cv::trace matrix
+    ::cv::transform matrix_1 matrix_2
     ::cv::hconcat matrix_1 matrix_2
     ::cv::vconcat matrix_1 matrix_2
 
