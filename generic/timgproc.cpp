@@ -3348,8 +3348,8 @@ int contourArea(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int oriented = 0, count = 0;
     double result = 0;
 
-    if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 1, objv, "contour oriented");
+    if (objc != 2 && objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "contour ?oriented?");
         return TCL_ERROR;
     }
 
@@ -3386,8 +3386,10 @@ int contourArea(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
     }
 
-    if (Tcl_GetBooleanFromObj(interp, objv[2], &oriented) != TCL_OK) {
-        return TCL_ERROR;
+    if (objc == 3) {
+        if (Tcl_GetBooleanFromObj(interp, objv[2], &oriented) != TCL_OK) {
+            return TCL_ERROR;
+        }
     }
 
     try {

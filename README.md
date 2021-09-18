@@ -179,7 +179,7 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
 
     ::cv::findContours matrix mode method ?offset_point_x offset_point_y?
     ::cv::drawContours matrix contours_list contourIdx color_list ?thickness lineType maxLevel offset_point_x offset_point_y?
-    ::cv::contourArea contour oriented
+    ::cv::contourArea contour ?oriented?
     ::cv::boundingRect contour
     ::cv::minAreaRect contour
     ::cv::fitEllipse contour
