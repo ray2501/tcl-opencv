@@ -84,6 +84,8 @@ MODULE_SCOPE int perspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tc
 MODULE_SCOPE int getTickCount(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int getTickFrequency(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
+MODULE_SCOPE int PCA(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+
 MODULE_SCOPE int TermCriteria(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
@@ -312,6 +314,7 @@ typedef enum {
     OPENCV_MAT,
     OPENCV_VIDEOCAPTURE,
     OPENCV_VIDEOWRITER,
+    OPENCV_PCA,
     OPENCV_TERMCRITERIA,
     OPENCV_ODETECT,
     OPENCV_OOBJHOG,
@@ -419,6 +422,7 @@ MODULE_SCOPE int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
 #ifdef TCL_USE_OPENCV4
 MODULE_SCOPE int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
+MODULE_SCOPE int PCA_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int TERM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE void TrackbarCallback(int value, void *userdata);
 MODULE_SCOPE int VideoCapture_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

@@ -56,6 +56,11 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
                 delete writer;
                 break;
             }
+            case OPENCV_PCA: {
+                cv::PCA *pca = (cv::PCA *) cvo->obj;
+                delete pca;
+                break;
+            }
             case OPENCV_TERMCRITERIA: {
                 cv::TermCriteria *termCriteria = (cv::TermCriteria *) cvo->obj;
                 delete termCriteria;
@@ -227,6 +232,11 @@ Opencv_DESTRUCTOR(ClientData cd)
         delete writer;
         break;
     }
+    case OPENCV_PCA: {
+        cv::PCA *pca = (cv::PCA *) cvo->obj;
+        delete pca;
+        break;
+    }
     case OPENCV_TERMCRITERIA: {
         cv::TermCriteria *termCriteria = (cv::TermCriteria *) cvo->obj;
         delete termCriteria;
@@ -289,6 +299,10 @@ Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj)
     case OPENCV_VIDEOWRITER:
         prefix = "cv-videow";
         proc = VideoWriter_FUNCTION;
+        break;
+    case OPENCV_PCA:
+        prefix = "cv-pca";
+        proc = PCA_FUNCTION;
         break;
     case OPENCV_TERMCRITERIA:
         prefix = "cv-term";
@@ -775,6 +789,10 @@ Opencv_Init(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp, "::" NS "::getTickFrequency",
         (Tcl_ObjCmdProc *) getTickFrequency,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::PCA",
+        (Tcl_ObjCmdProc *) PCA,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_CreateObjCommand(interp, "::" NS "::TermCriteria",
@@ -3703,6 +3721,22 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::KMEANS_USE_INITIAL_LABELS", -1);
     setupValue = Tcl_NewIntObj(cv::KMEANS_USE_INITIAL_LABELS);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * PCA flags
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::DATA_AS_ROW", -1);
+    setupValue = Tcl_NewIntObj(cv::PCA::DATA_AS_ROW);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::DATA_AS_COL", -1);
+    setupValue = Tcl_NewIntObj(cv::PCA::DATA_AS_COL);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::USE_AVG", -1);
+    setupValue = Tcl_NewIntObj(cv::PCA::USE_AVG);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*

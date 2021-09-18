@@ -1,6 +1,7 @@
 2021-09-18 Danilo Chang
 
 	* Improve contourArea command
+	* Implement command: PCA
 	* Implement command: integral
 	* Implement command: connectedComponentsWithStats
 	* Implement command: transform, solve

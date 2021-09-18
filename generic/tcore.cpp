@@ -3878,6 +3878,183 @@ int getTickFrequency(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 }
 
 
+int PCA_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Obj *cvo = (Opencv_Obj *)cd;
+    int choice;
+    cv::PCA *pca;
+
+    static const char *FUNC_strs[] = {
+        "mean",
+        "eigenvalues",
+        "eigenvectors",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_mean,
+        FUNC_eigenvalues,
+        FUNC_eigenvectors,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    cd = (void *) cvo->top;
+    pca = (cv::PCA *) cvo->obj;
+    if (!pca) {
+        Tcl_Panic("null PCA object");
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_mean: {
+            cv::Mat *dstmat;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            dstmat = new cv::Mat(pca->mean);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_eigenvalues: {
+            cv::Mat *dstmat;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            dstmat = new cv::Mat(pca->eigenvalues);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_eigenvectors: {
+            cv::Mat *dstmat;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            dstmat = new cv::Mat(pca->eigenvectors);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+
+            break;
+        }
+        case FUNC__COMMAND: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            Tcl_GetCommandFullName(interp, cvo->cmd, obj);
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__NAME: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewStringObj(cvo->key, -1));
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::PCA", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int PCA(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int flags = 0, maxComponents = 0;
+    cv::PCA local_pca;
+    cv::PCA *pca;
+    cv::Mat *mat;
+    Tcl_Obj *pResultStr = NULL;
+
+    if (objc != 3 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 2, objv, "matrix flags ?maxComponents?");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &flags) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 4) {
+        if (Tcl_GetIntFromObj(interp, objv[3], &maxComponents) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        local_pca = cv::PCA(*mat, cv::Mat(), flags, maxComponents);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "PCA failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pca = new cv::PCA(local_pca);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_PCA, pca);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int TERM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     Opencv_Obj *cvo = (Opencv_Obj *)cd;
@@ -3911,7 +4088,7 @@ int TERM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     cd = (void *) cvo->top;
     termCriteria = (cv::TermCriteria *) cvo->obj;
     if (!termCriteria) {
-        Tcl_Panic("null Matrix object");
+        Tcl_Panic("null TermCriteria object");
     }
 
     switch ((enum FUNC_enum)choice) {
@@ -3952,7 +4129,7 @@ int TERM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            Tcl_SetResult(interp, (char *) "cv::Mat", TCL_STATIC);
+            Tcl_SetResult(interp, (char *) "cv::TermCriteria", TCL_STATIC);
             break;
         }
     }

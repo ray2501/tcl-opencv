@@ -113,7 +113,10 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     ::cv::getTickCount
     ::cv::getTickFrequency
 
-    ::cv::TermCriteria
+    ::cv::PCA matrix flags ?maxComponents?
+    PCA close
+
+    ::cv::TermCriteria type maxCount epsilon
     TermCriteria close
 
 ### imgcodecs
@@ -1210,6 +1213,12 @@ Kmeans flags -
     ::cv::KMEANS_RANDOM_CENTERS
     ::cv::KMEANS_PP_CENTERS
     ::cv::KMEANS_USE_INITIAL_LABELS
+
+PCA flags -
+
+    ::cv::DATA_AS_ROW
+    ::cv::DATA_AS_COL
+    ::cv::USE_AVG
 
 TermCriteria type -
 
