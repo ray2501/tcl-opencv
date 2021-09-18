@@ -2902,6 +2902,108 @@ Stitcher test -
         puts $em
     }
 
+PCA example -
+
+    package require opencv
+
+    proc drawAxis {matrix x1 y1 x2 y2 color scale} {
+        set PI 3.1415926535897931
+        set angle [expr atan2($y1 - $y2, $x1 - $x2)]
+        set hypotenuse [expr sqrt(($y1 - $y2)*($y1 - $y2) + ($x1 - $x2)*($x1 - $x2))]
+
+        set qx [expr int($x1 - $scale * $hypotenuse * cos($angle))]
+        set qy [expr int($y1 - $scale * $hypotenuse * sin($angle))]
+
+        cv::line $matrix $x1 $y1 $qx $qy $color 1 $::cv::LINE_AA 0
+
+        set px [expr int($qx + 9 * cos($angle + $PI / 4))]
+        set py [expr int($qy + 9 * sin($angle + $PI / 4))]
+        cv::line $matrix $px $py $qx $qy $color 1 $::cv::LINE_AA 0
+
+        set px [expr int($qx + 9 * cos($angle - $PI / 4))]
+        set py [expr int($qy + 9 * sin($angle - $PI / 4))]
+        cv::line $matrix $px $py $qx $qy $color 1 $::cv::LINE_AA 0
+    }
+
+    proc getOrientation {matrix contour} {
+        set sz [expr [llength $contour] / 2]
+        set data_pts [::cv::Mat::Mat $sz 2 $::cv::CV_64F]
+        for {set i 0; set j 0} {$i < $sz} {incr i 1; incr j 2} {
+            $data_pts at [list $i 0] 0 [lindex $contour $j]
+            $data_pts at [list $i 1] 0 [lindex $contour [expr $j + 1]]
+        }
+
+        set pca [::cv::PCA $data_pts $::cv::DATA_AS_ROW]
+        set mean [$pca mean]
+        set cntr_x [expr int([$mean at [list 0 0] 0])]
+        set cntr_y [expr int([$mean at [list 0 1] 0])]
+
+        set eigenvalues [$pca eigenvalues]
+        set eigenvectors [$pca eigenvectors]
+
+        set eigen_vecs [list]
+        set eigen_val [list]
+        for {set i 0} {$i < 2} {incr i} {
+            set x [$eigenvectors at [list $i 0] 0]
+            set y [$eigenvectors at [list $i 1] 0]
+            lappend eigen_vecs $x $y
+            lappend eigen_val [$eigenvalues at [list $i 0] 0]
+        }
+
+        set p1_x [expr int($cntr_x + 0.02 * [lindex $eigen_vecs 0] * [lindex $eigen_val 0])]
+        set p1_y [expr int($cntr_y + 0.02 * [lindex $eigen_vecs 1] * [lindex $eigen_val 0])]
+        set p2_x [expr int($cntr_x - 0.02 * [lindex $eigen_vecs 2] * [lindex $eigen_val 1])]
+        set p2_y [expr int($cntr_y - 0.02 * [lindex $eigen_vecs 3] * [lindex $eigen_val 1])]
+
+        cv::circle $matrix $cntr_x $cntr_y 3 [list 255 0 255 0] 2
+        drawAxis $matrix $cntr_x $cntr_y $p1_x $p1_y [list 0 255 0 0] 1
+        drawAxis $matrix $cntr_x $cntr_y $p2_x $p2_y [list 255 255 0 0] 5
+
+        $mean close
+        $eigenvectors close
+        $eigenvalues close
+        $pca close
+    }
+
+    #
+    # Download from https://github.com/opencv/opencv/blob/master/samples/data/pca_test1.jpg
+    #
+    set filename "pca_test1.jpg"
+
+    try {
+        set src [::cv::imread $filename $::cv::IMREAD_COLOR]
+
+        ::cv::namedWindow "Src" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Src" $src
+
+        set gray [::cv::cvtColor $src $::cv::COLOR_BGR2GRAY]
+        set bw [cv::threshold $gray 50 255 [expr $::cv::THRESH_BINARY | $::cv::THRESH_OTSU]]
+        set contours [cv::findContours $bw $::cv::RETR_LIST $::cv::CHAIN_APPROX_NONE]
+
+        for {set i 0} {$i < [llength $contours]} {incr i} {
+            set contour [lindex $contours $i]
+            set area [cv::contourArea $contour]
+            if {$area < 100 || $area > 100000} {
+                continue
+            }
+
+            cv::drawContours $src $contours $i [list 0 0 255 0] 2 $::cv::LINE_8 2 0 0
+            getOrientation $src $contour
+        }
+
+        $gray close
+        $bw close
+
+        ::cv::namedWindow "Output" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Output" $src
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $src close
+    } on error {em} {
+        puts $em
+    }
+
 QRCodeDetector example -
 
     package require opencv
