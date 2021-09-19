@@ -971,6 +971,104 @@ int getRectSubPix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int HuMoments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int count;
+    double hu[7] ;
+    Tcl_Obj *pResultStr = NULL;
+    double m00, m10, m01, m20, m11, m02, m30, m21, m12, m03;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "moments_list");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
+        Tcl_SetResult(interp, (char *) "HuMoments invalid list data", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    if (count != 10) {
+        Tcl_SetResult(interp, (char *) "HuMoments invalid data", TCL_STATIC);
+        return TCL_ERROR;
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+
+        Tcl_ListObjIndex(interp, objv[1], 0, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &m00) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[1], 1, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &m10) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[1], 2, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &m01) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[1], 3, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &m20) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[1], 4, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &m11) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[1], 5, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &m02) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[1], 6, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &m30) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[1], 7, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &m21) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[1], 8, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &m12) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[1], 9, &elemListPtr);
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &m03) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::Moments moments(m00, m10, m01, m20, m11, m02, m30, m21, m12, m03);
+        cv::HuMoments(moments, hu);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "HuMoments failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(hu[0]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(hu[1]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(hu[2]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(hu[3]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(hu[4]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(hu[5]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(hu[6]));
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
 int integral(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat sum, sqsum, tilted;

@@ -146,6 +146,7 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     ::cv::moments matrix ?binaryImage?
     ::cv::getRotationMatrix2D x y angle scale
     ::cv::getRectSubPix matrix width height center_x center_y
+    ::cv::HuMoments moments_list
     ::cv::integral matrix ?sdepth sqdepth?
     ::cv::remap matrix map1 map2 interpolation
     ::cv::resize matrix width height ?flags?

@@ -114,6 +114,7 @@ MODULE_SCOPE int matchTemplate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 MODULE_SCOPE int moments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int getRotationMatrix2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int getRectSubPix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int HuMoments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int integral(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int remap(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int resize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
