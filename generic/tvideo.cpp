@@ -48,7 +48,6 @@ static int SubtractorMOG2_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_APPLY: {
-            cv::Mat image;
             cv::Mat result_image;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *mat, *dstmat;
@@ -63,9 +62,8 @@ static int SubtractorMOG2_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
                 return TCL_ERROR;
             }
 
-            image = *mat;
             try {
-                cvd->bgsmog2->apply(image, result_image);
+                cvd->bgsmog2->apply(*mat, result_image);
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "apply failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -152,7 +150,6 @@ int meanShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int retval = 0;
     int x = 0, y = 0, width = 0, height = 0;
     cv::Rect window;
-    cv::Mat image;
     cv::Mat *mat1;
     cv::TermCriteria *termCriteria;
     Tcl_Obj *pResultStr = NULL;
@@ -215,7 +212,6 @@ int CamShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     cv::Rect window;
     cv::RotatedRect rect_result;
     cv::Point2f points[4];
-    cv::Mat image;
     cv::Mat *mat1;
     cv::TermCriteria *termCriteria;
     Tcl_Obj *pResultStr = NULL;
