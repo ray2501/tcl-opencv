@@ -1,7 +1,7 @@
 2021-09-19 Danilo Chang
 
 	* Re-design moments command
-	* Implement command: eigen
+	* Implement command: eigen, calcCovarMatrix
 	* Update PCA command
 
 2021-09-18 Danilo Chang

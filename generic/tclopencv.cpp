@@ -635,6 +635,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_bitwise_not,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::calcCovarMatrix",
+        (Tcl_ObjCmdProc *) mat_calcCovarMatrix,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::cartToPolar",
         (Tcl_ObjCmdProc *) mat_cartToPolar,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
@@ -3717,6 +3721,34 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::GC_PR_FGD", -1);
     setupValue = Tcl_NewIntObj(cv::GC_PR_FGD);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * Covar Flags
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::COVAR_SCRAMBLED", -1);
+    setupValue = Tcl_NewIntObj(cv::COVAR_SCRAMBLED);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::COVAR_NORMAL", -1);
+    setupValue = Tcl_NewIntObj(cv::COVAR_NORMAL);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::COVAR_USE_AVG", -1);
+    setupValue = Tcl_NewIntObj(cv::COVAR_USE_AVG);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::COVAR_SCALE", -1);
+    setupValue = Tcl_NewIntObj(cv::COVAR_SCALE);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::COVAR_ROWS", -1);
+    setupValue = Tcl_NewIntObj(cv::COVAR_ROWS);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::COVAR_COLS", -1);
+    setupValue = Tcl_NewIntObj(cv::COVAR_COLS);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*

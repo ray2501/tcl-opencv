@@ -67,6 +67,7 @@ Implement commands
     ::cv::bitwise_or matrix_1 matrix_2 ?mask?
     ::cv::bitwise_xor matrix_1 matrix_2 ?mask?
     ::cv::bitwise_not matrix ?mask?
+    ::cv::calcCovarMatrix matrix flags ?ctype?
     ::cv::cartToPolar matrix_1 matrix_2 ?angleInDegrees?
     ::cv::compare matrix_1 matrix_2 cmpop
     ::cv::convertScaleAbs matrix alpha beta
@@ -1218,6 +1219,15 @@ GrabCut classes -
     ::cv::GC_FGD
     ::cv::GC_PR_BGD
     ::cv::GC_PR_FGD
+
+`::cv::calcCovarMatrix` flags -
+
+    ::cv::COVAR_SCRAMBLED
+    ::cv::COVAR_NORMAL
+    ::cv::COVAR_USE_AVG
+    ::cv::COVAR_SCALE
+    ::cv::COVAR_ROWS
+    ::cv::COVAR_COLS
 
 Kmeans flags -
 

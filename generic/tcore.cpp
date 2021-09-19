@@ -2046,6 +2046,55 @@ int mat_bitwise_not(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_calcCovarMatrix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int flags = 0, ctype = CV_64F;
+    cv::Mat covar, mean;
+    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
+    cv::Mat *mat1, *matrix_covar, *matrix_mean;
+
+    if  (objc != 3 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix flags ?ctype?");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &flags) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 4) {
+        if (Tcl_GetIntFromObj(interp, objv[3], &ctype) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::calcCovarMatrix(*mat1, covar, mean, flags, ctype);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "calcCovarMatrix failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    matrix_covar = new cv::Mat(covar);
+    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, matrix_covar);
+
+    matrix_mean = new cv::Mat(mean);
+    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, matrix_mean);
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int mat_cartToPolar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int angleInDegrees = 0;
