@@ -2329,7 +2329,7 @@ int mat_copyMakeBorder(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 
 int mat_countNonZero(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image, dstimage;
+    cv::Mat image;
     cv::Mat *mat;
     int result = 0;
 
@@ -2358,6 +2358,33 @@ int mat_countNonZero(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
     }
 
     Tcl_SetObjResult(interp, Tcl_NewIntObj(result));
+    return TCL_OK;
+}
+
+
+int mat_determinant(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat *mat;
+    double result = 0;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix?");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    try {
+        result = cv::determinant(*mat);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "determinant failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
     return TCL_OK;
 }
 

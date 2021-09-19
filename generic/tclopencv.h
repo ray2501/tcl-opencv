@@ -47,6 +47,7 @@ MODULE_SCOPE int mat_compare(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 MODULE_SCOPE int mat_convertScaleAbs(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_copyMakeBorder(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_countNonZero(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_determinant(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_divide(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_eigen(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_eigenNonSymmetric(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
