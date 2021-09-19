@@ -2357,6 +2357,87 @@ int mat_divide(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_eigen(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    bool retval;
+    cv::Mat image1, image2;
+    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
+    cv::Mat *mat, *dstmat1, *dstmat2;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    try {
+        /*
+         * Calculates eigenvalues and eigenvectors of a symmetric matrix.
+         */
+        retval = cv::eigen(*mat, image1, image2);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "eigen failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    dstmat1 = new cv::Mat(image1);
+    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+
+    dstmat2 = new cv::Mat(image2);
+    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewBooleanObj((int) retval));
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
+int mat_eigenNonSymmetric(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat image1, image2;
+    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
+    cv::Mat *mat, *dstmat1, *dstmat2;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::eigenNonSymmetric(*mat, image1, image2);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "eigenNonSymmetric failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    dstmat1 = new cv::Mat(image1);
+    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+
+    dstmat2 = new cv::Mat(image2);
+    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int mat_exp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;

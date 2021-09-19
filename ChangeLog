@@ -1,5 +1,6 @@
 2021-09-19 Danilo Chang
 
+	* Implement command: eigen
 	* Update PCA command
 
 2021-09-18 Danilo Chang

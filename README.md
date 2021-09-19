@@ -73,6 +73,8 @@ Implement commands
     ::cv::copyMakeBorder matrix top bottom left right borderType ?color_list?
     ::cv::countNonZero matrix
     ::cv::divide matrix_1 matrix_2 ?scale?
+    ::cv::eigen matrix
+    ::cv::eigenNonSymmetric matrix
     ::cv::exp matrix
     ::cv::flip matrix flipCode
     ::cv::getOptimalDFTSize vecsize
