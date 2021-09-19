@@ -117,6 +117,8 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     PCA mean
     PCA eigenvalues
     PCA eigenvectors
+    PCA backProject matrix
+    PCA project matrix
     PCA close
 
     ::cv::TermCriteria type maxCount epsilon

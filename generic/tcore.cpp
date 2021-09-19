@@ -3888,6 +3888,8 @@ int PCA_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         "mean",
         "eigenvalues",
         "eigenvectors",
+        "backProject",
+        "project",
         "close",
         "_command",
         "_name",
@@ -3899,6 +3901,8 @@ int PCA_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         FUNC_mean,
         FUNC_eigenvalues,
         FUNC_eigenvectors,
+        FUNC_backProject,
+        FUNC_project,
         FUNC_CLOSE,
         FUNC__COMMAND,
         FUNC__NAME,
@@ -3961,6 +3965,62 @@ int PCA_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             }
 
             dstmat = new cv::Mat(pca->eigenvectors);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_backProject: {
+            Tcl_Obj *pResultStr = NULL;
+            cv::Mat image;
+            cv::Mat *mat, *dstmat;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                pca->backProject(*mat, image);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "backProject failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            dstmat = new cv::Mat(image);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_project: {
+            Tcl_Obj *pResultStr = NULL;
+            cv::Mat image;
+            cv::Mat *mat, *dstmat;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                pca->project(*mat, image);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "project failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            dstmat = new cv::Mat(image);
             pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
             Tcl_SetObjResult(interp, pResultStr);
 
