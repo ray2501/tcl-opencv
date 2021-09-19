@@ -532,7 +532,6 @@ int floodFill(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int lo_B = 0, lo_G= 0, lo_R = 0, lo_A = 0;
     int up_B = 0, up_G = 0, up_R = 0, up_A = 0;
     int flags = 4, count = 0;
-    cv::Mat image;
     cv::Mat *mat;
 
     if (objc != 5 && objc != 9) {
@@ -545,8 +544,6 @@ int floodFill(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (!mat) {
         return TCL_ERROR;
     }
-
-    image = *mat;
 
     if (Tcl_GetIntFromObj(interp, objv[2], &seed_x) != TCL_OK) {
         return TCL_ERROR;
@@ -697,10 +694,10 @@ int floodFill(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         cv::Scalar upColor(up_B, up_G, up_R, up_A);
 
         if (objc == 9) {
-            cv::floodFill(image, cv::Point(seed_x, seed_y), newColor,
+            cv::floodFill(*mat, cv::Point(seed_x, seed_y), newColor,
                       &rect, loColor, upColor, flags);
         } else {
-            cv::floodFill(image, cv::Point(seed_x, seed_y), newColor);
+            cv::floodFill(*mat, cv::Point(seed_x, seed_y), newColor);
         }
     } catch (...) {
         Tcl_SetResult(interp, (char *) "floodFill failed", TCL_STATIC);
@@ -715,7 +712,7 @@ int grabCut(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int x = 0, y = 0, width = 0, height = 0;
     int iterCount = 0, mode = cv::GC_INIT_WITH_RECT;
-    cv::Mat image, maskimage, bgdModel, fgdModel;
+    cv::Mat maskimage, bgdModel, fgdModel;
     Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
@@ -728,8 +725,6 @@ int grabCut(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (!mat) {
         return TCL_ERROR;
     }
-
-    image = *mat;
 
     if (Tcl_GetIntFromObj(interp, objv[2], &x) != TCL_OK) {
         return TCL_ERROR;
@@ -753,7 +748,7 @@ int grabCut(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Rect rect(x, y, width, height);
 
-        cv::grabCut(image, maskimage, rect, bgdModel, fgdModel, iterCount, mode);
+        cv::grabCut(*mat, maskimage, rect, bgdModel, fgdModel, iterCount, mode);
     } catch (...) {
         Tcl_SetResult(interp, (char *) "grabCut failed", TCL_STATIC);
         return TCL_ERROR;
@@ -2858,7 +2853,6 @@ int connectedComponentsWithStats(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
 
 int watershed(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     cv::Mat *smat, *mmat;
 
     if (objc != 3) {
@@ -2891,7 +2885,7 @@ int goodFeaturesToTrack(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 {
     int maxCorners = 0, blockSize = 3, useHarrisDetector = 0;
     double qualityLevel = 0, minDistance = 0, k = 0.04;
-    cv::Mat image, maskimage, result_image;
+    cv::Mat maskimage, result_image;
     Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *maskmat, *dstmat;
 
@@ -2905,8 +2899,6 @@ int goodFeaturesToTrack(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
     if (!mat) {
         return TCL_ERROR;
     }
-
-    image = *mat;
 
     if (Tcl_GetIntFromObj(interp, objv[2], &maxCorners) != TCL_OK) {
         return TCL_ERROR;
@@ -2942,7 +2934,7 @@ int goodFeaturesToTrack(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
     }
 
     try {
-        cv::goodFeaturesToTrack(image, result_image, maxCorners, qualityLevel, minDistance,
+        cv::goodFeaturesToTrack(*mat, result_image, maxCorners, qualityLevel, minDistance,
                                 maskimage, blockSize, (bool) useHarrisDetector, k);
     } catch (...) {
         Tcl_SetResult(interp, (char *) "goodFeaturesToTrack failed", TCL_STATIC);
@@ -3071,7 +3063,6 @@ int cornerSubPix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int HoughCircles(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     int method = 0, minRadius = 0, maxRadius = 0;
     double dp = 0, minDist = 0, param1 = 100, param2 = 100;
     cv::Mat *mat;
@@ -3145,7 +3136,6 @@ int HoughCircles(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int HoughLines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     int threshold = 0;
     double rho = 0.0, theta = 0.0, srn = 0.0, stn = 0.0, min_theta = 0.0, max_theta = CV_PI;
     cv::Mat *mat;
@@ -3218,7 +3208,6 @@ int HoughLines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int HoughLinesP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     int threshold = 0;
     double rho = 0.0, theta = 0.0, minLineLength = 0.0, maxLineGap = 0.0;
     cv::Mat *mat;
@@ -3946,7 +3935,6 @@ int convexHull(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int arrowedLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     cv::Mat *mat;
     int count = 0;
     int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
@@ -3964,8 +3952,6 @@ int arrowedLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (!mat) {
         return TCL_ERROR;
     }
-
-    image = *mat;
 
     if (Tcl_GetIntFromObj(interp, objv[2], &x1) != TCL_OK) {
         return TCL_ERROR;
@@ -4036,7 +4022,7 @@ int arrowedLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Scalar color(B, G, R, A);
 
-        cv::arrowedLine(image, cv::Point(x1, y1), cv::Point(x2, y2),
+        cv::arrowedLine(*mat, cv::Point(x1, y1), cv::Point(x2, y2),
                 color, thickness, lineType, shift, tipLength);
     } catch (...) {
         Tcl_SetResult(interp, (char *) "arrowedLine failed", TCL_STATIC);
@@ -4049,7 +4035,6 @@ int arrowedLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int circle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     cv::Mat *mat;
     int count = 0;
     int x1 = 0, y1 = 0, radius = 0;
@@ -4066,8 +4051,6 @@ int circle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (!mat) {
         return TCL_ERROR;
     }
-
-    image = *mat;
 
     if (Tcl_GetIntFromObj(interp, objv[2], &x1) != TCL_OK) {
         return TCL_ERROR;
@@ -4130,7 +4113,7 @@ int circle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Scalar color(B, G, R, A);
 
-        cv::circle(image, cv::Point(x1, y1), radius,
+        cv::circle(*mat, cv::Point(x1, y1), radius,
                    color, thickness, lineType, shift);
     } catch (...) {
         Tcl_SetResult(interp, (char *) "circle failed", TCL_STATIC);
@@ -4240,7 +4223,6 @@ int clipLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int drawMarker(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     cv::Mat *mat;
     int count = 0;
     int x1 = 0, y1 = 0;
@@ -4257,8 +4239,6 @@ int drawMarker(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (!mat) {
         return TCL_ERROR;
     }
-
-    image = *mat;
 
     if (Tcl_GetIntFromObj(interp, objv[2], &x1) != TCL_OK) {
         return TCL_ERROR;
@@ -4321,7 +4301,7 @@ int drawMarker(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Scalar color(B, G, R, A);
 
-        cv::drawMarker(image, cv::Point(x1, y1), color,
+        cv::drawMarker(*mat, cv::Point(x1, y1), color,
                        markerType, markerSize, thickness, line_type);
     } catch (...) {
         Tcl_SetResult(interp, (char *) "drawMarker failed", TCL_STATIC);
@@ -4334,7 +4314,6 @@ int drawMarker(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int ellipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     cv::Mat *mat;
     int count = 0;
     int x1 = 0, y1 = 0, width = 0, height;
@@ -4352,8 +4331,6 @@ int ellipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (!mat) {
         return TCL_ERROR;
     }
-
-    image = *mat;
 
     if (Tcl_GetIntFromObj(interp, objv[2], &x1) != TCL_OK) {
         return TCL_ERROR;
@@ -4432,7 +4409,7 @@ int ellipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Scalar color(B, G, R, A);
 
-        cv::ellipse(image, cv::Point(x1, y1), cv::Size(width, height),
+        cv::ellipse(*mat, cv::Point(x1, y1), cv::Size(width, height),
                     angle, startAngle, endAngle, color,
                     thickness, lineType, shift);
     } catch (...) {
@@ -4447,7 +4424,6 @@ int ellipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int fillConvexPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     cv::Mat *mat;
     int count = 0, B = 0, G = 0, R = 0, A = 0;
     int lineType = cv::LINE_8, shift = 0;
@@ -4464,8 +4440,6 @@ int fillConvexPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (!mat) {
         return TCL_ERROR;
     }
-
-    image = *mat;
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
         Tcl_SetResult(interp, (char *) "fillConvexPoly invalid list data", TCL_STATIC);
@@ -4549,7 +4523,7 @@ int fillConvexPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Scalar color(B, G, R, A);
 
-        cv::fillConvexPoly(image,  (const cv::Point *) pts, npts,
+        cv::fillConvexPoly(*mat,  (const cv::Point *) pts, npts,
                            color, lineType, shift);
     } catch (...) {
         ckfree(pts);
@@ -4564,7 +4538,6 @@ int fillConvexPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int line(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     cv::Mat *mat;
     int count = 0;
     int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
@@ -4581,8 +4554,6 @@ int line(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (!mat) {
         return TCL_ERROR;
     }
-
-    image = *mat;
 
     if (Tcl_GetIntFromObj(interp, objv[2], &x1) != TCL_OK) {
         return TCL_ERROR;
@@ -4649,7 +4620,7 @@ int line(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Scalar color(B, G, R, A);
 
-        cv::line(image, cv::Point(x1, y1), cv::Point(x2, y2),
+        cv::line(*mat, cv::Point(x1, y1), cv::Point(x2, y2),
                  color, thickness, lineType, shift);
     } catch (...) {
         Tcl_SetResult(interp, (char *) "line failed", TCL_STATIC);
@@ -4662,7 +4633,6 @@ int line(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int polylines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     cv::Mat *mat;
     int ncontours = 0, isClosed = 0;
     int count = 0, B = 0, G = 0, R = 0, A = 0;
@@ -4680,8 +4650,6 @@ int polylines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (!mat) {
         return TCL_ERROR;
     }
-
-    image = *mat;
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
         Tcl_SetResult(interp, (char *) "polylines invalid list data", TCL_STATIC);
@@ -4780,7 +4748,7 @@ int polylines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Scalar color(B, G, R, A);
 
-        cv::polylines(image,  (const cv::Point* const*) &pts, (const int*) &npts,
+        cv::polylines(*mat,  (const cv::Point* const*) &pts, (const int*) &npts,
                       ncontours, (bool) isClosed, color,
                       thickness, lineType, shift);
     } catch (...) {
@@ -4796,7 +4764,6 @@ int polylines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int putText(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     cv::Mat *mat;
     char *text = NULL;
     int len = 0;
@@ -4817,8 +4784,6 @@ int putText(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (!mat) {
         return TCL_ERROR;
     }
-
-    image = *mat;
 
     text = Tcl_GetStringFromObj(objv[2], &len);
     if (!text || len < 1) {
@@ -4894,7 +4859,7 @@ int putText(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Scalar color(B, G, R, A);
 
-        cv::putText(image, text, cv::Point(x1, y1), fontFace, fontScale,
+        cv::putText(*mat, text, cv::Point(x1, y1), fontFace, fontScale,
                     color, thickness, lineType, (bool) bottomLeftOrigin);
     } catch (...) {
         Tcl_DStringFree(&ds);
@@ -4909,7 +4874,6 @@ int putText(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int rectangle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     cv::Mat *mat;
     int count = 0;
     int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
@@ -4926,8 +4890,6 @@ int rectangle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (!mat) {
         return TCL_ERROR;
     }
-
-    image = *mat;
 
     if (Tcl_GetIntFromObj(interp, objv[2], &x1) != TCL_OK) {
         return TCL_ERROR;
@@ -4994,7 +4956,7 @@ int rectangle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Scalar color(B, G, R, A);
 
-        cv::rectangle(image, cv::Point(x1, y1), cv::Point(x2, y2),
+        cv::rectangle(*mat, cv::Point(x1, y1), cv::Point(x2, y2),
                       color, thickness, lineType, shift);
     } catch (...) {
         Tcl_SetResult(interp, (char *) "rectangle failed", TCL_STATIC);
