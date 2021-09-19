@@ -83,6 +83,7 @@ Implement commands
     ::cv::inRange matrix color_list1 color_list2
     ::cv::log matrix
     ::cv::LUT matrix1 matrix2
+    ::cv::Mahalanobis matrix1 matrix2 icovar_matrix
     ::cv::magnitude matrix1 matrix2
     ::cv::meanStdDev matrix
     ::cv::minMaxLoc matrix
@@ -1164,7 +1165,7 @@ Line Types -
     ::cv::ROTATE_180
     ::cv::ROTATE_90_COUNTERCLOCKWISE
 
-`MATRIX inv` method, `cv::solve` flags and
+`MATRIX inv` method, `::cv::solve` flags and
 `::cv::getPerspectiveTransform` command solveMethod -
 
     ::cv::DECOMP_LU

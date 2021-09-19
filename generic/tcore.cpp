@@ -2799,6 +2799,44 @@ int mat_lut(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_Mahalanobis(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat image;
+    cv::Mat *mat1, *mat2, *icovar;
+    double result = 0;
+
+    if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix1 matrix2 icovar_matrix");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    icovar = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+    if (!icovar) {
+        return TCL_ERROR;
+    }
+
+    try {
+        result = cv::Mahalanobis(*mat1, *mat2, *icovar);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "Mahalanobis failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
+    return TCL_OK;
+}
+
+
 int mat_magnitude(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;

@@ -699,6 +699,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_lut,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::Mahalanobis",
+        (Tcl_ObjCmdProc *) mat_Mahalanobis,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::magnitude",
         (Tcl_ObjCmdProc *) mat_magnitude,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
