@@ -391,7 +391,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_INV: {
             int method = cv::DECOMP_LU;
-            cv::Mat image, result_mat;
+            cv::Mat result_mat;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
@@ -406,9 +406,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 }
             }
 
-            image = *mat;
             try {
-                 result_mat = image.inv(method);
+                 result_mat = mat->inv(method);
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "inv failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -428,7 +427,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             break;
         }
         case FUNC_DOT: {
-            cv::Mat image, *mat2;
+            cv::Mat *mat2;
             double result = 0;
 
             if (objc != 3) {
@@ -441,9 +440,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            image = *mat;
             try {
-                result = image.dot(*mat2);
+                result = mat->dot(*mat2);
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "dot failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -454,7 +452,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_CROSS: {
             Tcl_Obj *pResultStr = NULL;
-            cv::Mat image, result_mat;
+            cv::Mat result_mat;
             cv::Mat *mat2, *dstmat;
 
             if (objc != 3) {
@@ -468,12 +466,11 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            image = *mat;
             try {
                 /*
                  * Computes a cross-product of two 3-element vectors.
                  */
-                result_mat = image.cross(*mat2);
+                result_mat = mat->cross(*mat2);
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "corss failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -493,7 +490,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_MULTIPLICATION: {
             Tcl_Obj *pResultStr = NULL;
-            cv::Mat image, result_mat;
+            cv::Mat result_mat;
             cv::Mat *mat2, *dstmat;
 
             if (objc != 3) {
@@ -506,9 +503,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            image = *mat;
             try {
-                result_mat = image * (*mat2);
+                result_mat = (*mat) * (*mat2);
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "* failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -528,7 +524,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_ADD: {
             double value = 0;
-            cv::Mat image;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
@@ -541,9 +536,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            image = *mat;
             try {
-                cv::Mat result_mat = image + value;
+                cv::Mat result_mat = (*mat) + value;
 
                 if (result_mat.empty() ||  !result_mat.data) {
                     Tcl_SetResult(interp, (char *) "add no data", TCL_STATIC);
@@ -564,7 +558,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_SUBTRACT: {
             double value = 0;
-            cv::Mat image;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
@@ -577,9 +570,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            image = *mat;
             try {
-                cv::Mat result_mat = image - value;
+                cv::Mat result_mat = (*mat) - value;
 
                 if (result_mat.empty() || !result_mat.data) {
                     Tcl_SetResult(interp, (char *) "subtract no data", TCL_STATIC);
@@ -600,7 +592,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_MULTIPLY: {
             double value = 0;
-            cv::Mat image;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
@@ -613,9 +604,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            image = *mat;
             try {
-                cv::Mat result_mat = image * value;
+                cv::Mat result_mat = (*mat) * value;
 
                 if (result_mat.empty() || !result_mat.data) {
                     Tcl_SetResult(interp, (char *) "multiply no data", TCL_STATIC);
@@ -636,7 +626,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_DIVIDE: {
             double value = 0;
-            cv::Mat image;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
@@ -649,9 +638,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            image = *mat;
             try {
-                cv::Mat result_mat = image / value;
+                cv::Mat result_mat = (*mat) / value;
 
                 if (result_mat.empty() || !result_mat.data) {
                     Tcl_SetResult(interp, (char *) "divide no data", TCL_STATIC);
@@ -671,7 +659,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             break;
         }
         case FUNC_TRANSPOSE: {
-            cv::Mat image;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
@@ -680,9 +667,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            image = *mat;
             try {
-                cv::Mat result_mat = image.t();
+                cv::Mat result_mat = mat->t();
 
                 if (result_mat.empty() || !result_mat.data) {
                     Tcl_SetResult(interp, (char *) "transpose no data", TCL_STATIC);
@@ -703,7 +689,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_DIAG: {
             int d = 0;
-            cv::Mat image, diag_image;
+            cv::Mat diag_image;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
@@ -718,9 +704,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 }
             }
 
-            image = *mat;
             try {
-                diag_image = image.diag(d);
+                diag_image = mat->diag(d);
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "diag failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -736,7 +721,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_CROP: {
             int x = 0, y= 0, width = 0, height = 0;
-            cv::Mat image;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
@@ -761,9 +745,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            image = *mat;
             try {
-                cv::Mat cropped_image = image(cv::Rect(x, y, width, height));
+                cv::Mat cropped_image = (*mat)(cv::Rect(x, y, width, height));
 
                 if (cropped_image.empty() || !cropped_image.data) {
                     Tcl_SetResult(interp, (char *) "crop no data", TCL_STATIC);
@@ -784,7 +767,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_RECT: {
             int x = 0, y= 0, width = 0, height = 0;
-            cv::Mat image;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
@@ -809,9 +791,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            image = *mat;
             try {
-                cv::Mat rect_image(image, cv::Rect(x, y, width, height));
+                cv::Mat rect_image(*mat, cv::Rect(x, y, width, height));
 
                 if (rect_image.empty() || !rect_image.data) {
                     Tcl_SetResult(interp, (char *) "rect image data", TCL_STATIC);
@@ -831,7 +812,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             break;
         }
         case FUNC_COPYTO: {
-            cv::Mat image;
             cv::Mat *mat1, *mat2 = 0;
 
             if (objc != 3 && objc != 4) {
@@ -851,12 +831,11 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 }
             }
 
-            image = *mat;
             try {
                 if (objc == 3) {
-                    image.copyTo(*mat1);
+                    mat->copyTo(*mat1);
                 } else {
-                    image.copyTo(*mat1, *mat2);
+                    mat->copyTo(*mat1, *mat2);
                 }
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "copyTo failed", TCL_STATIC);
@@ -868,7 +847,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         case FUNC_CONVERTTO: {
             int type = 0;
             double scale = 1, shift = 0;
-            cv::Mat image, imageChanged;
+            cv::Mat imageChanged;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
@@ -891,9 +870,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 }
             }
 
-            image = *mat;
             try {
-                image.convertTo(imageChanged, type, scale, shift);
+                mat->convertTo(imageChanged, type, scale, shift);
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "convertTo failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -913,7 +891,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_COLRANGE: {
             int startcol = 0, endcol = 0;
-            cv::Mat image, imageChanged;
+            cv::Mat imageChanged;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
@@ -930,13 +908,12 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            image = *mat;
             try {
                 /*
                  * startcol: An inclusive 0-based start index of the column span.
                  * endcol: An exclusive 0-based ending index of the column span.
                  */
-                imageChanged = image.colRange(startcol, endcol);
+                imageChanged = mat->colRange(startcol, endcol);
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "colRange failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -956,7 +933,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_ROWRANGE: {
             int startcol = 0, endcol = 0;
-            cv::Mat image, imageChanged;
+            cv::Mat imageChanged;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
@@ -973,13 +950,12 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            image = *mat;
             try {
                 /*
                  * startcol: An inclusive 0-based start index of the column span.
                  * endcol: An exclusive 0-based ending index of the column span.
                  */
-                imageChanged = image.rowRange(startcol, endcol);
+                imageChanged = mat->rowRange(startcol, endcol);
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "rowRange failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -999,7 +975,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_RESHAPE: {
             int cn = 0, rows = 0;
-            cv::Mat image, dstimage;
+            cv::Mat dstimage;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
@@ -1018,9 +994,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 }
             }
 
-            image = *mat;
             try {
-                dstimage = image.reshape(cn, rows);
+                dstimage = mat->reshape(cn, rows);
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "reshape failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -1082,7 +1057,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_SETTO: {
             int B = 0, G = 0, R = 0, A = 0, count = 0;
-            cv::Mat image, *mmat = 0;
+            cv::Mat *mmat = 0;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "color_list ?mask?");
@@ -1128,14 +1103,13 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 }
             }
 
-            image = *mat;
             try {
                 cv::Scalar color(B, G, R, A);
 
                 if (objc == 3) {
-                    image.setTo(color);
+                    mat->setTo(color);
                 } else {
-                    image.setTo(color, *mmat);
+                    mat->setTo(color, *mmat);
                 }
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "setTo failed", TCL_STATIC);
@@ -1568,7 +1542,7 @@ int mat_matwithdims(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int mat_diag(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image, diag_image;
+    cv::Mat diag_image;
     Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
@@ -1585,8 +1559,7 @@ int mat_diag(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     /*
      * One-dimensional matrix that represents the main diagonal.
      */
-    image = *mat;
-    diag_image = cv::Mat::diag(image);
+    diag_image = cv::Mat::diag(*mat);
 
     dstmat = new cv::Mat(diag_image);
 
@@ -2235,7 +2208,7 @@ int mat_copyMakeBorder(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
     int top = 0, bottom = 0, left = 0, right = 0, borderType = cv::BORDER_DEFAULT;
     int B = 0, G = 0, R = 0, A = 0;
     int count = 0;
-    cv::Mat image, dstimage;
+    cv::Mat dstimage;
     Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
@@ -2303,15 +2276,13 @@ int mat_copyMakeBorder(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
         }
     }
 
-    image = *mat;
-
     try {
         cv::Scalar color(B, G, R, A);
 
         if (borderType == cv::BORDER_CONSTANT) {
-            cv::copyMakeBorder(image, dstimage, top, bottom, left, right, borderType, color);
+            cv::copyMakeBorder(*mat, dstimage, top, bottom, left, right, borderType, color);
         } else {
-            cv::copyMakeBorder(image, dstimage, top, bottom, left, right, borderType);
+            cv::copyMakeBorder(*mat, dstimage, top, bottom, left, right, borderType);
         }
     } catch (...) {
         Tcl_SetResult(interp, (char *) "copyMakeBorder failed", TCL_STATIC);
@@ -2329,7 +2300,6 @@ int mat_copyMakeBorder(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 
 int mat_countNonZero(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     cv::Mat *mat;
     int result = 0;
 
@@ -2343,15 +2313,13 @@ int mat_countNonZero(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         return TCL_ERROR;
     }
 
-    image = *mat;
-
-    if (image.channels() != 1) {
+    if (mat->channels() != 1) {
         Tcl_SetResult(interp, (char *) "countNonZero requires single-channel array", TCL_STATIC);
         return TCL_ERROR;
     }
 
     try {
-        result = cv::countNonZero(image);
+        result = cv::countNonZero(*mat);
     } catch (...) {
         Tcl_SetResult(interp, (char *) "countNonZero failed", TCL_STATIC);
         return TCL_ERROR;
@@ -2828,7 +2796,6 @@ int mat_lut(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int mat_Mahalanobis(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     cv::Mat *mat1, *mat2, *icovar;
     double result = 0;
 
@@ -2987,7 +2954,6 @@ int mat_minMaxLoc(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int mat_split(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    cv::Mat image;
     Tcl_Obj *listPtr;
     cv::Mat *mat;
 
@@ -3001,11 +2967,9 @@ int mat_split(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return TCL_ERROR;
     }
 
-    image = *mat;
-
     std::vector<cv::Mat> channels;
     try {
-        cv::split(image, channels);
+        cv::split(*mat, channels);
     } catch (...) {
         Tcl_SetResult(interp, (char *) "split failed", TCL_STATIC);
         return TCL_ERROR;
