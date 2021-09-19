@@ -111,6 +111,7 @@ MODULE_SCOPE int equalizeHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 MODULE_SCOPE int floodFill(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int grabCut(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int matchTemplate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int moments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int getRotationMatrix2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int getRectSubPix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int integral(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
@@ -164,7 +165,6 @@ MODULE_SCOPE int fitEllipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 MODULE_SCOPE int boxPoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int minEnclosingCircle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int convexHull(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
-MODULE_SCOPE int moments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 MODULE_SCOPE int arrowedLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int circle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

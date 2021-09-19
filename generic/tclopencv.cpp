@@ -869,6 +869,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) matchTemplate,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::moments",
+        (Tcl_ObjCmdProc *) moments,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::getRotationMatrix2D",
         (Tcl_ObjCmdProc *) getRotationMatrix2D,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
@@ -1063,10 +1067,6 @@ Opencv_Init(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp, "::" NS "::convexHull",
         (Tcl_ObjCmdProc *) convexHull,
-        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
-
-    Tcl_CreateObjCommand(interp, "::" NS "::moments",
-        (Tcl_ObjCmdProc *) moments,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_CreateObjCommand(interp, "::" NS "::arrowedLine",

@@ -143,6 +143,7 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     ::cv::floodFill matrix seed_x seed_y color_list ?rect_list loDiff_color upDiff_color flags?
     ::cv::grabCut matrix x y width height iterCount
     ::cv::matchTemplate matrix templ_matrix method
+    ::cv::moments matrix ?binaryImage?
     ::cv::getRotationMatrix2D x y angle scale
     ::cv::getRectSubPix matrix width height center_x center_y
     ::cv::integral matrix ?sdepth sqdepth?
@@ -196,7 +197,9 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     ::cv::boxPoints contour
     ::cv::minEnclosingCircle contour
     ::cv::convexHull contour ?clockwise?
-    ::cv::moments contour
+
+If users need to know contour's moments, users need to use `::cv::Mat::Mat` to create
+a matrix and fill the contour's data to the matrix, then use `::cv::moments` to calculate.
 
     ::cv::arrowedLine matrix point_x1 point_y1 point_x2 point_y2 color_list thickness ?lineType shift tipLength?
     ::cv::circle matrix center_x center_y radius color_list thickness ?lineType shift?

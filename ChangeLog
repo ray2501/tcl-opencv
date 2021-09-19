@@ -1,5 +1,6 @@
 2021-09-19 Danilo Chang
 
+	* Re-design moments command
 	* Implement command: eigen
 	* Update PCA command
 

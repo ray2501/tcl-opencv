@@ -819,6 +819,56 @@ int matchTemplate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int moments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int binaryImage = 0;
+    cv::Mat *mat;
+    cv::Moments result;
+    Tcl_Obj *pResultStr = NULL;
+
+    if (objc != 2 && objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix ?binaryImage?");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 3) {
+        if (Tcl_GetBooleanFromObj(interp, objv[2], &binaryImage) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        result = cv::moments(*mat, (bool) binaryImage);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "moments failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    /*
+     * https://docs.opencv.org/master/d8/d23/classcv_1_1Moments.html
+     */
+    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m00));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m10));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m01));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m20));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m11));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m02));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m30));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m21));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m12));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m03));
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int getRotationMatrix2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
@@ -3790,78 +3840,6 @@ int convexHull(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(hull.at(i).x));
         Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(hull.at(i).y));
     }
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
-}
-
-
-int moments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
-{
-    std::vector<cv::Point> points;
-    cv::Moments result;
-    Tcl_Obj *pResultStr = NULL;
-    int count = 0;
-
-    if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 1, objv, "contour");
-        return TCL_ERROR;
-    }
-
-    if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "moments invalid contour data", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
-    if (count%2 != 0) {
-        Tcl_SetResult(interp, (char *) "moments invalid points data", TCL_STATIC);
-        return TCL_ERROR;
-    } else {
-        Tcl_Obj *elemListPtr = NULL;
-        int number_from_list_x;
-        int number_from_list_y;
-        int npts;
-
-        npts = count / 2;
-        for (int i = 0, j = 0; j < npts; i = i + 2, j = j + 1) {
-            cv::Point point;
-            Tcl_ListObjIndex(interp, objv[1], i, &elemListPtr);
-            if (Tcl_GetIntFromObj(interp, elemListPtr, &number_from_list_x) != TCL_OK) {
-                return TCL_ERROR;
-            }
-
-            Tcl_ListObjIndex(interp, objv[1], i + 1, &elemListPtr);
-            if (Tcl_GetIntFromObj(interp, elemListPtr, &number_from_list_y) != TCL_OK) {
-                return TCL_ERROR;
-            }
-
-            point.x = number_from_list_x;
-            point.y = number_from_list_y;
-            points.push_back (point);
-        }
-    }
-
-    try {
-        result = cv::moments(points);
-    } catch (...) {
-        Tcl_SetResult(interp, (char *) "moments failed", TCL_STATIC);
-        return TCL_ERROR;
-    }
-
-    /*
-     * https://docs.opencv.org/master/d8/d23/classcv_1_1Moments.html
-     */
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m00));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m10));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m01));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m20));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m11));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m02));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m30));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m21));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m12));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m03));
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
