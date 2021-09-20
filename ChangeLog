@@ -1,3 +1,7 @@
+2021-09-20 Danilo Chang
+
+	* Implement command: compareHist
+
 2021-09-19 Danilo Chang
 
 	* Re-design moments command

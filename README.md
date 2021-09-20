@@ -148,6 +148,7 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     ::cv::cvtColor src_matrix code ?dstCn?
     ::cv::calcBackProject matrix channels hist_matrix ranges_list ?scale uniform?
     ::cv::calcHist matrix channels mask dims histSize_list ranges_list ?uniform accumulate?
+    ::cv::compareHist matrix_1 matrix_2 method
     ::cv::equalizeHist matrix
     ::cv::floodFill matrix seed_x seed_y color_list ?rect_list loDiff_color upDiff_color flags?
     ::cv::grabCut matrix x y width height iterCount
@@ -1108,6 +1109,16 @@ Line Types -
     ::cv::EVENT_FLAG_CTRLKEY
     ::cv::EVENT_FLAG_SHIFTKEY
     ::cv::EVENT_FLAG_ALTKEY
+
+`::cv::compareHist` method -
+
+    ::cv::HISTCMP_CORREL
+    ::cv::HISTCMP_CHISQR
+    ::cv::HISTCMP_INTERSECT
+    ::cv::HISTCMP_BHATTACHARYYA
+    ::cv::HISTCMP_HELLINGER
+    ::cv::HISTCMP_CHISQR_ALT
+    ::cv::HISTCMP_KL_DIV
 
 `::cv::dft` command flags -
 

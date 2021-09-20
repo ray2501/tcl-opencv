@@ -492,6 +492,44 @@ int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int compareHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int method = 0;
+    double result = 0;
+    cv::Mat *mat1, *mat2;
+
+    if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix_1 matrix_2 method");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &method) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        result = cv::compareHist(*mat1, *mat2, method);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "compareHist failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
+
+    return TCL_OK;
+}
+
+
 int equalizeHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat dst;

@@ -865,6 +865,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) calcHist,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::compareHist",
+        (Tcl_ObjCmdProc *) compareHist,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::equalizeHist",
         (Tcl_ObjCmdProc *) equalizeHist,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
@@ -3364,6 +3368,38 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::EVENT_FLAG_ALTKEY", -1);
     setupValue = Tcl_NewIntObj(cv::EVENT_FLAG_ALTKEY);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * compareHist method
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::HISTCMP_CORREL", -1);
+    setupValue = Tcl_NewIntObj(cv::HISTCMP_CORREL);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::HISTCMP_CHISQR", -1);
+    setupValue = Tcl_NewIntObj(cv::HISTCMP_CHISQR);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::HISTCMP_INTERSECT", -1);
+    setupValue = Tcl_NewIntObj(cv::HISTCMP_INTERSECT);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::HISTCMP_BHATTACHARYYA", -1);
+    setupValue = Tcl_NewIntObj(cv::HISTCMP_BHATTACHARYYA);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::HISTCMP_HELLINGER", -1);
+    setupValue = Tcl_NewIntObj(cv::HISTCMP_HELLINGER);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::HISTCMP_CHISQR_ALT", -1);
+    setupValue = Tcl_NewIntObj(cv::HISTCMP_CHISQR_ALT);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::HISTCMP_KL_DIV", -1);
+    setupValue = Tcl_NewIntObj(cv::HISTCMP_KL_DIV);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*
