@@ -607,12 +607,18 @@ static int AlignMTB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
     static const char *FUNC_strs[] = {
         "process",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
     enum FUNC_enum {
         FUNC_PROCESS,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -699,6 +705,30 @@ static int AlignMTB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_alignmtb) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_alignmtb, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::AlignMTB", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -745,6 +775,9 @@ int AlignMTB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-alignmtb", -1);
 
+    if (cvd->cmd_alignmtb) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_alignmtb);
+    }
     cvd->cmd_alignmtb =
         Tcl_CreateObjCommand(interp, "::cv-alignmtb",
             (Tcl_ObjCmdProc *) AlignMTB_FUNCTION,
@@ -776,12 +809,18 @@ static int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl
     static const char *FUNC_strs[] = {
         "process",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
     enum FUNC_enum {
         FUNC_PROCESS,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -883,6 +922,30 @@ static int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_calibdeb) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_calibdeb, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::CalibrateDebevec", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -928,9 +991,11 @@ int CalibrateDebevec(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         return TCL_ERROR;
     }
 
-
     pResultStr = Tcl_NewStringObj("::cv-calibdeb", -1);
 
+    if (cvd->cmd_calibdeb) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_calibdeb);
+    }
     cvd->cmd_calibdeb =
         Tcl_CreateObjCommand(interp, "::cv-calibdeb",
             (Tcl_ObjCmdProc *) CalibrateDebevec_FUNCTION,
@@ -962,12 +1027,18 @@ static int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
     static const char *FUNC_strs[] = {
         "process",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
     enum FUNC_enum {
         FUNC_PROCESS,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -1073,6 +1144,30 @@ static int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_mergedeb) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_mergedeb, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::MergeDebevec", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -1104,6 +1199,9 @@ int MergeDebevec(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-mergedeb", -1);
 
+    if (cvd->cmd_mergedeb) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_mergedeb);
+    }
     cvd->cmd_mergedeb =
         Tcl_CreateObjCommand(interp, "::cv-mergedeb",
             (Tcl_ObjCmdProc *) MergeDebevec_FUNCTION,
@@ -1135,12 +1233,18 @@ static int MergeMertens_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
     static const char *FUNC_strs[] = {
         "process",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
     enum FUNC_enum {
         FUNC_PROCESS,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -1219,6 +1323,30 @@ static int MergeMertens_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_mergemer) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_mergemer, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::MergeMertens", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -1267,6 +1395,9 @@ int MergeMertens(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-mergemer", -1);
 
+    if (cvd->cmd_mergemer) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_mergemer);
+    }
     cvd->cmd_mergemer =
         Tcl_CreateObjCommand(interp, "::cv-mergemer",
             (Tcl_ObjCmdProc *) MergeMertens_FUNCTION,
@@ -1298,12 +1429,18 @@ static int TonemapDrago_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
     static const char *FUNC_strs[] = {
         "process",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
     enum FUNC_enum {
         FUNC_PROCESS,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -1362,6 +1499,30 @@ static int TonemapDrago_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_tonemapdra) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_tonemapdra, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::TonemapDrago", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -1408,6 +1569,9 @@ int TonemapDrago(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-tonemapdra", -1);
 
+    if (cvd->cmd_tonemapdra) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_tonemapdra);
+    }
     cvd->cmd_tonemapdra =
         Tcl_CreateObjCommand(interp, "::cv-tonemapdra",
             (Tcl_ObjCmdProc *) TonemapDrago_FUNCTION,
@@ -1439,12 +1603,18 @@ static int TonemapMantiuk_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
     static const char *FUNC_strs[] = {
         "process",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
     enum FUNC_enum {
         FUNC_PROCESS,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -1503,6 +1673,30 @@ static int TonemapMantiuk_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_tonemapman) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_tonemapman, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::TonemapMantiuk", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -1549,6 +1743,9 @@ int TonemapMantiuk(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-tonemapman", -1);
 
+    if (cvd->cmd_tonemapman) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_tonemapman);
+    }
     cvd->cmd_tonemapman =
         Tcl_CreateObjCommand(interp, "::cv-tonemapman",
             (Tcl_ObjCmdProc *) TonemapMantiuk_FUNCTION,
@@ -1580,12 +1777,18 @@ static int TonemapReinhard_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
     static const char *FUNC_strs[] = {
         "process",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
     enum FUNC_enum {
         FUNC_PROCESS,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -1644,6 +1847,30 @@ static int TonemapReinhard_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_tonemaprei) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_tonemaprei, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::TonemapReinhard", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -1695,6 +1922,9 @@ int TonemapReinhard(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-tonemaprei", -1);
 
+    if (cvd->cmd_tonemaprei) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_tonemaprei);
+    }
     cvd->cmd_tonemaprei =
         Tcl_CreateObjCommand(interp, "::cv-tonemaprei",
             (Tcl_ObjCmdProc *) TonemapReinhard_FUNCTION,

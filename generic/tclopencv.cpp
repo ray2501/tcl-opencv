@@ -44,6 +44,16 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
                 delete mat;
                 break;
             }
+            case OPENCV_FSTORAGE: {
+                cv::FileStorage *fs = (cv::FileStorage *) cvo->obj;
+                if (fs->isOpened()) {
+                    fs->release();
+                }
+                delete fs;
+                Tcl_DStringFree(&cvo->ds1);
+                Tcl_DStringFree(&cvo->ds2);
+                break;
+            }
             case OPENCV_VIDEOCAPTURE: {
                 cv::VideoCapture *capture = (cv::VideoCapture *) cvo->obj;
                 capture->release();
@@ -220,6 +230,16 @@ Opencv_DESTRUCTOR(ClientData cd)
         delete mat;
         break;
     }
+    case OPENCV_FSTORAGE: {
+        cv::FileStorage *fs = (cv::FileStorage *) cvo->obj;
+        if (fs->isOpened()) {
+            fs->release();
+        }
+        delete fs;
+        Tcl_DStringFree(&cvo->ds1);
+        Tcl_DStringFree(&cvo->ds2);
+        break;
+    }
     case OPENCV_VIDEOCAPTURE: {
         cv::VideoCapture *capture = (cv::VideoCapture *) cvo->obj;
         capture->release();
@@ -292,6 +312,10 @@ Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj)
         prefix = "cv-mat";
         proc = MATRIX_FUNCTION;
         break;
+    case OPENCV_FSTORAGE:
+        prefix = "cv-fstorage";
+        proc = FileStorage_FUNCTION;
+        break;
     case OPENCV_VIDEOCAPTURE:
         prefix = "cv-videoc";
         proc = VideoCapture_FUNCTION;
@@ -342,6 +366,11 @@ Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj)
     Tcl_SetHashValue(hashEntryPtr, cvo);
     cvo->key = (char *) Tcl_GetHashKey(&cvd->tbl[type], hashEntryPtr);
     cvo->cmd = NULL;
+    cvo->flags = 0;
+    if (type == OPENCV_FSTORAGE) {
+        Tcl_DStringInit(&cvo->ds1);
+        Tcl_DStringInit(&cvo->ds2);
+    }
     if (proc) {
         name = Tcl_NewStringObj(buffer, -1);
         Tcl_IncrRefCount(name);
@@ -535,6 +564,11 @@ Opencv_Init(Tcl_Interp *interp)
     if (nsPtr == NULL) {
         return TCL_ERROR;
     }
+    Tcl_CreateNamespace(interp, NS "::FileStorage", NULL, NULL);
+    Tcl_CreateNamespace(interp, NS "::ml", NULL, NULL);
+#ifdef TCL_USE_OPENCV4
+    Tcl_CreateNamespace(interp, NS "::dnn", NULL, NULL);
+#endif
 
     cvd = (Opencv_Data *) ckalloc(sizeof(Opencv_Data));
     memset((void *) cvd, 0, sizeof(Opencv_Data));
@@ -667,9 +701,11 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_eigen,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+#ifdef TCL_USE_OPENCV4
     Tcl_CreateObjCommand(interp, "::" NS "::eigenNonSymmetric",
         (Tcl_ObjCmdProc *) mat_eigenNonSymmetric,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+#endif
 
     Tcl_CreateObjCommand(interp, "::" NS "::exp",
         (Tcl_ObjCmdProc *) mat_exp,
@@ -843,6 +879,14 @@ Opencv_Init(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp, "::" NS "::imencode",
         (Tcl_ObjCmdProc *) imencode,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    /*
+     * For fstorage
+     */
+
+    Tcl_CreateObjCommand(interp, "::" NS "::FileStorage",
+        (Tcl_ObjCmdProc *) FileStorage,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     /*
@@ -1392,17 +1436,21 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) NormalBayesClassifier,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+#ifdef TCL_USE_OPENCV4
     Tcl_CreateObjCommand(interp, "::" NS "::ml::NormalBayesClassifier::load",
         (Tcl_ObjCmdProc *) NormalBayesClassifier_load,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+#endif
 
     Tcl_CreateObjCommand(interp, "::" NS "::ml::KNearest",
         (Tcl_ObjCmdProc *) KNearest,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+#ifdef TCL_USE_OPENCV4
     Tcl_CreateObjCommand(interp, "::" NS "::ml::KNearest::load",
         (Tcl_ObjCmdProc *) KNearest_load,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+#endif
 
     Tcl_CreateObjCommand(interp, "::" NS "::ml::SVM",
         (Tcl_ObjCmdProc *) SVM,
@@ -1580,6 +1628,50 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::CV_64FC4", -1);
     setupValue = Tcl_NewIntObj(CV_64FC4);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * fstorage flags
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::FileStorage::READ", -1);
+    setupValue = Tcl_NewIntObj(cv::FileStorage::READ);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::FileStorage::WRITE", -1);
+    setupValue = Tcl_NewIntObj(cv::FileStorage::WRITE);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::FileStorage::APPEND", -1);
+    setupValue = Tcl_NewIntObj(cv::FileStorage::APPEND);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::FileStorage::MEMORY", -1);
+    setupValue = Tcl_NewIntObj(cv::FileStorage::MEMORY);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::FileStorage::FORMAT_AUTO", -1);
+    setupValue = Tcl_NewIntObj(cv::FileStorage::FORMAT_AUTO);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::FileStorage::FORMAT_XML", -1);
+    setupValue = Tcl_NewIntObj(cv::FileStorage::FORMAT_XML);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::FileStorage::FORMAT_YAML", -1);
+    setupValue = Tcl_NewIntObj(cv::FileStorage::FORMAT_YAML);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::FileStorage::FORMAT_JSON", -1);
+    setupValue = Tcl_NewIntObj(cv::FileStorage::FORMAT_JSON);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::FileStorage::BASE64", -1);
+    setupValue = Tcl_NewIntObj(cv::FileStorage::BASE64);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::FileStorage::WRITE_BASE64", -1);
+    setupValue = Tcl_NewIntObj(cv::FileStorage::WRITE_BASE64);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*

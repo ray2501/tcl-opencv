@@ -567,6 +567,9 @@ static int FastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, 
         "setThreshold",
         "setType",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
@@ -579,6 +582,9 @@ static int FastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, 
         FUNC_SETTHRESHOLD,
         FUNC_SETTYPE,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -764,10 +770,34 @@ static int FastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, 
                 return TCL_ERROR;
             }
 
-            if (cvd->fastdetector) {
+            if (cvd->cmd_fastdetector) {
                 Tcl_DeleteCommandFromToken(interp, cvd->cmd_fastdetector);
             }
 
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_fastdetector) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_fastdetector, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::FastFeatureDetector", TCL_STATIC);
             break;
         }
     }
@@ -821,6 +851,9 @@ int FastFeatureDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
     pResultStr = Tcl_NewStringObj("::cv-fastdetector", -1);
 
+    if (cvd->cmd_fastdetector) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_fastdetector);
+    }
     cvd->cmd_fastdetector =
         Tcl_CreateObjCommand(interp, "::cv-fastdetector",
             (Tcl_ObjCmdProc *) FastFeatureDetector_FUNCTION,
@@ -858,6 +891,9 @@ static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
         "setThreshold",
         "setType",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
@@ -870,6 +906,9 @@ static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
         FUNC_SETTHRESHOLD,
         FUNC_SETTYPE,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -1055,10 +1094,34 @@ static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
                 return TCL_ERROR;
             }
 
-            if (cvd->agastdetector) {
+            if (cvd->cmd_agastdetector) {
                 Tcl_DeleteCommandFromToken(interp, cvd->cmd_agastdetector);
             }
 
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_agastdetector) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_agastdetector, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::AgastFeatureDetector", TCL_STATIC);
             break;
         }
     }
@@ -1112,6 +1175,9 @@ int AgastFeatureDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
     pResultStr = Tcl_NewStringObj("::cv-agastdetector", -1);
 
+    if (cvd->cmd_agastdetector) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_agastdetector);
+    }
     cvd->cmd_agastdetector =
         Tcl_CreateObjCommand(interp, "::cv-agastdetector",
             (Tcl_ObjCmdProc *) AgastFeatureDetector_FUNCTION,
@@ -1163,6 +1229,9 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
         "setScoreType",
         "setWTA_K",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
@@ -1189,6 +1258,9 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
         FUNC_setScoreType,
         FUNC_setWTA_K,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -1783,6 +1855,30 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_orbdetector) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_orbdetector, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::ORB", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -1864,6 +1960,9 @@ int ORB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-orbdetector", -1);
 
+    if (cvd->cmd_orbdetector) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_orbdetector);
+    }
     cvd->cmd_orbdetector =
         Tcl_CreateObjCommand(interp, "::cv-orbdetector",
             (Tcl_ObjCmdProc *) ORB_FUNCTION,
@@ -1911,6 +2010,9 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         "setNOctaves",
         "setThreshold",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
@@ -1933,6 +2035,9 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         FUNC_setNOctaves,
         FUNC_setThreshold,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -2455,6 +2560,30 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_akazedetector) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_akazedetector, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::AKAZE", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -2531,6 +2660,9 @@ int AKAZE(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-akazedetector", -1);
 
+    if (cvd->cmd_akazedetector) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_akazedetector);
+    }
     cvd->cmd_akazedetector =
         Tcl_CreateObjCommand(interp, "::cv-akazedetector",
             (Tcl_ObjCmdProc *) AKAZE_FUNCTION,
@@ -2564,6 +2696,9 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         "compute",
         "detectAndCompute",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
@@ -2572,6 +2707,9 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         FUNC_COMPUTE,
         FUNC_DETECTANDCOMPUTE,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -2820,6 +2958,30 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_briskdetector) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_briskdetector, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::BRISK", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -2867,6 +3029,9 @@ int BRISK(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-briskdetector", -1);
 
+    if (cvd->cmd_briskdetector) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_briskdetector);
+    }
     cvd->cmd_briskdetector =
         Tcl_CreateObjCommand(interp, "::cv-briskdetector",
             (Tcl_ObjCmdProc *) BRISK_FUNCTION,
@@ -2901,6 +3066,9 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         "compute",
         "detectAndCompute",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
@@ -2909,6 +3077,9 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         FUNC_COMPUTE,
         FUNC_DETECTANDCOMPUTE,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -3157,6 +3328,30 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_siftdetector) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_siftdetector, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::SIFT", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -3215,6 +3410,9 @@ int SIFT(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-siftdetector", -1);
 
+    if (cvd->cmd_siftdetector) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_siftdetector);
+    }
     cvd->cmd_siftdetector =
         Tcl_CreateObjCommand(interp, "::cv-siftdetector",
             (Tcl_ObjCmdProc *) SIFT_FUNCTION,
@@ -3225,7 +3423,7 @@ int SIFT(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
-#endif
+#endif /* TCL_USE_SIFT */
 
 static void BFMatcher_DESTRUCTOR(void *cd)
 {
@@ -3247,6 +3445,9 @@ static int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
         "match",
         "knnMatch",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
@@ -3254,6 +3455,9 @@ static int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
         FUNC_MATCH,
         FUNC_KNNMATCH,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -3380,6 +3584,30 @@ static int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_bfmatcher) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_bfmatcher, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::BFMatcher", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -3422,6 +3650,9 @@ int BFMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-bfmatcher", -1);
 
+    if (cvd->cmd_bfmatcher) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_bfmatcher);
+    }
     cvd->cmd_bfmatcher =
         Tcl_CreateObjCommand(interp, "::cv-bfmatcher",
             (Tcl_ObjCmdProc *) BFMatcher_FUNCTION,
@@ -3454,6 +3685,9 @@ static int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tc
         "match",
         "knnMatch",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
@@ -3461,6 +3695,9 @@ static int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tc
         FUNC_MATCH,
         FUNC_KNNMATCH,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -3587,6 +3824,30 @@ static int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tc
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_flannbasedmatcher) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_flannbasedmatcher, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::FlannBasedMatcher", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -3611,7 +3872,7 @@ int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
 
     if (objc == 3) {
         algorithm = Tcl_GetStringFromObj(objv[1], &len);
-        if (!algorithm || len < 1) {
+        if (len < 1) {
             Tcl_SetResult(interp, (char *) "FlannBasedMatcher invalid algorithm name", TCL_STATIC);
             return TCL_ERROR;
         }
@@ -3700,6 +3961,9 @@ int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
 
     pResultStr = Tcl_NewStringObj("::cv-flannbasedmatcher", -1);
 
+    if (cvd->cmd_flannbasedmatcher) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_flannbasedmatcher);
+    }
     cvd->cmd_flannbasedmatcher =
         Tcl_CreateObjCommand(interp, "::cv-flannbasedmatcher",
             (Tcl_ObjCmdProc *) FlannBasedMatcher_FUNCTION,
@@ -3731,12 +3995,18 @@ static int SimpleBlobDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, T
     static const char *FUNC_strs[] = {
         "detect",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
     enum FUNC_enum {
         FUNC_DETECT,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -3807,6 +4077,30 @@ static int SimpleBlobDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, T
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_sbdetector) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_sbdetector, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::SimpleBlobDetector", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -3831,7 +4125,7 @@ int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
     }
 
     for (int i = 1; i + 1 < objc; i += 2) {
-        zArg = Tcl_GetStringFromObj(objv[i], 0);
+        zArg = Tcl_GetString(objv[i]);
 
         if (strcmp(zArg, "-minThreshold") == 0) {
             if (Tcl_GetDoubleFromObj(interp, objv[i+1], &minThreshold) != TCL_OK) {
@@ -3937,6 +4231,9 @@ int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 
     pResultStr = Tcl_NewStringObj("::cv-sbdetector", -1);
 
+    if (cvd->cmd_sbdetector) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_sbdetector);
+    }
     cvd->cmd_sbdetector =
         Tcl_CreateObjCommand(interp, "::cv-sbdectector",
             (Tcl_ObjCmdProc *) SimpleBlobDetector_FUNCTION,

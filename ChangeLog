@@ -1,5 +1,6 @@
 2021-09-20 Danilo Chang
 
+	* Apply Christian's patch (FileStorage interface)
 	* Implement command: compareHist
 
 2021-09-19 Danilo Chang

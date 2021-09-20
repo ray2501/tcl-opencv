@@ -367,7 +367,7 @@ int CascadeClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
     }
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
-    if (!filename || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "CascadeClassifier: invalid file name", TCL_STATIC);
         return TCL_ERROR;
     }

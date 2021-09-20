@@ -135,6 +135,25 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     ::cv::TermCriteria type maxCount epsilon
     TermCriteria close
 
+### fstorage
+
+    ::cv::FileStorage
+    FS open filename|data mode
+    FS keys ?name ...?
+    FS startMap name
+    FS startSeq name
+    FS endMap
+    FS endSeq
+    FS readDouble name ...
+    FS readInt name ...
+    FS readMat name ...
+    FS readString name ...
+    FS writeDouble name double ...
+    FS writeInt name int ...
+    FS writeMat name matrix
+    FS writeString name string ...
+    FS close
+
 ### imgcodecs
 
     ::cv::imread filename ?flags?
@@ -650,6 +669,19 @@ Types -
     ::cv::CV_64FC2
     ::cv::CV_64FC3
     ::cv::CV_64FC4
+
+`::cv::FileStorage` flags -
+
+    ::cv::FileStorage::READ
+    ::cv::FileStorage::WRITE
+    ::cv::FileStorage::APPEND
+    ::cv::FileStorage::MEMORY
+    ::cv::FileStorage::FORMAT_AUTO
+    ::cv::FileStorage::FORMAT_XML
+    ::cv::FileStorage::FORMAT_YAML
+    ::cv::FileStorage::FORMAT_JSON
+    ::cv::FileStorage::BASE64
+    ::cv::FileStorage::WRITE_BASE64
 
 `::cv::imread` flags -
 

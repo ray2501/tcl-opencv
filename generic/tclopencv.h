@@ -50,7 +50,9 @@ MODULE_SCOPE int mat_countNonZero(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
 MODULE_SCOPE int mat_determinant(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_divide(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_eigen(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#ifdef TCL_USE_OPENCV4
 MODULE_SCOPE int mat_eigenNonSymmetric(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
 MODULE_SCOPE int mat_exp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_flip(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_getOptimalDFTSize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
@@ -92,6 +94,12 @@ MODULE_SCOPE int getTickFrequency(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
 MODULE_SCOPE int PCA(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 MODULE_SCOPE int TermCriteria(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+
+/*
+ * OpenCV fstorage
+ */
+
+MODULE_SCOPE int FileStorage(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
  * OpenCV imgcodecs
@@ -278,10 +286,14 @@ MODULE_SCOPE int Stitcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
  */
 
 MODULE_SCOPE int NormalBayesClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#ifdef TCL_USE_OPENCV4
 MODULE_SCOPE int NormalBayesClassifier_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
 
 MODULE_SCOPE int KNearest(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#ifdef TCL_USE_OPENCV4
 MODULE_SCOPE int KNearest_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
 
 MODULE_SCOPE int SVM(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int SVM_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
@@ -319,6 +331,7 @@ extern DLLEXPORT int Opencv_Init(Tcl_Interp * interp);
 typedef enum {
     OPENCV_CALLBACK = 0,
     OPENCV_MAT,
+    OPENCV_FSTORAGE,
     OPENCV_VIDEOCAPTURE,
     OPENCV_VIDEOWRITER,
     OPENCV_PCA,
@@ -402,6 +415,8 @@ typedef struct {
     char *key;
     void *obj;
     Tcl_Command cmd;
+    int flags;             /* for OPENCV_FSTORAGE */
+    Tcl_DString ds1, ds2;  /* for OPENCV_FSTORAGE */
 } Opencv_Obj;
 
 
@@ -422,6 +437,7 @@ MODULE_SCOPE int Opencv_CheckForTk(void *cd, Tcl_Interp *interp);
 MODULE_SCOPE void CallBackFunc(int event, int x, int y, int flags, void *userdata);
 MODULE_SCOPE int CascadeClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #ifdef TCL_USE_OPENCV4
 MODULE_SCOPE int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

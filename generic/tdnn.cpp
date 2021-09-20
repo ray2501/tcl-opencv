@@ -205,10 +205,6 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
             if (objc == 6) {
                 /* name could be an empty string */
                 name = Tcl_GetStringFromObj(objv[3], &len);
-                if (!name) {
-                    Tcl_SetResult(interp, (char *) "setInput invalid name", TCL_STATIC);
-                    return TCL_ERROR;
-                }
 
                 if (Tcl_GetDoubleFromObj(interp, objv[4], &scalefactor) != TCL_OK) {
                     return TCL_ERROR;
@@ -276,7 +272,7 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
             if (objc == 3) {
                 name = Tcl_GetStringFromObj(objv[2], &len);
-                if (!name || len < 1) {
+                if (len < 1) {
                     Tcl_SetResult(interp, (char *) "forward invalid name", TCL_STATIC);
                     return TCL_ERROR;
                 }
@@ -360,7 +356,7 @@ int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     model = Tcl_GetStringFromObj(objv[1], &len);
-    if (!model || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "readNet invalid model name", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -368,7 +364,7 @@ int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     if (objc == 4) {
         config = Tcl_GetStringFromObj(objv[2], &len);
-        if (!config || len < 1) {
+        if (len < 1) {
             Tcl_DStringFree(&ds1);
             Tcl_SetResult(interp, (char *) "readNet invalid config name", TCL_STATIC);
             return TCL_ERROR;
@@ -376,7 +372,7 @@ int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         config = Tcl_UtfToExternalDString(NULL, config, len, &ds2);
 
         framework = Tcl_GetStringFromObj(objv[3], &len);
-        if (!framework || len < 1) {
+        if (len < 1) {
             Tcl_DStringFree(&ds1);
             Tcl_DStringFree(&ds2);
             Tcl_SetResult(interp, (char *) "readNet invalid framework name", TCL_STATIC);

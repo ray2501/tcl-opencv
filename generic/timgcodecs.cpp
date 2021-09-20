@@ -20,7 +20,7 @@ int imread(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
-    if (!filename || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "imread invalid file name", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -70,7 +70,7 @@ int imdecode(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     data = Tcl_GetByteArrayFromObj(objv[1], &len);
-    if (!data || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "imdecode invalid data", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -118,7 +118,7 @@ int imwrite(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
-    if (!filename || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "imwrite invalid file name", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -187,7 +187,6 @@ int imencode(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     return TCL_OK;
 }
-#
 #ifdef __cplusplus
 }
 #endif

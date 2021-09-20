@@ -4824,10 +4824,6 @@ int putText(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     text = Tcl_GetStringFromObj(objv[2], &len);
-    if (!text || len < 1) {
-        Tcl_SetResult(interp, (char *) "putText invalid text", TCL_STATIC);
-        return TCL_ERROR;
-    }
 
     if (Tcl_GetIntFromObj(interp, objv[3], &x1) != TCL_OK) {
         return TCL_ERROR;

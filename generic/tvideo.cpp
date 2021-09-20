@@ -24,12 +24,18 @@ static int SubtractorMOG2_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
     static const char *FUNC_strs[] = {
         "apply",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
     enum FUNC_enum {
         FUNC_APPLY,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -88,6 +94,31 @@ static int SubtractorMOG2_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_bgsmog2) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_bgsmog2, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::BackgroundSubtractorMOG2", TCL_STATIC);
+            break;
+        }
+
     }
 
     return TCL_OK;
@@ -133,6 +164,9 @@ int BackgroundSubtractorMOG2(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
     pResultStr = Tcl_NewStringObj("::cv-subtractorMOG2", -1);
 
+    if (cvd->cmd_bgsmog2) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_bgsmog2);
+    }
     cvd->cmd_bgsmog2 =
         Tcl_CreateObjCommand(interp, "::cv-subtractorMOG2",
             (Tcl_ObjCmdProc *) SubtractorMOG2_FUNCTION,

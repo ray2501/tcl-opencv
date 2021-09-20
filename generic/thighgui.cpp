@@ -17,7 +17,7 @@ int namedWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     winname = Tcl_GetStringFromObj(objv[1], &len);
-    if (!winname || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "namedWindow invalid winname", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -55,7 +55,7 @@ int imshow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     winname = Tcl_GetStringFromObj(objv[1], &len);
-    if (!winname || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "imshow invalid winname", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -115,7 +115,7 @@ int moveWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     winname = Tcl_GetStringFromObj(objv[1], &len);
-    if (!winname || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "moveWindow Iinvalid winname", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -153,7 +153,7 @@ int resizeWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     winname = Tcl_GetStringFromObj(objv[1], &len);
-    if (!winname || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "resizeWindow Iinvalid winname", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -194,7 +194,7 @@ int destroyWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     winname = Tcl_GetStringFromObj(objv[1], &len);
-    if (!winname || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "destroyWindow invalid winname", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -317,13 +317,13 @@ int setMouseCallback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
     }
 
     winname = Tcl_GetStringFromObj(objv[1], &len);
-    if (!winname || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "setMouseCallback invalid winname", TCL_STATIC);
         return TCL_ERROR;
     }
 
     callback_code = Tcl_GetStringFromObj(objv[2], &len);
-    if (!callback_code || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "setMouseCallback invalid callback_code", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -384,13 +384,13 @@ int createTrackbar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return TCL_ERROR;
     }
     trackbarname = Tcl_GetStringFromObj(objv[1], &tlen);
-    if (!trackbarname || tlen < 1) {
+    if (tlen < 1) {
         Tcl_SetResult(interp, (char *) "createTrackbar invalid trackbarname", TCL_STATIC);
         return TCL_ERROR;
     }
 
     winname = Tcl_GetStringFromObj(objv[2], &wlen);
-    if (!winname || wlen < 1) {
+    if (wlen < 1) {
         Tcl_SetResult(interp, (char *) "createTrackbar invalid winname", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -404,7 +404,7 @@ int createTrackbar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     callback_code = Tcl_GetStringFromObj(objv[5], &len);
-    if (!callback_code || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "createTrackbar invalid callback_code", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -446,13 +446,13 @@ int getTrackbarPos(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return TCL_ERROR;
     }
     trackbarname = Tcl_GetStringFromObj(objv[1], &tlen);
-    if (!trackbarname || tlen < 1) {
+    if (tlen < 1) {
         Tcl_SetResult(interp, (char *) "getTrackbarPos invalid trackbarname", TCL_STATIC);
         return TCL_ERROR;
     }
 
     winname = Tcl_GetStringFromObj(objv[2], &wlen);
-    if (!winname || wlen < 1) {
+    if (wlen < 1) {
         Tcl_SetResult(interp, (char *) "getTrackbarPos invalid winname", TCL_STATIC);
         return TCL_ERROR;
     }

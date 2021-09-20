@@ -2444,6 +2444,7 @@ int mat_eigen(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+#ifdef TCL_USE_OPENCV4
 int mat_eigenNonSymmetric(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image1, image2;
@@ -2480,6 +2481,7 @@ int mat_eigenNonSymmetric(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
+#endif
 
 
 int mat_exp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)

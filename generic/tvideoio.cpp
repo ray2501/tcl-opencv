@@ -212,13 +212,13 @@ int VideoWriter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
-    if (!filename || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "VideoWriter: invalid file name", TCL_STATIC);
         return TCL_ERROR;
     }
 
     fourcc = Tcl_GetStringFromObj(objv[2], &len4);
-    if (!fourcc || len != 4) {
+    if (len != 4) {
         Tcl_SetResult(interp, (char *) "VideoWriter: invalid fourcc", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -478,14 +478,14 @@ int VideoCapture(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     opentype = Tcl_GetStringFromObj(objv[1], &len);
-    if (!opentype || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "VideoCapture: invalid open type", TCL_STATIC);
         return TCL_ERROR;
     }
 
     if (strcmp(opentype, "file") == 0) {
         filename = Tcl_GetStringFromObj(objv[2], &len);
-        if (!filename || len < 1) {
+        if (len < 1) {
             Tcl_SetResult(interp, (char *) "VideoCapture: invalid file name", TCL_STATIC);
             return TCL_ERROR;
         }

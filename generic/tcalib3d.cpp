@@ -87,6 +87,9 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         "setTextureThreshold",
         "setUniquenessRatio",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
@@ -105,6 +108,9 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         FUNC_setTextureThreshold,
         FUNC_setUniquenessRatio,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -402,6 +408,30 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_stereobm) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_stereobm, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::StereoBM", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -444,6 +474,9 @@ int StereoBM(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-stereobm", -1);
 
+    if (cvd->cmd_stereobm) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_stereobm);
+    }
     cvd->cmd_stereobm =
         Tcl_CreateObjCommand(interp, "::cv-stereobm",
             (Tcl_ObjCmdProc *) StereoBM_FUNCTION,
@@ -485,6 +518,9 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
         "setPreFilterCap",
         "setUniquenessRatio",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
@@ -501,6 +537,9 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
         FUNC_setPreFilterCap,
         FUNC_setUniquenessRatio,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -759,6 +798,30 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_stereosgbm) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_stereosgbm, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::StereoSGBM", TCL_STATIC);
+            break;
+        }
     }
 
     return TCL_OK;
@@ -847,6 +910,9 @@ int StereoSGBM(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-stereosgbm", -1);
 
+    if (cvd->cmd_stereosgbm) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_stereosgbm);
+    }
     cvd->cmd_stereosgbm =
         Tcl_CreateObjCommand(interp, "::cv-stereosgbm",
             (Tcl_ObjCmdProc *) StereoSGBM_FUNCTION,
@@ -857,7 +923,6 @@ int StereoSGBM(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
-
 #ifdef __cplusplus
 }
 #endif

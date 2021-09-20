@@ -1062,6 +1062,7 @@ test opencv-1.83 {Simple SVM test} {*}{
         $svm close
         $labelsMat close
         $trainingDataMat close
+        $term close
         $result_image close
     }
     -returnCodes ok
@@ -1094,7 +1095,69 @@ test opencv-1.84 {Mahalanobis test} {*}{
     -result {0}
 }
 
-test opencv-1.85 {Close test} {*}{
+test opencv-1.85 {FileStorage} {*}{
+    -body {
+        set image1 [::cv::imread "tests/logoLarge.png"]
+        set fs [::cv::FileStorage]
+        $fs open "" [expr {
+            $::cv::FileStorage::FORMAT_JSON | $::cv::FileStorage::MEMORY | $::cv::FileStorage::WRITE
+        }]
+        $fs writeMat "image" $image1
+        $fs writeString "names" "hello" "world"
+        $fs writeInt "dim" [$image1 cols] [$image1 rows]
+        set data [$fs close]
+        set fs [::cv::FileStorage]
+        $fs open $data [expr {
+            $::cv::FileStorage::FORMAT_JSON | $::cv::FileStorage::MEMORY | $::cv::FileStorage::READ
+        }]
+        set image2 [$fs readMat "image"]
+        set names [$fs readString "names"]
+        set dim [$fs readInt "dim"]
+        # OpenCV 3.2 on Debian9: 3 empty elements
+        # set keys [$fs keys]
+        $fs close
+        set bytes1 [::cv::imencode ".png" $image1]
+        set bytes2 [::cv::imencode ".png" $image2]
+        set ret [string equal $bytes1 $bytes2]
+        incr ret [string equal [list "hello" "world"] $names]
+        incr ret [string equal [list [$image2 cols] [$image2 rows]] $dim]
+        # see comment above
+        # incr ret [string compare $keys [list "image" "names" "dim"]]
+        $image1 close
+        $image2 close
+        set ret
+    }
+    -returnCodes ok
+    -result {3}
+}
+
+test opencv-1.86 {FileStorage (nested)} {*}{
+    -body {
+        set fs [::cv::FileStorage]
+        $fs open "" [expr {
+            $::cv::FileStorage::FORMAT_JSON | $::cv::FileStorage::MEMORY | $::cv::FileStorage::WRITE
+        }]
+        $fs startMap "top"
+        $fs writeString "names" "hello" "world"
+        $fs writeInt "numbers" 41 42
+        $fs endMap
+        set data [$fs close]
+        set fs [::cv::FileStorage]
+        $fs open $data [expr {
+            $::cv::FileStorage::FORMAT_JSON | $::cv::FileStorage::MEMORY | $::cv::FileStorage::READ
+        }]
+        set names [$fs readString "top" "names"]
+        set numbers [$fs readInt "top" "numbers"]
+        $fs close
+        set ret [string equal [list "hello" "world"] $names]
+        incr ret [string equal [list 41 42] $numbers]
+        set ret
+    }
+    -returnCodes ok
+    -result {2}
+}
+
+test opencv-1.87 {Close test} {*}{
     -body {
         ::cv::imwrite output.png $image
         $tmatrix1 close
@@ -1126,10 +1189,10 @@ cleanupTests
 
 puts ====
 puts "Left over objects:"
-puts [cv::_info]
+puts [lsort [cv::_info]]
 puts ====
 puts "Left over procs:"
-puts [info command ::cv*]
+puts [lsort [info command ::cv*]]
 puts ====
 
 return

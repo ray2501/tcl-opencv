@@ -27,6 +27,9 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
         "predictProb",
         "save",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
@@ -36,6 +39,9 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
         FUNC_predictProb,
         FUNC_save,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -64,7 +70,7 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
             }
 
             command = Tcl_GetStringFromObj(objv[2], &len);
-            if (!command || len < 1) {
+            if (len < 1) {
                 Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -183,7 +189,7 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
             }
 
             filename = Tcl_GetStringFromObj(objv[2], &len);
-            if (!filename || len < 1) {
+            if (len < 1) {
                 Tcl_SetResult(interp, (char *) "save invalid file name", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -210,6 +216,30 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
                 Tcl_DeleteCommandFromToken(interp, cvd->cmd_bayesclassifier);
             }
 
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_bayesclassifier) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_bayesclassifier, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::ml::NormalBayesClassifier", TCL_STATIC);
             break;
         }
     }
@@ -243,6 +273,9 @@ int NormalBayesClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
     pResultStr = Tcl_NewStringObj("::cv-mlbayesclassifier", -1);
 
+    if (cvd->cmd_bayesclassifier) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_bayesclassifier);
+    }
     cvd->cmd_bayesclassifier =
         Tcl_CreateObjCommand(interp, "::cv-mlbayesclassifier",
             (Tcl_ObjCmdProc *) BayesClassifier_FUNCTION,
@@ -255,6 +288,7 @@ int NormalBayesClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 }
 
 
+#ifdef TCL_USE_OPENCV4
 int NormalBayesClassifier_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;
@@ -270,7 +304,7 @@ int NormalBayesClassifier_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
     }
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
-    if (!filename || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "load invalid file name", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -293,6 +327,9 @@ int NormalBayesClassifier_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
     pResultStr = Tcl_NewStringObj("::cv-mlbayesclassifier", -1);
 
+    if (cvd->cmd_bayesclassifier) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_bayesclassifier);
+    }
     cvd->cmd_bayesclassifier =
         Tcl_CreateObjCommand(interp, "::cv-mlbayesclassifier",
             (Tcl_ObjCmdProc *) BayesClassifier_FUNCTION,
@@ -303,6 +340,7 @@ int NormalBayesClassifier_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
+#endif
 
 
 static void KNearest_DESTRUCTOR(void *cd)
@@ -335,6 +373,9 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         "predict",
         "save",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
@@ -352,6 +393,9 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         FUNC_predict,
         FUNC_save,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -574,7 +618,7 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
             }
 
             command = Tcl_GetStringFromObj(objv[2], &len);
-            if (!command || len < 1) {
+            if (len < 1) {
                 Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -649,7 +693,7 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
             }
 
             filename = Tcl_GetStringFromObj(objv[2], &len);
-            if (!filename || len < 1) {
+            if (len < 1) {
                 Tcl_SetResult(interp, (char *) "save invalid file name", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -676,6 +720,30 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
                 Tcl_DeleteCommandFromToken(interp, cvd->cmd_knearest);
             }
 
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_knearest) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_knearest, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::ml::KNearest", TCL_STATIC);
             break;
         }
     }
@@ -709,6 +777,9 @@ int KNearest(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-mlknearest", -1);
 
+    if (cvd->cmd_knearest) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_knearest);
+    }
     cvd->cmd_knearest =
         Tcl_CreateObjCommand(interp, "::cv-mlknearest",
             (Tcl_ObjCmdProc *) KNearest_FUNCTION,
@@ -721,6 +792,7 @@ int KNearest(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+#ifdef TCL_USE_OPENCV4
 int KNearest_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;
@@ -736,7 +808,7 @@ int KNearest_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
-    if (!filename || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "load invalid file name", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -759,6 +831,9 @@ int KNearest_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-mlknearest", -1);
 
+    if (cvd->cmd_knearest) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_knearest);
+    }
     cvd->cmd_knearest =
         Tcl_CreateObjCommand(interp, "::cv-mlknearest",
             (Tcl_ObjCmdProc *) KNearest_FUNCTION,
@@ -769,6 +844,7 @@ int KNearest_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
+#endif
 
 
 static void SVM_DESTRUCTOR(void *cd)
@@ -812,6 +888,9 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
         "predict",
         "save",
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
@@ -840,6 +919,9 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
         FUNC_predict,
         FUNC_save,
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -1284,7 +1366,7 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
             }
 
             command = Tcl_GetStringFromObj(objv[2], &len);
-            if (!command || len < 1) {
+            if (len < 1) {
                 Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1359,7 +1441,7 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
             }
 
             filename = Tcl_GetStringFromObj(objv[2], &len);
-            if (!filename || len < 1) {
+            if (len < 1) {
                 Tcl_SetResult(interp, (char *) "save invalid file name", TCL_STATIC);
                 return TCL_ERROR;
             }
@@ -1388,6 +1470,31 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_svm) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_svm, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::ml::SVM", TCL_STATIC);
+            break;
+        }
+
     }
 
     return TCL_OK;
@@ -1419,6 +1526,9 @@ int SVM(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-mlsvm", -1);
 
+    if (cvd->cmd_svm) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_svm);
+    }
     cvd->cmd_svm =
         Tcl_CreateObjCommand(interp, "::cv-mlsvm",
             (Tcl_ObjCmdProc *) SVM_FUNCTION,
@@ -1446,7 +1556,7 @@ int SVM_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
-    if (!filename || len < 1) {
+    if (len < 1) {
         Tcl_SetResult(interp, (char *) "load invalid file name", TCL_STATIC);
         return TCL_ERROR;
     }
@@ -1469,6 +1579,9 @@ int SVM_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-mlsvm", -1);
 
+    if (cvd->cmd_svm) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_svm);
+    }
     cvd->cmd_svm =
         Tcl_CreateObjCommand(interp, "::cv-mlsvm",
             (Tcl_ObjCmdProc *) SVM_FUNCTION,
@@ -1499,11 +1612,17 @@ static int TrainData_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 
     static const char *FUNC_strs[] = {
         "close",
+        "_command",
+        "_name",
+        "_type",
         0
     };
 
     enum FUNC_enum {
         FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
     };
 
     if (objc < 2) {
@@ -1533,6 +1652,31 @@ static int TrainData_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 
             break;
         }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_traindata) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_traindata, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::ml::TrainData", TCL_STATIC);
+            break;
+        }
+
     }
 
     return TCL_OK;
@@ -1580,6 +1724,9 @@ int TrainData(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewStringObj("::cv-mltraindata", -1);
 
+    if (cvd->cmd_traindata) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_traindata);
+    }
     cvd->cmd_traindata =
         Tcl_CreateObjCommand(interp, "::cv-mltraindata",
             (Tcl_ObjCmdProc *) TrainData_FUNCTION,
@@ -1590,7 +1737,6 @@ int TrainData(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
-
 #ifdef __cplusplus
 }
 #endif
