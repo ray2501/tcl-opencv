@@ -402,6 +402,13 @@ Please notice, SimpleBlobDetector command will only have 1 instance.
 
 ### calib3d
 
+    ::cv::findChessboardCorners image patternSize_width patternSize_height ?flags?
+    ::cv::drawChessboardCorners image patternSize_width patternSize_height corners patternWasFound
+
+`::cv::findChessboardCorners` returns a list of (retval, corners).
+The retval value is a non-zero value if all of the corners are found and they are placed in a certain order.
+And the retval value should be passed to `::cv::drawChessboardCorners`'s parameter `patternWasFound`.
+
     ::cv::findHomography srcPoints dstPoints ?method ransacReprojThreshold?
 
 Note that whenever an H matrix cannot be estimated, an empty one will be returned.
@@ -1337,6 +1344,13 @@ TermCriteria type -
     ::cv::DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG
     ::cv::DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS
     ::cv::DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
+
+`findChessboardCorners` flags -
+
+    ::cv::CALIB_CB_ADAPTIVE_THRESH
+    ::cv::CALIB_CB_NORMALIZE_IMAGE
+    ::cv::CALIB_CB_FILTER_QUADS
+    ::cv::CALIB_CB_FAST_CHECK
 
 `findHomography` method -
 

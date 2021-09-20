@@ -1297,6 +1297,14 @@ Opencv_Init(Tcl_Interp *interp)
      * For calib3d
      */
 
+    Tcl_CreateObjCommand(interp, "::" NS "::findChessboardCorners",
+        (Tcl_ObjCmdProc *) findChessboardCorners,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::drawChessboardCorners",
+        (Tcl_ObjCmdProc *) drawChessboardCorners,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::findHomography",
         (Tcl_ObjCmdProc *) findHomography,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
@@ -4057,6 +4065,25 @@ Opencv_Init(Tcl_Interp *interp)
     setupValue = Tcl_NewIntObj((int) cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
+    /*
+     * findChessboardCorners flags
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::CALIB_CB_ADAPTIVE_THRESH", -1);
+    setupValue = Tcl_NewIntObj(cv::CALIB_CB_ADAPTIVE_THRESH);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::CALIB_CB_NORMALIZE_IMAGE", -1);
+    setupValue = Tcl_NewIntObj(cv::CALIB_CB_NORMALIZE_IMAGE);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::CALIB_CB_FILTER_QUADS", -1);
+    setupValue = Tcl_NewIntObj(cv::CALIB_CB_FILTER_QUADS);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::CALIB_CB_FAST_CHECK", -1);
+    setupValue = Tcl_NewIntObj(cv::CALIB_CB_FAST_CHECK);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*
      * findHomography method

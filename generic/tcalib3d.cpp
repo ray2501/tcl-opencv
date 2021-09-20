@@ -4,6 +4,110 @@
 extern "C" {
 #endif
 
+int findChessboardCorners(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int patternSize_width = 0, patternSize_height = 0;
+    int flags = cv::CALIB_CB_ADAPTIVE_THRESH | cv::CALIB_CB_NORMALIZE_IMAGE;
+    bool retval;
+    cv::Mat result;
+    cv::Mat *mat1, *dstmat;
+    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL;
+
+    if (objc != 4 && objc != 5) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "image patternSize_width patternSize_height ?flags?");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &patternSize_width) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &patternSize_height) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 5) {
+        if (Tcl_GetIntFromObj(interp, objv[4], &flags) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        retval = cv::findChessboardCorners(*mat1,
+                                           cv::Size(patternSize_width, patternSize_height),
+                                           result, flags);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "findChessboardCorners failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    dstmat = new cv::Mat(result);
+    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+    Tcl_SetObjResult(interp, pResultStr1);
+
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewBooleanObj((int) retval));
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
+int drawChessboardCorners(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int patternSize_width = 0, patternSize_height = 0, patternWasFound = 0;
+    cv::Mat result;
+    cv::Mat *mat1, *corners;
+
+    if (objc != 6) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "image patternSize_width patternSize_height corners patternWasFound");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &patternSize_width) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &patternSize_height) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    corners = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[4]);
+    if (!corners) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetBooleanFromObj(interp, objv[5], &patternWasFound) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::drawChessboardCorners(*mat1,
+                                  cv::Size(patternSize_width, patternSize_height),
+                                  *corners, (bool) patternWasFound);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "drawChessboardCorners failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    return TCL_OK;
+}
+
+
 int findHomography(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double ransacReprojThreshold = 3;

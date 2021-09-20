@@ -1,6 +1,7 @@
 2021-09-20 Danilo Chang
 
 	* Apply Christian's patch (FileStorage interface)
+	* Implement command: findChessboardCorners, drawChessboardCorners
 	* Implement command: getGaussianKernel, sepFilter2D
 	* Implement command: compareHist
 

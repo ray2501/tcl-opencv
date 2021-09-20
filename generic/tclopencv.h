@@ -238,6 +238,9 @@ MODULE_SCOPE int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_
  * OpenCV calib3d
  */
 
+MODULE_SCOPE int findChessboardCorners(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int drawChessboardCorners(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+
 MODULE_SCOPE int findHomography(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 MODULE_SCOPE int StereoBM(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
