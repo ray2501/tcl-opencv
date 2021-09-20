@@ -1447,6 +1447,47 @@ READNET `setPreferableTarget` targetId -
 Examples
 =====
 
+Brighness and contrast -
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set img [::cv::imread $filename $::cv::IMREAD_COLOR]
+
+        set img2 [$img convertTo -1 1 100]
+        set img3 [$img convertTo -1 1 -100]
+        set img4 [$img convertTo -1 2 0]
+        set img5 [$img convertTo -1 0.5 0]
+
+        ::cv::namedWindow "Source" $::cv::WINDOW_NORMAL
+        ::cv::imshow "Source" $img
+        ::cv::namedWindow "Brighness High" $::cv::WINDOW_NORMAL
+        ::cv::imshow "Brighness High" $img2
+        ::cv::namedWindow "Brighness Low" $::cv::WINDOW_NORMAL
+        ::cv::imshow "Brighness Low" $img3
+        ::cv::namedWindow "Contrast High" $::cv::WINDOW_NORMAL
+        ::cv::imshow "Contrast High" $img4
+        ::cv::namedWindow "Contrast Low" $::cv::WINDOW_NORMAL
+        ::cv::imshow "Contrast Low" $img5
+
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $img close
+        $img2 close
+        $img3 close
+        $img4 close
+        $img5 close
+    } on error {em} {
+        puts $em
+    }
+
 Below is an example to apply a color map -
 
     package require opencv
