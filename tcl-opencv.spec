@@ -57,5 +57,5 @@ rm -rf %buildroot
 
 %files
 %defattr(-,root,root)
-%doc README.md LICENSE
+%doc README.md BUILDING.md LICENSE
 %{tcl_archdir}
