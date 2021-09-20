@@ -187,6 +187,7 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     ::cv::warpPerspective src_matrix transformation_matrix width height ?flags?
 
     ::cv::filter2D src_matrix kernel_matrix ?anchor_x anchor_y delta borderType?
+    ::cv::sepFilter2D src_matrix kernelX kernelY ?anchor_x anchor_y delta borderType?
     ::cv::getGaborKernel ksize_width ksize_height sigma theta lambd gamma ?psi type?
     ::cv::getGaussianKernel ksize sigma ?type?
     ::cv::blur src_matrix ksize_width ksize_height ?anchor_x anchor_y borderType?

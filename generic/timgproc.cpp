@@ -1738,6 +1738,70 @@ int filter2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int sepFilter2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat filter_image;
+    int anchor_x = -1, anchor_y = -1, borderType = cv::BORDER_DEFAULT;
+    double delta = 0.0;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *mat, *kmatx, *kmaty, *dstmat;
+
+    if (objc != 4 && objc != 8) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "src_matrix kernelX kernelY ?anchor_x anchor_y delta borderType?");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    kmatx = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!kmatx) {
+        return TCL_ERROR;
+    }
+
+    kmaty = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+    if (!kmaty) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 8) {
+        if (Tcl_GetIntFromObj(interp, objv[4], &anchor_x) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[5], &anchor_y) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[6], &delta) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[7], &borderType) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::sepFilter2D(*mat, filter_image, -1, *kmatx, *kmaty,
+                        cv::Point(anchor_x, anchor_y), delta, borderType);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "sepFilter2D failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    dstmat = new cv::Mat(filter_image);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int getGaborKernel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat result_mat;
