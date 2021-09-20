@@ -307,7 +307,7 @@ void CallBackFunc(int event, int x, int y, int flags, void *userdata)
 int setMouseCallback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *winname = NULL, *callback_code = NULL;
-    int len = 0;
+    int len = 0, len2 = 0;
     CvCallbackInfo *callbackinfo;
     Tcl_DString ds;
 
@@ -322,8 +322,8 @@ int setMouseCallback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         return TCL_ERROR;
     }
 
-    callback_code = Tcl_GetStringFromObj(objv[2], &len);
-    if (len < 1) {
+    callback_code = Tcl_GetStringFromObj(objv[2], &len2);
+    if (len2 < 1) {
         Tcl_SetResult(interp, (char *) "setMouseCallback invalid callback_code", TCL_STATIC);
         return TCL_ERROR;
     }
