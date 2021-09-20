@@ -218,7 +218,7 @@ int VideoWriter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     fourcc = Tcl_GetStringFromObj(objv[2], &len4);
-    if (len != 4) {
+    if (len4 != 4) {
         Tcl_SetResult(interp, (char *) "VideoWriter: invalid fourcc", TCL_STATIC);
         return TCL_ERROR;
     }
