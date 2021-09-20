@@ -188,6 +188,7 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
 
     ::cv::filter2D src_matrix kernel_matrix ?anchor_x anchor_y delta borderType?
     ::cv::getGaborKernel ksize_width ksize_height sigma theta lambd gamma ?psi type?
+    ::cv::getGaussianKernel ksize sigma ?type?
     ::cv::blur src_matrix ksize_width ksize_height ?anchor_x anchor_y borderType?
     ::cv::GaussianBlur src_matrix ksize_width ksize_height sigmaX ?sigmaY borderType?
     ::cv::medianBlur src_matrix ksize

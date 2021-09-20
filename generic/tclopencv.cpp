@@ -989,6 +989,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) getGaborKernel,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::getGaussianKernel",
+        (Tcl_ObjCmdProc *) getGaussianKernel,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::blur",
         (Tcl_ObjCmdProc *) blur,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

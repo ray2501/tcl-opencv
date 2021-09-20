@@ -1808,6 +1808,54 @@ int getGaborKernel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int getGaussianKernel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat result_mat;
+    int ksize = 0, type = CV_64F;
+    double sigma = 0;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *dstmat;
+
+    if (objc != 3 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "ksize sigma ?type?");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[1], &ksize) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[2], &sigma) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 4) {
+        if (Tcl_GetIntFromObj(interp, objv[3], &type) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (type != CV_32F && type != CV_64F) {
+            Tcl_SetResult(interp, (char *) "getGaussianKernel type is wrong", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        result_mat = cv::getGaussianKernel(ksize, sigma, type);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "getGaussianKernel failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    dstmat = new cv::Mat(result_mat);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int blur(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat blur_image;
