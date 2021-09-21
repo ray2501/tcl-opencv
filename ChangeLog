@@ -1,3 +1,7 @@
+2021-09-21 Danilo Chang
+
+	* Bump version to v0.9
+
 2021-09-20 Danilo Chang
 
 	* Apply Christian's patch (FileStorage interface)
