@@ -3956,10 +3956,10 @@ int fitLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(line[0]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(line[1]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(line[2]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(line[3]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) line[0]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) line[1]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) line[2]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) line[3]));
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
