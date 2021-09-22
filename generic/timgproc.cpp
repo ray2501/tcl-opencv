@@ -3882,6 +3882,90 @@ int fitEllipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int fitLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    std::vector<cv::Point> points;
+    cv::Vec4f line;
+    cv::RotatedRect rect;
+    Tcl_Obj *pResultStr = NULL;
+    int count = 0, distType = 0;
+    double param = 0, reps = 0, aeps = 0;
+
+    if (objc != 6) {
+        Tcl_WrongNumArgs(interp, 1, objv, "contour distType param reps aeps");
+        return TCL_ERROR;
+    }
+
+    /*
+     * For 2D point set.
+     */
+    if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
+        Tcl_SetResult(interp, (char *) "fitLine invalid contour data", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    if (count%2 != 0) {
+        Tcl_SetResult(interp, (char *) "fitLine invalid points data", TCL_STATIC);
+        return TCL_ERROR;
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+        int number_from_list_x;
+        int number_from_list_y;
+        int npts;
+
+        npts = count / 2;
+        for (int i = 0, j = 0; j < npts; i = i + 2, j = j + 1) {
+            cv::Point point;
+            Tcl_ListObjIndex(interp, objv[1], i, &elemListPtr);
+            if (Tcl_GetIntFromObj(interp, elemListPtr, &number_from_list_x) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            Tcl_ListObjIndex(interp, objv[1], i + 1, &elemListPtr);
+            if (Tcl_GetIntFromObj(interp, elemListPtr, &number_from_list_y) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            point.x = number_from_list_x;
+            point.y = number_from_list_y;
+            points.push_back (point);
+        }
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &distType) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[3], &param) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[4], &reps) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[5], &aeps) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::fitLine(points, line, distType, param, reps, aeps);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "fitLine failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(line[0]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(line[1]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(line[2]));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(line[3]));
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int boxPoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat points;

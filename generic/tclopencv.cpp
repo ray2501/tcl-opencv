@@ -1135,6 +1135,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) fitEllipse,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::fitLine",
+        (Tcl_ObjCmdProc *) fitLine,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::boxPoints",
         (Tcl_ObjCmdProc *) boxPoints,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

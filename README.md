@@ -228,6 +228,7 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     ::cv::boundingRect contour
     ::cv::minAreaRect contour
     ::cv::fitEllipse contour
+    ::cv::fitLine contour distType param reps aeps
     ::cv::boxPoints contour
     ::cv::minEnclosingCircle contour
     ::cv::convexHull contour ?clockwise?
@@ -1309,6 +1310,7 @@ Line Types -
     ::cv::TM_CCOEFF
     ::cv::TM_CCOEFF_NORMED
 
+`::cv::fitLine` distType and
 `::cv::distanceTransform` distanceType -
 
     ::cv::DIST_L1
