@@ -4351,7 +4351,7 @@ Opencv_Init(Tcl_Interp *interp)
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*
-     * Svmsgd Type
+     * SVMSGD Type
      */
 
     strValue = Tcl_NewStringObj("::" NS "::ml::SVMSGD_SGD", -1);

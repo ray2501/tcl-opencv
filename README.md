@@ -1488,7 +1488,7 @@ SVMSGD Margin Type -
     ::cv::ml::SVMSGD_SOFT_MARGIN
     ::cv::ml::SVMSGD_HARD_MARGIN
 
-Svmsgd Type -
+SVMSGD Type -
 
     ::cv::ml::SVMSGD_SGD
     ::cv::ml::SVMSGD_ASGD
