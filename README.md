@@ -635,6 +635,29 @@ Please notice, KNearest and KNearest::load command will only have 1 instance.
 
 Please notice, SVM and SVM::load command will only have 1 instance.
 
+    ::cv::ml::SVMSGD
+    ::cv::ml::SVMSGD::load filename
+    SVMSGD getInitialStepSize
+    SVMSGD getMarginRegularization
+    SVMSGD getMarginType
+    SVMSGD getShift
+    SVMSGD getStepDecreasingPower
+    SVMSGD getSvmsgdType
+    SVMSGD getWeights
+    SVMSGD setInitialStepSize value
+    SVMSGD setMarginRegularization value
+    SVMSGD setMarginType value
+    SVMSGD setOptimalParameters svmsgdType marginType
+    SVMSGD setStepDecreasingPower value
+    SVMSGD setSvmsgdType value
+    SVMSGD setTermCriteria termCriteria
+    SVMSGD train trainData ?flags?
+    SVMSGD predict samples ?flags?
+    SVMSGD save filename
+    SVMSGD close
+
+Please notice, SVMSGD and SVMSGD::load command will only have 1 instance.
+
     ::cv::ml::TrainData samples layout responses
     TrainData close
 
@@ -1458,6 +1481,17 @@ SVM kernel types -
     ::cv::ml::SVM_SIGMOID
     ::cv::ml::SVM_CHI2
     ::cv::ml::SVM_INTER
+
+
+SVMSGD Margin Type -
+
+    ::cv::ml::SVMSGD_SOFT_MARGIN
+    ::cv::ml::SVMSGD_HARD_MARGIN
+
+Svmsgd Type -
+
+    ::cv::ml::SVMSGD_SGD
+    ::cv::ml::SVMSGD_ASGD
 
 READNET `setPreferableBackend` backendId -
 

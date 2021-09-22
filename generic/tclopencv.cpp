@@ -181,6 +181,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->svm) {
         cvd->svm.release();
     }
+    if (cvd->svmsgd) {
+        cvd->svmsgd.release();
+    }
     if (cvd->traindata) {
         cvd->traindata.release();
     }
@@ -1488,6 +1491,16 @@ Opencv_Init(Tcl_Interp *interp)
     Tcl_CreateObjCommand(interp, "::" NS "::ml::SVM::load",
         (Tcl_ObjCmdProc *) SVM_load,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::SVMSGD",
+        (Tcl_ObjCmdProc *) SVMSGD,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+#ifdef TCL_USE_OPENCV4
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::SVMSGD::load",
+        (Tcl_ObjCmdProc *) SVMSGD_load,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+#endif
 
     Tcl_CreateObjCommand(interp, "::" NS "::ml::TrainData",
         (Tcl_ObjCmdProc *) TrainData,
@@ -4323,6 +4336,30 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::ml::SVM_INTER", -1);
     setupValue = Tcl_NewIntObj(cv::ml::SVM::KernelTypes::INTER);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * SVMSGD Margin Type
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::SVMSGD_SOFT_MARGIN", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SVMSGD::MarginType::SOFT_MARGIN);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::SVMSGD_HARD_MARGIN", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SVMSGD::MarginType::HARD_MARGIN);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * Svmsgd Type
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::SVMSGD_SGD", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SVMSGD::SvmsgdType::SGD);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::SVMSGD_ASGD", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::SVMSGD::SvmsgdType::ASGD);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*
