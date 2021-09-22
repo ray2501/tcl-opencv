@@ -40,6 +40,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         "convertTo",
         "colRange",
         "rowRange",
+        "pop_back",
+        "push_back",
         "reshape",
         "setData",
         "setTo",
@@ -79,6 +81,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         FUNC_CONVERTTO,
         FUNC_COLRANGE,
         FUNC_ROWRANGE,
+        FUNC_POP_BACK,
+        FUNC_PUSH_BACK,
         FUNC_RESHAPE,
         FUNC_SETDATA,
         FUNC_SETTO,
@@ -971,6 +975,51 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_POP_BACK: {
+            size_t nelems = 1;
+
+            if (objc != 2 && objc != 3) {
+                Tcl_WrongNumArgs(interp, 1, objv, "?nelems?");
+                return TCL_ERROR;
+            }
+
+            if (objc == 3) {
+                if (Tcl_GetLongFromObj(interp, objv[2], (long *) &nelems) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                mat->pop_back(nelems);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "pop_back failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_PUSH_BACK: {
+            cv::Mat *mat1;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 1, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat1) {
+                return TCL_ERROR;
+            }
+
+            try {
+                mat->push_back(*mat1);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "push_back failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
             break;
         }
         case FUNC_RESHAPE: {

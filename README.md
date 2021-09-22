@@ -45,6 +45,8 @@ Implement commands
     MATRIX convertTo type ?scale shift?
     MATRIX colRange startcol endcol
     MATRIX rowRange startcol endcol
+    MATRIX pop_back ?nelems?
+    MATRIX push_back matrix
     MATRIX reshape cn ?rows?
     MATRIX setData list_data
     MATRIX setTo color_list ?mask?

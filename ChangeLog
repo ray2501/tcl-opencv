@@ -1,3 +1,7 @@
+2021-09-22 Danilo Chang
+
+	* Add pop_back and push_back method to MATRIX function
+
 2021-09-21 Danilo Chang
 
 	* Bump version to v0.9
