@@ -1157,7 +1157,42 @@ test opencv-1.86 {FileStorage (nested)} {*}{
     -result {2}
 }
 
-test opencv-1.87 {Close test} {*}{
+test opencv-1.87 {fitLine test} {*}{
+    -body {
+        set testimg [::cv::Mat::Mat 480 640 $::cv::CV_8UC3]
+
+        set points [list 48 58 105 98 155 160 202 210 231 232 248 260 320 300 350 360 412 400]
+
+        for {set i 0} {$i < [llength $points]} {incr i 2} {
+            cv::circle $testimg [lindex $points $i] [lindex $points [expr $i+1]] 5 [list 0 0 255 0] 2
+        }
+
+        set para [::cv::fitLine $points $::cv::DIST_L2 0 0.01 0.01]
+        set p0x [lindex $para 0]
+        set p0y [lindex $para 1]
+        set p1x [lindex $para 2]
+        set p1y [lindex $para 3]
+
+        cv::line $testimg $p0x $p0y $p1x $p1y [list 255 0 0 0] 2
+
+        set k [expr ($p1y-$p0y)/($p1x-$p0x)]
+
+        set n0x $p1x
+        set n0y $p1y
+        set n1x 640
+        set n1y [expr $k * 640]
+
+        cv::line $testimg $n0x $n0y $n1x $n1y [list 0 255 0 0] 2
+
+        ::cv::imwrite "line.png" $testimg
+
+        $testimg close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.88 {Close test} {*}{
     -body {
         ::cv::imwrite output.png $image
         $tmatrix1 close
@@ -1182,6 +1217,7 @@ test opencv-1.87 {Close test} {*}{
 
 #-------------------------------------------------------------------------------
 
+removeFile line.png
 removeFile result.png
 removeFile output.png
 
