@@ -169,6 +169,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->tonemaprei) {
         cvd->tonemaprei.release();
     }
+    if (cvd->logistic) {
+        cvd->logistic.release();
+    }
     if (cvd->bayesclassifier) {
         cvd->bayesclassifier.release();
     }
@@ -1447,6 +1450,16 @@ Opencv_Init(Tcl_Interp *interp)
     /*
      * For ml
      */
+
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::LogisticRegression",
+        (Tcl_ObjCmdProc *) LogisticRegression,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+#ifdef TCL_USE_OPENCV4
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::LogisticRegression::load",
+        (Tcl_ObjCmdProc *) LogisticRegression_load,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+#endif
 
     Tcl_CreateObjCommand(interp, "::" NS "::ml::NormalBayesClassifier",
         (Tcl_ObjCmdProc *) NormalBayesClassifier,
@@ -4217,6 +4230,35 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::ml::PREPROCESSED_INPUT", -1);
     setupValue = Tcl_NewIntObj(cv::ml::StatModel::Flags::PREPROCESSED_INPUT);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+
+    /*
+     * LogisticRegression Methods
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::LOGISTIC_BATCH", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::LogisticRegression::Methods::BATCH);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::LOGISTIC_MINI_BATCH", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::LogisticRegression::Methods::MINI_BATCH);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * LogisticRegression RegKinds
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::LOGISTIC_REG_DISABLE", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::LogisticRegression::RegKinds::REG_DISABLE);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::LOGISTIC_REG_L1", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::LogisticRegression::RegKinds::REG_L1);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::LOGISTIC_REG_L2", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::LogisticRegression::RegKinds::REG_L2);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*

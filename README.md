@@ -557,6 +557,25 @@ if encoded QR Code data is long when I test it.
 
 ### ml
 
+    ::cv::ml::LogisticRegression
+    ::cv::ml::LogisticRegression::load filename
+    LogisticRegression get_learnt_thetas
+    LogisticRegression getIterations
+    LogisticRegression getLearningRate
+    LogisticRegression getMiniBatchSize
+    LogisticRegression getRegularization
+    LogisticRegression getTrainMethod
+    LogisticRegression setIterations value
+    LogisticRegression setLearningRate value
+    LogisticRegression setMiniBatchSize value
+    LogisticRegression setRegularization value
+    LogisticRegression setTrainMethod value
+    LogisticRegression setTermCriteria termCriteria
+    LogisticRegression train trainData ?flags?
+    LogisticRegression predict samples ?flags?
+    LogisticRegression save filename
+    LogisticRegression close
+
     ::cv::ml::NormalBayesClassifier
     ::cv::ml::NormalBayesClassifier::load filename
     NormalBayesClassifier train trainData ?flags?
@@ -1404,6 +1423,17 @@ Predict options -
     ::cv::ml::RAW_OUTPUT
     ::cv::ml::COMPRESSED_INPUT
     ::cv::ml::PREPROCESSED_INPUT
+
+LogisticRegression Methods -
+
+    ::cv::ml::LOGISTIC_BATCH
+    ::cv::ml::LOGISTIC_MINI_BATCH
+
+LogisticRegression Regularization Kinds -
+
+    ::cv::ml::LOGISTIC_REG_DISABLE
+    ::cv::ml::LOGISTIC_REG_L1
+    ::cv::ml::LOGISTIC_REG_L2
 
 KNearest algorithm -
 
