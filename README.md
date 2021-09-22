@@ -576,6 +576,8 @@ if encoded QR Code data is long when I test it.
     LogisticRegression save filename
     LogisticRegression close
 
+Please notice, LogisticRegression and LogisticRegression::load command will only have 1 instance.
+
     ::cv::ml::NormalBayesClassifier
     ::cv::ml::NormalBayesClassifier::load filename
     NormalBayesClassifier train trainData ?flags?
