@@ -187,6 +187,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->dtrees) {
         cvd->dtrees.release();
     }
+    if (cvd->boost) {
+        cvd->boost.release();
+    }
     if (cvd->traindata) {
         cvd->traindata.release();
     }
@@ -1516,6 +1519,16 @@ Opencv_Init(Tcl_Interp *interp)
 #ifdef TCL_USE_OPENCV4
     Tcl_CreateObjCommand(interp, "::" NS "::ml::DTrees::load",
         (Tcl_ObjCmdProc *) DTrees_load,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+#endif
+
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::Boost",
+        (Tcl_ObjCmdProc *) Boost,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+#ifdef TCL_USE_OPENCV4
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::Boost::load",
+        (Tcl_ObjCmdProc *) Boost_load,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 #endif
 
@@ -4377,6 +4390,26 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::ml::SVMSGD_ASGD", -1);
     setupValue = Tcl_NewIntObj(cv::ml::SVMSGD::SvmsgdType::ASGD);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * Boost Types
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::BOOST_DISCRETE", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::Boost::Types::DISCRETE);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::BOOST_REAL", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::Boost::Types::REAL);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::BOOST_LOGIT", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::Boost::Types::LOGIT);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::BOOST_GENTLE", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::Boost::Types::GENTLE);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*

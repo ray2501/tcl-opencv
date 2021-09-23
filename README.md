@@ -686,6 +686,39 @@ Please notice, SVMSGD and SVMSGD::load command will only have 1 instance.
 
 Please notice, DTrees and DTrees::load command will only have 1 instance.
 
+    ::cv::ml::Boost
+    ::cv::ml::Boost::load filename
+    Boost getCVFolds
+    Boost getMaxCategories
+    Boost getMaxDepth
+    Boost getMinSampleCount
+    Boost getPriors
+    Boost getRegressionAccuracy
+    Boost getTruncatePrunedTree
+    Boost getUse1SERule
+    Boost getUseSurrogates
+    Boost getBoostType
+    Boost getWeakCount
+    Boost getWeightTrimRate
+    Boost setCVFolds value
+    Boost setMaxCategories value
+    Boost setMaxDepth value
+    Boost setMinSampleCount value
+    Boost setPriors matrix
+    Boost setRegressionAccuracy value
+    Boost setTruncatePrunedTree value
+    Boost setUse1SERule value
+    Boost setUseSurrogates value
+    Boost setBoostType value
+    Boost setWeakCount value
+    Boost setWeightTrimRate value
+    Boost train trainData ?flags?
+    Boost predict samples ?flags?
+    Boost save filename
+    Boost close
+
+Please notice, Boost and Boost::load command will only have 1 instance.
+
     ::cv::ml::TrainData samples layout responses
     TrainData close
 
@@ -1521,6 +1554,13 @@ SVMSGD Type -
 
     ::cv::ml::SVMSGD_SGD
     ::cv::ml::SVMSGD_ASGD
+
+Boost Types -
+
+    ::cv::ml::BOOST_DISCRETE
+    ::cv::ml::BOOST_REAL
+    ::cv::ml::BOOST_LOGIT
+    ::cv::ml::BOOST_GENTLE
 
 READNET `setPreferableBackend` backendId -
 

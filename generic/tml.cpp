@@ -3440,6 +3440,821 @@ int DTrees_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 #endif
 
 
+static void Boost_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->boost) {
+        cvd->boost.release();
+    }
+    cvd->cmd_boost = NULL;
+}
+
+
+static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "getCVFolds",
+        "getMaxCategories",
+        "getMaxDepth",
+        "getMinSampleCount",
+        "getPriors",
+        "getRegressionAccuracy",
+        "getTruncatePrunedTree",
+        "getUse1SERule",
+        "getUseSurrogates",
+        "getBoostType",
+        "getWeakCount",
+        "getWeightTrimRate",
+        "setCVFolds",
+        "setMaxCategories",
+        "setMaxDepth",
+        "setMinSampleCount",
+        "setPriors",
+        "setRegressionAccuracy",
+        "setTruncatePrunedTree",
+        "setUse1SERule",
+        "setUseSurrogates",
+        "setBoostType",
+        "setWeakCount",
+        "setWeightTrimRate",
+        "train",
+        "predict",
+        "save",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_getCVFolds,
+        FUNC_getMaxCategories,
+        FUNC_getMaxDepth,
+        FUNC_getMinSampleCount,
+        FUNC_getPriors,
+        FUNC_getRegressionAccuracy,
+        FUNC_getTruncatePrunedTree,
+        FUNC_getUse1SERule,
+        FUNC_getUseSurrogates,
+        FUNC_getBoostType,
+        FUNC_getWeakCount,
+        FUNC_getWeightTrimRate,
+        FUNC_setCVFolds,
+        FUNC_setMaxCategories,
+        FUNC_setMaxDepth,
+        FUNC_setMinSampleCount,
+        FUNC_setPriors,
+        FUNC_setRegressionAccuracy,
+        FUNC_setTruncatePrunedTree,
+        FUNC_setUse1SERule,
+        FUNC_setUseSurrogates,
+        FUNC_setBoostType,
+        FUNC_setWeakCount,
+        FUNC_setWeightTrimRate,
+        FUNC_train,
+        FUNC_predict,
+        FUNC_save,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->boost == nullptr) {
+        Tcl_SetResult(interp, (char *) "no boost instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_getCVFolds: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->boost->getCVFolds();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getCVFolds failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getMaxCategories: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->boost->getMaxCategories();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getMaxCategories failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getMaxDepth: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->boost->getMaxDepth();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getMaxDepth failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getMinSampleCount: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->boost->getMinSampleCount();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getMinSampleCount failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getPriors: {
+            cv::Mat results;
+            cv::Mat *dstmat;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                results = cvd->boost->getPriors();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getPriors failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            dstmat = new cv::Mat(results);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_getRegressionAccuracy: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->boost->getRegressionAccuracy();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getRegressionAccuracy failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getTruncatePrunedTree: {
+            bool value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->boost->getTruncatePrunedTree();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getTruncatePrunedTree failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewBooleanObj((int) value));
+            break;
+        }
+        case FUNC_getUse1SERule: {
+            bool value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->boost->getUse1SERule();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getUse1SERule failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewBooleanObj((int) value));
+            break;
+        }
+        case FUNC_getUseSurrogates: {
+            bool value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->boost->getUseSurrogates();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getUseSurrogates failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewBooleanObj((int) value));
+            break;
+        }
+        case FUNC_getBoostType: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->boost->getBoostType();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getBoostType failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getWeakCount: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->boost->getWeakCount();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getWeakCount failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getWeightTrimRate: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->boost->getWeightTrimRate();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getWeightTrimRate failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_setCVFolds: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->boost->setCVFolds(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setCVFolds failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setMaxCategories: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->boost->setMaxCategories(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setMaxCategories failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setMaxDepth: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->boost->setMaxDepth(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setMaxDepth failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setMinSampleCount: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->boost->setMinSampleCount(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setMinSampleCount failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setPriors: {
+            cv::Mat *priori;
+
+           if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            priori = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!priori) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->boost->setPriors(*priori);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setPriors failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setRegressionAccuracy: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->boost->setRegressionAccuracy((float) value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setRegressionAccuracy failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setTruncatePrunedTree: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetBooleanFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->boost->setTruncatePrunedTree((bool) value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setTruncatePrunedTree failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setUse1SERule: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetBooleanFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->boost->setUse1SERule((bool) value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setUse1SERule failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setUseSurrogates: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetBooleanFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->boost->setUseSurrogates((bool) value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setUseSurrogates failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setBoostType: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->boost->setBoostType(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setBoostType failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setWeakCount: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->boost->setWeakCount(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setWeakCount failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setWeightTrimRate: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->boost->setWeightTrimRate(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setWeightTrimRate failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_train: {
+            cv::Ptr< cv::ml::TrainData > trainData;
+            char *command = NULL;
+            int len = 0, flags = 0;
+
+            if (objc != 3 && objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "trainData ?flags?");
+                return TCL_ERROR;
+            }
+
+            command = Tcl_GetStringFromObj(objv[2], &len);
+            if (len < 1) {
+                Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            if (strcmp(command, "::cv-mltraindata")==0) {
+                trainData = cvd->traindata;
+            }
+
+            if (objc == 4) {
+                if (Tcl_GetIntFromObj(interp, objv[3], &flags) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                cvd->boost->train(trainData, flags);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "train failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_predict: {
+            cv::Mat *samples, *dstmat;
+            cv::Mat results;
+            Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
+            int flags = 0;
+            float value;
+
+            if (objc != 3 && objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "samples ?flags?");
+                return TCL_ERROR;
+            }
+
+            samples = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!samples) {
+                return TCL_ERROR;
+            }
+
+            if (objc == 4) {
+                if (Tcl_GetIntFromObj(interp, objv[3], &flags) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                value = cvd->boost->predict(*samples, results, flags);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "predict failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            dstmat = new cv::Mat(results);
+            pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
+            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_save: {
+            char *filename = NULL;
+            int len = 0;
+            Tcl_DString ds;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "filename");
+                return TCL_ERROR;
+            }
+
+            filename = Tcl_GetStringFromObj(objv[2], &len);
+            if (len < 1) {
+                Tcl_SetResult(interp, (char *) "save invalid file name", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
+            try {
+                cvd->boost->save(filename);
+            } catch (...) {
+                Tcl_DStringFree(&ds);
+                Tcl_SetResult(interp, (char *) "save failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+            Tcl_DStringFree(&ds);
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_boost) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_boost);
+            }
+
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_boost) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_boost, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::ml::Boost", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int Boost(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::ml::Boost> boost;
+
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, 0);
+        return TCL_ERROR;
+    }
+
+    try {
+        boost = cv::ml::Boost::create();
+
+        if (boost == nullptr) {
+            Tcl_SetResult(interp, (char *) "Boost create failed", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "Boost failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-mlboost", -1);
+
+    if (cvd->cmd_boost) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_boost);
+    }
+    cvd->cmd_boost =
+        Tcl_CreateObjCommand(interp, "::cv-mlboost",
+            (Tcl_ObjCmdProc *) Boost_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) Boost_DESTRUCTOR);
+
+    cvd->boost = boost;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
+#ifdef TCL_USE_OPENCV4
+int Boost_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::ml::Boost> boost;
+    char *filename = NULL;
+    int len = 0;
+    Tcl_DString ds;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "filename");
+        return TCL_ERROR;
+    }
+
+    filename = Tcl_GetStringFromObj(objv[1], &len);
+    if (len < 1) {
+        Tcl_SetResult(interp, (char *) "load invalid file name", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
+    try {
+        boost = cv::ml::Boost::load(filename);
+
+        if (boost == nullptr) {
+            Tcl_DStringFree(&ds);
+            Tcl_SetResult(interp, (char *) "Boost load failed", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...) {
+        Tcl_DStringFree(&ds);
+        Tcl_SetResult(interp, (char *) "Boost load failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    Tcl_DStringFree(&ds);
+
+    pResultStr = Tcl_NewStringObj("::cv-mlboost", -1);
+
+    if (cvd->cmd_boost) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_boost);
+    }
+    cvd->cmd_boost =
+        Tcl_CreateObjCommand(interp, "::cv-mlboost",
+            (Tcl_ObjCmdProc *) Boost_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) Boost_DESTRUCTOR);
+
+    cvd->boost = boost;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+#endif
+
+
 static void TrainData_DESTRUCTOR(void *cd)
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;
