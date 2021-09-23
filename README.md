@@ -659,6 +659,31 @@ Please notice, SVM and SVM::load command will only have 1 instance.
 
 Please notice, SVMSGD and SVMSGD::load command will only have 1 instance.
 
+    ::cv::ml::DTrees
+    ::cv::ml::DTrees::load filename
+    DTrees getCVFolds
+    DTrees getMaxCategories
+    DTrees getMaxDepth
+    DTrees getMinSampleCount
+    DTrees getRegressionAccuracy
+    DTrees getTruncatePrunedTree
+    DTrees getUse1SERule
+    DTrees getUseSurrogates
+    DTrees setCVFolds value
+    DTrees setMaxCategories value
+    DTrees setMaxDepth value
+    DTrees setMinSampleCount value
+    DTrees setRegressionAccuracy value
+    DTrees setTruncatePrunedTree value
+    DTrees setUse1SERule value
+    DTrees setUseSurrogates value
+    DTrees train trainData ?flags?
+    DTrees predict samples ?flags?
+    DTrees save filename
+    DTrees close
+
+Please notice, DTrees and DTrees::load command will only have 1 instance.
+
     ::cv::ml::TrainData samples layout responses
     TrainData close
 

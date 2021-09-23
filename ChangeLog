@@ -1,3 +1,7 @@
+2021-09-23 Danilo Chang
+
+	* Implement command: DTrees
+
 2021-09-22 Danilo Chang
 
 	* Implement command: fitLine (for 2D point set)
