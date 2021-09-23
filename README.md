@@ -665,6 +665,7 @@ Please notice, SVMSGD and SVMSGD::load command will only have 1 instance.
     DTrees getMaxCategories
     DTrees getMaxDepth
     DTrees getMinSampleCount
+    DTrees getPriors
     DTrees getRegressionAccuracy
     DTrees getTruncatePrunedTree
     DTrees getUse1SERule
@@ -673,6 +674,7 @@ Please notice, SVMSGD and SVMSGD::load command will only have 1 instance.
     DTrees setMaxCategories value
     DTrees setMaxDepth value
     DTrees setMinSampleCount value
+    DTrees setPriors matrix
     DTrees setRegressionAccuracy value
     DTrees setTruncatePrunedTree value
     DTrees setUse1SERule value

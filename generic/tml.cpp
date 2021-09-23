@@ -2775,6 +2775,7 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         "getMaxCategories",
         "getMaxDepth",
         "getMinSampleCount",
+        "getPriors",
         "getRegressionAccuracy",
         "getTruncatePrunedTree",
         "getUse1SERule",
@@ -2783,6 +2784,7 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         "setMaxCategories",
         "setMaxDepth",
         "setMinSampleCount",
+        "setPriors",
         "setRegressionAccuracy",
         "setTruncatePrunedTree",
         "setUse1SERule",
@@ -2802,6 +2804,7 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         FUNC_getMaxCategories,
         FUNC_getMaxDepth,
         FUNC_getMinSampleCount,
+        FUNC_getPriors,
         FUNC_getRegressionAccuracy,
         FUNC_getTruncatePrunedTree,
         FUNC_getUse1SERule,
@@ -2810,6 +2813,7 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         FUNC_setMaxCategories,
         FUNC_setMaxDepth,
         FUNC_setMinSampleCount,
+        FUNC_setPriors,
         FUNC_setRegressionAccuracy,
         FUNC_setTruncatePrunedTree,
         FUNC_setUse1SERule,
@@ -2908,6 +2912,30 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getPriors: {
+            cv::Mat results;
+            cv::Mat *dstmat;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                results = cvd->dtrees->getPriors();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getPriors failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            dstmat = new cv::Mat(results);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, pResultStr);
+
             break;
         }
         case FUNC_getRegressionAccuracy: {
@@ -3061,6 +3089,28 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
                 cvd->dtrees->setMinSampleCount(value);
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "setMinSampleCount failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setPriors: {
+            cv::Mat *priori;
+
+           if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            priori = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!priori) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->dtrees->setPriors(*priori);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setPriors failed", TCL_STATIC);
                 return TCL_ERROR;
             }
 
