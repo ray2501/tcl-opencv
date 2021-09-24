@@ -406,7 +406,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             Tcl_IncrRefCount(empty);
             try {
                 cv::FileNode node = (*fs)[name];
-                std::string typestring;
+                cv::String typestring;
                 const char *type;
 
                 for (int i = 3; i < objc; i++) {
