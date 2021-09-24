@@ -643,9 +643,13 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 } else if (strcmp(type, "opencv-traindata") == 0) {
                     cv::Mat samples, responses;
                     int layout;
-                    samples = node["samples"].mat();
+                    if (!node["samples"].isNone()) {
+                        samples = node["samples"].mat();
+                    }
                     node["layout"] >> layout;
-                    responses = node["responses"].mat();
+                    if (!node["responses"].isNone()) {
+                        responses = node["responses"].mat();
+                    }
                     if (TrainData_CONSTRUCTOR(cd, interp, samples, layout, responses) != TCL_OK) {
                         throw cv::Exception();
                     }
@@ -920,7 +924,8 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     cmd == cvd->cmd_svmsgd ||
                     cmd == cvd->cmd_dtrees ||
                     cmd == cvd->cmd_boost ||
-                    cmd == cvd->cmd_rtrees) {
+                    cmd == cvd->cmd_rtrees ||
+                    cmd == cvd->cmd_traindata) {
                     /* type can be serialized */
                 } else {
                     Tcl_SetResult(interp, (char *) "unsupported type", TCL_STATIC);
@@ -1251,10 +1256,11 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 } else if (cmd == cvd->cmd_traindata) {
                     (*fs) << name << "{";
                     (*fs) << "type" << "opencv-traindata";
+                    (*fs) << "data" << "{";
                     (*fs) << "samples" << cvd->traindata->getSamples();
                     (*fs) << "layout" << cvd->traindata->getLayout();
                     (*fs) << "responses" << cvd->traindata->getResponses();
-                    (*fs) << "}";
+                    (*fs) << "}" << "}";
                 } else {
                     Tcl_Panic("unhandled type/object");
                 }

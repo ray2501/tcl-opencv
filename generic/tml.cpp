@@ -4284,7 +4284,9 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         "getActiveVarCount",
         "getCalculateVarImportance",
         "getVarImportance",
+#ifdef TCL_USE_OPENCV4
         "getVotes",
+#endif
         "setCVFolds",
         "setMaxCategories",
         "setMaxDepth",
@@ -4320,7 +4322,9 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         FUNC_getActiveVarCount,
         FUNC_getCalculateVarImportance,
         FUNC_getVarImportance,
+#ifdef TCL_USE_OPENCV4
         FUNC_getVotes,
+#endif
         FUNC_setCVFolds,
         FUNC_setMaxCategories,
         FUNC_setMaxDepth,
@@ -4585,6 +4589,7 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             break;
         }
+#ifdef TCL_USE_OPENCV4
         case FUNC_getVotes: {
             int flags = 0;
             cv::Mat results;
@@ -4619,6 +4624,7 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             break;
         }
+#endif
         case FUNC_setCVFolds: {
             int value;
 

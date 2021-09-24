@@ -1170,6 +1170,14 @@ test opencv-1.87 {FileStorage (types)} {*}{
         $fs writeObj $name $mat
         $mat close
         set objlist [list $name]
+        set mat [::cv::Mat::zeros 8 1 $::cv::CV_32FC1]
+        set trd [::cv::ml::TrainData $mat $::cv::ml::ROW_SAMPLE $mat]
+        set name "obj$count"
+        incr count
+        $fs writeObj $name $trd
+        $mat close
+        $trd close
+        lappend objlist $name
         foreach cmd {
             cv::FastFeatureDetector
             cv::AgastFeatureDetector
