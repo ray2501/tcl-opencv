@@ -190,6 +190,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->boost) {
         cvd->boost.release();
     }
+    if (cvd->rtrees) {
+        cvd->rtrees.release();
+    }
     if (cvd->traindata) {
         cvd->traindata.release();
     }
@@ -1534,6 +1537,16 @@ Opencv_Init(Tcl_Interp *interp)
 #ifdef TCL_USE_OPENCV4
     Tcl_CreateObjCommand(interp, "::" NS "::ml::Boost::load",
         (Tcl_ObjCmdProc *) Boost_load,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+#endif
+
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::RTrees",
+        (Tcl_ObjCmdProc *) RTrees,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+#ifdef TCL_USE_OPENCV4
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::RTrees::load",
+        (Tcl_ObjCmdProc *) RTrees_load,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 #endif
 

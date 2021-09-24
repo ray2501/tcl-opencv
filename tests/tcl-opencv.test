@@ -1196,6 +1196,7 @@ test opencv-1.87 {FileStorage (types)} {*}{
             cv::ml::SVMSGD
             cv::ml::DTrees
             cv::ml::Boost
+            cv::ml::RTrees
         } {
             set obj [$cmd]
             set name "obj$count"

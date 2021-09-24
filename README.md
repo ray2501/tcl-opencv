@@ -721,6 +721,40 @@ Please notice, DTrees and DTrees::load command will only have 1 instance.
 
 Please notice, Boost and Boost::load command will only have 1 instance.
 
+    ::cv::ml::RTrees
+    ::cv::ml::RTrees::load filename
+    RTrees getCVFolds
+    RTrees getMaxCategories
+    RTrees getMaxDepth
+    RTrees getMinSampleCount
+    RTrees getPriors
+    RTrees getRegressionAccuracy
+    RTrees getTruncatePrunedTree
+    RTrees getUse1SERule
+    RTrees getUseSurrogates
+    RTrees getActiveVarCount
+    RTrees getCalculateVarImportance
+    RTrees getVarImportance
+    RTrees getVotes
+    RTrees setCVFolds value
+    RTrees setMaxCategories value
+    RTrees setMaxDepth value
+    RTrees setMinSampleCount value
+    RTrees setPriors matrix
+    RTrees setRegressionAccuracy value
+    RTrees setTruncatePrunedTree value
+    RTrees setUse1SERule value
+    RTrees setUseSurrogates value
+    RTrees setActiveVarCount value
+    RTrees setCalculateVarImportance value
+    RTrees setTermCriteria termCriteria
+    RTrees train trainData ?flags?
+    RTrees predict samples ?flags?
+    RTrees save filename
+    RTrees close
+
+Please notice, RTrees and RTrees::load command will only have 1 instance.
+
     ::cv::ml::TrainData samples layout responses
     TrainData close
 

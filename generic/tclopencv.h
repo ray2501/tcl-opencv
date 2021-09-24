@@ -324,6 +324,11 @@ MODULE_SCOPE int Boost(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 MODULE_SCOPE int Boost_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
 
+MODULE_SCOPE int RTrees(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#ifdef TCL_USE_OPENCV4
+MODULE_SCOPE int RTrees_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
+
 MODULE_SCOPE int TrainData(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
@@ -404,6 +409,7 @@ typedef struct {
     cv::Ptr<cv::ml::SVMSGD> svmsgd;
     cv::Ptr<cv::ml::DTrees> dtrees;
     cv::Ptr<cv::ml::Boost> boost;
+    cv::Ptr<cv::ml::RTrees> rtrees;
     cv::Ptr<cv::ml::TrainData> traindata;
 
     Tcl_Command cmd_fastdetector;
@@ -435,6 +441,7 @@ typedef struct {
     Tcl_Command cmd_svmsgd;
     Tcl_Command cmd_dtrees;
     Tcl_Command cmd_boost;
+    Tcl_Command cmd_rtrees;
     Tcl_Command cmd_traindata;
 
 #ifdef TCL_USE_TKPHOTO
