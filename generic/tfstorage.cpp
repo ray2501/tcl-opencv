@@ -406,6 +406,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             Tcl_IncrRefCount(empty);
             try {
                 cv::FileNode node = (*fs)[name];
+                std::string typestring;
                 const char *type;
 
                 for (int i = 3; i < objc; i++) {
@@ -417,7 +418,8 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 if (node.isNone() || !node.isMap()) {
                     throw cv::Exception();
                 }
-                type = node["type"].string().c_str();
+                typestring = node["type"].string();
+                type = typestring.c_str();
                 node = node["data"];
                 if (!(node.isMap() || node.isNone()) || type == NULL) {
                     throw cv::Exception();
