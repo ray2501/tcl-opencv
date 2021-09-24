@@ -2958,6 +2958,49 @@ int mat_meanStdDev(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_minMaxIdx(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Tcl_Obj *pResultStr = NULL, *pSubResultStr = NULL;
+    double minVal, maxVal;
+    int minIdx, maxIdx;
+    cv::Mat *mat;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::minMaxIdx(*mat, &minVal, &maxVal, &minIdx, &maxIdx);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "minMaxLoc failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    pSubResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_ListObjAppendElement(NULL, pSubResultStr, Tcl_NewDoubleObj(minVal));
+    Tcl_ListObjAppendElement(NULL, pSubResultStr, Tcl_NewIntObj(minIdx));
+
+    Tcl_ListObjAppendElement(NULL, pResultStr, pSubResultStr);
+
+    pSubResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_ListObjAppendElement(NULL, pSubResultStr, Tcl_NewDoubleObj(maxVal));
+    Tcl_ListObjAppendElement(NULL, pSubResultStr, Tcl_NewIntObj(maxIdx));
+
+    Tcl_ListObjAppendElement(NULL, pResultStr, pSubResultStr);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int mat_minMaxLoc(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     Tcl_Obj *pResultStr = NULL, *pSubResultStr = NULL;

@@ -95,6 +95,7 @@ Implement commands
     ::cv::Mahalanobis matrix1 matrix2 icovar_matrix
     ::cv::magnitude matrix1 matrix2
     ::cv::meanStdDev matrix
+    ::cv::minMaxIdx matrix
     ::cv::minMaxLoc matrix
     ::cv::multiply matrix_1 matrix_2 ?scale?
     ::cv::mulSpectrums matrix_1 matrix_2 flags ?conjB?
@@ -754,6 +755,22 @@ Please notice, Boost and Boost::load command will only have 1 instance.
     RTrees close
 
 Please notice, RTrees and RTrees::load command will only have 1 instance.
+
+    ::cv::ml::ANN_MLP
+    ::cv::ml::ANN_MLP::load filename
+    ANN_MLP getLayerSizes
+    ANN_MLP getTrainMethod
+    ANN_MLP getWeights layerIdx
+    ANN_MLP setActivationFunction value ?param1 param2?
+    ANN_MLP setLayerSizes matrix
+    ANN_MLP setTrainMethod value ?param1 param2?
+    ANN_MLP setTermCriteria termCriteria
+    ANN_MLP train trainData ?flags?
+    ANN_MLP predict samples ?flags?
+    ANN_MLP save filename
+    ANN_MLP close
+
+Please notice, ANN_MLP and ANN_MLP::load command will only have 1 instance.
 
     ::cv::ml::TrainData samples layout responses
     TrainData close
@@ -1580,7 +1597,6 @@ SVM kernel types -
     ::cv::ml::SVM_CHI2
     ::cv::ml::SVM_INTER
 
-
 SVMSGD Margin Type -
 
     ::cv::ml::SVMSGD_SOFT_MARGIN
@@ -1597,6 +1613,26 @@ Boost Types -
     ::cv::ml::BOOST_REAL
     ::cv::ml::BOOST_LOGIT
     ::cv::ml::BOOST_GENTLE
+
+ANN_MLP ActivationFunctions -
+
+    ::cv::ml::MLP_IDENTITY
+    ::cv::ml::MLP_SIGMOID_SYM
+    ::cv::ml::MLP_GAUSSIAN
+    ::cv::ml::MLP_RELU
+    ::cv::ml::MLP_LEAKYRELU
+
+ANN_MLP Train Flags
+
+    ::cv::ml::MLP_UPDATE_WEIGHTS
+    ::cv::ml::MLP_NO_INPUT_SCALE
+    ::cv::ml::MLP_NO_OUTPUT_SCALE
+
+ANN_MLP Training Methods -
+
+    ::cv::ml::MLP_BACKPROP
+    ::cv::ml::MLP_RPROP
+    ::cv::ml::MLP_ANNEAL
 
 READNET `setPreferableBackend` backendId -
 

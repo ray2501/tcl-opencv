@@ -63,6 +63,7 @@ MODULE_SCOPE int mat_lut(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 MODULE_SCOPE int mat_Mahalanobis(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_magnitude(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_meanStdDev(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_minMaxIdx(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_minMaxLoc(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_multiply(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_mulSpectrums(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
@@ -329,6 +330,11 @@ MODULE_SCOPE int RTrees(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 MODULE_SCOPE int RTrees_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
 
+MODULE_SCOPE int ANN_MLP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#ifdef TCL_USE_OPENCV4
+MODULE_SCOPE int ANN_MLP_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
+
 MODULE_SCOPE int TrainData(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
@@ -410,6 +416,7 @@ typedef struct {
     cv::Ptr<cv::ml::DTrees> dtrees;
     cv::Ptr<cv::ml::Boost> boost;
     cv::Ptr<cv::ml::RTrees> rtrees;
+    cv::Ptr<cv::ml::ANN_MLP> annmlp;
     cv::Ptr<cv::ml::TrainData> traindata;
 
     Tcl_Command cmd_fastdetector;
@@ -442,6 +449,7 @@ typedef struct {
     Tcl_Command cmd_dtrees;
     Tcl_Command cmd_boost;
     Tcl_Command cmd_rtrees;
+    Tcl_Command cmd_annmlp;
     Tcl_Command cmd_traindata;
 
 #ifdef TCL_USE_TKPHOTO

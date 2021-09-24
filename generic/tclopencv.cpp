@@ -193,6 +193,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->rtrees) {
         cvd->rtrees.release();
     }
+    if (cvd->annmlp) {
+        cvd->annmlp.release();
+    }
     if (cvd->traindata) {
         cvd->traindata.release();
     }
@@ -769,6 +772,10 @@ Opencv_Init(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp, "::" NS "::meanStdDev",
         (Tcl_ObjCmdProc *) mat_meanStdDev,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::minMaxIdx",
+        (Tcl_ObjCmdProc *) mat_minMaxIdx,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_CreateObjCommand(interp, "::" NS "::minMaxLoc",
@@ -1547,6 +1554,16 @@ Opencv_Init(Tcl_Interp *interp)
 #ifdef TCL_USE_OPENCV4
     Tcl_CreateObjCommand(interp, "::" NS "::ml::RTrees::load",
         (Tcl_ObjCmdProc *) RTrees_load,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+#endif
+
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::ANN_MLP",
+        (Tcl_ObjCmdProc *) ANN_MLP,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+#ifdef TCL_USE_OPENCV4
+    Tcl_CreateObjCommand(interp, "::" NS "::ml::ANN_MLP::load",
+        (Tcl_ObjCmdProc *) ANN_MLP_load,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 #endif
 
@@ -4429,6 +4446,66 @@ Opencv_Init(Tcl_Interp *interp)
     strValue = Tcl_NewStringObj("::" NS "::ml::BOOST_GENTLE", -1);
     setupValue = Tcl_NewIntObj(cv::ml::Boost::Types::GENTLE);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * ANN_MLP ActivationFunctions
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::MLP_IDENTITY", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::ANN_MLP::ActivationFunctions::IDENTITY);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::MLP_SIGMOID_SYM", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::ANN_MLP::ActivationFunctions::SIGMOID_SYM);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::MLP_GAUSSIAN", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::ANN_MLP::ActivationFunctions::GAUSSIAN);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+#ifdef TCL_USE_OPENCV4
+    strValue = Tcl_NewStringObj("::" NS "::ml::MLP_RELU", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::ANN_MLP::ActivationFunctions::RELU);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::MLP_LEAKYRELU", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::ANN_MLP::ActivationFunctions::LEAKYRELU);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+#endif
+
+    /*
+     * ANN_MLP Train Flags
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::MLP_UPDATE_WEIGHTS", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::ANN_MLP::TrainFlags::UPDATE_WEIGHTS);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::MLP_NO_INPUT_SCALE", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::ANN_MLP::TrainFlags::NO_INPUT_SCALE);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::MLP_NO_OUTPUT_SCALE", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::ANN_MLP::TrainFlags::NO_OUTPUT_SCALE);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * ANN_MLP Training Methods
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::MLP_BACKPROP", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::ANN_MLP::TrainingMethods::BACKPROP);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::ml::MLP_RPROP", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::ANN_MLP::TrainingMethods::RPROP);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+#ifdef TCL_USE_OPENCV4
+    strValue = Tcl_NewStringObj("::" NS "::ml::MLP_ANNEAL", -1);
+    setupValue = Tcl_NewIntObj(cv::ml::ANN_MLP::TrainingMethods::ANNEAL);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+#endif
 
     /*
      * DNN backend

@@ -640,6 +640,13 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     if (!node.isNone()) {
                         cvd->rtrees->read(node);
                     }
+                } else if (strcmp(type, "opencv-annmlp") == 0) {
+                    if (ANN_MLP(cd, interp, 1, &empty) != TCL_OK) {
+                        throw cv::Exception();
+                    }
+                    if (!node.isNone()) {
+                        cvd->annmlp->read(node);
+                    }
                 } else if (strcmp(type, "opencv-traindata") == 0) {
                     cv::Mat samples, responses;
                     int layout;
@@ -925,6 +932,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     cmd == cvd->cmd_dtrees ||
                     cmd == cvd->cmd_boost ||
                     cmd == cvd->cmd_rtrees ||
+                    cmd == cvd->cmd_annmlp ||
                     cmd == cvd->cmd_traindata) {
                     /* type can be serialized */
                 } else {
@@ -1250,6 +1258,16 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                         (*fs) << "data" << "{";
                         fs->elname = "data";
                         cvd->rtrees->write(*fs);
+                        (*fs) << "}";
+                    }
+                    (*fs) << "}";
+                } else if (cmd == cvd->cmd_annmlp) {
+                    (*fs) << name << "{";
+                    (*fs) << "type" << "opencv-annmlp";
+                    if (!cvd->annmlp->empty()) {
+                        (*fs) << "data" << "{";
+                        fs->elname = "data";
+                        cvd->annmlp->write(*fs);
                         (*fs) << "}";
                     }
                     (*fs) << "}";

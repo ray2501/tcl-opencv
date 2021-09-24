@@ -1,6 +1,7 @@
 2021-09-24 Danilo Chang
 
-	* Implement command: RTrees
+	* Implement command: minMaxIdx
+	* Implement command: RTrees, ANN_MLP
 	* Apply Christian's patch
 
 2021-09-23 Danilo Chang
