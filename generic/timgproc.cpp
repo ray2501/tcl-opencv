@@ -3871,11 +3871,11 @@ int fitEllipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj( (int) rect.center.x));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj( (int) rect.center.y));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj( (int) rect.size.width));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj( (int) rect.size.height));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj( (int) rect.angle));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) rect.center.x));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) rect.center.y));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) rect.size.width));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) rect.size.height));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) rect.angle));
 
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;

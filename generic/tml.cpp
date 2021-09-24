@@ -1117,7 +1117,7 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
             }
 
             try {
-                cvd->knearest->setIsClassifier( (bool) value);
+                cvd->knearest->setIsClassifier((bool) value);
             } catch (...) {
                 Tcl_SetResult(interp, (char *) "setIsClassifier failed", TCL_STATIC);
                 return TCL_ERROR;
@@ -4340,6 +4340,41 @@ static int TrainData_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 
     }
 
+    return TCL_OK;
+}
+
+
+int TrainData_CONSTRUCTOR(void *cd, Tcl_Interp *interp, cv::Mat &samples, int layout, cv::Mat &responses)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::ml::TrainData> traindata;
+
+    try {
+        traindata = cv::ml::TrainData::create(samples, layout, responses);
+
+        if (traindata == nullptr) {
+            Tcl_SetResult(interp, (char *) "TrainData create failed", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "TrainData failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-mltraindata", -1);
+
+    if (cvd->cmd_traindata) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_traindata);
+    }
+    cvd->cmd_traindata =
+        Tcl_CreateObjCommand(interp, "::cv-mltraindata",
+            (Tcl_ObjCmdProc *) TrainData_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) TrainData_DESTRUCTOR);
+
+    cvd->traindata = traindata;
+
+    Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
 

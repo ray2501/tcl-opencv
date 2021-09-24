@@ -4235,7 +4235,7 @@ int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
         Tcl_DeleteCommandFromToken(interp, cvd->cmd_sbdetector);
     }
     cvd->cmd_sbdetector =
-        Tcl_CreateObjCommand(interp, "::cv-sbdectector",
+        Tcl_CreateObjCommand(interp, "::cv-sbdetector",
             (Tcl_ObjCmdProc *) SimpleBlobDetector_FUNCTION,
             cd, (Tcl_CmdDeleteProc *) SimpleBlobDetector_DESTRUCTOR);
 

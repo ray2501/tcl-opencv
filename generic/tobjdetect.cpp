@@ -117,7 +117,7 @@ int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             pResultStr = Tcl_NewListObj(0, NULL);
             Tcl_ListObjAppendElement(NULL, pResultStr,
-                                     Tcl_NewStringObj(result.c_str(), result.length()));
+                Tcl_NewStringObj(result.c_str(), result.length()));
 
             Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
             Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);

@@ -407,8 +407,10 @@ Opencv_FindHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, Tcl_Obj *name)
     string = Tcl_GetString(name);
     hashEntryPtr = Tcl_FindHashEntry(&cvd->tbl[type], string);
     if (hashEntryPtr == NULL) {
-        Tcl_SetObjResult(interp,
-            Tcl_ObjPrintf("handle \"%s\" not found", string));
+        if (interp != NULL) {
+            Tcl_SetObjResult(interp,
+                    Tcl_ObjPrintf("handle \"%s\" not found", string));
+        }
         return NULL;
     }
     cvo = (Opencv_Obj *) Tcl_GetHashValue(hashEntryPtr);
@@ -417,6 +419,9 @@ Opencv_FindHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, Tcl_Obj *name)
     }
     if (cvo->obj == NULL) {
         Tcl_Panic("null CV object");
+    }
+    if (interp == NULL) {
+        return cvo;
     }
     return cvo->obj;
 }

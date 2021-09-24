@@ -133,20 +133,20 @@ int BackgroundSubtractorMOG2(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
     Tcl_Obj *pResultStr = NULL;
     cv::Ptr<cv::BackgroundSubtractorMOG2> bgsmog2;
 
-    if (objc != 4) {
-        Tcl_WrongNumArgs(interp, 1, objv, "history varThreshold detectShadows");
+    if (objc > 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "?history varThreshold detectShadows?");
         return TCL_ERROR;
     }
 
-    if (Tcl_GetIntFromObj(interp, objv[1], &history) != TCL_OK) {
+    if (objc > 1 && Tcl_GetIntFromObj(interp, objv[1], &history) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    if (Tcl_GetDoubleFromObj(interp, objv[2], &varThreshold) != TCL_OK) {
+    if (objc > 2 && Tcl_GetDoubleFromObj(interp, objv[2], &varThreshold) != TCL_OK) {
         return TCL_ERROR;
     }
 
-    if (Tcl_GetBooleanFromObj(interp, objv[3], &detectShadows) != TCL_OK) {
+    if (objc > 3 && Tcl_GetBooleanFromObj(interp, objv[3], &detectShadows) != TCL_OK) {
         return TCL_ERROR;
     }
 

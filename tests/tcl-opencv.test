@@ -1135,7 +1135,7 @@ test opencv-1.86 {FileStorage (nested)} {*}{
     -body {
         set fs [::cv::FileStorage]
         $fs open "" [expr {
-            $::cv::FileStorage::FORMAT_JSON | $::cv::FileStorage::MEMORY | $::cv::FileStorage::WRITE
+            $::cv::FileStorage::FORMAT_XML | $::cv::FileStorage::MEMORY | $::cv::FileStorage::WRITE
         }]
         $fs startMap "top"
         $fs writeString "names" "hello" "world"
@@ -1144,7 +1144,7 @@ test opencv-1.86 {FileStorage (nested)} {*}{
         set data [$fs close]
         set fs [::cv::FileStorage]
         $fs open $data [expr {
-            $::cv::FileStorage::FORMAT_JSON | $::cv::FileStorage::MEMORY | $::cv::FileStorage::READ
+            $::cv::FileStorage::FORMAT_XML | $::cv::FileStorage::MEMORY | $::cv::FileStorage::READ
         }]
         set names [$fs readString "top" "names"]
         set numbers [$fs readInt "top" "numbers"]
@@ -1157,7 +1157,81 @@ test opencv-1.86 {FileStorage (nested)} {*}{
     -result {2}
 }
 
-test opencv-1.87 {fitLine test} {*}{
+test opencv-1.87 {FileStorage (types)} {*}{
+    -body {
+        set fs [::cv::FileStorage]
+        $fs open "" [expr {
+            $::cv::FileStorage::FORMAT_YAML | $::cv::FileStorage::MEMORY | $::cv::FileStorage::WRITE
+        }]
+        set count 0
+        set mat [::cv::Mat::zeros 2 2 [::cv::CV_8UC 1]]
+        set name "obj$count"
+        incr count
+        $fs writeObj $name $mat
+        $mat close
+        set objlist [list $name]
+        foreach cmd {
+            cv::FastFeatureDetector
+            cv::AgastFeatureDetector
+            cv::ORB
+            cv::AKAZE
+            cv::BRISK
+            cv::BFMatcher
+            cv::FlannBasedMatcher
+            cv::SimpleBlobDetector
+            cv::BackgroundSubtractorMOG2
+            cv::StereoBM
+            cv::StereoSGBM
+            cv::AlignMTB
+            cv::CalibrateDebevec
+            cv::MergeDebevec
+            cv::MergeMertens
+            cv::TonemapDrago
+            cv::TonemapMantiuk
+            cv::TonemapReinhard
+            cv::ml::LogisticRegression
+            cv::ml::NormalBayesClassifier
+            cv::ml::KNearest
+            cv::ml::SVM
+            cv::ml::SVMSGD
+            cv::ml::DTrees
+            cv::ml::Boost
+        } {
+            set obj [$cmd]
+            set name "obj$count"
+            incr count
+            $fs writeObj $name $obj
+            $obj close
+            lappend objlist $name
+        }
+        set data1 [$fs close]
+        set fs [::cv::FileStorage]
+        $fs open $data1 [expr {
+            $::cv::FileStorage::FORMAT_YAML | $::cv::FileStorage::MEMORY | $::cv::FileStorage::READ
+        }]
+        foreach name $objlist {
+            lappend newlist [$fs readObj $name]
+        }
+        $fs close
+        set fs [::cv::FileStorage]
+        $fs open "" [expr {
+            $::cv::FileStorage::FORMAT_YAML | $::cv::FileStorage::MEMORY | $::cv::FileStorage::WRITE
+        }]
+        set count 0
+        foreach cmd $newlist {
+            set name "obj$count"
+            incr count
+            $fs writeObj $name $cmd
+            $cmd close
+        }
+        set data2 [$fs close]
+        string equal $data1 $data2
+    }
+    -returnCodes ok
+    -result {1}
+}
+
+test opencv-1.88 {fitLine test} {*}{
     -body {
         set testimg [::cv::Mat::Mat 480 640 $::cv::CV_8UC3]
 
@@ -1192,7 +1266,7 @@ test opencv-1.87 {fitLine test} {*}{
     -result {0}
 }
 
-test opencv-1.88 {Close test} {*}{
+test opencv-1.89 {Close test} {*}{
     -body {
         ::cv::imwrite output.png $image
         $tmatrix1 close

@@ -273,13 +273,13 @@ MODULE_SCOPE int edgePreservingFilter(void *cd, Tcl_Interp *interp, int objc, Tc
 MODULE_SCOPE int pencilSketch(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int stylization(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
-MODULE_SCOPE int AlignMTB(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-MODULE_SCOPE int CalibrateDebevec(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-MODULE_SCOPE int MergeDebevec(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-MODULE_SCOPE int MergeMertens(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-MODULE_SCOPE int TonemapDrago(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-MODULE_SCOPE int TonemapMantiuk(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
-MODULE_SCOPE int TonemapReinhard(void *cd, Tcl_Interp *interp, int objc,Tcl_Obj *const*objv);
+MODULE_SCOPE int AlignMTB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int CalibrateDebevec(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int MergeDebevec(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int MergeMertens(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int TonemapDrago(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int TonemapMantiuk(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int TonemapReinhard(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
  * OpenCV Stitcher
@@ -484,6 +484,7 @@ MODULE_SCOPE int TERM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 MODULE_SCOPE void TrackbarCallback(int value, void *userdata);
 MODULE_SCOPE int VideoCapture_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int VideoWriter_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int TrainData_CONSTRUCTOR(void *cd, Tcl_Interp *interp, cv::Mat &samples, int layout, cv::Mat &responses);
 
 #ifdef __cplusplus
 }
