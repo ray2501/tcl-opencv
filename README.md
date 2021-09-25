@@ -758,9 +758,31 @@ Please notice, RTrees and RTrees::load command will only have 1 instance.
 
     ::cv::ml::ANN_MLP
     ::cv::ml::ANN_MLP::load filename
+    ANN_MLP getAnnealCoolingRatio
+    ANN_MLP getAnnealFinalT
+    ANN_MLP getAnnealInitialT
+    ANN_MLP getAnnealItePerStep
+    ANN_MLP getBackpropMomentumScale
+    ANN_MLP getBackpropWeightScale
+    ANN_MLP getRpropDW0
+    ANN_MLP getRpropDWMax
+    ANN_MLP getRpropDWMin
+    ANN_MLP getRpropDWMinus
+    ANN_MLP getRpropDWPlus
     ANN_MLP getLayerSizes
     ANN_MLP getTrainMethod
     ANN_MLP getWeights layerIdx
+    ANN_MLP setAnnealCoolingRatio value
+    ANN_MLP setAnnealFinalT value
+    ANN_MLP setAnnealInitialT value
+    ANN_MLP setAnnealItePerStep value
+    ANN_MLP setBackpropMomentumScale value
+    ANN_MLP setBackpropWeightScale value
+    ANN_MLP setRpropDW0 value
+    ANN_MLP setRpropDWMax value
+    ANN_MLP setRpropDWMin value
+    ANN_MLP setRpropDWMinus value
+    ANN_MLP setRpropDWPlus value
     ANN_MLP setActivationFunction value ?param1 param2?
     ANN_MLP setLayerSizes matrix
     ANN_MLP setTrainMethod value ?param1 param2?

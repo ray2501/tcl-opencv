@@ -5136,9 +5136,35 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
     int choice;
 
     static const char *FUNC_strs[] = {
+#ifdef TCL_USE_OPENCV4
+        "getAnnealCoolingRatio",
+        "getAnnealFinalT",
+        "getAnnealInitialT",
+        "getAnnealItePerStep",
+#endif
+        "getBackpropMomentumScale",
+        "getBackpropWeightScale",
+        "getRpropDW0",
+        "getRpropDWMax",
+        "getRpropDWMin",
+        "getRpropDWMinus",
+        "getRpropDWPlus",
         "getLayerSizes",
         "getTrainMethod",
         "getWeights",
+#ifdef TCL_USE_OPENCV4
+        "setAnnealCoolingRatio",
+        "setAnnealFinalT",
+        "setAnnealInitialT",
+        "setAnnealItePerStep",
+#endif
+        "setBackpropMomentumScale",
+        "setBackpropWeightScale",
+        "setRpropDW0",
+        "setRpropDWMax",
+        "setRpropDWMin",
+        "setRpropDWMinus",
+        "setRpropDWPlus",
         "setActivationFunction",
         "setLayerSizes",
         "setTrainMethod",
@@ -5154,9 +5180,35 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
     };
 
     enum FUNC_enum {
+#ifdef TCL_USE_OPENCV4
+        FUNC_getAnnealCoolingRatio,
+        FUNC_getAnnealFinalT,
+        FUNC_getAnnealInitialT,
+        FUNC_getAnnealItePerStep,
+#endif
+        FUNC_getBackpropMomentumScale,
+        FUNC_getBackpropWeightScale,
+        FUNC_getRpropDW0,
+        FUNC_getRpropDWMax,
+        FUNC_getRpropDWMin,
+        FUNC_getRpropDWMinus,
+        FUNC_getRpropDWPlus,
         FUNC_getLayerSizes,
         FUNC_getTrainMethod,
         FUNC_getWeights,
+#ifdef TCL_USE_OPENCV4
+        FUNC_setAnnealCoolingRatio,
+        FUNC_setAnnealFinalT,
+        FUNC_setAnnealInitialT,
+        FUNC_setAnnealItePerStep,
+#endif
+        FUNC_setBackpropMomentumScale,
+        FUNC_setBackpropWeightScale,
+        FUNC_setRpropDW0,
+        FUNC_setRpropDWMax,
+        FUNC_setRpropDWMin,
+        FUNC_setRpropDWMinus,
+        FUNC_setRpropDWPlus,
         FUNC_setActivationFunction,
         FUNC_setLayerSizes,
         FUNC_setTrainMethod,
@@ -5185,6 +5237,206 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
     }
 
     switch ((enum FUNC_enum)choice) {
+#ifdef TCL_USE_OPENCV4
+        case FUNC_getAnnealCoolingRatio: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->annmlp->getAnnealCoolingRatio();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getAnnealCoolingRatio failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getAnnealFinalT: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->annmlp->getAnnealFinalT();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getAnnealFinalT failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getAnnealInitialT: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->annmlp->getAnnealInitialT();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getAnnealInitialT failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getAnnealItePerStep: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->annmlp->getAnnealItePerStep();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getAnnealItePerStep failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+#endif
+        case FUNC_getBackpropMomentumScale: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->annmlp->getBackpropMomentumScale();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getBackpropMomentumScale failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getBackpropWeightScale: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->annmlp->getBackpropWeightScale();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getBackpropWeightScale failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getRpropDW0: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->annmlp->getRpropDW0();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getRpropDW0 failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getRpropDWMax: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->annmlp->getRpropDWMax();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getRpropDWMax failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getRpropDWMin: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->annmlp->getRpropDWMin();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getRpropDWMin failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getRpropDWMinus: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->annmlp->getRpropDWMinus();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getRpropDWMinus failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getRpropDWPlus: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->annmlp->getRpropDWPlus();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getRpropDWPlus failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
         case FUNC_getLayerSizes: {
             cv::Mat layer;
             cv::Mat *dstmat;
@@ -5254,6 +5506,239 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
             pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+#ifdef TCL_USE_OPENCV4
+        case FUNC_setAnnealCoolingRatio: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->annmlp->setAnnealCoolingRatio(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setAnnealCoolingRatio failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setAnnealFinalT: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->annmlp->setAnnealFinalT(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setAnnealFinalT failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setAnnealInitialT: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->annmlp->setAnnealInitialT(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setAnnealInitialT failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setAnnealItePerStep: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->annmlp->setAnnealItePerStep(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setAnnealItePerStep failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+#endif
+        case FUNC_setBackpropMomentumScale: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->annmlp->setBackpropMomentumScale(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setBackpropMomentumScale failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setBackpropWeightScale: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->annmlp->setBackpropWeightScale(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setBackpropWeightScale failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setRpropDW0: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->annmlp->setRpropDW0(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setRpropDW0 failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setRpropDWMax: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->annmlp->setRpropDWMax(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setRpropDWMax failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setRpropDWMin: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->annmlp->setRpropDWMin(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setRpropDWMin failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setRpropDWMinus: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->annmlp->setRpropDWMinus(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setRpropDWMinus failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setRpropDWPlus: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->annmlp->setRpropDWPlus(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setRpropDWPlus failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
 
             break;
         }
