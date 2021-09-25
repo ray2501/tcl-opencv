@@ -43,7 +43,8 @@ PRJ_OBJS = \
 	$(TMP_DIR)\tfeatures2d.obj \
 	$(TMP_DIR)\tcalib3d.obj \
 	$(TMP_DIR)\tml.obj \
-	$(TMP_DIR)\tfstorage.obj
+	$(TMP_DIR)\tfstorage.obj \
+	$(TMP_DIR)\tthread.obj
 
 
 # Define any additional compiler flags that might be required for the project

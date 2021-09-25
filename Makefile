@@ -33,8 +33,8 @@
 # $(srcdir) or in the generic, win or unix subdirectory.
 #========================================================================
 
-PKG_SOURCES	=  tclopencv.cpp tcore.cpp timgproc.cpp timgcodecs.cpp tvideoio.cpp thighgui.cpp tvideo.cpp tfeatures2d.cpp tcalib3d.cpp tphoto.cpp tstitcher.cpp tobjdetect.cpp tdnn.cpp tml.cpp tfstorage.cpp
-PKG_OBJECTS	=  tclopencv.o tcore.o timgproc.o timgcodecs.o tvideoio.o thighgui.o tvideo.o tfeatures2d.o tcalib3d.o tphoto.o tstitcher.o tobjdetect.o tdnn.o tml.o tfstorage.o
+PKG_SOURCES	=  tclopencv.cpp tcore.cpp timgproc.cpp timgcodecs.cpp tvideoio.cpp thighgui.cpp tvideo.cpp tfeatures2d.cpp tcalib3d.cpp tphoto.cpp tstitcher.cpp tobjdetect.cpp tdnn.cpp tml.cpp tfstorage.cpp tthread.cpp
+PKG_OBJECTS	=  tclopencv.o tcore.o timgproc.o timgcodecs.o tvideoio.o thighgui.o tvideo.o tfeatures2d.o tcalib3d.o tphoto.o tstitcher.o tobjdetect.o tdnn.o tml.o tfstorage.o tthread.o
 
 PKG_STUB_SOURCES = 
 PKG_STUB_OBJECTS = 

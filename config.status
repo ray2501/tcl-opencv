@@ -612,9 +612,9 @@ S["TCL_THREADS"]="1"
 S["TK_INCLUDES"]=""
 S["TCL_INCLUDES"]="-I\"/usr/include\""
 S["PKG_OBJECTS"]=" tclopencv.o tcore.o timgproc.o timgcodecs.o tvideoio.o thighgui.o tvideo.o tfeatures2d.o tcalib3d.o tphoto.o tstitcher.o tobjdetect.o tdnn.o tml.o "\
-"tfstorage.o"
+"tfstorage.o tthread.o"
 S["PKG_SOURCES"]=" tclopencv.cpp tcore.cpp timgproc.cpp timgcodecs.cpp tvideoio.cpp thighgui.cpp tvideo.cpp tfeatures2d.cpp tcalib3d.cpp tphoto.cpp tstitcher.cpp tobj"\
-"detect.cpp tdnn.cpp tml.cpp tfstorage.cpp"
+"detect.cpp tdnn.cpp tml.cpp tfstorage.cpp tthread.cpp"
 S["EGREP"]="/usr/bin/grep -E"
 S["GREP"]="/usr/bin/grep"
 S["RANLIB"]=":"
