@@ -33,7 +33,9 @@ static void ExitHandler(ClientData cd)
         while (msg != NULL) {
             next = msg->next;
             Tcl_DStringFree(&msg->ds);
-            delete msg->mat;
+            if (msg->mat) {
+                delete msg->mat;
+            }
             ckfree(msg);
             msg = next;
         }
@@ -170,14 +172,17 @@ int Opencv_Trecv(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         if (hashEntryPtr == NULL) {
             Tcl_GetTime(&t1);
             timeout.sec = t0.sec - t1.sec;
+            timeout.usec = t0.usec - t1.usec;
             if (timeout.sec < 0) {
                 break;
             }
             if (timeout.sec == 0) {
-                timeout.usec = t0.usec - t1.usec;
                 if (timeout.usec <= 0) {
                     break;
                 }
+            } else if (timeout.usec < 0) {
+                timeout.usec += 1000000;
+                timeout.sec -= 1;
             }
             Tcl_ConditionWait(&cvthrCond, &cvthrMutex, &timeout);
             continue;
