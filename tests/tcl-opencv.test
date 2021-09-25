@@ -1276,7 +1276,50 @@ test opencv-1.88 {fitLine test} {*}{
     -result {0}
 }
 
-test opencv-1.89 {Close test} {*}{
+test opencv-1.89 {Thread support} {*}{
+    -body {
+        set mat [::cv::Mat::zeros 2 2 [::cv::CV_8UC 1]]
+        cv::thread::send MyTag $mat
+        set mat [::cv::Mat::zeros 2 2 [::cv::CV_8UC 1]]
+        cv::thread::send MyTag $mat
+        set mat [::cv::Mat::zeros 2 2 [::cv::CV_8UC 1]]
+        cv::thread::send MyTag $mat "hello"
+        lassign [cv::thread::recv MyTag] mat string
+        $mat close
+        lassign [cv::thread::recv MyTag] mat string
+        $mat close
+        cv::thread::send MyTag "None"
+        set mat [::cv::Mat::zeros 2 2 [::cv::CV_8UC 1]]
+        cv::thread::send MyTag $mat "last"
+        if {[info command $mat] eq $mat} {
+            error "matrix $mat still present"
+        }
+        set result [list [cv::thread::info] [cv::thread::info MyTag]]
+        lassign [cv::thread::recv MyTag] mat string
+        if {$string ne "hello"} {
+            error "string not transferred"
+        }
+        $mat close
+        lassign [cv::thread::recv MyTag] mat string
+        if {$mat ne "" || $string ne ""} {
+            error "mat/string not empty"
+        }
+        lassign [cv::thread::recv MyTag] mat string
+        if {$string ne "last"} {
+            error "string not transferred"
+        }
+        $mat close
+        lappend result [cv::thread::info] [cv::thread::info MyTag]
+        set t0 [clock seconds]
+        cv::thread::recv MyTag 2021
+        set t1 [clock seconds]
+        lappend result [expr {($t1 - $t0) > 1}]
+    }
+    -returnCodes ok
+    -result {MyTag 3 {} 0 1}
+}
+
+test opencv-1.90 {Close test} {*}{
     -body {
         ::cv::imwrite output.png $image
         $tmatrix1 close

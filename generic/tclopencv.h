@@ -358,6 +358,14 @@ MODULE_SCOPE int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc, Tcl_O
 MODULE_SCOPE int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
 
+/*
+ * Thread support
+ */
+
+MODULE_SCOPE int Opencv_Tsend(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int Opencv_Trecv(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int Opencv_Tinfo(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+
 extern DLLEXPORT int Opencv_Init(Tcl_Interp * interp);
 
 #ifdef __cplusplus

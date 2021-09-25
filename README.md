@@ -816,11 +816,27 @@ Users could check
 [official OpenCV documentation](https://docs.opencv.org/master/d6/d0f/group__dnn.html#ga3b34fe7a29494a6a4295c169a7d32422) to know about the different frameworks,
 their model files and the configuration files.
 
+### thread support
+
+    ::cv::thread::info ?tag?
+    ::cv::thread::recv tag ?timeout?
+    ::cv::thread::send tag mat|None ?string?
+
+A simple mechanism to transfer `cv::Mat` from one Tcl thread to another
+where `tag` is the name of a queue. The `info` command without arguments
+returns all currently known `tags`, the `info` command with a `tag` returns
+the number of items in that queue. With `send` an item consisting of a
+`cv::Mat` or `None` and an optional `string` is added to the queue
+named `tag`. With `recv` a zero, one, or two element list is returned
+from the queue named `tag` with optional wait timeout in milliseconds
+(default timeout is 10 seconds). Zero elements means timeout condition,
+one or two elements are the name/command of the received `cv::Mat` or
+empty element for `None`, and optional `string`.
 
 Variables
 =====
 
-This extension defined below namespace vriables:
+This extension defined below namespace variables:
 
 Types -
 

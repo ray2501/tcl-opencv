@@ -41,7 +41,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
             }
             case OPENCV_MAT: {
                 cv::Mat *mat = (cv::Mat *) cvo->obj;
-                delete mat;
+                if (mat) {
+                    delete mat;
+                }
                 break;
             }
             case OPENCV_FSTORAGE: {
@@ -245,7 +247,9 @@ Opencv_DESTRUCTOR(ClientData cd)
     }
     case OPENCV_MAT: {
         cv::Mat *mat = (cv::Mat *) cvo->obj;
-        delete mat;
+        if (mat) {
+            delete mat;
+        }
         break;
     }
     case OPENCV_FSTORAGE: {
@@ -1584,6 +1588,22 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) dnn_readNet,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 #endif
+
+    /*
+     * Thread support
+     */
+
+    Tcl_CreateObjCommand(interp, "::" NS "::thread::send",
+        (Tcl_ObjCmdProc *) Opencv_Tsend,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::thread::recv",
+        (Tcl_ObjCmdProc *) Opencv_Trecv,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::thread::info",
+        (Tcl_ObjCmdProc *) Opencv_Tinfo,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     /*
      * Helper.
