@@ -4908,6 +4908,7 @@ int polylines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         for (int i = 0, j = 0; j < npts; i = i + 2, j = j + 1) {
             Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
             if (Tcl_GetIntFromObj(interp, elemListPtr, &number_from_list_x) != TCL_OK) {
+                ckfree(pts);
                 return TCL_ERROR;
             }
 
@@ -4947,21 +4948,25 @@ int polylines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
         Tcl_ListObjIndex(interp, objv[5], 0, &elemListPtr);
         if (Tcl_GetIntFromObj(interp, elemListPtr, &B) != TCL_OK) {
+            ckfree(pts);
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[5], 1, &elemListPtr);
         if (Tcl_GetIntFromObj(interp, elemListPtr, &G) != TCL_OK) {
+            ckfree(pts);
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[5], 2, &elemListPtr);
         if (Tcl_GetIntFromObj(interp, elemListPtr, &R) != TCL_OK) {
+            ckfree(pts);
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[5], 3, &elemListPtr);
         if (Tcl_GetIntFromObj(interp, elemListPtr, &A) != TCL_OK) {
+            ckfree(pts);
             return TCL_ERROR;
         }
     }
