@@ -251,6 +251,12 @@ a matrix and fill the contour's data to the matrix, then use `::cv::moments` to 
     ::cv::putText matrix text point_x point_y fontFace fontScale color_list thickness ?lineType bottomLeftOrigin?
     ::cv::rectangle matrix point_x1 point_y1 point_x2 point_y2 color_list thickness ?lineType shift?
 
+    ::cv::CLAHE ?clipLimit tileGridSize_w tileGridSize_h?
+    CLAHE apply matrix
+    CLAHE close
+
+Please notice, CLAHE command will only have 1 instance.
+
 ### videoio
 
     ::cv::VideoCapture file/index filename/number ?flags?

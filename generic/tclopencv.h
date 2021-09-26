@@ -195,6 +195,8 @@ MODULE_SCOPE int polylines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 MODULE_SCOPE int putText(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int rectangle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
+MODULE_SCOPE int CLAHE(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+
 /*
  * For videoio
  */
@@ -395,6 +397,7 @@ typedef enum {
 typedef struct {
     Tcl_HashTable tbl[OPENCV_MAXTYPE];
 
+    cv::Ptr<cv::CLAHE> clahe;
     cv::Ptr<cv::FastFeatureDetector> fastdetector;
     cv::Ptr<cv::AgastFeatureDetector> agastdetector;
     cv::Ptr<cv::ORB> orbdetector;
@@ -428,6 +431,7 @@ typedef struct {
     cv::Ptr<cv::ml::ANN_MLP> annmlp;
     cv::Ptr<cv::ml::TrainData> traindata;
 
+    Tcl_Command cmd_clahe;
     Tcl_Command cmd_fastdetector;
     Tcl_Command cmd_agastdetector;
     Tcl_Command cmd_orbdetector;

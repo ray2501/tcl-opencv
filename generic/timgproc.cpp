@@ -5367,6 +5367,181 @@ int rectangle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     return TCL_OK;
 }
+
+
+static void CLAHE_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->clahe) {
+        cvd->clahe.release();
+    }
+    cvd->cmd_clahe = NULL;
+}
+
+
+static int CLAHE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "apply",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_APPLY,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->clahe == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_APPLY: {
+            cv::Mat *mat, *dstmat;
+            cv::Mat result;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            try {
+
+                cvd->clahe->apply(*mat, result);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "apply failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            dstmat = new cv::Mat(result);
+
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_clahe) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_clahe);
+            }
+
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_clahe) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_clahe, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::CLAHE", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int CLAHE(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    double clipLimit = 40.0;
+    int tileGridSize_w = 8, tileGridSize_h = 8;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::CLAHE> clahe;
+
+    if (objc != 1 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "?clipLimit tileGridSize_w tileGridSize_h?");
+        return TCL_ERROR;
+    }
+
+    if (objc == 4) {
+        if (Tcl_GetDoubleFromObj(interp, objv[1], &clipLimit) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[2], &tileGridSize_w) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[3], &tileGridSize_h) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        clahe = cv::createCLAHE(clipLimit, cv::Size(tileGridSize_w, tileGridSize_h));
+        if (clahe == nullptr) {
+            Tcl_SetResult(interp, (char *) "CLAHE create failed", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "CLAHE failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-clahe", -1);
+
+    if (cvd->cmd_clahe) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_clahe);
+    }
+    cvd->cmd_clahe =
+        Tcl_CreateObjCommand(interp, "::cv-clahe",
+            (Tcl_ObjCmdProc *) CLAHE_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) CLAHE_DESTRUCTOR);
+
+    cvd->clahe = clahe;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
 #ifdef __cplusplus
 }
 #endif

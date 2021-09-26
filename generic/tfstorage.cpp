@@ -449,6 +449,13 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                         hog->read(node);
                     }
                     pResultStr = Opencv_NewHandle(cd, interp, OPENCV_OOBJHOG, hog);
+                } else if (strcmp(type, "opencv-clahe") == 0) {
+                    if (CLAHE(cd, interp, 1, &empty) != TCL_OK) {
+                        throw cv::Exception();
+                    }
+                    if (!node.isNone()) {
+                        cvd->clahe->read(node);
+                    }
                 } else if (strcmp(type, "opencv-fastfeaturedetector") == 0) {
                     if (FastFeatureDetector(cd, interp, 1, &empty) != TCL_OK) {
                         throw cv::Exception();
@@ -903,7 +910,8 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 if (cmd == NULL) {
                     return TCL_ERROR;
                 }
-                if (cmd == cvd->cmd_fastdetector ||
+                if (cmd == cvd->cmd_clahe ||
+                    cmd == cvd->cmd_fastdetector ||
                     cmd == cvd->cmd_agastdetector ||
                     cmd == cvd->cmd_orbdetector ||
                     cmd == cvd->cmd_akazedetector ||
@@ -989,6 +997,16 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                             break;
                         }
                     }
+                } else if (cmd == cvd->cmd_clahe) {
+                    (*fs) << name << "{";
+                    (*fs) << "type" << "opencv-clahe";
+                    if (!cvd->clahe->empty()) {
+                        (*fs) << "data" << "{";
+                        fs->elname = "data";
+                        cvd->clahe->write(*fs);
+                        (*fs) << "}";
+                    }
+                    (*fs) << "}";
                 } else if (cmd == cvd->cmd_fastdetector) {
                     (*fs) << name << "{";
                     (*fs) << "type" << "opencv-fastfeaturedetector";

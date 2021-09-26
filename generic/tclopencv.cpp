@@ -109,6 +109,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
         }
         Tcl_DeleteHashTable(&cvd->tbl[i]);
     }
+    if (cvd->clahe) {
+        cvd->clahe.release();
+    }
     if (cvd->fastdetector) {
         cvd->fastdetector.release();
     }
@@ -1218,6 +1221,10 @@ Opencv_Init(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp, "::" NS "::rectangle",
         (Tcl_ObjCmdProc *) rectangle,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::CLAHE",
+        (Tcl_ObjCmdProc *) CLAHE,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     /*

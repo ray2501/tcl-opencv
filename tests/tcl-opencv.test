@@ -1179,6 +1179,7 @@ test opencv-1.87 {FileStorage (types)} {*}{
         $trd close
         lappend objlist $name
         foreach cmd {
+            cv::CLAHE
             cv::FastFeatureDetector
             cv::AgastFeatureDetector
             cv::ORB
@@ -1348,7 +1349,22 @@ test opencv-1.92 {fillPoly test} {*}{
     -returnCodes ok
 }
 
-test opencv-1.93 {Close test} {*}{
+test opencv-1.93 {CLAHE test} {*}{
+    -body {
+        set dogimg1 [::cv::imread "tests/dog.jpeg" $::cv::IMREAD_GRAYSCALE]
+        set clahe [::cv::CLAHE]
+        set dogimg2 [$clahe apply $dogimg1]
+        ::cv::imwrite "dog2.png" $dogimg2
+
+        $clahe close
+        $dogimg1 close
+        $dogimg2 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.94 {Close test} {*}{
     -body {
         ::cv::imwrite output.png $image
         $tmatrix1 close
@@ -1373,6 +1389,7 @@ test opencv-1.93 {Close test} {*}{
 
 #-------------------------------------------------------------------------------
 
+removeFile dog2.png
 removeFile line.png
 removeFile result.png
 removeFile output.png
