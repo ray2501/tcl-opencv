@@ -174,6 +174,7 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     ::cv::calcHist matrix channels mask dims histSize_list ranges_list ?uniform accumulate?
     ::cv::compareHist matrix_1 matrix_2 method
     ::cv::equalizeHist matrix
+    ::cv::EMD signature1 signature2 distType ?cost?
     ::cv::floodFill matrix seed_x seed_y color_list ?rect_list loDiff_color upDiff_color flags?
     ::cv::grabCut matrix x y width height iterCount
     ::cv::matchTemplate matrix templ_matrix method
@@ -1468,7 +1469,7 @@ Line Types -
     ::cv::TM_CCOEFF
     ::cv::TM_CCOEFF_NORMED
 
-`::cv::fitLine` distType and
+`::cv::EMD` distType, `::cv::fitLine` distType and
 `::cv::distanceTransform` distanceType -
 
     ::cv::DIST_L1

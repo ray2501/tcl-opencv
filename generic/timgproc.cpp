@@ -562,6 +562,53 @@ int equalizeHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int EMD(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat cost;
+    cv::Mat *mat1, *mat2, *mat3 = NULL;
+    int distType = 0;
+    double ret = 0;
+
+    if (objc != 4 && objc != 5) {
+        Tcl_WrongNumArgs(interp, 1, objv, "signature1 signature2 distType ?cost?");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &distType) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 5) {
+        mat3 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[4]);
+        if (!mat3) {
+            return TCL_ERROR;
+        }
+
+        cost = *mat3;
+    }
+
+    try {
+        ret = cv::EMD(*mat1, *mat2, distType, cost);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "EMD failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    Tcl_SetObjResult(interp, Tcl_NewDoubleObj(ret));
+    return TCL_OK;
+}
+
+
 int floodFill(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int seed_x = 0, seed_y = 0;

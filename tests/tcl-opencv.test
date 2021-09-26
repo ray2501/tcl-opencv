@@ -1364,7 +1364,66 @@ test opencv-1.93 {CLAHE test} {*}{
     -result {0}
 }
 
-test opencv-1.94 {Close test} {*}{
+test opencv-1.94 {EMD test} {*}{
+    -body {
+        set myimage1 [::cv::imread "tests/tsukuba_l.png"]
+        set myimage2 [::cv::imread "tests/tsukuba_r.png"]
+
+        set hbins 30
+        set sbins 32
+        set hsv1 [::cv::cvtColor $myimage1 $::cv::COLOR_BGR2HSV]
+        set hsv2 [::cv::cvtColor $myimage2 $::cv::COLOR_BGR2HSV]
+
+        set mask [::cv::Mat::Mat 0 0 $::cv::CV_8U]
+
+        set dst1 [::cv::calcHist $hsv1 [list 0 1] $mask 2 [list $hbins $sbins] \
+                [list 0 180 0 256] \
+                1 0]
+        set hist1 [cv::normalize $dst1 0 1 $::cv::NORM_MINMAX]
+
+        set dst2 [::cv::calcHist $hsv2 [list 0 1] $mask 2 [list $hbins $sbins] \
+                [list 0 180 0 256] \
+                1 0]
+        set hist2 [cv::normalize $dst2 0 1 $::cv::NORM_MINMAX]
+
+        set numrows [expr $hbins * $sbins]
+
+        set sig1 [cv::Mat::Mat $numrows 3 $::cv::CV_32FC1]
+        set sig2 [cv::Mat::Mat $numrows 3 $::cv::CV_32FC1]
+
+        for {set h 0} {$h < $hbins} {incr h} {
+            for {set s 0} {$s < $sbins} {incr s} {
+                set binval1 [$hist1 at [list $h $s] 0]
+                $sig1 at [list [expr $h*$sbins+$s] 0] 0 $binval1
+                $sig1 at [list [expr $h*$sbins+$s] 1] 0 $h
+                $sig1 at [list [expr $h*$sbins+$s] 2] 0 $s
+
+                set binval2 [$hist2 at [list $h $s] 0]
+                $sig2 at [list [expr $h*$sbins+$s] 0] 0 $binval2
+                $sig2 at [list [expr $h*$sbins+$s] 1] 0 $h
+                $sig2 at [list [expr $h*$sbins+$s] 2] 0 $s
+            }
+        }
+
+        set emd [cv::EMD $sig1 $sig2 $::cv::DIST_L2]
+
+        $mask close
+        $sig1 close
+        $sig2 close
+        $dst1 close
+        $hist1 close
+        $dst2 close
+        $hist2 close
+        $hsv1 close
+        $hsv2 close
+        $myimage1 close
+        $myimage2 close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.95 {Close test} {*}{
     -body {
         ::cv::imwrite output.png $image
         $tmatrix1 close

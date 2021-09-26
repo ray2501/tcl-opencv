@@ -121,6 +121,7 @@ MODULE_SCOPE int calcBackProject(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
 MODULE_SCOPE int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int compareHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int equalizeHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int EMD(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int floodFill(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int grabCut(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int matchTemplate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

@@ -951,6 +951,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) equalizeHist,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::EMD",
+        (Tcl_ObjCmdProc *) EMD,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::floodFill",
         (Tcl_ObjCmdProc *) floodFill,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

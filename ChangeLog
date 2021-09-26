@@ -1,6 +1,6 @@
 2021-09-26 Danilo Chang
 
-	* Implement command: fillPoly, CLAHE
+	* Implement command: fillPoly, CLAHE, EMD
 
 2021-09-25 Danilo Chang
 
