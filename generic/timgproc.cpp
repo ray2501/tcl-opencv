@@ -4774,6 +4774,169 @@ int fillConvexPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int fillPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat *mat;
+    int count = 0, B = 0, G = 0, R = 0, A = 0;
+    int lineType = cv::LINE_8, shift = 0, offset_x = 0, offset_y = 0;
+    cv::Point **pts = NULL;
+    int *npts = NULL;
+    int ncontours = 0;
+    int isDone = 0;
+
+    if (objc != 4 && objc != 8) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "matrix point_lists color_list ?lineType shift offset_x offset_y?");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_ListObjLength(interp, objv[2], &ncontours) != TCL_OK) {
+        Tcl_SetResult(interp, (char *) "fillPoly invalid lists", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    if (ncontours == 0) {
+        Tcl_SetResult(interp, (char *) "fillPoly invalid point lists", TCL_STATIC);
+        return TCL_ERROR;
+    } else {
+        pts = (cv::Point **) ckalloc(sizeof(cv::Point *) * ncontours);
+        npts = (int *) ckalloc(sizeof(int) * ncontours);
+        Tcl_Obj *elemPointListPtr = NULL;
+        int count = 0;
+
+        for (int number = 0; number < ncontours; number++) {
+            pts[number] = NULL;
+        }
+
+        for (int number = 0; number < ncontours; number++) {
+            Tcl_ListObjIndex(interp, objv[2], number, &elemPointListPtr);
+            if (Tcl_ListObjLength(interp, elemPointListPtr, &count) != TCL_OK) {
+                Tcl_SetResult(interp, (char *) "fillPoly invalid list", TCL_STATIC);
+
+                goto End;
+            }
+
+            if (count%2 != 0) {
+                Tcl_SetResult(interp, (char *) "fillPoly invalid point data", TCL_STATIC);
+
+                goto End;
+            } else {
+                Tcl_Obj *elemListPtr = NULL;
+                int number_from_list_x;
+                int number_from_list_y;
+
+                npts[number] = count / 2;
+                pts[number] = (cv::Point *) ckalloc(sizeof(cv::Point) * npts[number]);
+
+                for (int i = 0, j = 0; j < npts[number]; i = i + 2, j = j + 1) {
+                    Tcl_ListObjIndex(interp, elemPointListPtr, i, &elemListPtr);
+                    if (Tcl_GetIntFromObj(interp, elemListPtr, &number_from_list_x) != TCL_OK) {
+                        goto End;
+                    }
+
+                    Tcl_ListObjIndex(interp, elemPointListPtr, i + 1, &elemListPtr);
+                    if (Tcl_GetIntFromObj(interp, elemListPtr, &number_from_list_y) != TCL_OK) {
+                        goto End;
+                    }
+
+                    pts[number][j].x = number_from_list_x;
+                    pts[number][j].y = number_from_list_y;
+                }
+            }
+        }
+    }
+
+    if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
+        Tcl_SetResult(interp, (char *) "fillPoly invalid list data", TCL_STATIC);
+
+        goto End;
+    }
+
+    if (count != 4) {
+        Tcl_SetResult(interp, (char *) "fillPoly invalid color data", TCL_STATIC);
+
+        goto End;
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+
+        Tcl_ListObjIndex(interp, objv[3], 0, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &B) != TCL_OK) {
+            goto End;
+        }
+
+        Tcl_ListObjIndex(interp, objv[3], 1, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &G) != TCL_OK) {
+            goto End;
+        }
+
+        Tcl_ListObjIndex(interp, objv[3], 2, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &R) != TCL_OK) {
+            goto End;
+        }
+
+        Tcl_ListObjIndex(interp, objv[3], 3, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &A) != TCL_OK) {
+            goto End;
+        }
+    }
+
+    if (objc == 8) {
+        if (Tcl_GetIntFromObj(interp, objv[4], &lineType) != TCL_OK) {
+            goto End;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[5], &shift) != TCL_OK) {
+            goto End;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[6], &offset_x) != TCL_OK) {
+            goto End;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[7], &offset_y) != TCL_OK) {
+            goto End;
+        }
+    }
+
+    try {
+        cv::Scalar color(B, G, R, A);
+
+        cv::fillPoly(*mat,  (const cv::Point **) pts, (const int *) npts,
+                     ncontours, color, lineType, shift,
+                     cv::Point(offset_x, offset_y));
+
+        isDone = 1;
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "fillPoly failed", TCL_STATIC);
+
+        isDone = 0;
+        goto End;
+    }
+
+End:
+    if (pts) {
+        for (int index = 0; index < ncontours; index++) {
+            if(pts[index]) ckfree(pts[index]);
+        }
+
+        ckfree(pts);
+    }
+
+    if(npts) ckfree(npts);
+
+    if (isDone) {
+        return TCL_OK;
+    } else {
+        return TCL_ERROR;
+    }
+}
+
+
 int line(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat *mat;

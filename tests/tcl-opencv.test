@@ -1319,7 +1319,36 @@ test opencv-1.89 {Thread support} {*}{
     -result {MyTag 3 {} 0 1}
 }
 
-test opencv-1.90 {Close test} {*}{
+test opencv-1.90 {fillPoly, wrong # args} {*}{
+    -body {
+        ::cv::fillPoly $image
+    }
+    -returnCodes error
+    -match glob
+    -result {wrong # args*}
+}
+
+test opencv-1.91 {fillPoly test} {*}{
+    -body {
+        ::cv::fillPoly $image [list [list 100]] [list 255 0 0 0]
+    }
+    -returnCodes error
+    -match glob
+    -result {fillPoly invalid point data}
+}
+
+test opencv-1.92 {fillPoly test} {*}{
+    -body {
+        set points [list [list 100 100 150 150 400 200] [list 250 120 300 100 170 120]]
+        cv::fillPoly $image $points [list 64 64 128 0]
+
+        set points [list [list 250 450 200 360 250 360]]
+        cv::fillPoly $image $points [list 64 64 128 0] $::cv::LINE_8 0 0 0
+    }
+    -returnCodes ok
+}
+
+test opencv-1.93 {Close test} {*}{
     -body {
         ::cv::imwrite output.png $image
         $tmatrix1 close
