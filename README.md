@@ -112,6 +112,7 @@ Implement commands
     ::cv::sqrt matrix
     ::cv::subtract matrix_1 matrix_2
     ::cv::sum matrix
+    ::cv::SVDecomp matrix ?flags?
     ::cv::trace matrix
     ::cv::transform matrix_1 matrix_2
     ::cv::hconcat matrix_1 matrix_2
@@ -1377,6 +1378,12 @@ Line Types -
     ::cv::DFT_COMPLEX_INPUT
     ::cv::DCT_INVERSE
     ::cv::DCT_ROWS
+
+`::cv::SVDecomp` flags -
+
+    ::cv::SVD_MODIFY_A
+    ::cv::SVD_NO_UV
+    ::cv::SVD_FULL_UV
 
 `::cv::norm`, `::cv::normalize` and `BFMatcher`norm_type -
 

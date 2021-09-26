@@ -849,6 +849,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_sum,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::SVDecomp",
+        (Tcl_ObjCmdProc *) mat_SVDecomp,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::trace",
         (Tcl_ObjCmdProc *) mat_trace,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
@@ -3672,6 +3676,22 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::DCT_ROWS", -1);
     setupValue = Tcl_NewIntObj(cv::DCT_ROWS);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * SVD flags
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::SVD_MODIFY_A", -1);
+    setupValue = Tcl_NewIntObj(cv::SVD::Flags::MODIFY_A);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::SVD_NO_UV", -1);
+    setupValue = Tcl_NewIntObj(cv::SVD::Flags::NO_UV);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::SVD_FULL_UV", -1);
+    setupValue = Tcl_NewIntObj(cv::SVD::Flags::FULL_UV);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*

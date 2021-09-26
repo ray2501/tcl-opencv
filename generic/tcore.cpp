@@ -3785,6 +3785,55 @@ int mat_sum(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_SVDecomp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat w, v, ut;
+    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
+    cv::Mat *mat1, *dstmat1, *dstmat2, *dstmat3;
+    int flags = 0;
+
+    if (objc != 2 && objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix ?flags?");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 3) {
+        if (Tcl_GetIntFromObj(interp, objv[2], &flags) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::SVDecomp(*mat1, w, v, ut, flags);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "SVDecomp failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    dstmat1 = new cv::Mat(w);
+    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+
+    dstmat2 = new cv::Mat(v);
+    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+
+    dstmat3 = new cv::Mat(ut);
+    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat3);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int mat_trace(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Scalar result;
