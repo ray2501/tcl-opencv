@@ -849,6 +849,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_sum,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::SVBackSubst",
+        (Tcl_ObjCmdProc *) mat_SVBackSubst,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::SVDecomp",
         (Tcl_ObjCmdProc *) mat_SVDecomp,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

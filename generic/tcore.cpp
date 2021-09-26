@@ -3785,6 +3785,53 @@ int mat_sum(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_SVBackSubst(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat result;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *mat1, *mat2, *mat3, *mat4, *dstmat;
+
+    if (objc != 5) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix_w matrix_u matrix_vt matrix");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    mat3 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+    if (!mat3) {
+        return TCL_ERROR;
+    }
+
+    mat4 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[4]);
+    if (!mat4) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::SVBackSubst(*mat1, *mat2, *mat3, *mat4, result);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "SVBackSubst failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    dstmat = new cv::Mat(result);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int mat_SVDecomp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat w, v, ut;

@@ -112,6 +112,7 @@ Implement commands
     ::cv::sqrt matrix
     ::cv::subtract matrix_1 matrix_2
     ::cv::sum matrix
+    ::cv::SVBackSubst matrix_w matrix_u matrix_vt matrix
     ::cv::SVDecomp matrix ?flags?
     ::cv::trace matrix
     ::cv::transform matrix_1 matrix_2
