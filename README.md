@@ -108,6 +108,7 @@ Implement commands
     ::cv::randu matrix min_list max_list
     ::cv::reduce matrix dim rtype ?dtype?
     ::cv::rotate matrix rotateCode
+    ::cv::setRNGSeed seed
     ::cv::solve matrix_1 matrix_2 ?flags?
     ::cv::sqrt matrix
     ::cv::subtract matrix_1 matrix_2

@@ -1,6 +1,6 @@
 2021-09-27 Danilo Chang
 
-	* Implement command: warpPolar
+	* Implement command: setRNGSeed, warpPolar
 
 2021-09-26 Danilo Chang
 

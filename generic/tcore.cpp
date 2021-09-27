@@ -3633,6 +3633,30 @@ int mat_rotate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_setRNGSeed(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int seed = 0;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "seed");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[1], &seed) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::setRNGSeed(seed);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "setRNGSeed failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    return TCL_OK;
+}
+
+
 int mat_solve(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
