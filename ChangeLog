@@ -1,6 +1,7 @@
 2021-09-27 Danilo Chang
 
-	* Implement command: setRNGSeed, warpPolar
+	* Implement command: setRNGSeed, randShuffle
+	* Implement command: warpPolar
 
 2021-09-26 Danilo Chang
 

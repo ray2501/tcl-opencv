@@ -106,6 +106,7 @@ Implement commands
     ::cv::pow matrix power
     ::cv::randn matrix mean_list stddev_list
     ::cv::randu matrix min_list max_list
+    ::cv::randShuffle matrix ?iterFactor?
     ::cv::reduce matrix dim rtype ?dtype?
     ::cv::rotate matrix rotateCode
     ::cv::setRNGSeed seed

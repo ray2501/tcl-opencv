@@ -825,6 +825,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_randu,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::randShuffle",
+        (Tcl_ObjCmdProc *) mat_randShuffle,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::reduce",
         (Tcl_ObjCmdProc *) mat_reduce,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

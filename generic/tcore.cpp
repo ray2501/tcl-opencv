@@ -3542,6 +3542,42 @@ int mat_randu(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_randShuffle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    double iterFactor = 1;
+    cv::Mat *mat;
+
+    if (objc != 2 && objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix ?iterFactor?");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 3) {
+        if (Tcl_GetDoubleFromObj(interp, objv[2], &iterFactor) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        /*
+         * The function cv::randShuffle shuffles the specified 1D array
+         * by randomly choosing pairs of elements and swapping them.
+         */
+        cv::randShuffle(*mat, iterFactor);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "randShuffle failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    return TCL_OK;
+}
+
+
 int mat_reduce(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int dim = 0, rtype = 0, dtype = -1;
