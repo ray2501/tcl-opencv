@@ -2749,6 +2749,96 @@ int pyrMeanShiftFiltering(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 }
 
 
+int createHanningWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat image;
+    int winSize_width = 0, winSize_height = 0, type = 0;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *dstmat;
+
+    if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "winSize_width winSize_height type");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[1], &winSize_width) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &winSize_height) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &type) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::createHanningWindow(image, cv::Size(winSize_width, winSize_height), type);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "createHanningWindow failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    dstmat = new cv::Mat(image);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
+int phaseCorrelate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *mat1, *mat2, *window;
+    cv::Point2d result;
+
+    if (objc != 3 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix_1 matrix_2 ?window?");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 4) {
+        window = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+        if (!window) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        if (objc == 3) {
+            result = cv::phaseCorrelate(*mat1, *mat2);
+        } else {
+            result = cv::phaseCorrelate(*mat1, *mat2, *window);
+        }
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "phaseCorrelate failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.x));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.x));
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
 int Canny(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;

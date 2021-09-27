@@ -216,6 +216,9 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     ::cv::pyrDown src_matrix ?dstsize_width dstsize_height borderType?
     ::cv::pyrMeanShiftFiltering src_matrix sp sr ?maxLevel?
 
+    ::cv::createHanningWindow winSize_width winSize_height type
+    ::cv::phaseCorrelate matrix_1 matrix_2 ?window?
+
     ::cv::Canny matrix threshold1 threshold2 ?apertureSize L2gradient?
     ::cv::Sobel matrix dx dy ?ksize scale delta borderType?
     ::cv::Scharr matrix dx dy ?scale delta borderType?

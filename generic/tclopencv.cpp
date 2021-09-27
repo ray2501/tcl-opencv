@@ -1109,6 +1109,14 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) pyrMeanShiftFiltering,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::createHanningWindow",
+        (Tcl_ObjCmdProc *) createHanningWindow,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::phaseCorrelate",
+        (Tcl_ObjCmdProc *) phaseCorrelate,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::Canny",
         (Tcl_ObjCmdProc *) Canny,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

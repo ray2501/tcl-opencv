@@ -165,6 +165,9 @@ MODULE_SCOPE int pyrUp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 MODULE_SCOPE int pyrDown(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int pyrMeanShiftFiltering(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
+MODULE_SCOPE int createHanningWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int phaseCorrelate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+
 MODULE_SCOPE int Canny(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int Sobel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int Scharr(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
