@@ -1730,7 +1730,7 @@ int warpPerspective(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int warpPolar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat mat_image;
-    int dsize_widht = 0, dsize_height = 0;
+    int dsize_width = 0, dsize_height = 0;
     int flags = cv::WarpPolarMode::WARP_POLAR_LINEAR;
     double center_x = 0, center_y = 0, maxRadius = 0;
     Tcl_Obj *pResultStr = NULL;
@@ -1747,7 +1747,7 @@ int warpPolar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return TCL_ERROR;
     }
 
-    if (Tcl_GetIntFromObj(interp, objv[2], &dsize_widht) != TCL_OK) {
+    if (Tcl_GetIntFromObj(interp, objv[2], &dsize_width) != TCL_OK) {
         return TCL_ERROR;
     }
 
@@ -1775,7 +1775,7 @@ int warpPolar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::warpPolar(*mat, mat_image,
-                      cv::Size(dsize_widht, dsize_height),
+                      cv::Size(dsize_width, dsize_height),
                       cv::Point2f((float) center_x, (float) center_y),
                       maxRadius, flags);
     } catch (...) {
