@@ -193,6 +193,7 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     ::cv::warpAffine src_matrix transformation_matrix width height ?flags?
     ::cv::getPerspectiveTransform src_list dst_list ?solveMethod?
     ::cv::warpPerspective src_matrix transformation_matrix width height ?flags?
+    ::cv::warpPolar matrix dsize_width dsize_height center_x center_y maxRadius ?flags?
 
     ::cv::filter2D src_matrix kernel_matrix ?anchor_x anchor_y delta borderType?
     ::cv::sepFilter2D src_matrix kernelX kernelY ?anchor_x anchor_y delta borderType?
@@ -1415,6 +1416,11 @@ Line Types -
     ::cv::INTER_MAX
     ::cv::WARP_FILL_OUTLIERS
     ::cv::WARP_INVERSE_MAP
+
+`::cv::warpPolar` mode -
+
+    ::cv::WARP_POLAR_LINEAR
+    ::cv::WARP_POLAR_LOG
 
 `::cv::compare` cmpop -
 

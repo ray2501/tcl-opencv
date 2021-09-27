@@ -1027,6 +1027,12 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) warpPerspective,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+#ifdef TCL_USE_OPENCV4
+    Tcl_CreateObjCommand(interp, "::" NS "::warpPolar",
+        (Tcl_ObjCmdProc *) warpPolar,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+#endif
+
     Tcl_CreateObjCommand(interp, "::" NS "::filter2D",
         (Tcl_ObjCmdProc *) filter2D,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
@@ -3794,6 +3800,20 @@ Opencv_Init(Tcl_Interp *interp)
     strValue = Tcl_NewStringObj("::" NS "::WARP_INVERSE_MAP", -1);
     setupValue = Tcl_NewIntObj(cv::WARP_INVERSE_MAP);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+#ifdef TCL_USE_OPENCV4
+    /*
+     * WarpPolar Mode
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::WARP_POLAR_LINEAR", -1);
+    setupValue = Tcl_NewIntObj(cv::WarpPolarMode::WARP_POLAR_LINEAR);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::WARP_POLAR_LOG", -1);
+    setupValue = Tcl_NewIntObj(cv::WarpPolarMode::WARP_POLAR_LOG);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+#endif
 
     /*
      * Cmp Types

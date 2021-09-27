@@ -1726,6 +1726,74 @@ int warpPerspective(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+#ifdef TCL_USE_OPENCV4
+int warpPolar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat mat_image;
+    int dsize_widht = 0, dsize_height = 0;
+    int flags = cv::WarpPolarMode::WARP_POLAR_LINEAR;
+    double center_x = 0, center_y = 0, maxRadius = 0;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *mat, *dstmat;
+
+    if (objc != 7 && objc != 8) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "matrix dsize_width dsize_height center_x center_y maxRadius ?flags?");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &dsize_widht) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &dsize_height) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[4], &center_x) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[5], &center_y) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[6], &maxRadius) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 8) {
+        if (Tcl_GetIntFromObj(interp, objv[7], &flags) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::warpPolar(*mat, mat_image,
+                      cv::Size(dsize_widht, dsize_height),
+                      cv::Point2f((float) center_x, (float) center_y),
+                      maxRadius, flags);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "warpPolar failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    dstmat = new cv::Mat(mat_image);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+#endif
+
+
 int filter2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat filter_image;

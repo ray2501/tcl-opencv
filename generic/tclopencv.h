@@ -140,6 +140,9 @@ MODULE_SCOPE int getAffineTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_
 MODULE_SCOPE int warpAffine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int getPerspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int warpPerspective(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#ifdef TCL_USE_OPENCV4
+MODULE_SCOPE int warpPolar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
 
 MODULE_SCOPE int filter2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int sepFilter2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
