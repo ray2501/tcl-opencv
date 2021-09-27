@@ -1,5 +1,8 @@
 2021-09-27 Danilo Chang
 
+	* Implement command: initUndistortRectifyMap, projectPoints
+	* Implement command: getOptimalNewCameraMatrix, undistort
+	* Implement command: calibrateCamera
 	* Implement command: createHanningWindow, phaseCorrelate
 	* Implement command: setRNGSeed, randShuffle
 	* Implement command: warpPolar

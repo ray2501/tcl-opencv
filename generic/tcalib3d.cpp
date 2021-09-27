@@ -108,6 +108,390 @@ int drawChessboardCorners(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 }
 
 
+int calibrateCamera(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int width = 0, height = 0, count = 0;
+    std::vector<cv::Mat> objectPoints, imagePoints, rvecs, tvecs;
+    cv::Mat *cameraMatrix, *distCoeffs;
+    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL, *pListResultStr = NULL;
+    double ret = 0;
+
+    if (objc != 7) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "objectPoints_list imagePoints_list width height cameraMatrix distCoeffs");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
+        Tcl_SetResult(interp, (char *) "calibrateCamera invalid list data", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    if (count <= 0) {
+        Tcl_SetResult(interp, (char *) "calibrateCamera list data is empty", TCL_STATIC);
+        return TCL_ERROR;
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+        cv::Mat *mat;
+
+        for (int index = 0; index < count; index++) {
+            Tcl_ListObjIndex(interp, objv[1], index, &elemListPtr);
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, elemListPtr);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            objectPoints.push_back(*mat);
+        }
+    }
+
+    if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+        Tcl_SetResult(interp, (char *) "calibrateCamera invalid list data", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    if (count <= 0) {
+        Tcl_SetResult(interp, (char *) "calibrateCamera list data is empty", TCL_STATIC);
+        return TCL_ERROR;
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+        cv::Mat *mat;
+
+        for (int index = 0; index < count; index++) {
+            Tcl_ListObjIndex(interp, objv[2], index, &elemListPtr);
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, elemListPtr);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            imagePoints.push_back(*mat);
+        }
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &width) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[4], &height) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    cameraMatrix = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[5]);
+    if (!cameraMatrix) {
+        return TCL_ERROR;
+    }
+
+    distCoeffs = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[6]);
+    if (!distCoeffs) {
+        return TCL_ERROR;
+    }
+
+    try {
+        ret = cv::calibrateCamera(objectPoints, imagePoints,
+                                  cv::Size(width, height),
+                                  *cameraMatrix, *distCoeffs, rvecs, tvecs);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "calibrateCamera failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(ret));
+
+    pMatResultStr = objv[5];
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+
+    pMatResultStr = objv[6];
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+
+    pListResultStr = Tcl_NewListObj(0, NULL);
+    for (size_t i = 0; i < rvecs.size(); i++) {
+        cv::Mat *dstmat;
+        Tcl_Obj *pSubResultStr = NULL;
+
+        dstmat = new cv::Mat(rvecs[i]);
+
+        pSubResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+        Tcl_ListObjAppendElement(NULL, pListResultStr, pSubResultStr);
+    }
+    Tcl_ListObjAppendElement(NULL, pResultStr, pListResultStr);
+
+    pListResultStr = Tcl_NewListObj(0, NULL);
+    for (size_t i = 0; i < tvecs.size(); i++) {
+        cv::Mat *dstmat;
+        Tcl_Obj *pSubResultStr = NULL;
+
+        dstmat = new cv::Mat(tvecs[i]);
+
+        pSubResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+        Tcl_ListObjAppendElement(NULL, pListResultStr, pSubResultStr);
+    }
+    Tcl_ListObjAppendElement(NULL, pResultStr, pListResultStr);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
+int getOptimalNewCameraMatrix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int width = 0, height = 0, nwidth = 0, nheight = 0, centerPrincipalPoint = 0;
+    double alpha = 0;
+    cv::Mat result_matrix;
+    cv::Mat *cameraMatrix, *distCoeffs, *dstmat;
+    cv::Rect validPixROI;
+    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
+
+    if (objc != 8 && objc != 9) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "cameraMatrix distCoeffs width height alpha nwidth nheight ?centerPrincipalPoint?");
+        return TCL_ERROR;
+    }
+
+    cameraMatrix = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!cameraMatrix) {
+        return TCL_ERROR;
+    }
+
+    distCoeffs = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!distCoeffs) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &width) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[4], &height) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[5], &alpha) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[6], &nwidth) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[7], &nheight) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 9) {
+        if (Tcl_GetBooleanFromObj(interp, objv[8], &centerPrincipalPoint) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        result_matrix = cv::getOptimalNewCameraMatrix(*cameraMatrix, *distCoeffs,
+                                            cv::Size(width, height), alpha,
+                                            cv::Size(nwidth, nheight),
+                                            &validPixROI, (bool) centerPrincipalPoint);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "getOptimalNewCameraMatrix failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    dstmat = new cv::Mat(result_matrix);
+    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(validPixROI.x));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(validPixROI.y));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(validPixROI.width));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(validPixROI.height));
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
+int undistort(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat result_matrix;
+    cv::Mat *matrix, *cameraMatrix, *distCoeffs, *newCameraMatrix, *dstmat;
+    Tcl_Obj *pResultStr = NULL;
+
+    if (objc != 5) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "matrix cameraMatrix distCoeffs newCameraMatrix");
+        return TCL_ERROR;
+    }
+
+    matrix = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!matrix) {
+        return TCL_ERROR;
+    }
+
+    cameraMatrix = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!cameraMatrix) {
+        return TCL_ERROR;
+    }
+
+    distCoeffs = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+    if (!distCoeffs) {
+        return TCL_ERROR;
+    }
+
+    newCameraMatrix = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[4]);
+    if (!newCameraMatrix) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::undistort(*matrix, result_matrix, *cameraMatrix, *distCoeffs, *newCameraMatrix);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "undistort failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    dstmat = new cv::Mat(result_matrix);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
+int initUndistortRectifyMap(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat map1, map2;
+    cv::Mat *cameraMatrix, *distCoeffs, *Rmatrix, *newCameraMatrix, *dstmat1, *dstmat2;
+    int width = 0, height= 0, m1type = 0;
+    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
+
+    if (objc != 8) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "cameraMatrix distCoeffs R newCameraMatrix width height m1type");
+        return TCL_ERROR;
+    }
+
+    cameraMatrix = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!cameraMatrix) {
+        return TCL_ERROR;
+    }
+
+    distCoeffs = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!distCoeffs) {
+        return TCL_ERROR;
+    }
+
+    /*
+     * Optional rectification transformation.
+     * This matrix can be empty.
+     */
+    Rmatrix = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+    if (!Rmatrix) {
+        return TCL_ERROR;
+    }
+
+    newCameraMatrix = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[4]);
+    if (!newCameraMatrix) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[5], &width) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[6], &height) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[7], &m1type) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::initUndistortRectifyMap(*cameraMatrix, *distCoeffs,
+                                    *Rmatrix, *newCameraMatrix,
+                                    cv::Size(width, height), m1type,
+                                    map1, map2);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "initUndistortRectifyMap failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    dstmat1 = new cv::Mat(map1);
+    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+
+    dstmat2 = new cv::Mat(map2);
+    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
+int projectPoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat result_matrix;
+    cv::Mat *objectPoints, *rvec, *tvec, *cameraMatrix, *distCoeffs, *dstmat;
+    Tcl_Obj *pResultStr = NULL;
+
+    if (objc != 6) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "objectPoints rvec tvec cameraMatrix distCoeffs");
+        return TCL_ERROR;
+    }
+
+    objectPoints = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!objectPoints) {
+        return TCL_ERROR;
+    }
+
+    rvec = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!rvec) {
+        return TCL_ERROR;
+    }
+
+    tvec = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+    if (!tvec) {
+        return TCL_ERROR;
+    }
+
+    cameraMatrix = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[4]);
+    if (!cameraMatrix) {
+        return TCL_ERROR;
+    }
+
+    distCoeffs = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[5]);
+    if (!distCoeffs) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::projectPoints(*objectPoints, *rvec, *tvec,
+                          *cameraMatrix, *distCoeffs, result_matrix);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "projectPoints failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    dstmat = new cv::Mat(result_matrix);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
 int findHomography(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double ransacReprojThreshold = 3;

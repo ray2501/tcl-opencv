@@ -3239,9 +3239,9 @@ int mat_norm(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int norm_type = cv::NORM_L2;
     double result;
-    cv::Mat *mat;
+    cv::Mat *mat, *mat2 = NULL;
 
-    if (objc != 3) {
+    if (objc != 3 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "matrix norm_type");
         return TCL_ERROR;
     }
@@ -3251,12 +3251,27 @@ int mat_norm(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return TCL_ERROR;
     }
 
-    if (Tcl_GetIntFromObj(interp, objv[2], &norm_type) != TCL_OK) {
-        return TCL_ERROR;
+    if (objc == 3) {
+        if (Tcl_GetIntFromObj(interp, objv[2], &norm_type) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    } else {
+        mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+        if (!mat2) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[3], &norm_type) != TCL_OK) {
+            return TCL_ERROR;
+        }
     }
 
     try {
-        result = cv::norm(*mat, norm_type);
+        if (objc == 3) {
+            result = cv::norm(*mat, norm_type);
+        } else {
+            result = cv::norm(*mat, *mat2, norm_type);
+        }
     } catch (...) {
         Tcl_SetResult(interp, (char *) "norm failed", TCL_STATIC);
         return TCL_ERROR;

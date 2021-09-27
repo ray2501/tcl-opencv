@@ -1385,6 +1385,26 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) drawChessboardCorners,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::calibrateCamera",
+        (Tcl_ObjCmdProc *) calibrateCamera,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::getOptimalNewCameraMatrix",
+        (Tcl_ObjCmdProc *) getOptimalNewCameraMatrix,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::undistort",
+        (Tcl_ObjCmdProc *) undistort,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::initUndistortRectifyMap",
+        (Tcl_ObjCmdProc *) initUndistortRectifyMap,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::projectPoints",
+        (Tcl_ObjCmdProc *) projectPoints,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::findHomography",
         (Tcl_ObjCmdProc *) findHomography,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
@@ -1396,7 +1416,6 @@ Opencv_Init(Tcl_Interp *interp)
     Tcl_CreateObjCommand(interp, "::" NS "::StereoSGBM",
         (Tcl_ObjCmdProc *) StereoSGBM,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
-
 
     /*
      * For Video
