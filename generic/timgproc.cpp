@@ -2831,7 +2831,7 @@ int phaseCorrelate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewListObj(0, NULL);
     Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.x));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.x));
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.y));
 
     Tcl_SetObjResult(interp, pResultStr);
 
