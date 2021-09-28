@@ -3184,6 +3184,102 @@ Camera Calibration test -
         $imgp close
     }
 
+Pose Estimation, Render a Cube -
+
+    package require opencv
+
+    proc draw {img imgpts} {
+        set imgpts_c [list]
+        set imgpts_sub [list]
+        for {set i 0} {$i < 4} {incr i} {
+            set img_x [expr int([$imgpts at [list $i 0] 0])]
+            set img_y [expr int([$imgpts at [list $i 0] 1])]
+            lappend imgpts_sub $img_x $img_y
+        }
+        lappend imgpts_c $imgpts_sub
+
+        cv::drawContours $img $imgpts_c -1 [list 0 255 0 0] -3 $::cv::LINE_8 2 0 0
+
+        for {set i 0; set j 4} {$i < 4} {incr i; incr j} {
+            set img_x1 [expr int([$imgpts at [list $i 0] 0])]
+            set img_y1 [expr int([$imgpts at [list $i 0] 1])]
+            set img_x2 [expr int([$imgpts at [list $j 0] 0])]
+            set img_y2 [expr int([$imgpts at [list $j 0] 1])]
+
+            cv::line $img $img_x1 $img_y1 $img_x2 $img_y2 [list 255 0 0 0] 3
+        }
+
+        set imgpts_c [list]
+        set imgpts_sub [list]
+        for {set i 4} {$i < 8} {incr i} {
+            set img_x [expr int([$imgpts at [list $i 0] 0])]
+            set img_y [expr int([$imgpts at [list $i 0] 1])]
+            lappend imgpts_sub $img_x $img_y
+        }
+        lappend imgpts_c $imgpts_sub
+
+        cv::drawContours $img $imgpts_c -1 [list 0 0 255 0] 3 $::cv::LINE_8 2 0 0
+    }
+
+
+    # Load data
+    set fs [::cv::FileStorage ]
+    $fs open "calibration.yaml" $::cv::FileStorage::READ
+    set cameraMatrix [$fs readMat "mtx"]
+    set distCoeffs [$fs readMat "dist"]
+    $fs close
+
+    # prepare object points
+    set objp [::cv::Mat::zeros [expr 6*9] 3 $::cv::CV_32F]
+    for {set i 0} {$i < 9} {incr i} {
+        for {set j 0} {$j < 6} {incr j} {
+            $objp at [list [expr $i * 6 + $j] 0] 0 $j
+            $objp at [list [expr $i * 6 + $j] 1] 0 $i
+            $objp at [list [expr $i * 6 + $j] 2] 0 0
+        }
+    }
+
+    set axis [cv::Mat::Mat 8 3 $::cv::CV_32F]
+    $axis setData [list 0 0 0 0 3 0 3 3 0 3 0 0 \
+                        0 0 -3 0 3 -3 3 3 -3 3 0 -3]
+
+    set term [::cv::TermCriteria [expr $::cv::EPS | $::cv::COUNT] 30 0.001]
+
+    set filenames [glob data/left*.jpg]
+    foreach file $filenames {
+        set img [::cv::imread $file]
+        set gray [cv::cvtColor $img $::cv::COLOR_BGR2GRAY]
+        set res [cv::findChessboardCorners $gray 6 9]
+        set ret [lindex $res 0]
+        set corners [lindex $res 1]
+
+        if {$ret == 1} {
+            cv::cornerSubPix $gray $corners 11 11 -1 -1 $term
+
+            set r [cv::solvePnP $objp $corners $cameraMatrix $distCoeffs]
+            set rvec [lindex $r 1]
+            set tvec [lindex $r 2]
+            set imgpts [cv::projectPoints $axis $rvec $tvec $cameraMatrix $distCoeffs]
+
+            draw $img $imgpts
+
+            cv::imshow "img" $img
+            cv::waitKey 500
+
+            $imgpts close
+            $rvec close
+            $tvec close
+        }
+
+        $corners close
+        $img close
+        $gray close
+    }
+
+    $term close
+    $objp close
+    $axis close
+
 Non-Photorealistic Rendering -
 
     package require opencv
