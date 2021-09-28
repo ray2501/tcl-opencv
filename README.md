@@ -164,6 +164,9 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     FS writeString name string ...
     FS close
 
+For more FileStorage info, you can check
+[XML/YAML Persistence](https://docs.opencv.org/master/d4/da4/group__core__xml.html).
+
 ### imgcodecs
 
     ::cv::imread filename ?flags?
@@ -435,8 +438,10 @@ Please notice, SimpleBlobDetector command will only have 1 instance.
     ::cv::solvePnP objectPoints imagePoints cameraMatrix distCoeffs
 
 `::cv::findChessboardCorners` returns a list of (retval, corners).
-The retval value is a non-zero value if all of the corners are found and they are placed in a certain order.
-And the retval value should be passed to `::cv::drawChessboardCorners`'s parameter `patternWasFound`.
+The retval value is a non-zero value if all of the corners are found and
+they are placed in a certain order.
+And the retval value should be passed to `::cv::drawChessboardCorners`'s
+parameter `patternWasFound`.
 
     ::cv::computeCorrespondEpilines points whichImage F
     ::cv::findFundamentalMat matrix_1 matrix_2 ?method ransacReprojThreshold confidence?
@@ -3307,8 +3312,8 @@ Epipolar Geometry -
             set y0 [expr int(-$r2/$r1)]
             set x1 $col
             set y1 [expr int(-($r2+$r0*$col)/$r1)]
-
             ::cv::line $img1 $x0 $y0 $x1 $y1 $color 1
+
             set p1 [$pts1 at [list $i 0] 0]
             set p2 [$pts1 at [list $i 0] 1]
             ::cv::circle $img1 $p1 $p2 5 $color -1
