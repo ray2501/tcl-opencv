@@ -432,6 +432,7 @@ Please notice, SimpleBlobDetector command will only have 1 instance.
     ::cv::undistort matrix cameraMatrix distCoeffs newCameraMatrix
     ::cv::initUndistortRectifyMap cameraMatrix distCoeffs R newCameraMatrix width height m1type
     ::cv::projectPoints objectPoints rvec tvec cameraMatrix distCoeffs
+    ::cv::solvePnP objectPoints imagePoints cameraMatrix distCoeffs
 
 `::cv::findChessboardCorners` returns a list of (retval, corners).
 The retval value is a non-zero value if all of the corners are found and they are placed in a certain order.

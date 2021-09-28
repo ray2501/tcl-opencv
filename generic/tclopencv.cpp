@@ -1405,6 +1405,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) projectPoints,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::solvePnP",
+        (Tcl_ObjCmdProc *) solvePnP,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::findHomography",
         (Tcl_ObjCmdProc *) findHomography,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

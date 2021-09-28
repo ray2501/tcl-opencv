@@ -492,6 +492,66 @@ int projectPoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int solvePnP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat result_rvec, result_tvec;
+    cv::Mat *objectPoints, *imagePoints, *cameraMatrix, *distCoeffs, *dstmat1, *dstmat2;
+    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
+    bool result;
+
+    if (objc != 5) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "objectPoints imagePoints cameraMatrix distCoeffs");
+        return TCL_ERROR;
+    }
+
+    objectPoints = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!objectPoints) {
+        return TCL_ERROR;
+    }
+
+    imagePoints = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!imagePoints) {
+        return TCL_ERROR;
+    }
+
+    cameraMatrix = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+    if (!cameraMatrix) {
+        return TCL_ERROR;
+    }
+
+    distCoeffs = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[4]);
+    if (!distCoeffs) {
+        return TCL_ERROR;
+    }
+
+    try {
+        result = cv::solvePnP(*objectPoints, *imagePoints,
+                          *cameraMatrix, *distCoeffs,
+                          result_rvec, result_tvec);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "solvePnP failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewBooleanObj((int) result));
+
+    dstmat1 = new cv::Mat(result_rvec);
+    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+
+    dstmat2 = new cv::Mat(result_tvec);
+    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
 int findHomography(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double ransacReprojThreshold = 3;
