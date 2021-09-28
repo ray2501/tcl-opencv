@@ -3289,6 +3289,139 @@ Pose Estimation, Render a Cube -
     $objp close
     $axis close
 
+Epipolar Geometry -
+
+    package require opencv
+
+    proc drawlines {img1 lines pts1 pts2} {
+        set col [$img1 cols]
+        set row [$img1 rows]
+
+        for {set i 0} {$i < [$lines rows]} {incr i} {
+            set color [list [expr int(rand()*255)] [expr int(rand()*255)] [expr int(rand()*255)] 0]
+            set r0 [$lines at [list $i 0] 0]
+            set r1 [$lines at [list $i 0] 1]
+            set r2 [$lines at [list $i 0] 2]
+
+            set x0 0
+            set y0 [expr int(-$r2/$r1)]
+            set x1 $col
+            set y1 [expr int(-($r2+$r0*$col)/$r1)]
+
+            ::cv::line $img1 $x0 $y0 $x1 $y1 $color 1
+            set p1 [$pts1 at [list $i 0] 0]
+            set p2 [$pts1 at [list $i 0] 1]
+            ::cv::circle $img1 $p1 $p2 5 $color -1
+        }
+    }
+
+    #
+    # From https://github.com/opencv/opencv/tree/master/samples/data
+    #
+    set filename1 "left.jpg"
+    set filename2 "right.jpg"
+
+    try {
+        set img1 [::cv::imread $filename1 $::cv::IMREAD_GRAYSCALE]
+        set img2 [::cv::imread $filename2 $::cv::IMREAD_GRAYSCALE]
+
+        set akaze [::cv::AKAZE]
+
+        set result1 [$akaze detectAndCompute $img1]
+        set result2 [$akaze detectAndCompute $img2]
+        set kp1 [lindex $result1 0]
+        set d1 [lindex $result1 1]
+        set kp2 [lindex $result2 0]
+        set d2 [lindex $result2 1]
+
+        set bmatcher [::cv::BFMatcher $::cv::NORM_HAMMING 0]
+        set matches [$bmatcher knnMatch $d1 $d2 2]
+
+        $d1 close
+        $d2 close
+        $akaze close
+        $bmatcher close
+
+        set dmatches [list]
+        foreach match $matches {
+            foreach {m n} $match {
+                set mdistance [lindex $m 3]
+                set ndistance [lindex $n 3]
+                if {$mdistance < [expr 0.8 * $ndistance]} {
+                    lappend dmatches $m
+                }
+            }
+        }
+
+        set srcPts [list]
+        set dstPts [list]
+        foreach match $dmatches {
+            set spoint [lindex $kp1 [lindex $match 0]]
+            set dpoint [lindex $kp2 [lindex $match 1]]
+
+            lappend srcPts [expr int([lindex $spoint 0])] [expr int([lindex $spoint 1])]
+            lappend dstPts [expr int([lindex $dpoint 0])] [expr int([lindex $dpoint 1])]
+        }
+
+        # Find homography matrix and do perspective transform
+        set src_pts [::cv::Mat::Mat 1 [expr [llength $srcPts]/2] $::cv::CV_32SC2]
+        $src_pts setData $srcPts
+        set dst_pts [::cv::Mat::Mat 1 [expr [llength $dstPts]/2] $::cv::CV_32SC2]
+        $dst_pts setData $dstPts
+
+        set result [::cv::findFundamentalMat $src_pts $dst_pts $::cv::FM_LMEDS 3.0 0.99]
+        set F [lindex $result 0]
+        set mask [lindex $result 1]
+
+        set nsrc_pts [cv::Mat::Mat 0 0 $::cv::CV_32SC2]
+        set ndst_pts [cv::Mat::Mat 0 0 $::cv::CV_32SC2]
+        for {set i 0} {$i < [$mask rows]} {incr i} {
+            set value [$mask at [list $i 0] 0]
+
+            # We select only inlier points
+            if {$value == 1} {
+                set srccol [$src_pts colRange $i [expr $i + 1]]
+                $nsrc_pts push_back $srccol
+
+                set dstcol [$dst_pts colRange $i [expr $i + 1]]
+                $ndst_pts push_back $dstcol
+
+                $srccol close
+                $dstcol close
+            }
+        }
+
+        $src_pts close
+        $dst_pts close
+
+        set colorimg1 [::cv::cvtColor $img1 $::cv::COLOR_GRAY2BGR]
+        set colorimg2 [::cv::cvtColor $img2 $::cv::COLOR_GRAY2BGR]
+
+        set lines1 [::cv::computeCorrespondEpilines $ndst_pts 2 $F]
+        drawlines $colorimg1 $lines1 $nsrc_pts $ndst_pts
+        ::cv::imshow "imgag1" $colorimg1
+
+        set lines2 [::cv::computeCorrespondEpilines $nsrc_pts 1 $F]
+        drawlines $colorimg2 $lines2 $ndst_pts $nsrc_pts
+        ::cv::imshow "imgag2" $colorimg2
+
+        ::cv::waitKey 0
+
+        $nsrc_pts close
+        $ndst_pts close
+        $F close
+        $mask close
+        $lines1 close
+        $lines2 close
+        $colorimg1 close
+        $colorimg2 close
+
+        $img1 close
+        $img2 close
+    } on error {em} {
+        puts $em
+    }
+
 Non-Photorealistic Rendering -
 
     package require opencv
