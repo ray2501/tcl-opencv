@@ -129,6 +129,7 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
 
     ::cv::perspectiveTransform src_list transformation_matrix
 
+    ::cv::getBuildInformation
     ::cv::getTickCount
     ::cv::getTickFrequency
 

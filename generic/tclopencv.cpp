@@ -889,6 +889,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) perspectiveTransform,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::getBuildInformation",
+        (Tcl_ObjCmdProc *) getBuildInformation,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::getTickCount",
         (Tcl_ObjCmdProc *) getTickCount,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

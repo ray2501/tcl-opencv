@@ -4260,6 +4260,27 @@ int perspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 }
 
 
+int getBuildInformation(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::String result;
+
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, 0);
+        return TCL_ERROR;
+    }
+
+    try {
+        result = cv::getBuildInformation();
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "getBuildInformation failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    Tcl_SetObjResult(interp, Tcl_NewStringObj(result.c_str(), -1));
+    return TCL_OK;
+}
+
+
 int getTickCount(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double result;

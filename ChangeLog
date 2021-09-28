@@ -1,6 +1,7 @@
 2021-09-28 Danilo Chang
 
 	* Implement command: computeCorrespondEpilines, findFundamentalMat
+	* Implement command: getBuildInformation
 	* Implement command: solvePnP
 
 2021-09-27 Danilo Chang

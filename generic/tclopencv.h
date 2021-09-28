@@ -93,6 +93,7 @@ MODULE_SCOPE int kmeans(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
 MODULE_SCOPE int perspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
+MODULE_SCOPE int getBuildInformation(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int getTickCount(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int getTickFrequency(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
