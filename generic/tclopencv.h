@@ -263,6 +263,8 @@ MODULE_SCOPE int initUndistortRectifyMap(void *cd, Tcl_Interp *interp, int objc,
 MODULE_SCOPE int projectPoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int solvePnP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
+MODULE_SCOPE int computeCorrespondEpilines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int findFundamentalMat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int findHomography(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 MODULE_SCOPE int StereoBM(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

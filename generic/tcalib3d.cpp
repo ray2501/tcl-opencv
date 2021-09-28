@@ -552,6 +552,113 @@ int solvePnP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int computeCorrespondEpilines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int whichImage = 0;
+    cv::Mat lines;
+    cv::Mat *mat1, *mat2, *dstmat;
+    Tcl_Obj *pResultStr = NULL;
+
+    if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "points whichImage F");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &whichImage) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::computeCorrespondEpilines(*mat1, whichImage, *mat2,
+                                       lines);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "computeCorrespondEpilines failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    dstmat = new cv::Mat(lines);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
+int findFundamentalMat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    double ransacReprojThreshold = 3, confidence = 0.99;
+    int method = cv::FM_RANSAC;
+    cv::Mat result, mask;
+    cv::Mat *mat1, *mat2, *dstmat1, *dstmat2;
+    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
+
+    if (objc != 3 && objc != 6) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "matrix_1 matrix_2 ?method ransacReprojThreshold confidence?");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 6) {
+        if (Tcl_GetIntFromObj(interp, objv[3], &method) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[4], &ransacReprojThreshold) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[5], &confidence) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        result = cv::findFundamentalMat(*mat1, *mat2, mask,
+                                        method, ransacReprojThreshold,
+                                        confidence);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "findFundamentalMat failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    dstmat1 = new cv::Mat(result);
+    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+
+    dstmat2 = new cv::Mat(mask);
+    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
 int findHomography(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double ransacReprojThreshold = 3;

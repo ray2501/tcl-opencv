@@ -1409,6 +1409,14 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) solvePnP,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::computeCorrespondEpilines",
+        (Tcl_ObjCmdProc *) computeCorrespondEpilines,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::findFundamentalMat",
+        (Tcl_ObjCmdProc *) findFundamentalMat,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::findHomography",
         (Tcl_ObjCmdProc *) findHomography,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
@@ -4292,6 +4300,26 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::CALIB_CB_FAST_CHECK", -1);
     setupValue = Tcl_NewIntObj(cv::CALIB_CB_FAST_CHECK);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * findFundamentalMat method
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::FM_7POINT", -1);
+    setupValue = Tcl_NewIntObj(cv::FM_7POINT);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::FM_8POINT", -1);
+    setupValue = Tcl_NewIntObj(cv::FM_8POINT);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::FM_LMEDS", -1);
+    setupValue = Tcl_NewIntObj(cv::FM_LMEDS);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::FM_RANSAC", -1);
+    setupValue = Tcl_NewIntObj(cv::FM_RANSAC);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*

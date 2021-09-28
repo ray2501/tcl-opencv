@@ -438,6 +438,8 @@ Please notice, SimpleBlobDetector command will only have 1 instance.
 The retval value is a non-zero value if all of the corners are found and they are placed in a certain order.
 And the retval value should be passed to `::cv::drawChessboardCorners`'s parameter `patternWasFound`.
 
+    ::cv::computeCorrespondEpilines points whichImage F
+    ::cv::findFundamentalMat matrix_1 matrix_2 ?method ransacReprojThreshold confidence?
     ::cv::findHomography srcPoints dstPoints ?method ransacReprojThreshold?
 
 Note that whenever an H matrix cannot be estimated, an empty one will be returned.
@@ -1584,6 +1586,13 @@ TermCriteria type -
     ::cv::CALIB_CB_NORMALIZE_IMAGE
     ::cv::CALIB_CB_FILTER_QUADS
     ::cv::CALIB_CB_FAST_CHECK
+
+`findFundamentalMat` method -
+
+    ::cv::FM_7POINT
+    ::cv::FM_8POINT
+    ::cv::FM_LMEDS
+    ::cv::FM_RANSAC
 
 `findHomography` method -
 
