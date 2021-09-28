@@ -2097,12 +2097,12 @@ Access camera using OpenCV and save to a video file -
             $f close
         } on error {em} {
             puts $em
-            exit
+            break
         }
 
-        set key [::cv::waitKey 10]
+        set key [::cv::waitKey 1]
         if {$key==[scan "q" %c]} {
-            exit
+            break
         }
     }
     $w close
