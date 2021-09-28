@@ -3067,6 +3067,123 @@ SIFT, Feature Matching + Homography to find Objects -
         puts $em
     }
 
+Camera Calibration test -
+
+    package require opencv
+
+    set term [::cv::TermCriteria [expr $::cv::EPS | $::cv::COUNT] 30 0.001]
+
+    # prepare object points
+    set objp [::cv::Mat::zeros [expr 6*9] 3 $::cv::CV_32F]
+    for {set i 0} {$i < 9} {incr i} {
+        for {set j 0} {$j < 6} {incr j} {
+            $objp at [list [expr $i * 6 + $j] 0] 0 $j
+            $objp at [list [expr $i * 6 + $j] 1] 0 $i
+            $objp at [list [expr $i * 6 + $j] 2] 0 0
+        }
+    }
+
+    set objpoints [list]
+    set imgpoints [list]
+    set width 0
+    set height 0
+
+    #
+    # Download files from:
+    # https://github.com/opencv/opencv/tree/master/samples/data
+    # left01.jpg ~ left14.jpg (except left12.jpg)
+    #
+    set filenames [glob data/left*.jpg]
+    foreach file $filenames {
+        set img [::cv::imread $file]
+        set gray [cv::cvtColor $img $::cv::COLOR_BGR2GRAY]
+        set res [cv::findChessboardCorners $gray 6 9]
+        set ret [lindex $res 0]
+        set corners [lindex $res 1]
+
+        if {$ret == 1} {
+            cv::cornerSubPix $gray $corners 11 11 -1 -1 $term
+
+            set width [$img cols]
+            set height [$img rows]
+
+            cv::drawChessboardCorners $img 6 9 $corners $ret
+            cv::imshow "img" $img
+            cv::waitKey 500
+
+            lappend imgpoints $corners
+            lappend objpoints $objp
+        }
+        $img close
+        $gray close
+    }
+
+    $term close
+
+    set cameraMatrix [::cv::Mat::eye 3 3 $::cv::CV_64F]
+    set distCoeffs [::cv::Mat::zeros 5 1 $::cv::CV_64F]
+
+    set res [cv::calibrateCamera $objpoints $imgpoints $width $height $cameraMatrix $distCoeffs]
+    set ret [lindex $res 0]
+    set cameraMatrix [lindex $res 1]
+    set distCoeffs [lindex $res 2]
+    set rvecs [lindex $res 3]
+    set tvecs [lindex $res 4]
+
+    # Save to FileStorage
+    set fs [::cv::FileStorage]
+    $fs open "calibration.yaml" $::cv::FileStorage::WRITE
+    $fs writeMat "mtx" $cameraMatrix
+    $fs writeMat "dist" $distCoeffs
+    $fs close
+
+    # Undistortion
+    set img [::cv::imread "left12.jpg"]
+    set width [$img cols]
+    set height [$img rows]
+    set result [::cv::getOptimalNewCameraMatrix $cameraMatrix $distCoeffs \
+                                                $width $height 1 $width $height]
+    set newcameramtx [lindex $result 0]
+    set roix [lindex $result 1]
+    set roiy [lindex $result 2]
+    set roiw [lindex $result 3]
+    set roih [lindex $result 4]
+
+    set dst [::cv::undistort $img $cameraMatrix $distCoeffs $newcameramtx]
+    set dst2 [$dst rect $roix $roiy $roiw $roih]
+    ::cv::imwrite "calibresult.png" $dst2
+    $dst close
+    $dst2 close
+
+    set R [cv::Mat::Mat 0 0 $::cv::CV_32F]
+    set rdst [::cv::initUndistortRectifyMap $cameraMatrix $distCoeffs $R $newcameramtx \
+                                            $width $height $::cv::CV_32F]
+    set mapx [lindex $rdst 0]
+    set mapy [lindex $rdst 1]
+    set dst [::cv::remap $img $mapx $mapy $::cv::INTER_LINEAR]
+    set dst2 [$dst rect $roix $roiy $roiw $roih]
+    ::cv::imwrite "calibresult2.png" $dst2
+    $mapx close
+    $mapy close
+    $dst close
+    $dst2 close
+    $R close
+    $newcameramtx close
+    $img close
+
+    $cameraMatrix close
+    $distCoeffs close
+    foreach rvec $rvecs {
+        $rvec close
+    }
+    foreach tvec $tvecs {
+        $tvec close
+    }
+    $objp close
+    foreach imgp $imgpoints {
+        $imgp close
+    }
+
 Non-Photorealistic Rendering -
 
     package require opencv
