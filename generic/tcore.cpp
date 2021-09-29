@@ -4690,25 +4690,31 @@ int TermCriteria(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     cv::TermCriteria term_crit, *termCriteria;
     Tcl_Obj *pResultStr = NULL;
 
-    if (objc != 4) {
-        Tcl_WrongNumArgs(interp, 2, objv, "type maxCount epsilon");
+    if (objc != 1 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 2, objv, "?type maxCount epsilon?");
         return TCL_ERROR;
     }
 
-    if (Tcl_GetIntFromObj(interp, objv[1], &type) != TCL_OK) {
-        return TCL_ERROR;
-    }
+    if (objc == 4) {
+        if (Tcl_GetIntFromObj(interp, objv[1], &type) != TCL_OK) {
+            return TCL_ERROR;
+        }
 
-    if (Tcl_GetIntFromObj(interp, objv[2], &maxCount) != TCL_OK) {
-        return TCL_ERROR;
-    }
+        if (Tcl_GetIntFromObj(interp, objv[2], &maxCount) != TCL_OK) {
+            return TCL_ERROR;
+        }
 
-    if (Tcl_GetDoubleFromObj(interp, objv[3], &epsilon) != TCL_OK) {
-        return TCL_ERROR;
+        if (Tcl_GetDoubleFromObj(interp, objv[3], &epsilon) != TCL_OK) {
+            return TCL_ERROR;
+        }
     }
 
     try {
-        term_crit = cv::TermCriteria(type, maxCount, epsilon);
+        if (objc == 1) {
+            term_crit = cv::TermCriteria();
+        } else {
+            term_crit = cv::TermCriteria(type, maxCount, epsilon);
+        }
     } catch (...) {
         Tcl_SetResult(interp, (char *) "TermCriteria failed", TCL_STATIC);
         return TCL_ERROR;
