@@ -517,7 +517,11 @@ Please notice, BackgroundSubtractorMOG2 command will only have 1 instance.
     ::cv::inpaint matrix inpaintMask inpaintRadius flags
     ::cv::decolor matrix
 
+    ::cv::fastNlMeansDenoising matrix ?h templateWindowSize searchWindowSize?
     ::cv::fastNlMeansDenoisingColored matrix ?h hColor templateWindowSize searchWindowSize?
+
+`::cv::fastNlMeansDenoising` expected to be applied to grayscale images.
+`::cv::fastNlMeansDenoisingColored` is for colored images.
 
     ::cv::colorChange matrix mask red_mul green_mul blue_mul
     ::cv::illuminationChange matrix mask alpha beta

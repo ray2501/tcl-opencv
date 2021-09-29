@@ -1476,6 +1476,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) decolor,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::fastNlMeansDenoising",
+        (Tcl_ObjCmdProc *) fastNlMeansDenoising,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::fastNlMeansDenoisingColored",
         (Tcl_ObjCmdProc *) fastNlMeansDenoisingColored,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

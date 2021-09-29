@@ -96,6 +96,58 @@ int decolor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int fastNlMeansDenoising(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    double h = 3;
+    int templateWindowSize = 7, searchWindowSize = 21;
+    cv::Mat dstimage;
+    cv::Mat *mat1, *dstmat;
+    Tcl_Obj *pResultStr = NULL;
+
+    if (objc != 2 && objc != 5) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "matrix ?h templateWindowSize searchWindowSize?");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 5) {
+        if (Tcl_GetDoubleFromObj(interp, objv[2], &h) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[3], &templateWindowSize) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[4], &searchWindowSize) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+
+    try {
+        cv::fastNlMeansDenoising(*mat1, dstimage, (float) h,
+                                        templateWindowSize, searchWindowSize);
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "fastNlMeansDenoising failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    dstmat = new cv::Mat(dstimage);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
 int fastNlMeansDenoisingColored(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double h = 3, hColor = 3;
@@ -104,7 +156,7 @@ int fastNlMeansDenoisingColored(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj 
     cv::Mat *mat1, *dstmat;
     Tcl_Obj *pResultStr = NULL;
 
-    if (objc != 6) {
+    if (objc != 2 && objc != 6) {
         Tcl_WrongNumArgs(interp, 1, objv,
             "matrix ?h hColor templateWindowSize searchWindowSize?");
         return TCL_ERROR;

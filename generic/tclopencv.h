@@ -288,6 +288,7 @@ MODULE_SCOPE int calcOpticalFlowFarneback(void *cd, Tcl_Interp *interp, int objc
 
 MODULE_SCOPE int inpaint(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int decolor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int fastNlMeansDenoising(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int fastNlMeansDenoisingColored(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int colorChange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int illuminationChange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
