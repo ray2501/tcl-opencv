@@ -1,3 +1,7 @@
+2021-09-29 Danilo Chang
+
+	* Implement command: MSER
+
 2021-09-28 Danilo Chang
 
 	* Implement command: computeCorrespondEpilines, findFundamentalMat

@@ -1182,6 +1182,7 @@ test opencv-1.87 {FileStorage (types)} {*}{
             cv::CLAHE
             cv::FastFeatureDetector
             cv::AgastFeatureDetector
+            cv::MSER
             cv::ORB
             cv::AKAZE
             cv::BRISK

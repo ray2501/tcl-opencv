@@ -470,6 +470,13 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     if (!node.isNone()) {
                         cvd->agastdetector->read(node);
                     }
+                } else if (strcmp(type, "opencv-mserextractor") == 0) {
+                    if (MSER(cd, interp, 1, &empty) != TCL_OK) {
+                        throw cv::Exception();
+                    }
+                    if (!node.isNone()) {
+                        cvd->mserextractor->read(node);
+                    }
                 } else if (strcmp(type, "opencv-orb") == 0) {
                     if (ORB(cd, interp, 1, &empty) != TCL_OK) {
                         throw cv::Exception();
@@ -913,6 +920,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 if (cmd == cvd->cmd_clahe ||
                     cmd == cvd->cmd_fastdetector ||
                     cmd == cvd->cmd_agastdetector ||
+                    cmd == cvd->cmd_mserextractor ||
                     cmd == cvd->cmd_orbdetector ||
                     cmd == cvd->cmd_akazedetector ||
                     cmd == cvd->cmd_briskdetector ||
@@ -1024,6 +1032,16 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                         (*fs) << "data" << "{";
                         fs->elname = "data";
                         cvd->agastdetector->write(*fs);
+                        (*fs) << "}";
+                    }
+                    (*fs) << "}";
+                } else if (cmd == cvd->cmd_mserextractor) {
+                    (*fs) << name << "{";
+                    (*fs) << "type" << "opencv-mserextractor";
+                    if (!cvd->mserextractor->empty()) {
+                        (*fs) << "data" << "{";
+                        fs->elname = "data";
+                        cvd->mserextractor->write(*fs);
                         (*fs) << "}";
                     }
                     (*fs) << "}";

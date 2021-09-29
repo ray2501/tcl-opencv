@@ -241,6 +241,7 @@ MODULE_SCOPE int drawKeypoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 MODULE_SCOPE int drawMatches(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int FastFeatureDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int AgastFeatureDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int MSER(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int ORB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int AKAZE(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int BRISK(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
@@ -420,6 +421,7 @@ typedef struct {
     cv::Ptr<cv::CLAHE> clahe;
     cv::Ptr<cv::FastFeatureDetector> fastdetector;
     cv::Ptr<cv::AgastFeatureDetector> agastdetector;
+    cv::Ptr<cv::MSER> mserextractor;
     cv::Ptr<cv::ORB> orbdetector;
     cv::Ptr<cv::AKAZE> akazedetector;
     cv::Ptr<cv::BRISK> briskdetector;
@@ -454,6 +456,7 @@ typedef struct {
     Tcl_Command cmd_clahe;
     Tcl_Command cmd_fastdetector;
     Tcl_Command cmd_agastdetector;
+    Tcl_Command cmd_mserextractor;
     Tcl_Command cmd_orbdetector;
     Tcl_Command cmd_akazedetector;
     Tcl_Command cmd_briskdetector;

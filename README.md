@@ -338,6 +338,20 @@ Please notice, FastFeatureDetector command will only have 1 instance.
 
 Please notice, AgastFeatureDetector command will only have 1 instance.
 
+    ::cv::MSER ?delta min_area max_area max_variation min_diversity max_evolution area_threshold min_margin edge_blur_size?
+    MSER detectRegions matrix
+    MSER getDelta
+    MSER getMaxArea
+    MSER getMinArea
+    MSER getPass2Only
+    MSER setDelta value
+    MSER setMaxArea value
+    MSER setMinArea value
+    MSER setPass2Only value
+    MSER close
+
+Please notice, MSER command will only have 1 instance.
+
     ::cv::ORB ?nfeatures scaleFactor nlevels edgeThreshold firstLevel WTA_K scoreType patchSize fastThreshold?
     ORB detect matrix
     ORB compute matrix keypoints

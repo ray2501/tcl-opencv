@@ -118,6 +118,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->agastdetector) {
         cvd->agastdetector.release();
     }
+    if (cvd->mserextractor) {
+        cvd->mserextractor.release();
+    }
     if (cvd->orbdetector) {
         cvd->orbdetector.release();
     }
@@ -1345,6 +1348,10 @@ Opencv_Init(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp, "::" NS "::AgastFeatureDetector",
         (Tcl_ObjCmdProc *) AgastFeatureDetector,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::MSER",
+        (Tcl_ObjCmdProc *) MSER,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_CreateObjCommand(interp, "::" NS "::ORB",

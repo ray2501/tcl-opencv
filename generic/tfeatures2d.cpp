@@ -1190,6 +1190,409 @@ int AgastFeatureDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 }
 
 
+static void MSER_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->mserextractor) {
+        cvd->mserextractor.release();
+    }
+    cvd->cmd_mserextractor = NULL;
+}
+
+
+static int MSER_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "detectRegions",
+        "getDelta",
+        "getMaxArea",
+        "getMinArea",
+        "getPass2Only",
+        "setDelta",
+        "setMaxArea",
+        "setMinArea",
+        "setPass2Only",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_detectRegions,
+        FUNC_getDelta,
+        FUNC_getMaxArea,
+        FUNC_getMinArea,
+        FUNC_getPass2Only,
+        FUNC_setDelta,
+        FUNC_setMaxArea,
+        FUNC_setMinArea,
+        FUNC_setPass2Only,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->mserextractor == nullptr) {
+        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_detectRegions: {
+            std::vector< std::vector< cv::Point > > msers;
+            std::vector< cv::Rect > bboxes;
+            cv::Mat *mat;
+            Tcl_Obj *pResultStr = NULL, *pListResultStr = NULL;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->mserextractor->detectRegions(*mat, msers, bboxes);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "detectRegions failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+
+            pListResultStr = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < msers.size(); i++) {
+                Tcl_Obj *pListStr = NULL;
+
+                pListStr = Tcl_NewListObj(0, NULL);
+                for (size_t j = 0; j < msers[i].size(); j++) {
+                    Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(msers[i][j].x));
+                    Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(msers[i][j].y));
+                }
+
+                Tcl_ListObjAppendElement(NULL, pListResultStr, pListStr);
+            }
+            Tcl_ListObjAppendElement(NULL, pResultStr, pListResultStr);
+
+            pListResultStr = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < bboxes.size(); i++) {
+                Tcl_Obj *pListStr = NULL;
+
+                pListStr = Tcl_NewListObj(0, NULL);
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(bboxes[i].x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(bboxes[i].y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(bboxes[i].width));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(bboxes[i].height));
+
+                Tcl_ListObjAppendElement(NULL, pListResultStr, pListStr);
+            }
+            Tcl_ListObjAppendElement(NULL, pResultStr, pListResultStr);
+
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_getDelta: {
+            int value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->mserextractor->getDelta();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getDelta failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getMaxArea: {
+            int value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->mserextractor->getMaxArea();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getMaxArea failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getMinArea: {
+            int value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->mserextractor->getMinArea();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getMinArea failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getPass2Only: {
+            int value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = (int) cvd->mserextractor->getPass2Only();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getPass2Only failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewBooleanObj(value));
+            break;
+        }
+        case FUNC_setDelta: {
+            int value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->mserextractor->setDelta(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setDelta failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setMaxArea: {
+            int value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->mserextractor->setMaxArea(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setMaxArea failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setMinArea: {
+            int value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->mserextractor->setMinArea(value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setMinArea failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_setPass2Only: {
+            int value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetBooleanFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->mserextractor->setPass2Only((bool) value);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "setPass2Only failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_mserextractor) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_mserextractor);
+            }
+
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_mserextractor) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_mserextractor, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::MSER", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int MSER(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int delta = 5, min_area = 60, max_area = 14400, max_evolution = 200, edge_blur_size = 5;
+    double max_variation = 0.25, min_diversity = 0.2, area_threshold = 1.01, min_margin = 0.003;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::MSER> mserextractor;
+
+    if (objc != 1 && objc != 10) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "?delta min_area max_area max_variation min_diversity max_evolution area_threshold min_margin edge_blur_size?");
+        return TCL_ERROR;
+    }
+
+    if (objc == 10) {
+        if (Tcl_GetIntFromObj(interp, objv[1], &delta) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[2], &min_area) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[3], &max_area) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[4], &max_variation) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[5], &min_diversity) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[6], &max_evolution) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[7], &area_threshold) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[8], &min_margin) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[9], &edge_blur_size) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        mserextractor = cv::MSER::create(delta, min_area, max_area,
+                                         max_variation, min_diversity,
+                                         max_evolution, area_threshold,
+                                         min_margin, edge_blur_size);
+
+        if (mserextractor == nullptr) {
+            Tcl_SetResult(interp, (char *) "MSER create failed", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "MSER failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-mserextractor", -1);
+
+    if (cvd->cmd_mserextractor) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_mserextractor);
+    }
+    cvd->cmd_mserextractor =
+        Tcl_CreateObjCommand(interp, "::cv-mserextractor",
+            (Tcl_ObjCmdProc *) MSER_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) MSER_DESTRUCTOR);
+
+    cvd->mserextractor = mserextractor;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 static void ORB_DESTRUCTOR(void *cd)
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;
