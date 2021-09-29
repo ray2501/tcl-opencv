@@ -142,7 +142,7 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
     PCA project matrix
     PCA close
 
-    ::cv::TermCriteria type maxCount epsilon
+    ::cv::TermCriteria ?type maxCount epsilon?
     TermCriteria close
 
 ### fstorage
