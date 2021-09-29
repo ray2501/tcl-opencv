@@ -54,6 +54,7 @@ MODULE_SCOPE int mat_eigen(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 MODULE_SCOPE int mat_eigenNonSymmetric(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
 MODULE_SCOPE int mat_exp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_extractChannel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_flip(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_getOptimalDFTSize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_dft(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

@@ -86,6 +86,7 @@ Implement commands
     ::cv::eigen matrix
     ::cv::eigenNonSymmetric matrix
     ::cv::exp matrix
+    ::cv::extractChannel matrix coi
     ::cv::flip matrix flipCode
     ::cv::getOptimalDFTSize vecsize
     ::cv::dft matrix ?falgs nonzeroRows?

@@ -1,5 +1,6 @@
 2021-09-29 Danilo Chang
 
+	* Implement command: extractChannel
 	* Implement command: MSER
 
 2021-09-28 Danilo Chang
