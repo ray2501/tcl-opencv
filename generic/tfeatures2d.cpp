@@ -5925,6 +5925,12 @@ int BOWImgDescriptorExtractor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
         } else {
             CV_Error(cv::Error::StsNullPtr, "siftdetector nullptr");
         }
+    } else if (strcmp(dextractor_name, "::cv-kazedetector") == 0) {
+        if (cvd->kazedetector) {
+            dextractor = cvd->kazedetector;
+        } else {
+            CV_Error(cv::Error::StsNullPtr, "kazedetector nullptr");
+        }
     } else {
         return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid dextractor name");
     }

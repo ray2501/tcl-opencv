@@ -478,7 +478,7 @@ Please notice, SimpleBlobDetector command will only have 1 instance.
     BOWImgDescriptorExtractor setVocabulary vocabulary
     BOWImgDescriptorExtractor close
 
-`::cv::BOWImgDescriptorExtractor` now supports SIFT (dextractor) and FlannBasedMatcher (dmatcher).
+`::cv::BOWImgDescriptorExtractor` now supports SIFT or KAZE (dextractor) and FlannBasedMatcher (dmatcher).
 
 ### calib3d
 
