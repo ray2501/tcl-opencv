@@ -252,6 +252,7 @@ For more FileStorage info, you can check
     ::cv::boxPoints contour
     ::cv::minEnclosingCircle contour
     ::cv::convexHull contour ?clockwise?
+    ::cv::pointPolygonTest contour x y measureDist
 
 If users need to know contour's moments, users need to use `::cv::Mat::Mat` to create
 a matrix and fill the contour's data to the matrix, then use `::cv::moments` to calculate.

@@ -1368,6 +1368,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) convexHull,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::pointPolygonTest",
+        (Tcl_ObjCmdProc *) pointPolygonTest,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::arrowedLine",
         (Tcl_ObjCmdProc *) arrowedLine,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

@@ -4499,6 +4499,73 @@ int convexHull(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int pointPolygonTest(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    std::vector<cv::Point> points;
+    int count = 0, measureDist = 0;
+    double x = 0, y = 0, result = 0;
+
+    if (objc != 5) {
+        Tcl_WrongNumArgs(interp, 1, objv, "contour x y measureDist");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid contour data");
+    }
+
+    if (count%2 != 0) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+        int number_from_list_x;
+        int number_from_list_y;
+        int npts;
+
+        npts = count / 2;
+        for (int i = 0, j = 0; j < npts; i = i + 2, j = j + 1) {
+            cv::Point point;
+            Tcl_ListObjIndex(interp, objv[1], i, &elemListPtr);
+            if (Tcl_GetIntFromObj(interp, elemListPtr, &number_from_list_x) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            Tcl_ListObjIndex(interp, objv[1], i + 1, &elemListPtr);
+            if (Tcl_GetIntFromObj(interp, elemListPtr, &number_from_list_y) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            point.x = number_from_list_x;
+            point.y = number_from_list_y;
+            points.push_back (point);
+        }
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[2], &x) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[3], &y) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetBooleanFromObj(interp, objv[4], &measureDist) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        result = cv::pointPolygonTest(points, ::cv::Point2f((float) x, (float) y), measureDist);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
+    return TCL_OK;
+}
+
+
 int arrowedLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat *mat;
