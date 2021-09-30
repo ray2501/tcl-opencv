@@ -1244,6 +1244,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) morphologyEx,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::buildPyramid",
+        (Tcl_ObjCmdProc *) buildPyramid,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::pyrUp",
         (Tcl_ObjCmdProc *) pyrUp,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

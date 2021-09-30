@@ -2598,6 +2598,62 @@ int morphologyEx(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int buildPyramid(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int maxlevel = 0, borderType = cv::BORDER_DEFAULT;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *mat;
+    std::vector<cv::Mat> dst;
+
+    if (objc != 3 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "src_matrix maxlevel ?borderType?");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &maxlevel) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (maxlevel < 0) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 4) {
+        if (Tcl_GetIntFromObj(interp, objv[3], &borderType) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::buildPyramid(*mat, dst, maxlevel, borderType);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    for(size_t i = 0; i < dst.size(); i++) {
+        cv::Mat *dstmat;
+        Tcl_Obj *pMatResultStr = NULL;
+
+        dstmat = new cv::Mat(dst[i]);
+        pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+        Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+    }
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
 int pyrUp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;

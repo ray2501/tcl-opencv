@@ -218,6 +218,7 @@ For more FileStorage info, you can check
     ::cv::dilate src_matrix kernel_matrix ?anchor_x anchor_y iterations?
     ::cv::erode src_matrix kernel_matrix ?anchor_x anchor_y iterations?
     ::cv::morphologyEx src_matrix op kernel_matrix ?anchor_x anchor_y iterations?
+    ::cv::buildPyramid src_matrix maxlevel ?borderType?
     ::cv::pyrUp src_matrix ?dstsize_width dstsize_height borderType?
     ::cv::pyrDown src_matrix ?dstsize_width dstsize_height borderType?
     ::cv::pyrMeanShiftFiltering src_matrix sp sr ?maxLevel?
