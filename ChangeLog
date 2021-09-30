@@ -1,7 +1,7 @@
 2021-09-30 Danilo Chang
 
 	* Apply Christian's patch
-	* Implement command: BOWKMeansTrainer
+	* Implement command: BOWKMeansTrainer, BOWImgDescriptorExtractor
 
 2021-09-29 Danilo Chang
 

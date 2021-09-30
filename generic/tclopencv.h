@@ -254,6 +254,7 @@ MODULE_SCOPE int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_O
 MODULE_SCOPE int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 MODULE_SCOPE int BOWKMeansTrainer(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int BOWImgDescriptorExtractor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
  * OpenCV calib3d
@@ -416,6 +417,7 @@ typedef enum {
     OPENCV_QDETECT,
 #endif
     OPENCV_BOWTRAINER,
+    OPENCV_BOWEXTRACTOR,
     OPENCV_MAXTYPE
 } Opencv_Type;
 
@@ -538,6 +540,7 @@ MODULE_SCOPE int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
 MODULE_SCOPE int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
 MODULE_SCOPE int BOWKMeansTrainer_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int BOWImgDescriptorExtractor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int PCA_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int TERM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE void TrackbarCallback(int value, void *userdata);

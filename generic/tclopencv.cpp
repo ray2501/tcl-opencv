@@ -105,6 +105,11 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
                 delete bowkmeanstrainer;
                 break;
             }
+            case OPENCV_BOWEXTRACTOR: {
+                cv::BOWImgDescriptorExtractor *bowimgextractor = (cv::BOWImgDescriptorExtractor *) cvo->obj;
+                delete bowimgextractor;
+                break;
+            }
             default:
                 Tcl_Panic("wrong Opencv type");
                 break;
@@ -427,6 +432,11 @@ Opencv_DESTRUCTOR(ClientData cd)
         delete bowtrainer;
         break;
     }
+    case OPENCV_BOWEXTRACTOR: {
+        cv::BOWImgDescriptorExtractor *bowimgextractor = (cv::BOWImgDescriptorExtractor *) cvo->obj;
+        delete bowimgextractor;
+        break;
+    }
     default:
         Tcl_Panic("wrong Opencv type");
         break;
@@ -496,6 +506,10 @@ Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj)
     case OPENCV_BOWTRAINER:
         prefix = "cv-bowktrainer";
         proc = BOWKMeansTrainer_FUNCTION;
+        break;
+    case OPENCV_BOWEXTRACTOR:
+        prefix = "cv-bowimgextractor";
+        proc = BOWImgDescriptorExtractor_FUNCTION;
         break;
     default:
         Tcl_Panic("wrong Opencv type");
@@ -1509,6 +1523,10 @@ Opencv_Init(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp, "::" NS "::BOWKMeansTrainer",
         (Tcl_ObjCmdProc *) BOWKMeansTrainer,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::BOWImgDescriptorExtractor",
+        (Tcl_ObjCmdProc *) BOWImgDescriptorExtractor,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     /*

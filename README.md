@@ -450,6 +450,16 @@ Please notice, SimpleBlobDetector command will only have 1 instance.
     BOWKMeansTrainer getDescriptors
     BOWKMeansTrainer close
 
+    ::cv::BOWImgDescriptorExtractor dextractor dmatcher
+    BOWImgDescriptorExtractor compute matrix keypoints
+    BOWImgDescriptorExtractor descriptorSize
+    BOWImgDescriptorExtractor descriptorType
+    BOWImgDescriptorExtractor getVocabulary
+    BOWImgDescriptorExtractor setVocabulary vocabulary
+    BOWImgDescriptorExtractor close
+
+`::cv::BOWImgDescriptorExtractor` now supports SIFT (dextractor) and FlannBasedMatcher (dmatcher).
+
 ### calib3d
 
     ::cv::findChessboardCorners image patternSize_width patternSize_height ?flags?

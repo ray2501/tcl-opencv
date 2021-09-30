@@ -4953,6 +4953,351 @@ int BOWKMeansTrainer(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
     return TCL_OK;
 }
+
+
+int BOWImgDescriptorExtractor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Obj *cvo = (Opencv_Obj *)cd;
+    int choice;
+    cv::BOWImgDescriptorExtractor *bowimgextractor;
+
+    static const char *FUNC_strs[] = {
+        "compute",
+        "descriptorSize",
+        "descriptorType",
+        "getVocabulary",
+        "setVocabulary",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_compute,
+        FUNC_descriptorSize,
+        FUNC_descriptorType,
+        FUNC_getVocabulary,
+        FUNC_setVocabulary,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    cd = cvo->top;
+    bowimgextractor = (cv::BOWImgDescriptorExtractor *) cvo->obj;
+    if (!bowimgextractor) {
+        Tcl_Panic("null BOWImgDescriptorExtractor object");
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_compute: {
+            cv::Mat descriptors;
+            int count = 0;
+            std::vector< cv::KeyPoint > keypoints;
+            cv::Mat *mat, *dstmat;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix keypoints");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+            }
+
+            if (count == 0) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "no keypoints data");
+            } else {
+                for (int i = 0; i < count; i++) {
+                    Tcl_Obj *elemListPtr = NULL;
+                    int sub_count = 0;
+                    Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
+
+                    if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
+                        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid keypoints data");
+                    }
+
+                    if (sub_count != 7) {
+                        return Opencv_SetResult(interp, cv::Error::StsBadArg, "wrong  keypoints number");
+                    } else {
+                        Tcl_Obj *elemListSubPtr = NULL;
+                        double x, y, size, angle, response;
+                        int octave, class_id;
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 0, &elemListSubPtr);
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 1, &elemListSubPtr);
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 2, &elemListSubPtr);
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 3, &elemListSubPtr);
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 4, &elemListSubPtr);
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 5, &elemListSubPtr);
+                        if (Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 6, &elemListSubPtr);
+                        if (Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        cv::KeyPoint keypoint(cv::Point2f((float) x, (float)y), (float) size,
+                                            (float) angle, (float) response,
+                                            octave, class_id);
+
+                        keypoints.push_back(keypoint);
+                    }
+                }
+            }
+
+            try {
+                bowimgextractor->compute(*mat, keypoints, descriptors);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            dstmat = new cv::Mat(descriptors);
+
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_descriptorSize: {
+            int value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = bowimgextractor->descriptorSize();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_descriptorType: {
+            int value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = bowimgextractor->descriptorType();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getVocabulary: {
+            cv::Mat result;
+            cv::Mat *dstmat;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                result = bowimgextractor->getVocabulary();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            dstmat = new cv::Mat(result);
+
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_setVocabulary: {
+            cv::Mat *mat;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "vocabulary");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                bowimgextractor->setVocabulary(*mat);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+
+            break;
+        }
+        case FUNC__COMMAND: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            Tcl_GetCommandFullName(interp, cvo->cmd, obj);
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__NAME: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewStringObj(cvo->key, -1));
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::BOWImgDescriptorExtractor", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int BOWImgDescriptorExtractor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr< cv::DescriptorExtractor > dextractor;
+    cv::Ptr< cv::DescriptorMatcher > dmatcher;
+    cv::BOWImgDescriptorExtractor *bowimgextractor;
+    char *dextractor_name = NULL, *dmatcher_name = NULL;
+    int len = 0;
+
+    if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "dextractor dmatcher");
+        return TCL_ERROR;
+    }
+
+    dextractor_name = Tcl_GetStringFromObj(objv[1], &len);
+    if (len < 1) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid dextractor name");
+    }
+
+    if (strcmp(dextractor_name, "::cv-siftdetector") == 0) {
+        if (cvd->siftdetector) {
+            dextractor = cvd->siftdetector;
+        } else {
+            CV_Error(cv::Error::StsNullPtr, "siftdetector nullptr");
+        }
+    } else {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid dextractor name");
+    }
+
+    dmatcher_name = Tcl_GetStringFromObj(objv[2], &len);
+    if (len < 1) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid dmatcher name");
+    }
+
+    if (strcmp(dmatcher_name, "::cv-flannbasedmatcher") == 0) {
+        if (cvd->flannbasedmatcher) {
+            dmatcher = cvd->flannbasedmatcher;
+        } else {
+            CV_Error(cv::Error::StsNullPtr, "flannbasedmatcher nullptr");
+        }
+    } else {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid dmatcher name");
+    }
+
+    try {
+        bowimgextractor = new cv::BOWImgDescriptorExtractor(dextractor, dmatcher);
+
+        if (bowimgextractor == nullptr) {
+            CV_Error(cv::Error::StsNullPtr, "BOWImgDescriptorExtractor nullptr");
+        }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_BOWEXTRACTOR, bowimgextractor);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
 #ifdef __cplusplus
 }
 #endif
