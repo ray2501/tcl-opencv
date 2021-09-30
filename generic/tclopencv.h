@@ -59,6 +59,7 @@ MODULE_SCOPE int mat_flip(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 MODULE_SCOPE int mat_getOptimalDFTSize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_dft(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_inRange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_insertChannel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_log(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_lut(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_Mahalanobis(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

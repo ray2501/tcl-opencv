@@ -2818,6 +2818,46 @@ int mat_inRange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_insertChannel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int coi = 0;
+    cv::Mat *mat, *dstmat;
+
+    if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "src_matrix dst_matrix coi");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    dstmat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!dstmat) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &coi) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        /*
+         * Inserts a single channel to dst (coi is 0-based index).
+         * coi is index of channel for insertion.
+         */
+        cv::insertChannel(*mat, *dstmat, coi);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    return TCL_OK;
+}
+
+
 int mat_log(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;

@@ -904,6 +904,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_inRange,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::insertChannel",
+        (Tcl_ObjCmdProc *) mat_insertChannel,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::log",
         (Tcl_ObjCmdProc *) mat_log,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

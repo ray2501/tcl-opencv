@@ -4,6 +4,7 @@
 	* Implement command: KAZE
 	* Apply Christian's patch
 	* Implement command: BOWKMeansTrainer, BOWImgDescriptorExtractor
+	* Implement command: insertChannel
 	* Implement command: arcLength, buildPyramid, pointPolygonTest
 
 2021-09-29 Danilo Chang

@@ -91,6 +91,7 @@ Implement commands
     ::cv::getOptimalDFTSize vecsize
     ::cv::dft matrix ?falgs nonzeroRows?
     ::cv::inRange matrix color_list1 color_list2
+    ::cv::insertChannel src_matrix dst_matrix coi
     ::cv::log matrix
     ::cv::LUT matrix1 matrix2
     ::cv::Mahalanobis matrix1 matrix2 icovar_matrix
