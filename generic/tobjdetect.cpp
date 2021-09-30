@@ -66,12 +66,12 @@ int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
             try {
                 result = qrdet->detect(*srcmat, points_matrix);
                 if (!result) {
-                    Tcl_SetResult(interp, (char *) "detect result failed", TCL_STATIC);
-                    return TCL_ERROR;
+                    return Opencv_SetResult(interp, cv::Error::StsError, "no detect result");
                 }
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "detect failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(points_matrix);
@@ -102,9 +102,10 @@ int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
                 result = qrdet->detectAndDecode(*srcmat,
                                                 points_matrix,
                                                 code_matrix);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "detectAndDecode failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(points_matrix);
@@ -184,9 +185,10 @@ int QRCodeDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         qrdet = new cv::QRCodeDetector();
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "QRCodeDetector failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Opencv_NewHandle(cd, interp, OPENCV_QDETECT, qrdet);
@@ -287,9 +289,10 @@ int CascadeClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
                                       rect, scaleFactor, minNeighbors, 0,
                                       cv::Size(minWidth, minHeight),
                                       cv::Size(maxWidth, maxHeight));
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "detectMultiScale failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             pResultStr = Tcl_NewListObj(0, NULL);
@@ -368,8 +371,7 @@ int CascadeClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "CascadeClassifier: invalid file name", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
     }
 
     filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
@@ -377,13 +379,14 @@ int CascadeClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
         cas = new cv::CascadeClassifier(filename);
         if (cas->empty() == true) {
             Tcl_DStringFree(&ds);
-            Tcl_SetResult(interp, (char *) "CascadeClassifier load file failed", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsError, "loading from file failed");
         }
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "CascadeClassifier failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
@@ -485,9 +488,10 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
                                  cv::Size(winStride_width, winStride_height),
                                  cv::Size(padding_width, padding_height));
                 }
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "compute failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             pResultStr = Tcl_NewListObj(0, NULL);
@@ -557,9 +561,10 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
                                       cv::Size(padding_width, padding_height),
                                       scale, finalThreshold,
                                       (bool) useMeanshiftGrouping);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "detectMultiScale failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             pResultStr = Tcl_NewListObj(0, NULL);
@@ -588,9 +593,10 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 coefficients = cv::HOGDescriptor::getDefaultPeopleDetector();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getDefaultPeopleDetector failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             pResultStr = Tcl_NewListObj(0, NULL);
@@ -612,9 +618,10 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 coefficients = cv::HOGDescriptor::getDaimlerPeopleDetector();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getDaimlerPeopleDetector failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             pResultStr = Tcl_NewListObj(0, NULL);
@@ -635,13 +642,11 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
             }
 
             if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-                Tcl_SetResult(interp, (char *) "setSVMDetector invalid list data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
             }
 
             if (count == 0) {
-                Tcl_SetResult(interp, (char *) "setSVMDetector invalid data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid data");
             } else {
                 Tcl_Obj *elemListPtr = NULL;
                 double number;
@@ -658,9 +663,10 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 hog->setSVMDetector(svmdetector);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setSVMDetector failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -803,12 +809,12 @@ int HOGDescriptor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                                     signedGradient);
 
         if (hog == nullptr) {
-            Tcl_SetResult(interp, (char *) "HOGDescriptor create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "HOGDescriptor nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "HOGDescriptor failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Opencv_NewHandle(cd, interp, OPENCV_OOBJHOG, hog);

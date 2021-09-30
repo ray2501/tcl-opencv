@@ -39,13 +39,11 @@ int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
     }
 
     if (Tcl_ListObjLength(interp, objv[5], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "blobFromImage invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "blobFromImage invalid color data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -83,9 +81,10 @@ int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
         cv::Size size(width, height);
 
         dstimage = cv::dnn::blobFromImage(*mat, scalefactor, size, color, swapRB, crop);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "blobFromImage failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dstimage);
@@ -156,9 +155,10 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
             try {
                 net->setPreferableBackend(backendId);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setPreferableBackend failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -177,9 +177,10 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
             try {
                 net->setPreferableTarget(targetId);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setPreferableTarget failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -211,13 +212,11 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
                 }
 
                 if (Tcl_ListObjLength(interp, objv[5], &count) != TCL_OK) {
-                    Tcl_SetResult(interp, (char *) "setInput invalid list data", TCL_STATIC);
-                    return TCL_ERROR;
+                    return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
                 }
 
                 if (count != 4) {
-                    Tcl_SetResult(interp, (char *) "setInput invalid color data", TCL_STATIC);
-                    return TCL_ERROR;
+                    return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
                 } else {
                     Tcl_Obj *elemListPtr = NULL;
 
@@ -251,9 +250,10 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
                     cv::Scalar color(B, G, R, A);
                     net->setInput(blob, name, scalefactor, color);
                 }
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setInput failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -273,8 +273,7 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
             if (objc == 3) {
                 name = Tcl_GetStringFromObj(objv[2], &len);
                 if (len < 1) {
-                    Tcl_SetResult(interp, (char *) "forward invalid name", TCL_STATIC);
-                    return TCL_ERROR;
+                    return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid name");
                 }
             }
 
@@ -284,9 +283,10 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
                 } else {
                     result_mat = net->forward(name);
                 }
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "forward failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             mat = new cv::Mat(result_mat);
@@ -357,8 +357,7 @@ int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     model = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "readNet invalid model name", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid model name");
     }
     model = Tcl_UtfToExternalDString(NULL, model, len, &ds1);
 
@@ -366,8 +365,7 @@ int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         config = Tcl_GetStringFromObj(objv[2], &len);
         if (len < 1) {
             Tcl_DStringFree(&ds1);
-            Tcl_SetResult(interp, (char *) "readNet invalid config name", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid config name");
         }
         config = Tcl_UtfToExternalDString(NULL, config, len, &ds2);
 
@@ -375,8 +373,7 @@ int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         if (len < 1) {
             Tcl_DStringFree(&ds1);
             Tcl_DStringFree(&ds2);
-            Tcl_SetResult(interp, (char *) "readNet invalid framework name", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid framework name");
         }
         framework = Tcl_UtfToExternalDString(NULL, framework, len, &ds3);
     } else {
@@ -391,12 +388,16 @@ int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         } else {
             *net = cv::dnn::readNet(model, config, framework);
         }
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
+        Tcl_DStringFree(&ds3);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds1);
         Tcl_DStringFree(&ds2);
         Tcl_DStringFree(&ds3);
-        Tcl_SetResult(interp, (char *) "readNet failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds1);
     Tcl_DStringFree(&ds2);

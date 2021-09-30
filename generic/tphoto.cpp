@@ -40,9 +40,10 @@ int inpaint(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::inpaint(*mat1, *mat2, dstimage,
                     inpaintRadius, flags);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "inpaint failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dstimage);
@@ -73,9 +74,10 @@ int decolor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::decolor(*mat1, dstimage1, dstimage2);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "decolor failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat1 = new cv::Mat(dstimage1);
@@ -133,9 +135,10 @@ int fastNlMeansDenoising(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
     try {
         cv::fastNlMeansDenoising(*mat1, dstimage, (float) h,
                                         templateWindowSize, searchWindowSize);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "fastNlMeansDenoising failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dstimage);
@@ -190,9 +193,10 @@ int fastNlMeansDenoisingColored(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj 
         cv::fastNlMeansDenoisingColored(*mat1, dstimage,
                                         (float) h, (float) hColor,
                                         templateWindowSize, searchWindowSize);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "fastNlMeansDenoisingColored failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dstimage);
@@ -242,9 +246,10 @@ int colorChange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::colorChange(*mat1, *mat2, dstimage,
                         (float) red_mul, (float) green_mul, (float) blue_mul);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "colorChange failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dstimage);
@@ -284,8 +289,7 @@ int illuminationChange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
     }
 
     if (alpha < 0 || alpha > 2) {
-        Tcl_SetResult(interp, (char *) "illuminationChange alpha out of range", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "alpha out of range");
     }
 
     if (Tcl_GetDoubleFromObj(interp, objv[4], &beta) != TCL_OK) {
@@ -293,16 +297,16 @@ int illuminationChange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
     }
 
     if (beta < 0 || beta > 2) {
-        Tcl_SetResult(interp, (char *) "illuminationChange beta out of range", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "beta out of range");
     }
 
     try {
         cv::illuminationChange(*mat1, *mat2, dstimage,
                         (float) alpha, (float) beta);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "illuminationChange failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dstimage);
@@ -344,8 +348,7 @@ int textureFlattening(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
     }
 
     if (low_threshold < 0 || low_threshold > 100) {
-        Tcl_SetResult(interp, (char *) "textureFlattening low_threshold out of range", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "low threshold out of range");
     }
 
     if (Tcl_GetDoubleFromObj(interp, objv[4], &high_threshold) != TCL_OK) {
@@ -353,8 +356,7 @@ int textureFlattening(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
     }
 
     if (high_threshold < 100) {
-        Tcl_SetResult(interp, (char *) "textureFlattening high_threshold out of range", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "high threshold out of range");
     }
 
     if (objc == 6) {
@@ -366,9 +368,10 @@ int textureFlattening(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
     try {
         cv::textureFlattening(*mat1, *mat2, dstimage,
                 (float) low_threshold, (float) high_threshold, kernel_size);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "textureFlattening failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dstimage);
@@ -431,9 +434,10 @@ int seamlessClone(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::seamlessClone(*mat1, *mat2, *mat3,
                           cv::Point(x, y), dstimage, flags);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "seamlessClone failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dstimage);
@@ -475,9 +479,10 @@ int detailEnhance(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::detailEnhance(*mat1, dstimage, sigma_s, sigma_r);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "detailEnhance failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dstimage);
@@ -524,9 +529,10 @@ int edgePreservingFilter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
     try {
         cv::edgePreservingFilter(*mat1, dstimage, flags, (float) sigma_s, (float) sigma_r);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "edgePreservingFilter failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dstimage);
@@ -573,9 +579,10 @@ int pencilSketch(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::pencilSketch(*mat1, dstimage1, dstimage2,
                          (float) sigma_s, (float) sigma_r, (float) shade_factor);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "pencilSketch failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat1 = new cv::Mat(dstimage1);
@@ -625,9 +632,10 @@ int stylization(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::stylization(*mat1, dstimage, sigma_s, sigma_r);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "stylization failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dstimage);
@@ -683,8 +691,8 @@ static int AlignMTB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     if (cvd->alignmtb == nullptr) {
-       Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
-       return TCL_ERROR;
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
+        return TCL_ERROR;
     }
 
     switch ((enum FUNC_enum)choice) {
@@ -701,13 +709,11 @@ static int AlignMTB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
             }
 
             if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-                Tcl_SetResult(interp, (char *) "process invalid list data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
             }
 
             if (count == 0 || count%2 != 0) {
-                Tcl_SetResult(interp, (char *) "process matrix_list invalid data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid matrix list data");
             } else {
                 Tcl_Obj *elem = NULL;
                 cv::Mat *mat;
@@ -725,9 +731,10 @@ static int AlignMTB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->alignmtb->process(src, dst);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "process failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             pResultStr = Tcl_NewListObj(0, NULL);
@@ -817,12 +824,12 @@ int AlignMTB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         alignmtb = cv::createAlignMTB(max_bits, exclude_range, (bool) cut);
 
         if (alignmtb == nullptr) {
-            Tcl_SetResult(interp, (char *) "alignMTB create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "AlignMTB nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "AlignMTB failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-alignmtb", -1);
@@ -885,7 +892,7 @@ static int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl
     }
 
     if (cvd->calibdeb == nullptr) {
-        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
         return TCL_ERROR;
     }
 
@@ -904,13 +911,11 @@ static int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl
             }
 
             if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-                Tcl_SetResult(interp, (char *) "process invalid list data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
             }
 
             if (count == 0) {
-                Tcl_SetResult(interp, (char *) "process matrix_list invalid data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid matrix list data");
             } else {
                 Tcl_Obj *elem = NULL;
                 cv::Mat *mat;
@@ -927,13 +932,11 @@ static int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl
             }
 
             if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
-                Tcl_SetResult(interp, (char *) "process invalid list data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
             }
 
             if (count == 0) {
-                Tcl_SetResult(interp, (char *) "process times_list invalid data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid times list data");
             } else {
                 Tcl_Obj *elemListPtr = NULL;
                 double value = 0;
@@ -950,9 +953,10 @@ static int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl
 
             try {
                 cvd->calibdeb->process(src, responseDebevec, timesArray);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "process failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(responseDebevec);
@@ -1035,12 +1039,12 @@ int CalibrateDebevec(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         calibdeb = cv::createCalibrateDebevec(samples, (float) lambda, (bool) random);
 
         if (calibdeb == nullptr) {
-            Tcl_SetResult(interp, (char *) "calibrateDebevec create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "CalibrateDebevec nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "CalibrateDebevec failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-calibdeb", -1);
@@ -1103,7 +1107,7 @@ static int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
     }
 
     if (cvd->mergedeb == nullptr) {
-        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
         return TCL_ERROR;
     }
 
@@ -1122,13 +1126,11 @@ static int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
             }
 
             if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-                Tcl_SetResult(interp, (char *) "process invalid list data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
             }
 
             if (count == 0) {
-                Tcl_SetResult(interp, (char *) "process matrix_list invalid data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid matrix list data");
             } else {
                 Tcl_Obj *elem = NULL;
 
@@ -1144,13 +1146,11 @@ static int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
             }
 
             if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
-                Tcl_SetResult(interp, (char *) "process invalid list data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
             }
 
             if (count == 0) {
-                Tcl_SetResult(interp, (char *) "process times_list invalid data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid times list data");
             } else {
                 Tcl_Obj *elemListPtr = NULL;
                 double value = 0;
@@ -1172,9 +1172,10 @@ static int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
 
             try {
                 cvd->mergedeb->process(src, dst, timesArray, *mat);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "process failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(dst);
@@ -1241,12 +1242,12 @@ int MergeDebevec(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         mergedeb = cv::createMergeDebevec();
 
         if (mergedeb == nullptr) {
-            Tcl_SetResult(interp, (char *) "mergeDebevec create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "MergeDebevec nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "MergeDebevec failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-mergedeb", -1);
@@ -1309,7 +1310,7 @@ static int MergeMertens_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
     }
 
     if (cvd->mergemer == nullptr) {
-        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
         return TCL_ERROR;
     }
 
@@ -1327,13 +1328,11 @@ static int MergeMertens_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
             }
 
             if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-                Tcl_SetResult(interp, (char *) "process invalid list data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
             }
 
             if (count == 0) {
-                Tcl_SetResult(interp, (char *) "process matrix_list invalid data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid matrix list data");
             } else {
                 Tcl_Obj *elem = NULL;
                 cv::Mat *mat;
@@ -1351,9 +1350,10 @@ static int MergeMertens_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
 
             try {
                 cvd->mergemer->process(src, dst);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "process failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(dst);
@@ -1437,12 +1437,12 @@ int MergeMertens(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                                           (float) exposure_weight);
 
         if (mergemer == nullptr) {
-            Tcl_SetResult(interp, (char *) "mergeMertens create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "MergeMertens nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "mergeMertens failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-mergemer", -1);
@@ -1505,7 +1505,7 @@ static int TonemapDrago_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
     }
 
     if (cvd->tonemapdra == nullptr) {
-        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
         return TCL_ERROR;
     }
 
@@ -1527,9 +1527,10 @@ static int TonemapDrago_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
 
             try {
                 cvd->tonemapdra->process(*mat, dst);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "process failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(dst);
@@ -1611,12 +1612,12 @@ int TonemapDrago(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         tonemapdra = cv::createTonemapDrago(gamma, saturation, bias);
 
         if (tonemapdra == nullptr) {
-            Tcl_SetResult(interp, (char *) "tonemapDrago create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "TonemapDrago nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "TonemapDrago failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-tonemapdra", -1);
@@ -1679,7 +1680,7 @@ static int TonemapMantiuk_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
     }
 
     if (cvd->tonemapman == nullptr) {
-        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
         return TCL_ERROR;
     }
 
@@ -1701,9 +1702,10 @@ static int TonemapMantiuk_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
 
             try {
                 cvd->tonemapman->process(*mat, dst);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "process failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(dst);
@@ -1785,12 +1787,12 @@ int TonemapMantiuk(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         tonemapman = cv::createTonemapMantiuk((float) gamma, (float) scale, (float) saturation);
 
         if (tonemapman == nullptr) {
-            Tcl_SetResult(interp, (char *) "tonemapMantiuk create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "TonemapMantiuk nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "TonemapMantiuk failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-tonemapman", -1);
@@ -1853,7 +1855,7 @@ static int TonemapReinhard_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
     }
 
     if (cvd->tonemaprei == nullptr) {
-        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
         return TCL_ERROR;
     }
 
@@ -1875,9 +1877,10 @@ static int TonemapReinhard_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
 
             try {
                 cvd->tonemaprei->process(*mat, dst);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "process failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(dst);
@@ -1964,12 +1967,12 @@ int TonemapReinhard(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                                                (float) light_adapt, (float) color_adapt);
 
         if (tonemaprei == nullptr) {
-            Tcl_SetResult(interp, (char *) "tonemapReinhard create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "TonemapReinhard nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "TonemapReinhard failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-tonemaprei", -1);

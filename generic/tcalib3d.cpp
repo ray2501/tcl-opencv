@@ -42,9 +42,10 @@ int findChessboardCorners(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         retval = cv::findChessboardCorners(*mat1,
                                            cv::Size(patternSize_width, patternSize_height),
                                            result, flags);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "findChessboardCorners failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -99,9 +100,10 @@ int drawChessboardCorners(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         cv::drawChessboardCorners(*mat1,
                                   cv::Size(patternSize_width, patternSize_height),
                                   *corners, (bool) patternWasFound);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "drawChessboardCorners failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     return TCL_OK;
@@ -123,12 +125,12 @@ int calibrateCamera(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "calibrateCamera invalid list data", TCL_STATIC);
+        Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
         return TCL_ERROR;
     }
 
     if (count <= 0) {
-        Tcl_SetResult(interp, (char *) "calibrateCamera list data is empty", TCL_STATIC);
+        Opencv_SetResult(interp, cv::Error::StsBadArg, "list data is empty");
         return TCL_ERROR;
     } else {
         Tcl_Obj *elemListPtr = NULL;
@@ -146,12 +148,12 @@ int calibrateCamera(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "calibrateCamera invalid list data", TCL_STATIC);
+        Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
         return TCL_ERROR;
     }
 
     if (count <= 0) {
-        Tcl_SetResult(interp, (char *) "calibrateCamera list data is empty", TCL_STATIC);
+        Opencv_SetResult(interp, cv::Error::StsBadArg, "list data is empty");
         return TCL_ERROR;
     } else {
         Tcl_Obj *elemListPtr = NULL;
@@ -190,9 +192,10 @@ int calibrateCamera(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         ret = cv::calibrateCamera(objectPoints, imagePoints,
                                   cv::Size(width, height),
                                   *cameraMatrix, *distCoeffs, rvecs, tvecs);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "calibrateCamera failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -291,9 +294,10 @@ int getOptimalNewCameraMatrix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
                                             cv::Size(width, height), alpha,
                                             cv::Size(nwidth, nheight),
                                             &validPixROI, (bool) centerPrincipalPoint);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "getOptimalNewCameraMatrix failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -347,9 +351,10 @@ int undistort(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::undistort(*matrix, result_matrix, *cameraMatrix, *distCoeffs, *newCameraMatrix);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "undistort failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(result_matrix);
@@ -416,9 +421,10 @@ int initUndistortRectifyMap(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
                                     *Rmatrix, *newCameraMatrix,
                                     cv::Size(width, height), m1type,
                                     map1, map2);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "initUndistortRectifyMap failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -477,9 +483,10 @@ int projectPoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::projectPoints(*objectPoints, *rvec, *tvec,
                           *cameraMatrix, *distCoeffs, result_matrix);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "projectPoints failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(result_matrix);
@@ -529,9 +536,10 @@ int solvePnP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         result = cv::solvePnP(*objectPoints, *imagePoints,
                           *cameraMatrix, *distCoeffs,
                           result_rvec, result_tvec);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "solvePnP failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -581,9 +589,10 @@ int computeCorrespondEpilines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
     try {
         cv::computeCorrespondEpilines(*mat1, whichImage, *mat2,
                                        lines);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "computeCorrespondEpilines failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(lines);
@@ -638,9 +647,10 @@ int findFundamentalMat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
         result = cv::findFundamentalMat(*mat1, *mat2, mask,
                                         method, ransacReprojThreshold,
                                         confidence);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "findFundamentalMat failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -696,9 +706,10 @@ int findHomography(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         result = cv::findHomography(*mat1, *mat2,
                                     method, ransacReprojThreshold);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "findHomography failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(result);
@@ -778,7 +789,7 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     if (cvd->stereobm == nullptr) {
-        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
         return TCL_ERROR;
     }
 
@@ -805,9 +816,10 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->stereobm->compute(*mat1, *mat2, dst);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "compute failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(dst);
@@ -827,9 +839,10 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->stereobm->getPreFilterCap();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getPreFilterCap failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -845,9 +858,10 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->stereobm->getPreFilterSize();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getPreFilterSize failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -863,9 +877,10 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->stereobm->getPreFilterType();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getPreFilterType failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -881,9 +896,10 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->stereobm->getSmallerBlockSize();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getSmallerBlockSize failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -899,9 +915,10 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->stereobm->getTextureThreshold();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getTextureThreshold failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -917,9 +934,10 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->stereobm->getUniquenessRatio();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getUniquenessRatio failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -939,9 +957,10 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->stereobm->setPreFilterCap(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setPreFilterCap failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -960,9 +979,10 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->stereobm->setPreFilterSize(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setPreFilterSize failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -981,9 +1001,10 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->stereobm->setPreFilterType(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setPreFilterType failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1002,9 +1023,10 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->stereobm->setSmallerBlockSize(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setSmallerBlockSize failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1023,9 +1045,10 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->stereobm->setTextureThreshold(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setTextureThreshold failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1044,9 +1067,10 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->stereobm->setUniquenessRatio(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setUniquenessRatio failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1119,12 +1143,12 @@ int StereoBM(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         stereobm = cv::StereoBM::create(numDisparities, blockSize);
 
         if (stereobm == nullptr) {
-            Tcl_SetResult(interp, (char *) "stereobm create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "StereoBM nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "stereobm failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-stereobm", -1);
@@ -1207,7 +1231,7 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
     }
 
     if (cvd->stereosgbm == nullptr) {
-        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
         return TCL_ERROR;
     }
 
@@ -1234,9 +1258,10 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
             try {
                 cvd->stereosgbm->compute(*mat1, *mat2, dst);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "compute failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(dst);
@@ -1256,9 +1281,10 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
             try {
                 value = cvd->stereosgbm->getMode();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getMode failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -1274,9 +1300,10 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
             try {
                 value = cvd->stereosgbm->getP1();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getP1 failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -1292,9 +1319,10 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
             try {
                 value = cvd->stereosgbm->getP2();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getP2 failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -1310,9 +1338,10 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
             try {
                 value = cvd->stereosgbm->getPreFilterCap();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getPreFilterCap failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -1328,9 +1357,10 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
             try {
                 value = cvd->stereosgbm->getUniquenessRatio();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getUniquenessRatio failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -1350,9 +1380,10 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
             try {
                 cvd->stereosgbm->setMode(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setMode failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1371,9 +1402,10 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
             try {
                 cvd->stereosgbm->setP1(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setP1 failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1392,9 +1424,10 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
             try {
                 cvd->stereosgbm->setP2(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setP2 failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1413,9 +1446,10 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
             try {
                 cvd->stereosgbm->setPreFilterCap(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setPreFilterCap failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1434,9 +1468,10 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
             try {
                 cvd->stereosgbm->setUniquenessRatio(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setUniquenessRatio failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1555,12 +1590,12 @@ int StereoSGBM(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                                             speckleRange,
                                             mode);
         if (stereosgbm == nullptr) {
-            Tcl_SetResult(interp, (char *) "StereoSGBM create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "StereoSGBM nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "StereoSGBM failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-stereosgbm", -1);

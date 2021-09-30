@@ -48,7 +48,7 @@ static int SubtractorMOG2_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
     }
 
     if (cvd->bgsmog2 == nullptr) {
-        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
         return TCL_ERROR;
     }
 
@@ -70,9 +70,10 @@ static int SubtractorMOG2_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
 
             try {
                 cvd->bgsmog2->apply(*mat, result_image);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "apply failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(result_image);
@@ -154,12 +155,12 @@ int BackgroundSubtractorMOG2(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         bgsmog2 = cv::createBackgroundSubtractorMOG2(history, varThreshold, (bool) detectShadows);
 
         if (bgsmog2 == nullptr) {
-            Tcl_SetResult(interp, (char *) "BackgroundSubtractorMOG2 create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "BackgroundSubtractorMOG2 nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "BackgroundSubtractorMOG2 failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-subtractorMOG2", -1);
@@ -222,9 +223,10 @@ int meanShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         window = cv::Rect(x, y, width, height);
         retval = cv::meanShift(*mat1, window, *termCriteria);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "meanShift failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -286,9 +288,10 @@ int CamShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         window = cv::Rect(x, y, width, height);
         rect_result = cv::CamShift(*mat1, window, *termCriteria);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "CamShift failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -372,9 +375,10 @@ int calcOpticalFlowPyrLK(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         cv::calcOpticalFlowPyrLK(*mat1, *mat2, *mat3,
                                  nextPts, status, err, cv::Size(width, height), maxLevel,
                                  *termCriteria);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "calcOpticalFlowPyrLK failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -457,9 +461,10 @@ int calcOpticalFlowFarneback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         cv::calcOpticalFlowFarneback(*mat1, *mat2,
                                      flow, pyr_scale, levels, winsize,
                                      iterations, poly_n, poly_sigma, flags);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "calcOpticalFlowFarneback failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(flow);

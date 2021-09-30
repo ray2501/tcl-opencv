@@ -85,8 +85,7 @@ int Opencv_Tsend(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (strcmp(name, "None") != 0) {
         hashEntryPtr = Tcl_FindHashEntry(&cvd->tbl[OPENCV_MAT], Tcl_GetString(objv[2]));
         if (hashEntryPtr == NULL) {
-            Tcl_SetResult(interp, (char *) "handle not found", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "handle not found");
         }
         cvo = (Opencv_Obj *) Tcl_GetHashValue(hashEntryPtr);
     }
@@ -94,8 +93,7 @@ int Opencv_Tsend(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         InitProc();
     }
     if (cvthrInitialized < 0) {
-        Tcl_SetResult(interp, (char *) "no thread support", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsNotImplemented, "no thread support");
     }
     msg = (CvthrMsg *) ckalloc(sizeof(CvthrMsg));
     msg->next = NULL;
@@ -143,8 +141,7 @@ int Opencv_Trecv(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         InitProc();
     }
     if (cvthrInitialized < 0) {
-        Tcl_SetResult(interp, (char *) "no thread support", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsNotImplemented, "no thread support");
     }
     if (objc > 2) {
         int ms;
@@ -234,8 +231,7 @@ int Opencv_Tinfo(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         InitProc();
     }
     if (cvthrInitialized < 0) {
-        Tcl_SetResult(interp, (char *) "no thread support", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsNotImplemented, "no thread support");
     }
     if (objc > 1) {
         int count = 0;

@@ -76,8 +76,7 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     if (cvd->logistic == nullptr) {
-        Tcl_SetResult(interp, (char *) "no logistic instantiated", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
     }
 
     switch ((enum FUNC_enum)choice) {
@@ -93,9 +92,10 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->logistic->get_learnt_thetas();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "get_learnt_thetas failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(value);
@@ -114,9 +114,10 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->logistic->getIterations();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getIterations failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -132,9 +133,10 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->logistic->getLearningRate();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getLearningRate failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -150,9 +152,10 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->logistic->getMiniBatchSize();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getMiniBatchSize failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -168,9 +171,10 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->logistic->getRegularization();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getRegularization failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -186,9 +190,10 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->logistic->getTrainMethod();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getTrainMethod failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -208,9 +213,10 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->logistic->setIterations(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setIterations failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -229,9 +235,10 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->logistic->setLearningRate(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setLearningRate failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -250,9 +257,10 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->logistic->setMiniBatchSize(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setMiniBatchSize failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -271,9 +279,10 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->logistic->setRegularization(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setRegularization failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -292,9 +301,10 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->logistic->setTrainMethod(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setTrainMethod failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -314,9 +324,10 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->logistic->setTermCriteria(*termCriteria);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setTermCriteria failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -333,8 +344,7 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             command = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid train data");
             }
 
             if (strcmp(command, "::cv-mltraindata")==0) {
@@ -349,9 +359,10 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->logistic->train(trainData, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "train failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -381,9 +392,10 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->logistic->predict(*samples, results, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "predict failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(results);
@@ -408,17 +420,18 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             filename = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "save invalid file name", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
             }
 
             filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
             try {
                 cvd->logistic->save(filename);
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "save failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringFree(&ds);
 
@@ -481,12 +494,12 @@ int LogisticRegression(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
         logistic = cv::ml::LogisticRegression::create();
 
         if (logistic == nullptr) {
-            Tcl_SetResult(interp, (char *) "LogisticRegression create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "LogisticRegression nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "LogisticRegression failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-mllogistic", -1);
@@ -523,8 +536,7 @@ int LogisticRegression_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "load invalid file name", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
     }
 
     filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
@@ -532,14 +544,14 @@ int LogisticRegression_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
         logistic = cv::ml::LogisticRegression::load(filename);
 
         if (logistic == nullptr) {
-            Tcl_DStringFree(&ds);
-            Tcl_SetResult(interp, (char *) "LogisticRegression load failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "LogisticRegression nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "LogisticRegression load failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
@@ -610,8 +622,7 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
     }
 
     if (cvd->bayesclassifier == nullptr) {
-        Tcl_SetResult(interp, (char *) "no bayesclassifier instantiated", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
     }
 
     switch ((enum FUNC_enum)choice) {
@@ -627,8 +638,7 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
 
             command = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid train data");
             }
 
             if (strcmp(command, "::cv-mltraindata")==0) {
@@ -643,9 +653,10 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
 
             try {
                 cvd->bayesclassifier->train(trainData, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "train failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -675,9 +686,10 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
 
             try {
                 value = cvd->bayesclassifier->predict(*samples, results, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "predict failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(results);
@@ -715,9 +727,10 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
 
             try {
                 value = cvd->bayesclassifier->predictProb(*samples, outputs, outputProbs, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "predictProb failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat1 = new cv::Mat(outputs);
@@ -746,17 +759,18 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
 
             filename = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "save invalid file name", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
             }
 
             filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
             try {
                 cvd->bayesclassifier->save(filename);
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "save failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringFree(&ds);
 
@@ -819,12 +833,12 @@ int NormalBayesClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         bayesclassifier = cv::ml::NormalBayesClassifier::create();
 
         if (bayesclassifier == nullptr) {
-            Tcl_SetResult(interp, (char *) "NormalBayesClassifier create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "NormalBayesClassifier nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "NormalBayesClassifier failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-mlbayesclassifier", -1);
@@ -861,8 +875,7 @@ int NormalBayesClassifier_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "load invalid file name", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
     }
 
     filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
@@ -870,14 +883,14 @@ int NormalBayesClassifier_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
         bayesclassifier = cv::ml::NormalBayesClassifier::load(filename);
 
         if (bayesclassifier == nullptr) {
-            Tcl_DStringFree(&ds);
-            Tcl_SetResult(interp, (char *) "NormalBayesClassifier load failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "NormalBayesClassifier nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "NormalBayesClassifier load failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
@@ -964,8 +977,7 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     if (cvd->knearest == nullptr) {
-        Tcl_SetResult(interp, (char *) "no knearest instantiated", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
     }
 
     switch ((enum FUNC_enum)choice) {
@@ -979,9 +991,10 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->knearest->getAlgorithmType();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getAlgorithmType failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -997,9 +1010,10 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->knearest->getDefaultK();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getDefaultK failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -1015,9 +1029,10 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->knearest->getEmax();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getEmax failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -1033,9 +1048,10 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->knearest->getIsClassifier();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getIsClassifier failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewBooleanObj(value));
@@ -1055,9 +1071,10 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->knearest->setAlgorithmType(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setAlgorithmType failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1076,9 +1093,10 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->knearest->setDefaultK(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setDefaultK failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1097,9 +1115,10 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->knearest->setEmax(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setEmax failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1118,9 +1137,10 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->knearest->setIsClassifier((bool) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setIsClassifier failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1148,9 +1168,10 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->knearest->findNearest(*samples, k, results);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "findNearest failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(results);
@@ -1175,8 +1196,7 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             command = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid train data");
             }
 
             if (strcmp(command, "::cv-mltraindata")==0) {
@@ -1191,9 +1211,10 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 cvd->knearest->train(trainData, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "train failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1223,9 +1244,10 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             try {
                 value = cvd->knearest->predict(*samples, results, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "predict failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(results);
@@ -1250,17 +1272,18 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             filename = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "save invalid file name", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
             }
 
             filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
             try {
                 cvd->knearest->save(filename);
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "save failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringFree(&ds);
 
@@ -1323,12 +1346,12 @@ int KNearest(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         knearest = cv::ml::KNearest::create();
 
         if (knearest == nullptr) {
-            Tcl_SetResult(interp, (char *) "KNearest create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "KNearest nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "KNearest failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-mlknearest", -1);
@@ -1365,8 +1388,7 @@ int KNearest_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "load invalid file name", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
     }
 
     filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
@@ -1374,14 +1396,14 @@ int KNearest_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         knearest = cv::ml::KNearest::load(filename);
 
         if (knearest == nullptr) {
-            Tcl_DStringFree(&ds);
-            Tcl_SetResult(interp, (char *) "KNearest load failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "KNearest nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "KNearest load failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
@@ -1490,8 +1512,7 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
     }
 
     if (cvd->svm == nullptr) {
-        Tcl_SetResult(interp, (char *) "no svm instantiated", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
     }
 
     switch ((enum FUNC_enum)choice) {
@@ -1505,9 +1526,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 value = cvd->svm->getC();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getC failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -1523,9 +1545,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 value = cvd->svm->getCoef0();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getCoef0 failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -1541,9 +1564,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 value = cvd->svm->getDegree();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getDegree failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -1559,9 +1583,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 value = cvd->svm->getGamma();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getGamma failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -1577,9 +1602,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 value = cvd->svm->getNu();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getNu failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -1595,9 +1621,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 value = cvd->svm->getP();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getP failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -1613,9 +1640,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 value = cvd->svm->getType();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getType failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -1631,9 +1659,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 value = cvd->svm->getKernelType();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getKernelType failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -1657,9 +1686,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 value = cvd->svm->getDecisionFunction(index, alpha, svidx);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getSupportVectors failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             alphamat = new cv::Mat(alpha);
@@ -1687,9 +1717,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 vectors = cvd->svm->getSupportVectors();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getSupportVectors failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(vectors);
@@ -1710,9 +1741,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 vectors = cvd->svm->getUncompressedSupportVectors();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getUncompressedSupportVectors failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(vectors);
@@ -1735,9 +1767,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 cvd->svm->setC(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setC failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1756,9 +1789,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 cvd->svm->setCoef0(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setCoef0 failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1777,9 +1811,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 cvd->svm->setDegree(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setDegree failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1798,9 +1833,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 cvd->svm->setGamma(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setGamma failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1819,9 +1855,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 cvd->svm->setNu(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setNu failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1840,9 +1877,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 cvd->svm->setP(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setP failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1861,9 +1899,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 cvd->svm->setType(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setType failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1882,9 +1921,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 cvd->svm->setKernel(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setKernel failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1904,9 +1944,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 cvd->svm->setTermCriteria(*termCriteria);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setTermCriteria failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1923,8 +1964,7 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             command = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid train data");
             }
 
             if (strcmp(command, "::cv-mltraindata")==0) {
@@ -1939,9 +1979,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 cvd->svm->train(trainData, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "train failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1971,9 +2012,10 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             try {
                 value = cvd->svm->predict(*samples, results, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "predict failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(results);
@@ -1998,17 +2040,18 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             filename = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "save invalid file name", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
             }
 
             filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
             try {
                 cvd->svm->save(filename);
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "save failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringFree(&ds);
 
@@ -2072,12 +2115,12 @@ int SVM(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         svm = cv::ml::SVM::create();
 
         if (svm == nullptr) {
-            Tcl_SetResult(interp, (char *) "SVM create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "SVM nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "SVM failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-mlsvm", -1);
@@ -2113,8 +2156,7 @@ int SVM_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "load invalid file name", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
     }
 
     filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
@@ -2122,14 +2164,14 @@ int SVM_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         svm = cv::ml::SVM::load(filename);
 
         if (svm == nullptr) {
-            Tcl_DStringFree(&ds);
-            Tcl_SetResult(interp, (char *) "SVM load failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "SVM nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "SVM load failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
@@ -2225,8 +2267,7 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
     }
 
     if (cvd->svmsgd == nullptr) {
-        Tcl_SetResult(interp, (char *) "no svmsgd instantiated", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
     }
 
     switch ((enum FUNC_enum)choice) {
@@ -2240,9 +2281,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->svmsgd->getInitialStepSize();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getInitialStepSize failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -2258,9 +2300,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->svmsgd->getMarginRegularization();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getMarginRegularization failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -2276,9 +2319,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->svmsgd->getMarginType();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getMarginType failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -2294,9 +2338,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->svmsgd->getShift();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getShift failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -2312,9 +2357,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->svmsgd->getStepDecreasingPower();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getStepDecreasingPower failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -2330,9 +2376,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->svmsgd->getSvmsgdType();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getSvmsgdType failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -2350,9 +2397,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->svmsgd->getWeights();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getWeights failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(value);
@@ -2375,9 +2423,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->svmsgd->setInitialStepSize((float) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setInitialStepSize failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -2396,9 +2445,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->svmsgd->setMarginRegularization((float) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setMarginRegularization failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -2417,9 +2467,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->svmsgd->setMarginType(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setMarginType failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -2442,9 +2493,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->svmsgd->setOptimalParameters(value1, value2);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setOptimalParameters failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -2463,9 +2515,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->svmsgd->setStepDecreasingPower((float) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setStepDecreasingPower failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -2484,9 +2537,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->svmsgd->setSvmsgdType(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setSvmsgdType failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -2506,9 +2560,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->svmsgd->setTermCriteria(*termCriteria);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setTermCriteria failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -2525,8 +2580,7 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             command = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid train data");
             }
 
             if (strcmp(command, "::cv-mltraindata")==0) {
@@ -2541,9 +2595,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->svmsgd->train(trainData, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "train failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -2573,9 +2628,10 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->svmsgd->predict(*samples, results, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "predict failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(results);
@@ -2600,17 +2656,18 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             filename = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "save invalid file name", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
             }
 
             filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
             try {
                 cvd->svmsgd->save(filename);
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "save failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringFree(&ds);
 
@@ -2674,12 +2731,12 @@ int SVMSGD(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         svmsgd = cv::ml::SVMSGD::create();
 
         if (svmsgd == nullptr) {
-            Tcl_SetResult(interp, (char *) "SVMSGD create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "SVMSGD nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "SVMSGD failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-mlsvmsgd", -1);
@@ -2716,8 +2773,7 @@ int SVMSGD_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "load invalid file name", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
     }
 
     filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
@@ -2725,14 +2781,14 @@ int SVMSGD_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         svmsgd = cv::ml::SVMSGD::load(filename);
 
         if (svmsgd == nullptr) {
-            Tcl_DStringFree(&ds);
-            Tcl_SetResult(interp, (char *) "SVMSGD load failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "SVMSGD nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "SVMSGD load failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
@@ -2837,8 +2893,7 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
     }
 
     if (cvd->dtrees == nullptr) {
-        Tcl_SetResult(interp, (char *) "no dtrees instantiated", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
     }
 
     switch ((enum FUNC_enum)choice) {
@@ -2852,9 +2907,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->dtrees->getCVFolds();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getCVFolds failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -2870,9 +2926,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->dtrees->getMaxCategories();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getMaxCategories failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -2888,9 +2945,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->dtrees->getMaxDepth();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getMaxDepth failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -2906,9 +2964,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->dtrees->getMinSampleCount();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getMinSampleCount failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -2926,9 +2985,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 results = cvd->dtrees->getPriors();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getPriors failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(results);
@@ -2948,9 +3008,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->dtrees->getRegressionAccuracy();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getRegressionAccuracy failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -2966,9 +3027,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->dtrees->getTruncatePrunedTree();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getTruncatePrunedTree failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewBooleanObj((int) value));
@@ -2984,9 +3046,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->dtrees->getUse1SERule();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getUse1SERule failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewBooleanObj((int) value));
@@ -3002,9 +3065,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->dtrees->getUseSurrogates();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getUseSurrogates failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewBooleanObj((int) value));
@@ -3024,9 +3088,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->dtrees->setCVFolds(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setCVFolds failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3045,9 +3110,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->dtrees->setMaxCategories(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setMaxCategories failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3066,9 +3132,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->dtrees->setMaxDepth(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setMaxDepth failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3087,9 +3154,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->dtrees->setMinSampleCount(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setMinSampleCount failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3109,9 +3177,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->dtrees->setPriors(*priori);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setPriors failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3130,9 +3199,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->dtrees->setRegressionAccuracy((float) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setRegressionAccuracy failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3151,9 +3221,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->dtrees->setTruncatePrunedTree((bool) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setTruncatePrunedTree failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3172,9 +3243,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->dtrees->setUse1SERule((bool) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setUse1SERule failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3193,9 +3265,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->dtrees->setUseSurrogates((bool) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setUseSurrogates failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3212,8 +3285,7 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             command = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid train data");
             }
 
             if (strcmp(command, "::cv-mltraindata")==0) {
@@ -3228,9 +3300,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->dtrees->train(trainData, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "train failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3260,9 +3333,10 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->dtrees->predict(*samples, results, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "predict failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(results);
@@ -3287,17 +3361,18 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             filename = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "save invalid file name", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
             }
 
             filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
             try {
                 cvd->dtrees->save(filename);
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "save failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringFree(&ds);
 
@@ -3360,12 +3435,12 @@ int DTrees(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         dtrees = cv::ml::DTrees::create();
 
         if (dtrees == nullptr) {
-            Tcl_SetResult(interp, (char *) "DTrees create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "DTrees nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "DTrees failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-mldtrees", -1);
@@ -3402,8 +3477,7 @@ int DTrees_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "load invalid file name", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
     }
 
     filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
@@ -3411,14 +3485,14 @@ int DTrees_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         dtrees = cv::ml::DTrees::load(filename);
 
         if (dtrees == nullptr) {
-            Tcl_DStringFree(&ds);
-            Tcl_SetResult(interp, (char *) "DTrees load failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "DTrees nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "DTrees load failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
@@ -3535,8 +3609,7 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
     }
 
     if (cvd->boost == nullptr) {
-        Tcl_SetResult(interp, (char *) "no boost instantiated", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
     }
 
     switch ((enum FUNC_enum)choice) {
@@ -3550,9 +3623,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 value = cvd->boost->getCVFolds();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getCVFolds failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -3568,9 +3642,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 value = cvd->boost->getMaxCategories();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getMaxCategories failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -3586,9 +3661,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 value = cvd->boost->getMaxDepth();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getMaxDepth failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -3604,9 +3680,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 value = cvd->boost->getMinSampleCount();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getMinSampleCount failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -3624,9 +3701,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 results = cvd->boost->getPriors();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getPriors failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(results);
@@ -3646,9 +3724,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 value = cvd->boost->getRegressionAccuracy();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getRegressionAccuracy failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -3664,9 +3743,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 value = cvd->boost->getTruncatePrunedTree();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getTruncatePrunedTree failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewBooleanObj((int) value));
@@ -3682,9 +3762,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 value = cvd->boost->getUse1SERule();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getUse1SERule failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewBooleanObj((int) value));
@@ -3700,9 +3781,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 value = cvd->boost->getUseSurrogates();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getUseSurrogates failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewBooleanObj((int) value));
@@ -3718,9 +3800,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 value = cvd->boost->getBoostType();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getBoostType failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -3736,9 +3819,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 value = cvd->boost->getWeakCount();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getWeakCount failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -3754,9 +3838,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 value = cvd->boost->getWeightTrimRate();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getWeightTrimRate failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -3776,9 +3861,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 cvd->boost->setCVFolds(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setCVFolds failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3797,9 +3883,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 cvd->boost->setMaxCategories(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setMaxCategories failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3818,9 +3905,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 cvd->boost->setMaxDepth(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setMaxDepth failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3839,9 +3927,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 cvd->boost->setMinSampleCount(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setMinSampleCount failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3861,9 +3950,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 cvd->boost->setPriors(*priori);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setPriors failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3882,9 +3972,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 cvd->boost->setRegressionAccuracy((float) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setRegressionAccuracy failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3903,9 +3994,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 cvd->boost->setTruncatePrunedTree((bool) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setTruncatePrunedTree failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3924,9 +4016,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 cvd->boost->setUse1SERule((bool) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setUse1SERule failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3945,9 +4038,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 cvd->boost->setUseSurrogates((bool) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setUseSurrogates failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3966,9 +4060,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 cvd->boost->setBoostType(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setBoostType failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -3987,9 +4082,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 cvd->boost->setWeakCount(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setWeakCount failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4008,9 +4104,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 cvd->boost->setWeightTrimRate(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setWeightTrimRate failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4027,8 +4124,7 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             command = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid train data");
             }
 
             if (strcmp(command, "::cv-mltraindata")==0) {
@@ -4043,9 +4139,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 cvd->boost->train(trainData, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "train failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4075,9 +4172,10 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 value = cvd->boost->predict(*samples, results, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "predict failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(results);
@@ -4102,17 +4200,18 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             filename = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "save invalid file name", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
             }
 
             filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
             try {
                 cvd->boost->save(filename);
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "save failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringFree(&ds);
 
@@ -4175,12 +4274,12 @@ int Boost(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         boost = cv::ml::Boost::create();
 
         if (boost == nullptr) {
-            Tcl_SetResult(interp, (char *) "Boost create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "Boost nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "Boost failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-mlboost", -1);
@@ -4217,8 +4316,7 @@ int Boost_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "load invalid file name", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
     }
 
     filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
@@ -4226,14 +4324,14 @@ int Boost_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         boost = cv::ml::Boost::load(filename);
 
         if (boost == nullptr) {
-            Tcl_DStringFree(&ds);
-            Tcl_SetResult(interp, (char *) "Boost load failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "Boost nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "Boost load failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
@@ -4356,8 +4454,7 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
     }
 
     if (cvd->rtrees == nullptr) {
-        Tcl_SetResult(interp, (char *) "no rtrees instantiated", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
     }
 
     switch ((enum FUNC_enum)choice) {
@@ -4371,9 +4468,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->rtrees->getCVFolds();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getCVFolds failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -4389,9 +4487,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->rtrees->getMaxCategories();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getMaxCategories failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -4407,9 +4506,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->rtrees->getMaxDepth();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getMaxDepth failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -4425,9 +4525,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->rtrees->getMinSampleCount();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getMinSampleCount failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -4445,9 +4546,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 results = cvd->rtrees->getPriors();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getPriors failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(results);
@@ -4467,9 +4569,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->rtrees->getRegressionAccuracy();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getRegressionAccuracy failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -4485,9 +4588,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->rtrees->getTruncatePrunedTree();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getTruncatePrunedTree failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewBooleanObj((int) value));
@@ -4503,9 +4607,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->rtrees->getUse1SERule();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getUse1SERule failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewBooleanObj((int) value));
@@ -4521,9 +4626,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->rtrees->getUseSurrogates();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getUseSurrogates failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewBooleanObj((int) value));
@@ -4539,9 +4645,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->rtrees->getActiveVarCount();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getActiveVarCount failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -4557,9 +4664,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->rtrees->getCalculateVarImportance();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getCalculateVarImportance failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewBooleanObj((int) value));
@@ -4577,9 +4685,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 results = cvd->rtrees->getVarImportance();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getVarImportance failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(results);
@@ -4612,9 +4721,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->rtrees->getVotes(*samples, results, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getVotes failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(results);
@@ -4639,9 +4749,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->rtrees->setCVFolds(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setCVFolds failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4660,9 +4771,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->rtrees->setMaxCategories(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setMaxCategories failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4681,9 +4793,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->rtrees->setMaxDepth(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setMaxDepth failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4702,9 +4815,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->rtrees->setMinSampleCount(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setMinSampleCount failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4724,9 +4838,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->rtrees->setPriors(*priori);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setPriors failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4745,9 +4860,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->rtrees->setRegressionAccuracy((float) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setRegressionAccuracy failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4766,9 +4882,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->rtrees->setTruncatePrunedTree((bool) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setTruncatePrunedTree failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4787,9 +4904,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->rtrees->setUse1SERule((bool) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setUse1SERule failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4808,9 +4926,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->rtrees->setUseSurrogates((bool) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setUseSurrogates failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4829,9 +4948,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->rtrees->setActiveVarCount(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setActiveVarCount failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4850,9 +4970,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->rtrees->setCalculateVarImportance((bool) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setCalculateVarImportance failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4872,9 +4993,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->rtrees->setTermCriteria(*termCriteria);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setTermCriteria failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4891,8 +5013,7 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             command = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid train data");
             }
 
             if (strcmp(command, "::cv-mltraindata")==0) {
@@ -4907,9 +5028,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 cvd->rtrees->train(trainData, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "train failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -4939,9 +5061,10 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             try {
                 value = cvd->rtrees->predict(*samples, results, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "predict failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(results);
@@ -4966,17 +5089,18 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             filename = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "save invalid file name", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
             }
 
             filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
             try {
                 cvd->rtrees->save(filename);
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "save failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringFree(&ds);
 
@@ -5039,12 +5163,12 @@ int RTrees(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         rtrees = cv::ml::RTrees::create();
 
         if (rtrees == nullptr) {
-            Tcl_SetResult(interp, (char *) "RTrees create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "RTrees nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "RTrees failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-mlrtrees", -1);
@@ -5081,8 +5205,7 @@ int RTrees_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "load invalid file name", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
     }
 
     filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
@@ -5090,14 +5213,14 @@ int RTrees_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         rtrees = cv::ml::RTrees::load(filename);
 
         if (rtrees == nullptr) {
-            Tcl_DStringFree(&ds);
-            Tcl_SetResult(interp, (char *) "RTrees load failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "RTress nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "RTrees load failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
@@ -5232,8 +5355,7 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
     }
 
     if (cvd->annmlp == nullptr) {
-        Tcl_SetResult(interp, (char *) "no annmlp instantiated", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
     }
 
     switch ((enum FUNC_enum)choice) {
@@ -5248,9 +5370,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 value = cvd->annmlp->getAnnealCoolingRatio();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getAnnealCoolingRatio failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -5266,9 +5389,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 value = cvd->annmlp->getAnnealFinalT();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getAnnealFinalT failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -5284,9 +5408,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 value = cvd->annmlp->getAnnealInitialT();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getAnnealInitialT failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -5302,9 +5427,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 value = cvd->annmlp->getAnnealItePerStep();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getAnnealItePerStep failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -5321,9 +5447,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 value = cvd->annmlp->getBackpropMomentumScale();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getBackpropMomentumScale failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -5339,9 +5466,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 value = cvd->annmlp->getBackpropWeightScale();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getBackpropWeightScale failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -5357,9 +5485,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 value = cvd->annmlp->getRpropDW0();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getRpropDW0 failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -5375,9 +5504,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 value = cvd->annmlp->getRpropDWMax();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getRpropDWMax failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -5393,9 +5523,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 value = cvd->annmlp->getRpropDWMin();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getRpropDWMin failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -5411,9 +5542,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 value = cvd->annmlp->getRpropDWMinus();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getRpropDWMinus failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -5429,9 +5561,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 value = cvd->annmlp->getRpropDWPlus();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getRpropDWPlus failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
@@ -5449,9 +5582,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 layer = cvd->annmlp->getLayerSizes();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getLayerSizes failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(layer);
@@ -5471,9 +5605,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 value = cvd->annmlp->getTrainMethod();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getTrainMethod failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
@@ -5496,9 +5631,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 weights = cvd->annmlp->getWeights(layerIdx);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "getWeights failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
 
@@ -5524,9 +5660,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->setAnnealCoolingRatio(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setAnnealCoolingRatio failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5545,9 +5682,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->setAnnealFinalT(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setAnnealFinalT failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5566,9 +5704,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->setAnnealInitialT(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setAnnealInitialT failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5587,9 +5726,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->setAnnealItePerStep(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setAnnealItePerStep failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5609,9 +5749,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->setBackpropMomentumScale(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setBackpropMomentumScale failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5630,9 +5771,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->setBackpropWeightScale(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setBackpropWeightScale failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5651,9 +5793,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->setRpropDW0(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setRpropDW0 failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5672,9 +5815,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->setRpropDWMax(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setRpropDWMax failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5693,9 +5837,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->setRpropDWMin(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setRpropDWMin failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5714,9 +5859,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->setRpropDWMinus(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setRpropDWMinus failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5735,9 +5881,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->setRpropDWPlus(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setRpropDWPlus failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5767,9 +5914,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->setActivationFunction(value, param1, param2);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setActivationFunction failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5789,9 +5937,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->setLayerSizes(*layer);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setLayerSizes failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5821,9 +5970,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->setTrainMethod(value, param1, param2);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setTrainMethod failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5843,9 +5993,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->setTermCriteria(*termCriteria);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setTermCriteria failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5862,8 +6013,7 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             command = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "train invalid trainData", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid train data");
             }
 
             if (strcmp(command, "::cv-mltraindata")==0) {
@@ -5878,9 +6028,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 cvd->annmlp->train(trainData, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "train failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -5910,9 +6061,10 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             try {
                 value = cvd->annmlp->predict(*samples, results, flags);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "predict failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(results);
@@ -5937,17 +6089,18 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             filename = Tcl_GetStringFromObj(objv[2], &len);
             if (len < 1) {
-                Tcl_SetResult(interp, (char *) "save invalid file name", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
             }
 
             filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
             try {
                 cvd->annmlp->save(filename);
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "save failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringFree(&ds);
 
@@ -6010,12 +6163,12 @@ int ANN_MLP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         annmlp = cv::ml::ANN_MLP::create();
 
         if (annmlp == nullptr) {
-            Tcl_SetResult(interp, (char *) "ANN_MLP create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "ANN_MLP nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "ANN_MLP failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-mlannmlp", -1);
@@ -6052,8 +6205,7 @@ int ANN_MLP_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "load invalid file name", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
     }
 
     filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
@@ -6061,14 +6213,14 @@ int ANN_MLP_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         annmlp = cv::ml::ANN_MLP::load(filename);
 
         if (annmlp == nullptr) {
-            Tcl_DStringFree(&ds);
-            Tcl_SetResult(interp, (char *) "ANN_MLP load failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "ANN_MLP nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "ANN_MLP load failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
@@ -6131,8 +6283,7 @@ static int TrainData_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
     }
 
     if (cvd->traindata == nullptr) {
-        Tcl_SetResult(interp, (char *) "no traindata instantiated", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
     }
 
     switch ((enum FUNC_enum)choice) {
@@ -6189,12 +6340,12 @@ int TrainData_CONSTRUCTOR(void *cd, Tcl_Interp *interp, cv::Mat &samples, int la
         traindata = cv::ml::TrainData::create(samples, layout, responses);
 
         if (traindata == nullptr) {
-            Tcl_SetResult(interp, (char *) "TrainData create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "TrainData nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "TrainData failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-mltraindata", -1);
@@ -6245,12 +6396,12 @@ int TrainData(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         traindata = cv::ml::TrainData::create(*samples, layout, *responses);
 
         if (traindata == nullptr) {
-            Tcl_SetResult(interp, (char *) "TrainData create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "TrainData nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "TrainData failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-mltraindata", -1);

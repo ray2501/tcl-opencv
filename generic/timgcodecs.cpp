@@ -21,8 +21,7 @@ int imread(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "imread invalid file name", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
     }
 
     if (objc == 3) {
@@ -34,16 +33,17 @@ int imread(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
     try {
         image = cv::imread(filename, flags);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "imread failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
     if (image.empty() || !image.data) {
-        Tcl_SetResult(interp, (char *) "imread no image data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsError, "no image data");
     }
 
     mat = new cv::Mat(image);
@@ -71,8 +71,7 @@ int imdecode(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     data = Tcl_GetByteArrayFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "imdecode invalid data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid data");
     }
 
     if (objc == 3) {
@@ -85,14 +84,14 @@ int imdecode(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         std::vector<unsigned char> v;
         v.insert(v.end(), data, data + len);
         image = cv::imdecode(v, flags);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "imdecode failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     if (image.empty() || !image.data) {
-        Tcl_SetResult(interp, (char *) "imdecode no image data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsError, "no image data");
     }
 
     mat = new cv::Mat(image);
@@ -119,8 +118,7 @@ int imwrite(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "imwrite invalid file name", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
     }
 
     mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
@@ -131,16 +129,17 @@ int imwrite(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
     try {
         result = cv::imwrite(filename, *mat);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "imwrite failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
     if (!result) {
-        Tcl_SetResult(interp, (char *) "imwrite can't save file", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsError, "image data not saved");
     }
 
     return TCL_OK;
@@ -170,16 +169,16 @@ int imencode(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     fileext = Tcl_UtfToExternalDString(NULL, fileext, len, &ds);
     try {
         result = cv::imencode(fileext, *mat, buf);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "imencode failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
     if (!result) {
-        Tcl_SetResult(interp, (char *) "imencode can't process data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsError, "image data not processed");
     }
     if (buf.size()) {
         Tcl_SetObjResult(interp, Tcl_NewByteArrayObj(buf.data(), buf.size()));

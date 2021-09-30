@@ -48,8 +48,7 @@ static int Stitcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     if (cvd->stitcher == nullptr) {
-        Tcl_SetResult(interp, (char *) "no stitcher instantiated", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
     }
 
     switch ((enum FUNC_enum)choice) {
@@ -66,13 +65,11 @@ static int Stitcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
             }
 
             if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-                Tcl_SetResult(interp, (char *) "stitch invalid list data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
             }
 
             if (count == 0) {
-                Tcl_SetResult(interp, (char *) "stitch empty list", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty list data");
             } else {
                 Tcl_Obj *elem = NULL;
                 cv::Mat image;
@@ -92,14 +89,13 @@ static int Stitcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
             try {
                 cv::Stitcher::Status status = cvd->stitcher->stitch(imgs, result_image);
 
-                if (status != cv::Stitcher::OK)
-                {
-                    Tcl_SetResult(interp, (char *) "stitch can't stitch images", TCL_STATIC);
-                    return TCL_ERROR;
+                if (status != cv::Stitcher::OK) {
+                    CV_Error(cv::Error::StsError, "Stitcher status not OK");
                 }
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "stitch failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(result_image);
@@ -171,12 +167,12 @@ int Stitcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         stitcher = cv::Stitcher::create((cv::Stitcher::Mode) mode);
 
         if (stitcher == nullptr) {
-            Tcl_SetResult(interp, (char *) "Stitcher create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "Stitcher nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "Stitcher failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-stitcher", -1);

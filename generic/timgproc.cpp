@@ -28,9 +28,10 @@ int applyColorMap(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::applyColorMap(*mat, image, colormap);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "applyColorMap failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -72,9 +73,10 @@ int cvtColor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::cvtColor(*mat, image, code, dstCn);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "cvtColor failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -110,21 +112,18 @@ int calcBackProject(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "calcBackProject invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count == 0) {
-        Tcl_SetResult(interp, (char *) "calcBackProject channels is empty list", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty channels list");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         int size;
 
-        channels = (int *) ckalloc(sizeof(int) * count);
+        channels = (int *) attemptckalloc(sizeof(int) * count);
         if (!channels) {
-            Tcl_SetResult(interp, (char *) "calcBackProject channels malloc memory failed", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsNoMem, "alloc channels failed");
         }
 
         for (int i = 0; i < count; i++) {
@@ -136,8 +135,7 @@ int calcBackProject(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             if (size < 0) {
                 ckfree(channels);
-                Tcl_SetResult(interp, (char *) "calcBackProject channels out of range", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "channels out of range");
             }
 
             channels[i] = size;
@@ -152,25 +150,22 @@ int calcBackProject(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     if (Tcl_ListObjLength(interp, objv[4], &count) != TCL_OK) {
         ckfree(channels);
-        Tcl_SetResult(interp, (char *) "calcBackProject invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count == 0 || count%2 != 0) {
         ckfree(channels);
-        Tcl_SetResult(interp, (char *) "calcBackProject ranges_list invalid data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "ranges list invalid");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         int range = count / 2;
         double min, max;
         rangecount = range;
 
-        ranges = (float **) ckalloc(sizeof(float *) * count);
+        ranges = (float **) attemptckalloc(sizeof(float *) * count);
         if (!ranges) {
             ckfree(channels);
-            Tcl_SetResult(interp, (char *) "calcBackProject ranges malloc memory failed", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsNoMem, "alloc ranges failed");
         }
         for (int i = 0; i < range; i++) {
             ranges[i] = NULL;
@@ -196,15 +191,14 @@ int calcBackProject(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            ranges[i] = (float *) ckalloc(sizeof(float) * 2);
+            ranges[i] = (float *) attemptckalloc(sizeof(float) * 2);
             if (!ranges[i]) {
                 ckfree(channels);
                 for (--i; i >= 0; --i) {
                     ckfree(ranges[i]);
                 }
                 ckfree(ranges);
-                Tcl_SetResult(interp, (char *) "calcBackProject ranges malloc memory failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsNoMem, "alloc ranges failed");
             }
 
             ranges[i][0] = (float) min;
@@ -235,14 +229,20 @@ int calcBackProject(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::calcBackProject(mat, 1, channels, *histmat,
                             dst, (const float**) ranges, scale, (bool) uniform);
+    } catch (const cv::Exception &ex) {
+        ckfree(channels);
+        for (int i = 0; i < rangecount; i++) {
+            ckfree(ranges[i]);
+        }
+        ckfree(ranges);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         ckfree(channels);
         for (int i = 0; i < rangecount; i++) {
             ckfree(ranges[i]);
         }
         ckfree(ranges);
-        Tcl_SetResult(interp, (char *) "calcBackProject failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dst);
@@ -284,21 +284,18 @@ int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "calcHist invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count == 0) {
-        Tcl_SetResult(interp, (char *) "calcHist channels is empty list", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty channels list");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         int size;
 
-        channels = (int *) ckalloc(sizeof(int) * count);
+        channels = (int *) attemptckalloc(sizeof(int) * count);
         if (!channels) {
-            Tcl_SetResult(interp, (char *) "calcHist channels malloc memory failed", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsNoMem, "alloc channels failed");
         }
 
         for (int i = 0; i < count; i++) {
@@ -310,8 +307,7 @@ int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             if (size < 0) {
                 ckfree(channels);
-                Tcl_SetResult(interp, (char *) "calcHist channels out of range", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "channels out of range");
             }
 
             channels[i] = size;
@@ -331,29 +327,25 @@ int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     if (dims < 0 || dims > 32) {
         ckfree(channels);
-        Tcl_SetResult(interp, (char *) "calcHist dims out of range", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "dimensions out of range");
     }
 
     if (Tcl_ListObjLength(interp, objv[5], &count) != TCL_OK) {
         ckfree(channels);
-        Tcl_SetResult(interp, (char *) "calcHist invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count == 0) {
         ckfree(channels);
-        Tcl_SetResult(interp, (char *) "calcHist histSize_list is empty list", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "history size list empty");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         int size;
 
-        histSize = (int *) ckalloc(sizeof(int) * count);
+        histSize = (int *) attemptckalloc(sizeof(int) * count);
         if (!histSize) {
             ckfree(channels);
-            Tcl_SetResult(interp, (char *) "calcHist histSize malloc memory failed", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsNoMem, "alloc history size list failed");
         }
 
         for (int i = 0; i < count; i++) {
@@ -371,28 +363,25 @@ int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (Tcl_ListObjLength(interp, objv[6], &count) != TCL_OK) {
         ckfree(channels);
         ckfree(histSize);
-        Tcl_SetResult(interp, (char *) "calcHist invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count == 0 || count%2 != 0) {
         ckfree(channels);
         ckfree(histSize);
 
-        Tcl_SetResult(interp, (char *) "calcHist ranges_list invalid data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid ranges list data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         int range = count / 2;
         double min, max;
         rangecount = range;
 
-        ranges = (float **) ckalloc(sizeof(float *) * count);
+        ranges = (float **) attemptckalloc(sizeof(float *) * count);
         if (!ranges) {
             ckfree(channels);
             ckfree(histSize);
-            Tcl_SetResult(interp, (char *) "calcHist ranges malloc memory failed", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsNoMem, "alloc ranges list failed");
         }
         for (int i = 0; i < range; i++) {
             ranges[i] = NULL;
@@ -420,7 +409,7 @@ int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            ranges[i] = (float *) ckalloc(sizeof(float) * 2);
+            ranges[i] = (float *) attemptckalloc(sizeof(float) * 2);
             if (!ranges[i]) {
                 ckfree(channels);
                 ckfree(histSize);
@@ -428,8 +417,7 @@ int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                     ckfree(ranges[i]);
                 }
                 ckfree(ranges);
-                Tcl_SetResult(interp, (char *) "calcHist ranges malloc memory failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsNoMem, "alloc ranges list failed");
             }
 
             ranges[i][0] = (float) min;
@@ -463,6 +451,14 @@ int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         mask = *maskmat;
         cv::calcHist(mat, 1, channels, mask, dst, dims, histSize,
                      (const float**) ranges, (bool) uniform, (bool) accumulate);
+    } catch (const cv::Exception &ex) {
+        ckfree(channels);
+        ckfree(histSize);
+        for (int i = 0; i < rangecount; i++) {
+            ckfree(ranges[i]);
+        }
+        ckfree(ranges);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         ckfree(channels);
         ckfree(histSize);
@@ -470,8 +466,7 @@ int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             ckfree(ranges[i]);
         }
         ckfree(ranges);
-        Tcl_SetResult(interp, (char *) "calcHist failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dst);
@@ -519,9 +514,10 @@ int compareHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         result = cv::compareHist(*mat1, *mat2, method);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "compareHist failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
@@ -548,9 +544,10 @@ int equalizeHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::equalizeHist(*mat, dst);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "equalizeHist failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dst);
@@ -599,9 +596,10 @@ int EMD(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         ret = cv::EMD(*mat1, *mat2, distType, cost);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "EMD failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     Tcl_SetObjResult(interp, Tcl_NewDoubleObj(ret));
@@ -639,13 +637,11 @@ int floodFill(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[4], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "floodFill invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "floodFill invalid color data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -672,13 +668,11 @@ int floodFill(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     if (objc == 9) {
         if (Tcl_ListObjLength(interp, objv[5], &count) != TCL_OK) {
-            Tcl_SetResult(interp, (char *) "floodFill invalid list data", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
         }
 
         if (count != 4) {
-            Tcl_SetResult(interp, (char *) "floodFill invalid rect data", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid rect data");
         } else {
             Tcl_Obj *elemListPtr = NULL;
 
@@ -704,13 +698,11 @@ int floodFill(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
 
         if (Tcl_ListObjLength(interp, objv[6], &count) != TCL_OK) {
-            Tcl_SetResult(interp, (char *) "floodFill invalid list data", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
         }
 
         if (count != 4) {
-            Tcl_SetResult(interp, (char *) "floodFill invalid color data", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
         } else {
             Tcl_Obj *elemListPtr = NULL;
 
@@ -736,13 +728,11 @@ int floodFill(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
 
         if (Tcl_ListObjLength(interp, objv[7], &count) != TCL_OK) {
-            Tcl_SetResult(interp, (char *) "floodFill invalid list data", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
         }
 
         if (count != 4) {
-            Tcl_SetResult(interp, (char *) "floodFill invalid color data", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
         } else {
             Tcl_Obj *elemListPtr = NULL;
 
@@ -784,9 +774,10 @@ int floodFill(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         } else {
             cv::floodFill(*mat, cv::Point(seed_x, seed_y), newColor);
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "floodFill failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     return TCL_OK;
@@ -834,9 +825,10 @@ int grabCut(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         cv::Rect rect(x, y, width, height);
 
         cv::grabCut(*mat, maskimage, rect, bgdModel, fgdModel, iterCount, mode);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "grabCut failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(maskimage);
@@ -878,15 +870,15 @@ int matchTemplate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         if (mat->cols < templmat->cols ||
             mat->rows < templmat->rows) {
-            Tcl_SetResult(interp, (char *) "matchTemplate src image is too small", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "source image too small");
         }
 
         cv::matchTemplate(*mat, *templmat,
                           result_image, method);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "matchTemplate failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(result_image);
@@ -924,9 +916,10 @@ int moments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         result = cv::moments(*mat, (bool) binaryImage);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "moments failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     /*
@@ -980,9 +973,10 @@ int getRotationMatrix2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
     try {
         image = cv::getRotationMatrix2D(cv::Point2f(x, y), angle, scale);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "getRotationMatrix2D failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -1021,8 +1015,7 @@ int getRectSubPix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (width <= 0 || height <= 0) {
-        Tcl_SetResult(interp, (char *) "getRectSubPix invalid range", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid range");
     }
 
     if (Tcl_GetIntFromObj(interp, objv[4], &center_x) != TCL_OK) {
@@ -1036,9 +1029,10 @@ int getRectSubPix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::getRectSubPix(*mat, cv::Size(width, height),
                           cv::Point2f(center_x, center_y), sub_image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "getRectSubPix failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(sub_image);
@@ -1064,13 +1058,11 @@ int HuMoments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "HuMoments invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 10) {
-        Tcl_SetResult(interp, (char *) "HuMoments invalid data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -1128,9 +1120,10 @@ int HuMoments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Moments moments(m00, m10, m01, m20, m11, m02, m30, m21, m12, m03);
         cv::HuMoments(moments, hu);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "HuMoments failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -1178,9 +1171,10 @@ int integral(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::integral(*mat, sum, sqsum, tilted, sqdepth, sqdepth);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "integral failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -1236,9 +1230,10 @@ int remap(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::remap(*mat, image, *mapmat1, *mapmat2, interpolation);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "remap failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -1277,8 +1272,7 @@ int resize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (width <= 0 || height <= 0) {
-        Tcl_SetResult(interp, (char *) "resize invalid range", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid range");
     }
 
     if (objc == 5) {
@@ -1289,9 +1283,10 @@ int resize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::resize(*mat, image, cv::Size(width, height), 0, 0, flags);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "resize failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -1335,9 +1330,10 @@ int threshold(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::threshold(*mat, image, thresh, maxval, type);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "threshold failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -1391,9 +1387,10 @@ int adaptiveThreshold(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
     try {
         cv::adaptiveThreshold(*mat, image, maxValue,
                               adaptiveMethod, thresholdType, blockSize, C);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "adaptiveThreshold failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -1419,13 +1416,11 @@ int getAffineTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
     }
 
     if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "getAffineTransform invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count%2 != 0) {
-        Tcl_SetResult(interp, (char *) "getAffineTransform invalid point data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         double number_from_list_x;
@@ -1451,13 +1446,11 @@ int getAffineTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
     }
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "getAffineTransform invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count%2 != 0) {
-        Tcl_SetResult(interp, (char *) "getAffineTransform invalid point data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         double number_from_list_x;
@@ -1484,9 +1477,10 @@ int getAffineTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 
     try {
         mat_image = cv::getAffineTransform(src_points, dst_points);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "getAffineTransform failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(mat_image);
@@ -1532,8 +1526,7 @@ int warpAffine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (width <= 0 || height <= 0) {
-        Tcl_SetResult(interp, (char *) "warpAffine invalid range", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid range");
     }
 
     if (objc == 6) {
@@ -1545,9 +1538,10 @@ int warpAffine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::warpAffine(*mat, rotated_image, *rotmat,
                         cv::Size(width, height), flags);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "warpAffine failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(rotated_image);
@@ -1575,13 +1569,11 @@ int getPerspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
     }
 
     if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "getPerspectiveTransform invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count%2 != 0) {
-        Tcl_SetResult(interp, (char *) "getPerspectiveTransform invalid point data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         double number_from_list_x;
@@ -1607,13 +1599,11 @@ int getPerspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
     }
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "getPerspectiveTransform invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count%2 != 0) {
-        Tcl_SetResult(interp, (char *) "getPerspectiveTransform invalid point data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         double number_from_list_x;
@@ -1650,9 +1640,10 @@ int getPerspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 #else
         mat_image = cv::getPerspectiveTransform(src_points, dst_points);
 #endif
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "getPerspectiveTransform failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(mat_image);
@@ -1698,8 +1689,7 @@ int warpPerspective(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (width <= 0 || height <= 0) {
-        Tcl_SetResult(interp, (char *) "warpPerspective invalid range", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid range");
     }
 
     if (objc == 6) {
@@ -1711,9 +1701,10 @@ int warpPerspective(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::warpPerspective(*mat, mat_image, *matmat,
                         cv::Size(width, height), flags);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "warpPerspective failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(mat_image);
@@ -1778,9 +1769,10 @@ int warpPolar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                       cv::Size(dsize_width, dsize_height),
                       cv::Point2f((float) center_x, (float) center_y),
                       maxRadius, flags);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "warpPolar failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(mat_image);
@@ -1839,9 +1831,10 @@ int filter2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::filter2D(*mat, filter_image, -1, *kmat,
                      cv::Point(anchor_x, anchor_y), delta, borderType);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "filter2D failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(filter_image);
@@ -1903,9 +1896,10 @@ int sepFilter2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::sepFilter2D(*mat, filter_image, -1, *kmatx, *kmaty,
                         cv::Point(anchor_x, anchor_y), delta, borderType);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "sepFilter2D failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(filter_image);
@@ -1965,17 +1959,17 @@ int getGaborKernel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
 
         if (type != CV_32F && type != CV_64F) {
-            Tcl_SetResult(interp, (char *) "getGaborKernel type is wrong", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "wrong Gabor kernel type");
         }
     }
 
     try {
         result_mat = cv::getGaborKernel(cv::Size(ksize_width, ksize_height),
                            sigma, theta, lambd, gamma, psi, type);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "getGaborKernel failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(result_mat);
@@ -2014,16 +2008,16 @@ int getGaussianKernel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
         }
 
         if (type != CV_32F && type != CV_64F) {
-            Tcl_SetResult(interp, (char *) "getGaussianKernel type is wrong", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "wrong Gaussian kernel type");
         }
     }
 
     try {
         result_mat = cv::getGaussianKernel(ksize, sigma, type);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "getGaussianKernel failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(result_mat);
@@ -2080,9 +2074,10 @@ int blur(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         cv::blur(*mat, blur_image,
                  cv::Size(ksize_width, ksize_height),
                  cv::Point(anchor_x, anchor_y), borderType);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "blur failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(blur_image);
@@ -2140,9 +2135,10 @@ int GaussianBlur(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         cv::GaussianBlur(*mat, blur_image,
                  cv::Size(ksize_width, ksize_height),
                  sigmaX, sigmaY, borderType);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "GaussianBlur failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(blur_image);
@@ -2178,9 +2174,10 @@ int medianBlur(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::medianBlur(*mat, blur_image, ksize);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "medianBlur failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(blur_image);
@@ -2233,9 +2230,10 @@ int bilateralFilter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::bilateralFilter(*mat, blur_image,
                             d, sigmaColor, sigmaSpace, borderType);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "bilateralFilter failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(blur_image);
@@ -2297,9 +2295,10 @@ int boxFilter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         cv::boxFilter(*mat, filter_image, -1,
                       cv::Size(ksize_width, ksize_height),
                       cv::Point(anchor_x, anchor_y), (bool) normalize, borderType);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "boxFilter failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(filter_image);
@@ -2361,9 +2360,10 @@ int sqrBoxFilter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         cv::sqrBoxFilter(*mat, filter_image, -1,
                          cv::Size(ksize_width, ksize_height),
                          cv::Point(anchor_x, anchor_y), (bool) normalize, borderType);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "sqrBoxFilter failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(filter_image);
@@ -2413,9 +2413,10 @@ int getStructuringElement(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
     try {
         kernel = cv::getStructuringElement(shape, cv::Size(ksize_width, ksize_height),
                                            cv::Point(anchor_x, anchor_y));
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "getStructuringElement failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(kernel);
@@ -2466,9 +2467,10 @@ int dilate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::dilate(*mat, image, *kmat,
                    cv::Point(anchor_x, anchor_y), iterations);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "dilate failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2520,9 +2522,10 @@ int erode(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::erode(*mat, image, *kmat,
                    cv::Point(anchor_x, anchor_y), iterations);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "erode failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2579,9 +2582,10 @@ int morphologyEx(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::morphologyEx(*mat, image, op, *kmat,
                          cv::Point(anchor_x, anchor_y), iterations);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "morphologyEx failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2632,9 +2636,10 @@ int pyrUp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         } else {
             cv::pyrUp(*mat, image);
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "pyrUp failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2685,9 +2690,10 @@ int pyrDown(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         } else {
             cv::pyrDown(*mat, image);
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "pyrDown failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2734,9 +2740,10 @@ int pyrMeanShiftFiltering(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
     try {
         cv::pyrMeanShiftFiltering(*mat, image, sp, sr, maxLevel);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "pyrMeanShiftFiltering failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2775,9 +2782,10 @@ int createHanningWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
     try {
         cv::createHanningWindow(image, cv::Size(winSize_width, winSize_height), type);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "createHanningWindow failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2824,9 +2832,10 @@ int phaseCorrelate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         } else {
             result = cv::phaseCorrelate(*mat1, *mat2, *window);
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "phaseCorrelate failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -2878,9 +2887,10 @@ int Canny(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Canny(*mat, image, threshold1, threshold2,
                   apertureSize, (bool) L2gradient);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "Canny failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2941,9 +2951,10 @@ int Sobel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Sobel(*mat, image, ddepth, dx, dy,
                   ksize, scale, delta, borderType);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "Sobel failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -3000,9 +3011,10 @@ int Scharr(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Scharr(*mat, image, ddepth, dx, dy,
                    scale, delta, borderType);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "Scharr failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -3055,9 +3067,10 @@ int Laplacian(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::Laplacian(*mat, image, ddepth, ksize,
                       scale, delta, borderType);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "Laplacian failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -3098,9 +3111,10 @@ int distanceTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
 
     try {
         cv::distanceTransform(*mat, image, distanceType, maskSize, dstType);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "distanceTransform failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -3139,9 +3153,10 @@ int connectedComponents(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
     try {
         cv::connectedComponents(*mat, image, connectivity, ltype);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "connectedComponents failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -3180,9 +3195,10 @@ int connectedComponentsWithStats(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
 
     try {
         cv::connectedComponentsWithStats(*mat, labels, stats, centroids, connectivity, ltype);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "connectedComponentsWithStats failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -3227,9 +3243,10 @@ int watershed(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::watershed(*smat, *mmat);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "watershed failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     return TCL_OK;
@@ -3291,9 +3308,10 @@ int goodFeaturesToTrack(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
     try {
         cv::goodFeaturesToTrack(*mat, result_image, maxCorners, qualityLevel, minDistance,
                                 maskimage, blockSize, (bool) useHarrisDetector, k);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "goodFeaturesToTrack failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(result_image);
@@ -3344,9 +3362,10 @@ int cornerHarris(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::cornerHarris(*mat, dst, blockSize, ksize, k, borderType);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "cornerHarris failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dst);
@@ -3407,9 +3426,10 @@ int cornerSubPix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                          cv::Size(winSize_width, winSize_height),
                          cv::Size(zeroZone_widht, zeroZone_height),
                          *termCriteria);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "cornerSubPix failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     return TCL_OK;
@@ -3468,9 +3488,10 @@ int HoughCircles(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::HoughCircles(*mat, circles, method, dp, minDist,
                          param1, param2, minRadius, maxRadius);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "HoughCircles failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -3541,9 +3562,10 @@ int HoughLines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::HoughLines(*mat, lines, rho, theta, threshold,
                        srn, stn, min_theta, max_theta);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "HoughLines failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -3604,9 +3626,10 @@ int HoughLinesP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::HoughLinesP(*mat, lines, rho, theta, threshold,
                         minLineLength, maxLineGap);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "HoughLinesP failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -3668,9 +3691,10 @@ int findContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         } else {
             cv::findContours(*mat, contours, mode, method);
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "findContours failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -3711,13 +3735,11 @@ int drawContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "drawContours invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count <= 0) {
-        Tcl_SetResult(interp, (char *) "drawContours list data is empty", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty list");
     } else {
         for (int contours_count = 0; contours_count < count; contours_count++) {
             Tcl_Obj *elemListPtr = NULL;
@@ -3727,13 +3749,11 @@ int drawContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             Tcl_ListObjIndex(interp, objv[2], contours_count, &elemListPtr);
 
             if (Tcl_ListObjLength(interp, elemListPtr, &index_count) != TCL_OK) {
-                Tcl_SetResult(interp, (char *) "drawContours invalid contours data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid contours data");
             }
 
             if (index_count%2 != 0) {
-                Tcl_SetResult(interp, (char *) "drawContours invalid points data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid points data");
             } else {
                 Tcl_Obj *elemListSubPtr = NULL;
                 int number_from_list_x;
@@ -3768,13 +3788,11 @@ int drawContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[4], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "drawContours invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "drawContours invalid color data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -3825,9 +3843,10 @@ int drawContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         cv::drawContours(*mat, contours, contourIdx, color,
                         thickness, lineType, cv::noArray(), maxLevel,
                         cv::Point(offset_point_x, offset_point_y));
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "drawContours failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     return TCL_OK;
@@ -3846,13 +3865,11 @@ int contourArea(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "contourArea invalid contour data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid contour data");
     }
 
     if (count%2 != 0) {
-        Tcl_SetResult(interp, (char *) "contourArea invalid points data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid points data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         int number_from_list_x;
@@ -3886,9 +3903,10 @@ int contourArea(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         result = cv::contourArea(points, (bool) oriented);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "contourArea failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
@@ -3909,13 +3927,11 @@ int boundingRect(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "boundingRect invalid contour data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid contour data");
     }
 
     if (count%2 != 0) {
-        Tcl_SetResult(interp, (char *) "boundingRect invalid points data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         int number_from_list_x;
@@ -3943,9 +3959,10 @@ int boundingRect(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         rect = cv::boundingRect(points);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "boundingRect failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -3972,13 +3989,11 @@ int minAreaRect(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "minAreaRect invalid contour data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid contour data");
     }
 
     if (count%2 != 0) {
-        Tcl_SetResult(interp, (char *) "minAreaRect invalid points data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         int number_from_list_x;
@@ -4006,9 +4021,10 @@ int minAreaRect(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         rect = cv::minAreaRect(points);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "minAreaRect failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -4036,12 +4052,11 @@ int fitEllipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "fitEllipse invalid contour data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid contour data");
     }
 
     if (count%2 != 0) {
-        Tcl_SetResult(interp, (char *) "fitEllipse invalid points data", TCL_STATIC);
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
         return TCL_ERROR;
     } else {
         Tcl_Obj *elemListPtr = NULL;
@@ -4070,9 +4085,10 @@ int fitEllipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         rect = cv::fitEllipse(points);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "fitEllipse failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -4105,13 +4121,11 @@ int fitLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
      * For 2D point set.
      */
     if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "fitLine invalid contour data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid contour data");
     }
 
     if (count%2 != 0) {
-        Tcl_SetResult(interp, (char *) "fitLine invalid points data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         int number_from_list_x;
@@ -4155,9 +4169,10 @@ int fitLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::fitLine(points, line, distType, param, reps, aeps);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "fitLine failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -4185,13 +4200,11 @@ int boxPoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "boxPoints invalid box data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid box data");
     }
 
     if (count != 5) {
-        Tcl_SetResult(interp, (char *) "boxPoints invalid rotated rect data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid rotated rect data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -4225,9 +4238,10 @@ int boxPoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         cv::Size2f size((float) width, (float) height);
         cv::boxPoints(cv::RotatedRect(center, size, (float) angle),
                       points);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "boxPoints failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -4255,13 +4269,11 @@ int minEnclosingCircle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
     }
 
     if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "minEnclosingCircle invalid contour data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid contour data");
     }
 
     if (count%2 != 0) {
-        Tcl_SetResult(interp, (char *) "minEnclosingCircle invalid points data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         int number_from_list_x;
@@ -4289,9 +4301,10 @@ int minEnclosingCircle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 
     try {
         cv::minEnclosingCircle(points, center, radius);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "minEnclosingCircle failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -4316,13 +4329,11 @@ int convexHull(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "convexHull invalid contour data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid contour data");
     }
 
     if (count%2 != 0) {
-        Tcl_SetResult(interp, (char *) "convexHull invalid points data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         int number_from_list_x;
@@ -4356,9 +4367,10 @@ int convexHull(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::convexHull(points, hull, clockwise);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "convexHull failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -4409,13 +4421,11 @@ int arrowedLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[6], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "arrowedLine invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "arrowedLine invalid color data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -4463,9 +4473,10 @@ int arrowedLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
         cv::arrowedLine(*mat, cv::Point(x1, y1), cv::Point(x2, y2),
                 color, thickness, lineType, shift, tipLength);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "arrowedLine failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     return TCL_OK;
@@ -4504,13 +4515,11 @@ int circle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[5], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "circle invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "circle invalid color data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -4554,9 +4563,10 @@ int circle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
         cv::circle(*mat, cv::Point(x1, y1), radius,
                    color, thickness, lineType, shift);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "circle failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     return TCL_OK;
@@ -4576,13 +4586,11 @@ int clipLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "clipLine invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 2) {
-        Tcl_SetResult(interp, (char *) "clipLine invalid size data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid size data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -4598,13 +4606,11 @@ int clipLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "clipLine invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 2) {
-        Tcl_SetResult(interp, (char *) "clipLine invalid point data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -4620,13 +4626,11 @@ int clipLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "clipLine invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 2) {
-        Tcl_SetResult(interp, (char *) "clipLine invalid point data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -4645,9 +4649,10 @@ int clipLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         cv::Point point1(x1, y1);
         cv::Point point2(x2, y2);
         result = cv::clipLine(cv::Size(width, height), point1, point2);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "clipLine failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     if (result) {
@@ -4688,13 +4693,11 @@ int drawMarker(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[4], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "drawMarker invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "drawMarker invalid color data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -4742,9 +4745,10 @@ int drawMarker(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
         cv::drawMarker(*mat, cv::Point(x1, y1), color,
                        markerType, markerSize, thickness, line_type);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "drawMarker failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     return TCL_OK;
@@ -4800,13 +4804,11 @@ int ellipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[9], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "ellipse invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "ellipse invalid color data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -4851,9 +4853,10 @@ int ellipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         cv::ellipse(*mat, cv::Point(x1, y1), cv::Size(width, height),
                     angle, startAngle, endAngle, color,
                     thickness, lineType, shift);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "ellipse failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     return TCL_OK;
@@ -4880,13 +4883,11 @@ int fillConvexPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "fillConvexPoly invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count%2 != 0) {
-        Tcl_SetResult(interp, (char *) "fillConvexPoly invalid point data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         int number_from_list_x;
@@ -4915,14 +4916,12 @@ int fillConvexPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
         ckfree(pts);
-        Tcl_SetResult(interp, (char *) "fillConvexPoly invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
         ckfree(pts);
-        Tcl_SetResult(interp, (char *) "fillConvexPoly invalid color data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -4968,10 +4967,12 @@ int fillConvexPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
         cv::fillConvexPoly(*mat,  (const cv::Point *) pts, npts,
                            color, lineType, shift);
+    } catch (const cv::Exception &ex) {
+        ckfree(pts);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         ckfree(pts);
-        Tcl_SetResult(interp, (char *) "fillConvexPoly failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     ckfree(pts);
@@ -5001,13 +5002,11 @@ int fillPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[2], &ncontours) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "fillPoly invalid lists", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid lists");
     }
 
     if (ncontours == 0) {
-        Tcl_SetResult(interp, (char *) "fillPoly invalid point lists", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
     } else {
         pts = (cv::Point **) ckalloc(sizeof(cv::Point *) * ncontours);
         npts = (int *) ckalloc(sizeof(int) * ncontours);
@@ -5021,14 +5020,12 @@ int fillPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         for (int number = 0; number < ncontours; number++) {
             Tcl_ListObjIndex(interp, objv[2], number, &elemPointListPtr);
             if (Tcl_ListObjLength(interp, elemPointListPtr, &count) != TCL_OK) {
-                Tcl_SetResult(interp, (char *) "fillPoly invalid list", TCL_STATIC);
-
+                Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list");
                 goto End;
             }
 
             if (count%2 != 0) {
-                Tcl_SetResult(interp, (char *) "fillPoly invalid point data", TCL_STATIC);
-
+                Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
                 goto End;
             } else {
                 Tcl_Obj *elemListPtr = NULL;
@@ -5057,13 +5054,12 @@ int fillPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "fillPoly invalid list data", TCL_STATIC);
-
+        Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
         goto End;
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "fillPoly invalid color data", TCL_STATIC);
+        Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
 
         goto End;
     } else {
@@ -5116,8 +5112,13 @@ int fillPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                      cv::Point(offset_x, offset_y));
 
         isDone = 1;
+    } catch (const cv::Exception &ex) {
+        Opencv_Exc2Tcl(interp, &ex);
+
+        isDone = 0;
+        goto End;
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "fillPoly failed", TCL_STATIC);
+        Opencv_Exc2Tcl(interp, NULL);
 
         isDone = 0;
         goto End;
@@ -5132,7 +5133,9 @@ End:
         ckfree(pts);
     }
 
-    if(npts) ckfree(npts);
+    if (npts) {
+        ckfree(npts);
+    }
 
     if (isDone) {
         return TCL_OK;
@@ -5178,13 +5181,11 @@ int line(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[6], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "line invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "line invalid color data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -5228,9 +5229,10 @@ int line(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
         cv::line(*mat, cv::Point(x1, y1), cv::Point(x2, y2),
                  color, thickness, lineType, shift);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "line failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     return TCL_OK;
@@ -5258,13 +5260,11 @@ int polylines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "polylines invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count%2 != 0) {
-        Tcl_SetResult(interp, (char *) "polylines invalid point data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         int number_from_list_x;
@@ -5303,14 +5303,12 @@ int polylines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     if (Tcl_ListObjLength(interp, objv[5], &count) != TCL_OK) {
         ckfree(pts);
-        Tcl_SetResult(interp, (char *) "polylines invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
         ckfree(pts);
-        Tcl_SetResult(interp, (char *) "polylines invalid color data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -5362,10 +5360,12 @@ int polylines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         cv::polylines(*mat,  (const cv::Point* const*) &pts, (const int*) &npts,
                       ncontours, (bool) isClosed, color,
                       thickness, lineType, shift);
+    } catch (const cv::Exception &ex) {
+        ckfree(pts);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         ckfree(pts);
-        Tcl_SetResult(interp, (char *) "polylines failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     ckfree(pts);
@@ -5415,13 +5415,11 @@ int putText(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[7], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "putText invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "putText invalid color data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -5468,10 +5466,12 @@ int putText(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
         cv::putText(*mat, text, cv::Point(x1, y1), fontFace, fontScale,
                     color, thickness, lineType, (bool) bottomLeftOrigin);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "putText failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
@@ -5515,13 +5515,11 @@ int rectangle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[6], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "rectangle invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "rectangle invalid color data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -5565,9 +5563,10 @@ int rectangle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
         cv::rectangle(*mat, cv::Point(x1, y1), cv::Point(x2, y2),
                       color, thickness, lineType, shift);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "rectangle failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     return TCL_OK;
@@ -5617,7 +5616,7 @@ static int CLAHE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
     }
 
     if (cvd->clahe == nullptr) {
-        Tcl_SetResult(interp, (char *) "singleton not instantiated", TCL_STATIC);
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
         return TCL_ERROR;
     }
 
@@ -5638,11 +5637,11 @@ static int CLAHE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
             }
 
             try {
-
                 cvd->clahe->apply(*mat, result);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "apply failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(result);
@@ -5724,12 +5723,12 @@ int CLAHE(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         clahe = cv::createCLAHE(clipLimit, cv::Size(tileGridSize_w, tileGridSize_h));
         if (clahe == nullptr) {
-            Tcl_SetResult(interp, (char *) "CLAHE create failed", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsNullPtr, "CLAHE nullptr");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "CLAHE failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewStringObj("::cv-clahe", -1);

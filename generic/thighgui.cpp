@@ -18,8 +18,7 @@ int namedWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     winname = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "namedWindow invalid winname", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid window name");
     }
 
     if (objc == 3) {
@@ -31,10 +30,12 @@ int namedWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     winname = Tcl_UtfToExternalDString(NULL, winname, len, &ds);
     try {
         cv::namedWindow(winname, flags);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "namedWindow failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
@@ -56,8 +57,7 @@ int imshow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     winname = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "imshow invalid winname", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid window name");
     }
 
     mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
@@ -68,10 +68,12 @@ int imshow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     winname = Tcl_UtfToExternalDString(NULL, winname, len, &ds);
     try {
         cv::imshow(winname, *mat);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "imshow failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
     return TCL_OK;
@@ -94,9 +96,10 @@ int waitKey(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         result = cv::waitKey(delay);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "waitKey failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_SetObjResult(interp, Tcl_NewIntObj(result));
     return TCL_OK;
@@ -116,8 +119,7 @@ int moveWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     winname = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "moveWindow Iinvalid winname", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid window name");
     }
 
     if (Tcl_GetIntFromObj(interp, objv[2], &x) != TCL_OK) {
@@ -131,10 +133,12 @@ int moveWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     winname = Tcl_UtfToExternalDString(NULL, winname, len, &ds);
     try {
         cv::moveWindow(winname, x, y);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "moveWindow failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
     return TCL_OK;
@@ -154,8 +158,7 @@ int resizeWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     winname = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "resizeWindow Iinvalid winname", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid window name");
     }
 
     if (Tcl_GetIntFromObj(interp, objv[2], &width) != TCL_OK) {
@@ -172,10 +175,12 @@ int resizeWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     winname = Tcl_UtfToExternalDString(NULL, winname, len, &ds);
     try {
         cv::resizeWindow(winname, width, height);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "resizeWindow failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
     return TCL_OK;
@@ -195,17 +200,18 @@ int destroyWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     winname = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "destroyWindow invalid winname", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid window name");
     }
 
     winname = Tcl_UtfToExternalDString(NULL, winname, len, &ds);
     try {
         cv::destroyWindow(winname);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "destroyWindow failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
     return TCL_OK;
@@ -221,9 +227,10 @@ int destroyAllWindows(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
 
     try {
         cv::destroyAllWindows();
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "destroyAllWindows failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     return TCL_OK;
 }
@@ -260,9 +267,10 @@ int selectROI(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         rect = cv::selectROI(*mat, showCrosshair, fromCenter);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "selectROI failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -318,14 +326,12 @@ int setMouseCallback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
     winname = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "setMouseCallback invalid winname", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid window name");
     }
 
     callback_code = Tcl_GetStringFromObj(objv[2], &len2);
     if (len2 < 1) {
-        Tcl_SetResult(interp, (char *) "setMouseCallback invalid callback_code", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid callback");
     }
 
     winname = Tcl_UtfToExternalDString(NULL, winname, len, &ds);
@@ -335,10 +341,12 @@ int setMouseCallback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         callbackinfo->callback_code = callback_code;
         callbackinfo->value = 0;
         cv::setMouseCallback(winname, CallBackFunc, callbackinfo);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "setMouseCallback failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
@@ -385,14 +393,12 @@ int createTrackbar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
     trackbarname = Tcl_GetStringFromObj(objv[1], &tlen);
     if (tlen < 1) {
-        Tcl_SetResult(interp, (char *) "createTrackbar invalid trackbarname", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid trackbar name");
     }
 
     winname = Tcl_GetStringFromObj(objv[2], &wlen);
     if (wlen < 1) {
-        Tcl_SetResult(interp, (char *) "createTrackbar invalid winname", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid window name");
     }
 
     if (Tcl_GetIntFromObj(interp, objv[3], &init_value) != TCL_OK) {
@@ -405,8 +411,7 @@ int createTrackbar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     callback_code = Tcl_GetStringFromObj(objv[5], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "createTrackbar invalid callback_code", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid callback");
     }
 
     winname = Tcl_UtfToExternalDString(NULL, winname, wlen, &ds1);
@@ -419,11 +424,14 @@ int createTrackbar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
         cv::createTrackbar(trackbarname, winname, &(callbackinfo->value),
                            max_value, TrackbarCallback, callbackinfo);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds1);
         Tcl_DStringFree(&ds2);
-        Tcl_SetResult(interp, (char *) "createTrackbar failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds1);
     Tcl_DStringFree(&ds2);
@@ -447,25 +455,26 @@ int getTrackbarPos(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
     trackbarname = Tcl_GetStringFromObj(objv[1], &tlen);
     if (tlen < 1) {
-        Tcl_SetResult(interp, (char *) "getTrackbarPos invalid trackbarname", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid trackbar name");
     }
 
     winname = Tcl_GetStringFromObj(objv[2], &wlen);
     if (wlen < 1) {
-        Tcl_SetResult(interp, (char *) "getTrackbarPos invalid winname", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid window name");
     }
 
     winname = Tcl_UtfToExternalDString(NULL, winname, wlen, &ds1);
     trackbarname = Tcl_UtfToExternalDString(NULL, trackbarname, tlen, &ds2);
     try {
         value = cv::getTrackbarPos(trackbarname, winname);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds1);
         Tcl_DStringFree(&ds2);
-        Tcl_SetResult(interp, (char *) "getTrackbarPos failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds1);
     Tcl_DStringFree(&ds2);

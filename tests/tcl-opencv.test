@@ -30,7 +30,7 @@ test opencv-1.2 {read image, no image} {*}{
     }
     -returnCodes error
     -match glob
-    -result {*no image data}
+    -result {no image data}
 }
 
 test opencv-1.3 {write image, wrong # args} {*}{
@@ -657,7 +657,7 @@ test opencv-1.68 {MatWithDims test} {*}{
     }
     -returnCodes error
     -match glob
-    -result {matwithdims invalid color data*}
+    -result {invalid color data*}
 }
 
 test opencv-1.69 {dft test} {*}{
@@ -1336,7 +1336,7 @@ test opencv-1.91 {fillPoly test} {*}{
     }
     -returnCodes error
     -match glob
-    -result {fillPoly invalid point data}
+    -result {invalid point data}
 }
 
 test opencv-1.92 {fillPoly test} {*}{

@@ -96,16 +96,14 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 filename = Tcl_GetStringFromObj(objv[2], &len);
                 if ((mode & (cv::FileStorage::WRITE | cv::FileStorage::MEMORY)) !=
                     (cv::FileStorage::WRITE | cv::FileStorage::MEMORY) && len < 1) {
-                    Tcl_SetResult(interp, (char *) "invalid filename or data", TCL_STATIC);
-                    return TCL_ERROR;
+                    return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid filename or data");
                 }
                 Tcl_DStringFree(&cvo->ds1);
                 filename = Tcl_UtfToExternalDString(NULL, filename, len, &cvo->ds1);
             }
             if (!fs->open(filename, mode)) {
                 Tcl_DStringFree(&cvo->ds1);
-                Tcl_SetResult(interp, (char *) "open failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "open failed");
             }
             cvo->flags = mode;
             break;
@@ -116,8 +114,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return TCL_ERROR;
             }
             if (!fs->isOpened()) {
-                Tcl_SetResult(interp, (char *) "not opened", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened");
             }
             Tcl_Encoding enc = Tcl_GetEncoding(NULL, "utf-8");
             Tcl_DString ds;
@@ -150,12 +147,16 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     Tcl_DStringFree(&ds);
                     it++;
                 }
+            } catch (const cv::Exception &ex) {
+                Tcl_FreeEncoding(enc);
+                Tcl_DStringFree(&ds);
+                Tcl_DecrRefCount(listPtr);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_FreeEncoding(enc);
                 Tcl_DStringFree(&ds);
                 Tcl_DecrRefCount(listPtr);
-                Tcl_SetResult(interp, (char *) "retrieve keys failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_FreeEncoding(enc);
             Tcl_DStringFree(&ds);
@@ -173,12 +174,10 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return TCL_ERROR;
             }
             if (!fs->isOpened()) {
-                Tcl_SetResult(interp, (char *) "not opened", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened");
             }
             if (!(cvo->flags & (cv::FileStorage::WRITE | cv::FileStorage::APPEND))) {
-                Tcl_SetResult(interp, (char *) "not opened for writing", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened for writing");
             }
             enc = Tcl_GetEncoding(NULL, "utf-8");
             name = Tcl_GetStringFromObj(objv[2], &nlen);
@@ -192,10 +191,12 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     (*fs) << name << "{";
                     Tcl_DStringAppend(&cvo->ds2, "}", 1);
                 }
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "write failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringFree(&ds);
             break;
@@ -209,30 +210,27 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return TCL_ERROR;
             }
             if (!fs->isOpened()) {
-                Tcl_SetResult(interp, (char *) "not opened", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened");
             }
             if (!(cvo->flags & (cv::FileStorage::WRITE | cv::FileStorage::APPEND))) {
-                Tcl_SetResult(interp, (char *) "not opened for writing", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened for writing");
             }
             mlen = Tcl_DStringLength(&cvo->ds2) - 1;
             if (mlen < 0) {
-                Tcl_SetResult(interp, (char *) "no seq/map to end", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "no seq/map to end");
             }
             marker[0] = Tcl_DStringValue(&cvo->ds2)[mlen];
             marker[1] = '\0';
             if ((marker[0] == ']' && choice != FUNC_ENDS) ||
                 (marker[0] == '}' && choice != FUNC_ENDM))  {
-                Tcl_SetResult(interp, (char *) "seq/map mismatch", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "seq/map mismatch");
             }
             try {
                 (*fs) << (const char *) marker;
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "write failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringSetLength(&cvo->ds2, mlen);
             break;
@@ -248,8 +246,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return TCL_ERROR;
             }
             if (!fs->isOpened()) {
-                Tcl_SetResult(interp, (char *) "not opened", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened");
             }
             enc = Tcl_GetEncoding(NULL, "utf-8");
             name = Tcl_GetStringFromObj(objv[2], &nlen);
@@ -266,7 +263,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     node = node[name];
                 }
                 if (!(node.isSeq() || node.isReal())) {
-                    throw cv::Exception();
+                    CV_Error(cv::Error::StsParseError, "sequence or number expected");
                 }
                 if (node.isSeq()) {
                     for (size_t i = 0; i < node.size(); i++) {
@@ -277,12 +274,16 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     value = node.real();
                     Tcl_ListObjAppendElement(NULL, listPtr, Tcl_NewDoubleObj(value));
                 }
+            } catch (const cv::Exception &ex) {
+                Tcl_FreeEncoding(enc);
+                Tcl_DStringFree(&ds);
+                Tcl_DecrRefCount(listPtr);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_FreeEncoding(enc);
                 Tcl_DStringFree(&ds);
                 Tcl_DecrRefCount(listPtr);
-                Tcl_SetResult(interp, (char *) "read failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_FreeEncoding(enc);
             Tcl_DStringFree(&ds);
@@ -300,8 +301,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return TCL_ERROR;
             }
             if (!fs->isOpened()) {
-                Tcl_SetResult(interp, (char *) "not opened", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened");
             }
             enc = Tcl_GetEncoding(NULL, "utf-8");
             name = Tcl_GetStringFromObj(objv[2], &nlen);
@@ -318,7 +318,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     node = node[name];
                 }
                 if (!(node.isSeq() || !node.isInt())) {
-                    throw cv::Exception();
+                    CV_Error(cv::Error::StsParseError, "sequence or integer expected");
                 }
                 if (node.isSeq()) {
                     for (size_t i = 0; i < node.size(); i++) {
@@ -329,12 +329,16 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     node >> value;
                     Tcl_ListObjAppendElement(NULL, listPtr, Tcl_NewIntObj(value));
                 }
+            } catch (const cv::Exception &ex) {
+                Tcl_FreeEncoding(enc);
+                Tcl_DStringFree(&ds);
+                Tcl_DecrRefCount(listPtr);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_FreeEncoding(enc);
                 Tcl_DStringFree(&ds);
                 Tcl_DecrRefCount(listPtr);
-                Tcl_SetResult(interp, (char *) "read failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_FreeEncoding(enc);
             Tcl_DStringFree(&ds);
@@ -353,8 +357,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return TCL_ERROR;
             }
             if (!fs->isOpened()) {
-                Tcl_SetResult(interp, (char *) "not opened", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened");
             }
             enc = Tcl_GetEncoding(NULL, "utf-8");
             name = Tcl_GetStringFromObj(objv[2], &nlen);
@@ -369,14 +372,17 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     node = node[name];
                 }
                 if (node.isNone() || node.isSeq()) {
-                    throw cv::Exception();
+                    CV_Error(cv::Error::StsParseError, "wrong node type");
                 }
                 rmat = node.mat();
+            } catch (const cv::Exception &ex) {
+                Tcl_FreeEncoding(enc);
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_FreeEncoding(enc);
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "read failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_FreeEncoding(enc);
             Tcl_DStringFree(&ds);
@@ -396,14 +402,14 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return TCL_ERROR;
             }
             if (!fs->isOpened()) {
-                Tcl_SetResult(interp, (char *) "not opened", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened");
             }
             enc = Tcl_GetEncoding(NULL, "utf-8");
             name = Tcl_GetStringFromObj(objv[2], &nlen);
             name = Tcl_UtfToExternalDString(enc, name, nlen, &ds);
             empty = Tcl_NewObj();
             Tcl_IncrRefCount(empty);
+            int keepInterpErr = 0;
             try {
                 cv::FileNode node = (*fs)[name];
                 cv::String typestring;
@@ -416,13 +422,13 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     node = node[name];
                 }
                 if (node.isNone() || !node.isMap()) {
-                    throw cv::Exception();
+                    CV_Error(cv::Error::StsParseError, "wrong node type");
                 }
                 typestring = node["type"].string();
                 type = typestring.c_str();
                 node = node["data"];
                 if (!(node.isMap() || node.isNone()) || type == NULL) {
-                    throw cv::Exception();
+                    CV_Error(cv::Error::StsParseError, "wrong node type or unknown data type");
                 } else if (strcmp(type, "opencv-matrix") == 0) {
                     cv::Mat *mat;
                     if (node.isNone()) {
@@ -430,27 +436,32 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     } else {
                         mat = new cv::Mat(node.mat());
                     }
+                    keepInterpErr = 1;
                     pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
                 } else if (strcmp(type, "opencv-pca") == 0) {
                     cv::PCA *pca = new cv::PCA();
                     if (!node.isNone()) {
                         pca->read(node);
                     }
+                    keepInterpErr = 1;
                     pResultStr = Opencv_NewHandle(cd, interp, OPENCV_PCA, pca);
                 } else if (strcmp(type, "opencv-cascadeclassifier") == 0) {
                     cv::CascadeClassifier *cas = new cv::CascadeClassifier();
                     if (!node.isNone()) {
                         cas->read(node);
                     }
+                    keepInterpErr = 1;
                     pResultStr = Opencv_NewHandle(cd, interp, OPENCV_ODETECT, cas);
                 } else if (strcmp(type, "opencv-hogdescriptor") == 0) {
                     cv::HOGDescriptor *hog = new cv::HOGDescriptor();
                     if (!node.isNone()) {
                         hog->read(node);
                     }
+                    keepInterpErr = 1;
                     pResultStr = Opencv_NewHandle(cd, interp, OPENCV_OOBJHOG, hog);
                 } else if (strcmp(type, "opencv-clahe") == 0) {
                     if (CLAHE(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -458,6 +469,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-fastfeaturedetector") == 0) {
                     if (FastFeatureDetector(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -465,6 +477,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-agastfeaturedetector") == 0) {
                     if (AgastFeatureDetector(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -472,6 +485,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-mserextractor") == 0) {
                     if (MSER(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -479,6 +493,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-orb") == 0) {
                     if (ORB(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -486,6 +501,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-akaze") == 0) {
                     if (AKAZE(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -493,6 +509,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-brisk") == 0) {
                     if (BRISK(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -501,6 +518,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 #ifdef TCL_USE_SIFT
                 } else if (strcmp(type, "opencv-sift") == 0) {
                     if (SIFT(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -509,6 +527,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 #endif
                 } else if (strcmp(type, "opencv-bfmatcher") == 0) {
                     if (BFMatcher(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -516,6 +535,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-flannbasedmatcher") == 0) {
                     if (FlannBasedMatcher(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -523,6 +543,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-simpleblobdetector") == 0) {
                     if (SimpleBlobDetector(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -530,6 +551,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-backgroundsubtractormog2") == 0) {
                     if (BackgroundSubtractorMOG2(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -537,6 +559,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-stereobm") == 0) {
                     if (StereoBM(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -544,6 +567,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-stereosgbm") == 0) {
                     if (StereoSGBM(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -551,6 +575,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-alignmtb") == 0) {
                     if (AlignMTB(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -558,6 +583,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-calibratedebevec") == 0) {
                     if (CalibrateDebevec(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -565,6 +591,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-mergedebevec") == 0) {
                     if (MergeDebevec(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -572,6 +599,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-mergemertens") == 0) {
                     if (MergeMertens(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -579,6 +607,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-tonemapdrago") == 0) {
                     if (TonemapDrago(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -586,6 +615,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-tonemapmantiuk") == 0) {
                     if (TonemapMantiuk(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -593,6 +623,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-tonemapreinhard") == 0) {
                     if (TonemapReinhard(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -600,6 +631,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-logisticregression") == 0) {
                     if (LogisticRegression(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -607,6 +639,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-normalbayesclassifier") == 0) {
                     if (NormalBayesClassifier(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -614,6 +647,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-knearest") == 0) {
                     if (KNearest(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -621,6 +655,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-svm") == 0) {
                     if (SVM(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -628,6 +663,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-svmsgd") == 0) {
                     if (SVMSGD(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -635,6 +671,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-dtrees") == 0) {
                     if (DTrees(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -642,6 +679,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-boost") == 0) {
                     if (Boost(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -649,6 +687,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-rtrees") == 0) {
                     if (RTrees(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -656,6 +695,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                 } else if (strcmp(type, "opencv-annmlp") == 0) {
                     if (ANN_MLP(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                     if (!node.isNone()) {
@@ -672,17 +712,25 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                         responses = node["responses"].mat();
                     }
                     if (TrainData_CONSTRUCTOR(cd, interp, samples, layout, responses) != TCL_OK) {
+                        keepInterpErr = 1;
                         throw cv::Exception();
                     }
                 } else {
-                    throw cv::Exception();
+                    CV_Error(cv::Error::StsParseError, "unsupported data type");
                 }
+            } catch (const cv::Exception &ex) {
+                Tcl_DecrRefCount(empty);
+                Tcl_FreeEncoding(enc);
+                Tcl_DStringFree(&ds);
+                if (!keepInterpErr) {
+                    return Opencv_Exc2Tcl(interp, &ex);
+                }
+                return TCL_ERROR;
             } catch (...) {
                 Tcl_DecrRefCount(empty);
                 Tcl_FreeEncoding(enc);
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "read failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DecrRefCount(empty);
             Tcl_FreeEncoding(enc);
@@ -703,8 +751,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return TCL_ERROR;
             }
             if (!fs->isOpened()) {
-                Tcl_SetResult(interp, (char *) "not opened", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened");
             }
             enc = Tcl_GetEncoding(NULL, "utf-8");
             name = Tcl_GetStringFromObj(objv[2], &nlen);
@@ -722,7 +769,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     node = node[name];
                 }
                 if (!(node.isSeq() || !node.isString())) {
-                    throw cv::Exception();
+                    CV_Error(cv::Error::StsParseError, "sequence or string expected");
                 }
                 if (node.isSeq()) {
                     for (size_t i = 0; i < node.size(); i++) {
@@ -739,13 +786,18 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                             Tcl_NewStringObj(Tcl_DStringValue(&ds2), Tcl_DStringLength(&ds2)));
                     Tcl_DStringFree(&ds2);
                 }
+            } catch (const cv::Exception &ex) {
+                Tcl_FreeEncoding(enc);
+                Tcl_DStringFree(&ds);
+                Tcl_DStringFree(&ds2);
+                Tcl_DecrRefCount(listPtr);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_FreeEncoding(enc);
                 Tcl_DStringFree(&ds);
                 Tcl_DStringFree(&ds2);
                 Tcl_DecrRefCount(listPtr);
-                Tcl_SetResult(interp, (char *) "read failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_FreeEncoding(enc);
             Tcl_DStringFree(&ds);
@@ -765,8 +817,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return TCL_ERROR;
             }
             if (!fs->isOpened()) {
-                Tcl_SetResult(interp, (char *) "not opened", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened");
             }
             if (objc == 4) {
                 if (Tcl_GetDoubleFromObj(interp, objv[3], &value) != TCL_OK) {
@@ -794,10 +845,12 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                     (*fs) << "]";
                 }
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "write failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringFree(&ds);
             break;
@@ -814,8 +867,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return TCL_ERROR;
             }
             if (!fs->isOpened()) {
-                Tcl_SetResult(interp, (char *) "not opened", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened");
             }
             if (objc == 4) {
                 if (Tcl_GetIntFromObj(interp, objv[3], &value) != TCL_OK) {
@@ -843,10 +895,12 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                     (*fs) << "]";
                 }
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "write failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringFree(&ds);
             break;
@@ -866,8 +920,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return TCL_ERROR;
             }
             if (!fs->isOpened()) {
-                Tcl_SetResult(interp, (char *) "not opened", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened");
             }
             enc = Tcl_GetEncoding(NULL, "utf-8");
             name = Tcl_GetStringFromObj(objv[2], &nlen);
@@ -875,10 +928,12 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             Tcl_FreeEncoding(enc);
             try {
                 fs->write(name, *mat);
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "write failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringFree(&ds);
             break;
@@ -908,8 +963,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     case OPENCV_OOBJHOG:
                         break;
                     default:
-                        Tcl_SetResult(interp, (char *) "unsupported type", TCL_STATIC);
-                        return TCL_ERROR;
+                        return Opencv_SetResult(interp, cv::Error::StsBadArg, "unsupported type");
                 }
             }
             if (obj == NULL) {
@@ -952,13 +1006,11 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     cmd == cvd->cmd_traindata) {
                     /* type can be serialized */
                 } else {
-                    Tcl_SetResult(interp, (char *) "unsupported type", TCL_STATIC);
-                    return TCL_ERROR;
+                    return Opencv_SetResult(interp, cv::Error::StsBadArg, "unsupported type");
                 }
             }
             if (!fs->isOpened()) {
-                Tcl_SetResult(interp, (char *) "not opened", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened");
             }
             enc = Tcl_GetEncoding(NULL, "utf-8");
             name = Tcl_GetStringFromObj(objv[2], &nlen);
@@ -1318,10 +1370,12 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 } else {
                     Tcl_Panic("unhandled type/object");
                 }
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_DStringFree(&ds);
-                Tcl_SetResult(interp, (char *) "write failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringFree(&ds);
             break;
@@ -1337,8 +1391,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return TCL_ERROR;
             }
             if (!fs->isOpened()) {
-                Tcl_SetResult(interp, (char *) "not opened", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened");
             }
             enc = Tcl_GetEncoding(NULL, "utf-8");
             name = Tcl_GetStringFromObj(objv[2], &nlen);
@@ -1365,11 +1418,14 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                     (*fs) << "]";
                 }
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds1);
+                Tcl_DStringFree(&ds2);
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
                 Tcl_DStringFree(&ds1);
                 Tcl_DStringFree(&ds2);
-                Tcl_SetResult(interp, (char *) "write failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             Tcl_DStringFree(&ds1);
             Tcl_DStringFree(&ds2);
@@ -1381,8 +1437,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return TCL_ERROR;
             }
             if (!fs->isOpened()) {
-                Tcl_SetResult(interp, (char *) "not opened", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "not opened");
             }
             int ret = TCL_OK;
             if (cvo->flags & (cv::FileStorage::WRITE | cv::FileStorage::APPEND)) {
@@ -1393,9 +1448,10 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     marker[1] = '\0';
                     try {
                         (*fs) << (const char *) marker;
+                    } catch (const cv::Exception &ex) {
+                        ret = Opencv_Exc2Tcl(interp, &ex);
                     } catch (...) {
-                        Tcl_SetResult(interp, (char *) "write failed", TCL_STATIC);
-                        ret = TCL_ERROR;
+                        ret = Opencv_Exc2Tcl(interp, NULL);
                     }
                     mlen--;
                 }
@@ -1406,9 +1462,10 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 try {
                     std::string str = fs->releaseAndGetString();
                     Tcl_SetObjResult(interp, Tcl_NewByteArrayObj((unsigned char *) str.c_str(), str.length()));
+                } catch (const cv::Exception &ex) {
+                    ret = Opencv_Exc2Tcl(interp, &ex);
                 } catch (...) {
-                    Tcl_SetResult(interp, (char *) "error on close", TCL_STATIC);
-                    ret = TCL_ERROR;
+                    ret = Opencv_Exc2Tcl(interp, NULL);
                 }
             }
             Tcl_DeleteCommandFromToken(interp, cvo->cmd);

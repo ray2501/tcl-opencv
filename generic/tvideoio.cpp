@@ -59,9 +59,10 @@ int VideoWriter_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
             try {
                 result = writer->isOpened();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "isOpened failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             if (result) {
@@ -86,9 +87,10 @@ int VideoWriter_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
             try {
                 writer->write(*mat);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "write failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -108,9 +110,10 @@ int VideoWriter_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
             try {
                 result = writer->get(propId);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "get failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
@@ -136,9 +139,10 @@ int VideoWriter_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
             try {
                 result = writer->set(propId, value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "set failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             if (result) {
@@ -213,13 +217,12 @@ int VideoWriter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     filename = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "VideoWriter: invalid file name", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
     }
 
     fourcc = Tcl_GetStringFromObj(objv[2], &len4);
     if (len4 != 4) {
-        Tcl_SetResult(interp, (char *) "VideoWriter: invalid fourcc", TCL_STATIC);
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid fourcc");
         return TCL_ERROR;
     }
 
@@ -247,10 +250,12 @@ int VideoWriter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         writer = new cv::VideoWriter(filename, fourccvalue, fps,
                                      cv::Size (width,  height), (bool) isColor);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "VideoWriter failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
@@ -317,9 +322,10 @@ int VideoCapture_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 result = capture->isOpened();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "isOpened failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             if (result) {
@@ -342,14 +348,14 @@ int VideoCapture_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 isSuccess = capture->read(frame);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "read failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             if (!isSuccess) {
-                Tcl_SetResult(interp, (char *) "read failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "read failed");
             }
 
             mat = new cv::Mat(frame);
@@ -374,9 +380,10 @@ int VideoCapture_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 result = capture->get(propId);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "get failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
@@ -402,9 +409,10 @@ int VideoCapture_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             try {
                 result = capture->set(propId, value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "set failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             if (result) {
@@ -479,21 +487,18 @@ int VideoCapture(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     opentype = Tcl_GetStringFromObj(objv[1], &len);
     if (len < 1) {
-        Tcl_SetResult(interp, (char *) "VideoCapture: invalid open type", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid open type");
     }
 
     if (strcmp(opentype, "file") == 0) {
         filename = Tcl_GetStringFromObj(objv[2], &len);
         if (len < 1) {
-            Tcl_SetResult(interp, (char *) "VideoCapture: invalid file name", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
         }
 
         type = 1;
     } else if (strcmp(opentype, "index") == 0) {
         if (Tcl_GetIntFromObj(interp, objv[2], &index) != TCL_OK) {
-            Tcl_SetResult(interp, (char *) "VideoCapture: invalid index value", TCL_STATIC);
             return TCL_ERROR;
         }
 
@@ -521,10 +526,12 @@ int VideoCapture(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             capture = new cv::VideoCapture(index);
 #endif
         }
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         Tcl_DStringFree(&ds);
-        Tcl_SetResult(interp, (char *) "VideoCapture failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 

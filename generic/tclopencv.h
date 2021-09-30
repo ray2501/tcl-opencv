@@ -514,6 +514,8 @@ typedef struct {
 extern "C" {
 #endif
 
+MODULE_SCOPE int Opencv_Exc2Tcl(Tcl_Interp *interp, const cv::Exception *ex);
+MODULE_SCOPE int Opencv_SetResult(Tcl_Interp *interp, int code, const char *msg);
 MODULE_SCOPE Tcl_Obj *Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj);
 MODULE_SCOPE void *Opencv_FindHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, Tcl_Obj *name);
 #ifdef TCL_USE_TKPHOTO

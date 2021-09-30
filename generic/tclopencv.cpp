@@ -236,6 +236,111 @@ Opencv_HandleName(const char *prefix, void *obj, char *buffer)
 }
 
 
+static const char *
+Opencv_Err2Str(int code)
+{
+    const char *codebuf = NULL;
+
+    switch (code) {
+    case cv::Error::StsOk: codebuf = "StsOk"; break;
+    case cv::Error::StsBackTrace: codebuf = "StsBackTrace"; break;
+    case cv::Error::StsError: codebuf = "StsError"; break;
+    case cv::Error::StsInternal: codebuf = "StsInternal"; break;
+    case cv::Error::StsNoMem: codebuf = "StsNoMem"; break;
+    case cv::Error::StsBadArg: codebuf = "StsBadArg"; break;
+    case cv::Error::StsBadFunc: codebuf = "StsBadFunc"; break;
+    case cv::Error::StsNoConv: codebuf = "StsNoConv"; break;
+    case cv::Error::StsAutoTrace: codebuf = "StsAutoTrace"; break;
+    case cv::Error::HeaderIsNull: codebuf = "HeaderIsNull"; break;
+    case cv::Error::BadImageSize: codebuf = "BadImageSize"; break;
+    case cv::Error::BadOffset: codebuf = "BadOffset"; break;
+    case cv::Error::BadDataPtr: codebuf = "BadDataPtr"; break;
+    case cv::Error::BadStep: codebuf = "BadStep"; break;
+    case cv::Error::BadModelOrChSeq: codebuf = "BadModelOrChSeq"; break;
+    case cv::Error::BadNumChannels: codebuf = "BadNumChannels"; break;
+    case cv::Error::BadNumChannel1U: codebuf = "BadNumChannel1U"; break;
+    case cv::Error::BadDepth: codebuf = "BadDepth"; break;
+    case cv::Error::BadAlphaChannel: codebuf = "BadAlphaChannel"; break;
+    case cv::Error::BadOrder: codebuf = "BadOrder"; break;
+    case cv::Error::BadOrigin: codebuf = "BadOrigin"; break;
+    case cv::Error::BadAlign: codebuf = "BadAlign"; break;
+    case cv::Error::BadCallBack: codebuf = "BadCallBack"; break;
+    case cv::Error::BadTileSize: codebuf = "BadTileSize"; break;
+    case cv::Error::BadCOI: codebuf = "BadCOI"; break;
+    case cv::Error::BadROISize: codebuf = "BadROISize"; break;
+    case cv::Error::MaskIsTiled: codebuf = "MaskIsTiled"; break;
+    case cv::Error::StsNullPtr: codebuf = "StsNullPtr"; break;
+    case cv::Error::StsVecLengthErr: codebuf = "StsVecLengthErr"; break;
+    case cv::Error::StsFilterStructContentErr: codebuf = "StsFilterStructContentErr"; break;
+    case cv::Error::StsKernelStructContentErr: codebuf = "StsKernelStructContentErr"; break;
+    case cv::Error::StsFilterOffsetErr: codebuf = "StsFilterOffsetErr"; break;
+    case cv::Error::StsBadSize: codebuf = "StsBadSize"; break;
+    case cv::Error::StsDivByZero: codebuf = "StsDivByZero"; break;
+    case cv::Error::StsInplaceNotSupported: codebuf = "StsInplaceNotSupported"; break;
+    case cv::Error::StsObjectNotFound: codebuf = "StsObjectNotFound"; break;
+    case cv::Error::StsUnmatchedFormats: codebuf = "StsUnmatchedFormats"; break;
+    case cv::Error::StsBadFlag: codebuf = "StsBadFlag"; break;
+    case cv::Error::StsBadPoint: codebuf = "StsBadPoint"; break;
+    case cv::Error::StsBadMask: codebuf = "StsBadMask"; break;
+    case cv::Error::StsUnmatchedSizes: codebuf = "StsUnmatchedSizes"; break;
+    case cv::Error::StsUnsupportedFormat: codebuf = "StsUnsupportedFormat"; break;
+    case cv::Error::StsOutOfRange: codebuf = "StsOutOfRange"; break;
+    case cv::Error::StsParseError: codebuf = "StsParseError"; break;
+    case cv::Error::StsNotImplemented: codebuf = "StsNotImplemented"; break;
+    case cv::Error::StsBadMemBlock: codebuf = "StsBadMemBlock"; break;
+    case cv::Error::StsAssert: codebuf = "StsAssert"; break;
+    case cv::Error::GpuNotSupported: codebuf = "GpuNotSupported"; break;
+    case cv::Error::GpuApiCallError: codebuf = "GpuApiCallError"; break;
+    case cv::Error::OpenGlNotSupported: codebuf = "OpenGlNotSupported"; break;
+    case cv::Error::OpenGlApiCallError: codebuf = "OpenGlApiCallError"; break;
+    case cv::Error::OpenCLApiCallError: codebuf = "OpenCLApiCallError"; break;
+    case cv::Error::OpenCLDoubleNotSupported: codebuf = "OpenCLDoubleNotSupported"; break;
+    case cv::Error::OpenCLInitError: codebuf = "OpenCLInitError"; break;
+    case cv::Error::OpenCLNoAMDBlasFft: codebuf = "OpenCLNoAMDBlasFft"; break;
+    }
+    return codebuf;
+}
+
+
+int
+Opencv_Exc2Tcl(Tcl_Interp *interp, const cv::Exception *ex)
+{
+    const char *codebuf;
+    char numbuf[64];
+
+    if (!ex) {
+        Tcl_SetErrorCode(interp, "RUNTIME", "Unspecific", "-1", NULL);
+        Tcl_SetResult(interp, (char *) "unspecific exception", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    sprintf(numbuf, "Unknown_%d", ex->code);
+    codebuf = Opencv_Err2Str(ex->code);
+    if (codebuf == NULL) {
+        codebuf = numbuf;
+    }
+    Tcl_SetErrorCode(interp, "OPENCV", codebuf, numbuf + 8, NULL);
+    Tcl_SetObjResult(interp, Tcl_NewStringObj(ex->msg.c_str(), ex->msg.length()));
+    return (ex->code == cv::Error::StsOk) ? TCL_OK : TCL_ERROR;
+}
+
+
+int
+Opencv_SetResult(Tcl_Interp *interp, int code, const char *msg)
+{
+    const char *codebuf;
+    char numbuf[64];
+
+    sprintf(numbuf, "Unknown_%d", code);
+    codebuf = Opencv_Err2Str(code);
+    if (codebuf == NULL) {
+        codebuf = numbuf;
+    }
+    Tcl_SetErrorCode(interp, "OPENCV", codebuf, numbuf + 8, NULL);
+    Tcl_SetObjResult(interp, Tcl_NewStringObj(msg, -1));
+    return (code == cv::Error::StsOk) ? TCL_OK : TCL_ERROR;
+}
+
+
 static void
 Opencv_DESTRUCTOR(ClientData cd)
 {
@@ -550,13 +655,13 @@ Opencv_FromPhoto(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         img1 = cv::Mat(blk.height, blk.width, CV_8UC4, blk.pixelPtr, cv::Mat::AUTO_STEP);
         /* But OpenCV prefers BGRA layout */
         cv::cvtColor(img1, img2, cv::COLOR_RGBA2BGRA);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "fromPhoto failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
     if (img2.empty() || !img2.data) {
-        Tcl_SetResult(interp, (char *) "fromPhoto no data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsError, "no image data");
     }
     mat = new cv::Mat(img2);
     pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);

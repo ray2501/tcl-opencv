@@ -240,19 +240,16 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             }
 
             if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-                Tcl_SetResult(interp, (char *) "at invalid list data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
             }
 
             if (count != mat->dims) {
-                Tcl_SetResult(interp, (char *) "at wrong list number", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "wrong list number");
             }
 
-            index = (int *) ckalloc(sizeof(int) * mat->dims);
+            index = (int *) attemptckalloc(sizeof(int) * mat->dims);
             if (!index) {
-                Tcl_SetResult(interp, (char *) "at malloc index failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsNoMem, "alloc index failed");
             }
 
             for (int i = 0; i < count; i++) {
@@ -271,8 +268,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             for (int i = 0; i < count; i++) {
                 if (index[i] >= mat->size[i]) {
                     ckfree(index);
-                    Tcl_SetResult(interp, (char *) "at index out of range", TCL_STATIC);
-                    return TCL_ERROR;
+                    return Opencv_SetResult(interp, cv::Error::StsBadArg, "index out of range");
                 }
             }
 
@@ -283,8 +279,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             if (channel >= mat->channels()) {
                 ckfree(index);
-                Tcl_SetResult(interp, (char *) "at wrong channels range", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "wrong channel range");
             }
 
             switch (mat->type()) {
@@ -325,8 +320,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
                 default: {
                     ckfree(index);
-                    Tcl_SetResult(interp, (char *) "at invalid type", TCL_STATIC);
-                    return TCL_ERROR;
+                    return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid type");
                 }
             }
 
@@ -347,8 +341,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
                     default: {
                         ckfree(index);
-                        Tcl_SetResult(interp, (char *) "at set: wrong matrix type", TCL_STATIC);
-                        return TCL_ERROR;
+                        return Opencv_SetResult(interp, cv::Error::StsBadArg, "wrong matrix type");
                     }
                 }
             } else {
@@ -363,8 +356,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
                     default: {
                         ckfree(index);
-                        Tcl_SetResult(interp, (char *) "at get: wrong matrix type", TCL_STATIC);
-                        return TCL_ERROR;
+                        return Opencv_SetResult(interp, cv::Error::StsBadArg, "wrong matrix type");
                     }
                 }
 
@@ -384,8 +376,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
                     default: {
                         ckfree(index);
-                        Tcl_SetResult(interp, (char *) "at wrong matrix type", TCL_STATIC);
-                        return TCL_ERROR;
+                        return Opencv_SetResult(interp, cv::Error::StsBadArg, "wrong matrix type");
                     }
                 }
             }
@@ -412,14 +403,14 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             try {
                  result_mat = mat->inv(method);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "inv failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             if (result_mat.empty() || !result_mat.data) {
-                Tcl_SetResult(interp, (char *) "inv no data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "no data");
             }
 
             dstmat = new cv::Mat(result_mat);
@@ -446,9 +437,10 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             try {
                 result = mat->dot(*mat2);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "dot failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
@@ -475,14 +467,14 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                  * Computes a cross-product of two 3-element vectors.
                  */
                 result_mat = mat->cross(*mat2);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "corss failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             if (result_mat.empty() || !result_mat.data) {
-                Tcl_SetResult(interp, (char *) "corss no data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "no cross product data");
             }
 
             dstmat = new cv::Mat(result_mat);
@@ -509,14 +501,14 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             try {
                 result_mat = (*mat) * (*mat2);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "* failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             if (result_mat.empty() || !result_mat.data) {
-                Tcl_SetResult(interp, (char *) "* no data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "no data");
             }
 
             dstmat = new cv::Mat(result_mat);
@@ -544,8 +536,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 cv::Mat result_mat = (*mat) + value;
 
                 if (result_mat.empty() ||  !result_mat.data) {
-                    Tcl_SetResult(interp, (char *) "add no data", TCL_STATIC);
-                    return TCL_ERROR;
+                    CV_Error(cv::Error::StsError, "No data");
                 }
 
                 dstmat = new cv::Mat(result_mat);
@@ -553,9 +544,10 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
                 Tcl_SetObjResult(interp, pResultStr);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "add failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -578,8 +570,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 cv::Mat result_mat = (*mat) - value;
 
                 if (result_mat.empty() || !result_mat.data) {
-                    Tcl_SetResult(interp, (char *) "subtract no data", TCL_STATIC);
-                    return TCL_ERROR;
+                    CV_Error(cv::Error::StsError, "No data");
                 }
 
                 dstmat = new cv::Mat(result_mat);
@@ -587,9 +578,10 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
                 Tcl_SetObjResult(interp, pResultStr);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "subtract failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -612,8 +604,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 cv::Mat result_mat = (*mat) * value;
 
                 if (result_mat.empty() || !result_mat.data) {
-                    Tcl_SetResult(interp, (char *) "multiply no data", TCL_STATIC);
-                    return TCL_ERROR;
+                    CV_Error(cv::Error::StsError, "No data");
                 }
 
                 dstmat = new cv::Mat(result_mat);
@@ -621,9 +612,10 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
                 Tcl_SetObjResult(interp, pResultStr);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "multiply failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -646,8 +638,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 cv::Mat result_mat = (*mat) / value;
 
                 if (result_mat.empty() || !result_mat.data) {
-                    Tcl_SetResult(interp, (char *) "divide no data", TCL_STATIC);
-                    return TCL_ERROR;
+                    CV_Error(cv::Error::StsError, "No data");
                 }
 
                 dstmat = new cv::Mat(result_mat);
@@ -655,9 +646,10 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
                 Tcl_SetObjResult(interp, pResultStr);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "divide failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -675,7 +667,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 cv::Mat result_mat = mat->t();
 
                 if (result_mat.empty() || !result_mat.data) {
-                    Tcl_SetResult(interp, (char *) "transpose no data", TCL_STATIC);
+                    CV_Error(cv::Error::StsError, "No data");
                     return TCL_ERROR;
                 }
 
@@ -684,9 +676,10 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
                 Tcl_SetObjResult(interp, pResultStr);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "transpose failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -710,9 +703,10 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             try {
                 diag_image = mat->diag(d);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "diag failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(diag_image);
@@ -753,8 +747,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 cv::Mat cropped_image = (*mat)(cv::Rect(x, y, width, height));
 
                 if (cropped_image.empty() || !cropped_image.data) {
-                    Tcl_SetResult(interp, (char *) "crop no data", TCL_STATIC);
-                    return TCL_ERROR;
+                    CV_Error(cv::Error::StsError, "No data");
                 }
 
                 dstmat = new cv::Mat(cropped_image);
@@ -762,9 +755,10 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
                 Tcl_SetObjResult(interp, pResultStr);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "crop failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -799,8 +793,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 cv::Mat rect_image(*mat, cv::Rect(x, y, width, height));
 
                 if (rect_image.empty() || !rect_image.data) {
-                    Tcl_SetResult(interp, (char *) "rect image data", TCL_STATIC);
-                    return TCL_ERROR;
+                    CV_Error(cv::Error::StsError, "No image data");
                 }
 
                 dstmat = new cv::Mat(rect_image);
@@ -808,9 +801,10 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
                 Tcl_SetObjResult(interp, pResultStr);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "rect failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -841,9 +835,10 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 } else {
                     mat->copyTo(*mat1, *mat2);
                 }
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "copyTo failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -876,14 +871,14 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             try {
                 mat->convertTo(imageChanged, type, scale, shift);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "convertTo failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             if (imageChanged.empty() || !imageChanged.data) {
-                Tcl_SetResult(interp, (char *) "convertTo no data", TCL_STATIC);
-                return TCL_ERROR;
+                CV_Error(cv::Error::StsError, "No data");
             }
 
             dstmat = new cv::Mat(imageChanged);
@@ -918,14 +913,14 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                  * endcol: An exclusive 0-based ending index of the column span.
                  */
                 imageChanged = mat->colRange(startcol, endcol);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "colRange failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             if (imageChanged.empty() || !imageChanged.data) {
-                Tcl_SetResult(interp, (char *) "colRange no data", TCL_STATIC);
-                return TCL_ERROR;
+                CV_Error(cv::Error::StsError, "No data");
             }
 
             dstmat = new cv::Mat(imageChanged);
@@ -960,14 +955,14 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                  * endcol: An exclusive 0-based ending index of the column span.
                  */
                 imageChanged = mat->rowRange(startcol, endcol);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "rowRange failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             if (imageChanged.empty() || !imageChanged.data) {
-                Tcl_SetResult(interp, (char *) "rowRange no data", TCL_STATIC);
-                return TCL_ERROR;
+                CV_Error(cv::Error::StsError, "No data");
             }
 
             dstmat = new cv::Mat(imageChanged);
@@ -993,9 +988,10 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             try {
                 mat->pop_back(nelems);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "pop_back failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1015,9 +1011,10 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             try {
                 mat->push_back(*mat1);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "push_back failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1045,14 +1042,14 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             try {
                 dstimage = mat->reshape(cn, rows);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "reshape failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             if (dstimage.empty() || !dstimage.data) {
-                Tcl_SetResult(interp, (char *) "reshape no data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsError, "no data");
             }
 
             dstmat = new cv::Mat(dstimage);
@@ -1075,13 +1072,11 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             }
 
             if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-                Tcl_SetResult(interp, (char *) "setData invalid list data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
             }
 
             if (count > max_data_len) {
-                Tcl_SetResult(interp, (char *) "setData out of max range", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "out of max range");
             }
 
             for (int i = 0; i < count; i++) {
@@ -1114,13 +1109,11 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             }
 
             if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-                Tcl_SetResult(interp, (char *) "setTo invalid list data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
             }
 
             if (count != 4) {
-                Tcl_SetResult(interp, (char *) "setTo invalid color data", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
             } else {
                 Tcl_Obj *elemListPtr = NULL;
 
@@ -1160,9 +1153,10 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 } else {
                     mat->setTo(color, *mmat);
                 }
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "setTo failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             break;
@@ -1183,7 +1177,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             name = Tcl_GetString(objv[2]);
             photo = Tk_FindPhoto(interp, name);
             if (photo == NULL) {
-                Tcl_SetObjResult(interp, Tcl_ObjPrintf("can't use \"%s\": not a photo image", name));
+                Tcl_SetObjResult(interp, Tcl_ObjPrintf("Can't use \"%s\": not a photo image", name));
                 return TCL_ERROR;
             }
             if ((mat->type() == CV_8UC1 && mat->channels() == 1) ||
@@ -1221,8 +1215,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                     return TCL_ERROR;
                 }
             } else {
-                Tcl_SetResult(interp, (char *) "incompatible cv::Mat", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "incompatible matrix");
             }
             break;
         }
@@ -1433,13 +1426,11 @@ int mat_mat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     if (objc == 5) {
         if (Tcl_ListObjLength(interp, objv[4], &count) != TCL_OK) {
-            Tcl_SetResult(interp, (char *) "mat invalid list data", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
         }
 
         if (count != 4) {
-            Tcl_SetResult(interp, (char *) "mat invalid color data", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
         } else {
             Tcl_Obj *elemListPtr = NULL;
 
@@ -1499,19 +1490,16 @@ int mat_matwithdims(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "matwithdims invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != dims) {
-        Tcl_SetResult(interp, (char *) "matwithdims wrong list number", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "wrong list number");
     }
 
-    index = (int *) ckalloc(sizeof(int) * dims);
+    index = (int *) attemptckalloc(sizeof(int) * dims);
     if (!index) {
-        Tcl_SetResult(interp, (char *) "matwithdims malloc failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsNoMem, "alloc index failed");
     }
 
     for (int i = 0; i < count; i++) {
@@ -1535,14 +1523,12 @@ int mat_matwithdims(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (objc == 5) {
         if (Tcl_ListObjLength(interp, objv[4], &count) != TCL_OK) {
             ckfree(index);
-            Tcl_SetResult(interp, (char *) "matwithdims invalid list data", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
         }
 
         if (count != 4) {
             ckfree(index);
-            Tcl_SetResult(interp, (char *) "matwithdims invalid color data", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
         } else {
             Tcl_Obj *elemListPtr = NULL;
 
@@ -1737,15 +1723,15 @@ int mat_abs(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
     if (!mat1) {
-        Tcl_SetResult(interp, (char *) "abs invalid info data", TCL_STATIC);
         return TCL_ERROR;
     }
 
     try {
         image = cv::abs(*mat1);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "abs failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -1780,9 +1766,10 @@ int mat_absdiff(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::absdiff(*mat1, *mat2, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "absdiff failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -1817,9 +1804,10 @@ int mat_add(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::add(*mat1, *mat2, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "add failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -1867,9 +1855,10 @@ int mat_addWeighted(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::addWeighted(*mat1, alpha, *mat2, beta, gamma, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "addWeighted failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -1915,9 +1904,10 @@ int mat_bitwise_and(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         } else {
             cv::bitwise_and(*mat1, *mat2, image, *mat3);
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "bitwise_and failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -1963,9 +1953,10 @@ int mat_bitwise_or(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         } else {
             cv::bitwise_or(*mat1, *mat2, image, *mat3);
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "bitwise_or failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2011,9 +2002,10 @@ int mat_bitwise_xor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         } else {
             cv::bitwise_xor(*mat1, *mat2, image, *mat3);
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "bitwise_xor failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2054,9 +2046,10 @@ int mat_bitwise_not(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         } else {
             cv::bitwise_not(*mat1, dstimage, *mat2);
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "bitwise_not failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dstimage);
@@ -2097,9 +2090,10 @@ int mat_calcCovarMatrix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
     try {
         cv::calcCovarMatrix(*mat1, covar, mean, flags, ctype);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "calcCovarMatrix failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     matrix_covar = new cv::Mat(covar);
@@ -2147,9 +2141,10 @@ int mat_cartToPolar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::cartToPolar(*mat1, *mat2, magnitude, angle, angleInDegrees);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "cartToPolar failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     magnitudemat = new cv::Mat(magnitude);
@@ -2197,9 +2192,10 @@ int mat_compare(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::compare(*mat1, *mat2, image, cmpop);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "compare failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2238,9 +2234,10 @@ int mat_convertScaleAbs(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
     try {
         cv::convertScaleAbs(*mat, dstimage, alpha, beta);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "convertScaleAbs failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dstimage);
@@ -2293,13 +2290,11 @@ int mat_copyMakeBorder(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 
     if (objc == 8) {
         if (Tcl_ListObjLength(interp, objv[7], &count) != TCL_OK) {
-            Tcl_SetResult(interp, (char *) "copyMakeBorder invalid list data", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
         }
 
         if (count != 4) {
-            Tcl_SetResult(interp, (char *) "copyMakeBorder invalid color data", TCL_STATIC);
-            return TCL_ERROR;
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
         } else {
             Tcl_Obj *elemListPtr = NULL;
 
@@ -2333,9 +2328,10 @@ int mat_copyMakeBorder(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
         } else {
             cv::copyMakeBorder(*mat, dstimage, top, bottom, left, right, borderType);
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "copyMakeBorder failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(dstimage);
@@ -2363,15 +2359,15 @@ int mat_countNonZero(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
     }
 
     if (mat->channels() != 1) {
-        Tcl_SetResult(interp, (char *) "countNonZero requires single-channel array", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "single channel array required");
     }
 
     try {
         result = cv::countNonZero(*mat);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "countNonZero failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     Tcl_SetObjResult(interp, Tcl_NewIntObj(result));
@@ -2396,9 +2392,10 @@ int mat_determinant(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         result = cv::determinant(*mat);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "determinant failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
@@ -2436,9 +2433,10 @@ int mat_divide(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::divide(*mat1, *mat2, image, scale);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "divide failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2472,9 +2470,10 @@ int mat_eigen(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
          * Calculates eigenvalues and eigenvectors of a symmetric matrix.
          */
         retval = cv::eigen(*mat, image1, image2);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "eigen failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat1 = new cv::Mat(image1);
@@ -2512,9 +2511,10 @@ int mat_eigenNonSymmetric(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
     try {
         cv::eigenNonSymmetric(*mat, image1, image2);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "eigenNonSymmetric failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat1 = new cv::Mat(image1);
@@ -2551,9 +2551,10 @@ int mat_exp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::exp(*mat, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "exp failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2591,9 +2592,10 @@ int mat_extractChannel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
          * coi is 0-based index.
          */
         cv::extractChannel(*mat, image, coi);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "extractChannel failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2633,9 +2635,10 @@ int mat_flip(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::flip(*mat, image, flipCode);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "flip failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2663,9 +2666,10 @@ int mat_getOptimalDFTSize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
     try {
         result = cv::getOptimalDFTSize(vecsize);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "getOptimalDFTSize failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     Tcl_SetObjResult(interp, Tcl_NewIntObj(result));
@@ -2702,9 +2706,10 @@ int mat_dft(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::dft(*mat, image, flags, nonzeroRows);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "dft failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2736,13 +2741,11 @@ int mat_inRange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "inRange invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "inRange invalid color data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -2768,13 +2771,11 @@ int mat_inRange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "inRange invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "inRange invalid color data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -2802,9 +2803,10 @@ int mat_inRange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         cv::inRange(*mat, cv::Scalar(B1, G1, R1, A1),
                     cv::Scalar(B2, G2, R2, A2), image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "inRange failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2834,9 +2836,10 @@ int mat_log(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::log(*mat, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "log failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2871,9 +2874,10 @@ int mat_lut(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::LUT(*mat1, *mat2, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "lut failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2912,9 +2916,10 @@ int mat_Mahalanobis(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         result = cv::Mahalanobis(*mat1, *mat2, *icovar);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "Mahalanobis failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
@@ -2945,9 +2950,10 @@ int mat_magnitude(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::magnitude(*mat1, *mat2, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "magnitude failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -2977,9 +2983,10 @@ int mat_meanStdDev(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::meanStdDev(*mat, mean, stddev);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "meanStdDev failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat1 = new cv::Mat(mean);
@@ -3017,9 +3024,10 @@ int mat_minMaxIdx(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::minMaxIdx(*mat, &minVal, &maxVal, &minIdx, &maxIdx);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "minMaxLoc failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -3060,9 +3068,10 @@ int mat_minMaxLoc(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::minMaxLoc(*mat, &minVal, &maxVal, &minLoc, &maxLoc);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "minMaxLoc failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -3104,14 +3113,14 @@ int mat_split(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     std::vector<cv::Mat> channels;
     try {
         cv::split(*mat, channels);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "split failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     if (channels.size() == 0) {
-        Tcl_SetResult(interp, (char *) "split channels is 0", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid channel size");
     }
 
     listPtr = Tcl_NewListObj(0, NULL);
@@ -3161,9 +3170,10 @@ int mat_multiply(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::multiply(*mat1, *mat2, image, scale);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "multiply failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -3209,9 +3219,10 @@ int mat_mulSpectrums(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
     try {
         cv::mulSpectrums(*mat1, *mat2, image, flags, conjB);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "mulSpectrums failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -3237,13 +3248,11 @@ int mat_merge(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "merge: invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count == 0) {
-        Tcl_SetResult(interp, (char *) "merge: empty list", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty list");
     }
 
     for (int i = 0; i < count; i++) {
@@ -3261,9 +3270,10 @@ int mat_merge(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::merge(channels, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "merge failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -3312,9 +3322,10 @@ int mat_norm(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         } else {
             result = cv::norm(*mat, *mat2, norm_type);
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "norm failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
@@ -3354,9 +3365,10 @@ int mat_normalize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::normalize(*mat, image, alpha, beta, norm_type);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "normalize failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -3391,9 +3403,10 @@ int mat_pow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::pow(*mat, power, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "pow failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -3423,13 +3436,11 @@ int mat_randn(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "randn invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "randn invalid mean data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid mean data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -3455,13 +3466,11 @@ int mat_randn(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "randn invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "randn invalid stddev data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid stddev data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -3492,9 +3501,10 @@ int mat_randn(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
          */
         cv::randn(*mat, cv::Scalar(mean_B, mean_G, mean_R, mean_A),
                   cv::Scalar(stddev_B, stddev_G, stddev_R, stddev_A));
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "randn failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     return TCL_OK;
@@ -3519,13 +3529,11 @@ int mat_randu(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "randu invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "randu invalid min data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid min data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -3551,13 +3559,11 @@ int mat_randu(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "randu invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count != 4) {
-        Tcl_SetResult(interp, (char *) "randu invalid max data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid max data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
 
@@ -3588,9 +3594,10 @@ int mat_randu(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
          */
         cv::randu(*mat, cv::Scalar(min_B, min_G, min_R, min_A),
                   cv::Scalar(max_B, max_G, max_R, max_A));
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "randu failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     return TCL_OK;
@@ -3624,9 +3631,10 @@ int mat_randShuffle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
          * by randomly choosing pairs of elements and swapping them.
          */
         cv::randShuffle(*mat, iterFactor);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "randShuffle failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     return TCL_OK;
@@ -3673,9 +3681,10 @@ int mat_reduce(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::reduce(*mat, image, dim, rtype, dtype);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "reduce failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -3710,9 +3719,10 @@ int mat_rotate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::rotate(*mat, image, rotateCode);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "rotate failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -3739,9 +3749,10 @@ int mat_setRNGSeed(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::setRNGSeed(seed);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "setRNGSeed failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     return TCL_OK;
@@ -3779,9 +3790,10 @@ int mat_solve(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         result = cv::solve(*mat1, *mat2, image, flags);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "solve failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -3815,9 +3827,10 @@ int mat_sqrt(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::sqrt(*mat, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "sqrt failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -3852,9 +3865,10 @@ int mat_subtract(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::subtract(*mat1, *mat2, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "subtract failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -3884,9 +3898,10 @@ int mat_sum(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         result = cv::sum(*mat);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "sum failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -3933,9 +3948,10 @@ int mat_SVBackSubst(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::SVBackSubst(*mat1, *mat2, *mat3, *mat4, result);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "SVBackSubst failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(result);
@@ -3972,9 +3988,10 @@ int mat_SVDecomp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::SVDecomp(*mat1, w, v, ut, flags);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "SVDecomp failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -4017,9 +4034,10 @@ int mat_trace(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
      */
     try {
         result = cv::trace(*mat);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "trace failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -4056,9 +4074,10 @@ int mat_transform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::transform(*mat1, image, *mat2);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "transform failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -4093,9 +4112,10 @@ int mat_hconcat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::hconcat(*mat1, *mat2, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "hconcat failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -4130,9 +4150,10 @@ int mat_vconcat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::vconcat(*mat1, *mat2, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "vconcat failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     dstmat = new cv::Mat(image);
@@ -4151,7 +4172,7 @@ int kmeans(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     cv::Mat *matrix = NULL, *labelsmst = NULL, *dstmat = NULL;
     cv::TermCriteria *termCriteria;
     int k = 0, attempts = 0, flags = 0;
-    double value;
+    double value = 0;
     int nolabelmatrix = 0;
 
     if (objc != 7) {
@@ -4203,12 +4224,12 @@ int kmeans(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         } else if (nolabelmatrix == 1 && (flags & cv::KMEANS_USE_INITIAL_LABELS) == 0) {
             value = cv::kmeans(*matrix, k, bestLabels, *termCriteria, attempts, flags, image);
         } else {
-            Tcl_SetResult(interp, (char *) "kmeans arguments is invalid", TCL_STATIC);
-            return TCL_ERROR;
+            CV_Error(cv::Error::StsError, "Invalid argument");
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "kmeans failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -4246,13 +4267,11 @@ int perspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
     }
 
     if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
-        Tcl_SetResult(interp, (char *) "perspectiveTransform invalid list data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
     }
 
     if (count%2 != 0) {
-        Tcl_SetResult(interp, (char *) "perspectiveTransform invalid point data", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
     } else {
         Tcl_Obj *elemListPtr = NULL;
         double number_from_list_x;
@@ -4284,9 +4303,10 @@ int perspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
     try {
         cv::perspectiveTransform(src_points, dst_points, *mat);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "perspectiveTransform failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
@@ -4311,9 +4331,10 @@ int getBuildInformation(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
     try {
         result = cv::getBuildInformation();
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "getBuildInformation failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     Tcl_SetObjResult(interp, Tcl_NewStringObj(result.c_str(), -1));
@@ -4332,9 +4353,10 @@ int getTickCount(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         result = (double) cv::getTickCount();
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "getTickCount failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
@@ -4353,9 +4375,10 @@ int getTickFrequency(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
     try {
         result = cv::getTickFrequency();
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "getTickFrequency failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
@@ -4472,9 +4495,10 @@ int PCA_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             try {
                 pca->backProject(*mat, image);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "backProject failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(image);
@@ -4500,9 +4524,10 @@ int PCA_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             try {
                 pca->project(*mat, image);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
-                Tcl_SetResult(interp, (char *) "project failed", TCL_STATIC);
-                return TCL_ERROR;
+                return Opencv_Exc2Tcl(interp, NULL);
             }
 
             dstmat = new cv::Mat(image);
@@ -4587,9 +4612,10 @@ int PCA(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         local_pca = cv::PCA(*mat, cv::Mat(), flags, maxComponents);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "PCA failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     pca = new cv::PCA(local_pca);
@@ -4715,9 +4741,10 @@ int TermCriteria(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         } else {
             term_crit = cv::TermCriteria(type, maxCount, epsilon);
         }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
-        Tcl_SetResult(interp, (char *) "TermCriteria failed", TCL_STATIC);
-        return TCL_ERROR;
+        return Opencv_Exc2Tcl(interp, NULL);
     }
 
     termCriteria = new cv::TermCriteria(term_crit);
