@@ -4554,7 +4554,12 @@ int pointPolygonTest(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
     }
 
     try {
-        result = cv::pointPolygonTest(points, ::cv::Point2f((float) x, (float) y), measureDist);
+        /*
+         * When measureDist=false , the return value is +1, -1, and 0,
+         * respectively. Otherwise, the return value is a signed distance
+         * between the point and the nearest contour edge.
+         */
+        result = cv::pointPolygonTest(points, cv::Point2f((float) x, (float) y), measureDist);
     } catch (const cv::Exception &ex) {
         return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
