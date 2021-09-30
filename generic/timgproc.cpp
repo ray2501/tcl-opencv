@@ -3853,6 +3853,65 @@ int drawContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int arcLength(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    std::vector<cv::Point> points;
+    int closed = 0, count = 0;
+    double result = 0;
+
+    if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "contour closed");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid contour data");
+    }
+
+    if (count%2 != 0) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid points data");
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+        int number_from_list_x;
+        int number_from_list_y;
+        int npts;
+
+        npts = count / 2;
+        for (int i = 0, j = 0; j < npts; i = i + 2, j = j + 1) {
+            cv::Point point;
+            Tcl_ListObjIndex(interp, objv[1], i, &elemListPtr);
+            if (Tcl_GetIntFromObj(interp, elemListPtr, &number_from_list_x) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            Tcl_ListObjIndex(interp, objv[1], i + 1, &elemListPtr);
+            if (Tcl_GetIntFromObj(interp, elemListPtr, &number_from_list_y) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            point.x = number_from_list_x;
+            point.y = number_from_list_y;
+            points.push_back (point);
+        }
+    }
+
+    if (Tcl_GetBooleanFromObj(interp, objv[2], &closed) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        result = cv::arcLength(points, (bool) closed);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
+    return TCL_OK;
+}
+
+
 int contourArea(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     std::vector<cv::Point> points;

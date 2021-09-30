@@ -1328,6 +1328,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) drawContours,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::arcLength",
+        (Tcl_ObjCmdProc *) arcLength,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::contourArea",
         (Tcl_ObjCmdProc *) contourArea,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
