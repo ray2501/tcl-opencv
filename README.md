@@ -442,6 +442,14 @@ Please notice, FlannBasedMatcher command will only have 1 instance.
 
 Please notice, SimpleBlobDetector command will only have 1 instance.
 
+    ::cv::BOWKMeansTrainer clusterCount termCriteria ?attempts flags?
+    BOWKMeansTrainer add descriptors
+    BOWKMeansTrainer clear
+    BOWKMeansTrainer cluster
+    BOWKMeansTrainer descriptorsCount
+    BOWKMeansTrainer getDescriptors
+    BOWKMeansTrainer close
+
 ### calib3d
 
     ::cv::findChessboardCorners image patternSize_width patternSize_height ?flags?

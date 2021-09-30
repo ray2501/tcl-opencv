@@ -4647,6 +4647,273 @@ int SimpleBlobDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
+
+
+int BOWKMeansTrainer_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Obj *cvo = (Opencv_Obj *)cd;
+    int choice;
+    cv::BOWKMeansTrainer *bowkmeanstrainer;
+
+    static const char *FUNC_strs[] = {
+        "add",
+        "clear",
+        "cluster",
+        "descriptorsCount",
+        "getDescriptors",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_ADD,
+        FUNC_CLEAR,
+        FUNC_CLUSTER,
+        FUNC_descriptorsCount,
+        FUNC_getDescriptors,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    cd = cvo->top;
+    bowkmeanstrainer = (cv::BOWKMeansTrainer *) cvo->obj;
+    if (!bowkmeanstrainer) {
+        Tcl_Panic("null BOWKMeansTrainer object");
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_ADD: {
+            cv::Mat *mat;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "descriptors");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                bowkmeanstrainer->add(*mat);
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "add failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_CLEAR: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                bowkmeanstrainer->clear();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "clear failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            break;
+        }
+        case FUNC_CLUSTER: {
+            cv::Mat result;
+            cv::Mat *mat, *dstmat;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 2 && objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "?descriptors?");
+                return TCL_ERROR;
+            }
+
+            if (objc == 3) {
+                mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+                if (!mat) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                if (objc == 2) {
+                    result = bowkmeanstrainer->cluster();
+                } else {
+                    result = bowkmeanstrainer->cluster(*mat);
+                }
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "cluster failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            dstmat = new cv::Mat(result);
+
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_descriptorsCount: {
+            int value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = bowkmeanstrainer->descriptorsCount();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "descriptorsCount failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getDescriptors: {
+            std::vector<cv::Mat> value;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = bowkmeanstrainer->getDescriptors();
+            } catch (...) {
+                Tcl_SetResult(interp, (char *) "getDescriptors failed", TCL_STATIC);
+                return TCL_ERROR;
+            }
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+
+            for (size_t i = 0; i < value.size(); i++) {
+                Tcl_Obj *pMatResultStr = NULL;
+                cv::Mat *dstmat;
+
+                dstmat = new cv::Mat(value[i]);
+                pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+            }
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+
+            break;
+        }
+        case FUNC__COMMAND: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            Tcl_GetCommandFullName(interp, cvo->cmd, obj);
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__NAME: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewStringObj(cvo->key, -1));
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::BOWKMeansTrainer", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int BOWKMeansTrainer(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Tcl_Obj *pResultStr = NULL;
+    int clusterCount = 0, attempts = 3, flags = cv::KMEANS_PP_CENTERS;
+    cv::TermCriteria *termCriteria;
+    cv::BOWKMeansTrainer *bowkmeanstrainer;
+
+    if (objc != 3 && objc != 5) {
+        Tcl_WrongNumArgs(interp, 1, objv, "clusterCount termCriteria ?attempts flags?");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[1], &clusterCount) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    termCriteria = (cv::TermCriteria *) Opencv_FindHandle(cd, interp, OPENCV_TERMCRITERIA, objv[2]);
+    if (!termCriteria) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 5) {
+        if (Tcl_GetIntFromObj(interp, objv[3], &attempts) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[4], &flags) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        bowkmeanstrainer = new cv::BOWKMeansTrainer(clusterCount, *termCriteria,
+                                                    attempts, flags);
+
+        if (bowkmeanstrainer == nullptr) {
+            Tcl_SetResult(interp, (char *) "BOWKMeansTrainer create failed", TCL_STATIC);
+            return TCL_ERROR;
+        }
+    } catch (...) {
+        Tcl_SetResult(interp, (char *) "BOWKMeansTrainer failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_BOWTRAINER, bowkmeanstrainer);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
 #ifdef __cplusplus
 }
 #endif

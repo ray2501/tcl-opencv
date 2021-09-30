@@ -100,6 +100,11 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
                 break;
             }
 #endif
+            case OPENCV_BOWTRAINER: {
+                cv::BOWKMeansTrainer *bowkmeanstrainer = (cv::BOWKMeansTrainer *) cvo->obj;
+                delete bowkmeanstrainer;
+                break;
+            }
             default:
                 Tcl_Panic("wrong Opencv type");
                 break;
@@ -312,6 +317,11 @@ Opencv_DESTRUCTOR(ClientData cd)
         break;
     }
 #endif
+    case OPENCV_BOWTRAINER: {
+        cv::BOWKMeansTrainer *bowtrainer = (cv::BOWKMeansTrainer *) cvo->obj;
+        delete bowtrainer;
+        break;
+    }
     default:
         Tcl_Panic("wrong Opencv type");
         break;
@@ -378,6 +388,10 @@ Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj)
         proc = QRCodeDetector_FUNCTION;
         break;
 #endif
+    case OPENCV_BOWTRAINER:
+        prefix = "cv-bowktrainer";
+        proc = BOWKMeansTrainer_FUNCTION;
+        break;
     default:
         Tcl_Panic("wrong Opencv type");
         break;
@@ -1386,6 +1400,10 @@ Opencv_Init(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp, "::" NS "::SimpleBlobDetector",
         (Tcl_ObjCmdProc *) SimpleBlobDetector,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::BOWKMeansTrainer",
+        (Tcl_ObjCmdProc *) BOWKMeansTrainer,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     /*
