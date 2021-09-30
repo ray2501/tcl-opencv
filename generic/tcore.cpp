@@ -536,7 +536,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 cv::Mat result_mat = (*mat) + value;
 
                 if (result_mat.empty() ||  !result_mat.data) {
-                    CV_Error(cv::Error::StsError, "No data");
+                    CV_Error(cv::Error::StsError, "no data");
                 }
 
                 dstmat = new cv::Mat(result_mat);
@@ -570,7 +570,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 cv::Mat result_mat = (*mat) - value;
 
                 if (result_mat.empty() || !result_mat.data) {
-                    CV_Error(cv::Error::StsError, "No data");
+                    CV_Error(cv::Error::StsError, "no data");
                 }
 
                 dstmat = new cv::Mat(result_mat);
@@ -604,7 +604,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 cv::Mat result_mat = (*mat) * value;
 
                 if (result_mat.empty() || !result_mat.data) {
-                    CV_Error(cv::Error::StsError, "No data");
+                    CV_Error(cv::Error::StsError, "no data");
                 }
 
                 dstmat = new cv::Mat(result_mat);
@@ -638,7 +638,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 cv::Mat result_mat = (*mat) / value;
 
                 if (result_mat.empty() || !result_mat.data) {
-                    CV_Error(cv::Error::StsError, "No data");
+                    CV_Error(cv::Error::StsError, "no data");
                 }
 
                 dstmat = new cv::Mat(result_mat);
@@ -667,7 +667,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 cv::Mat result_mat = mat->t();
 
                 if (result_mat.empty() || !result_mat.data) {
-                    CV_Error(cv::Error::StsError, "No data");
+                    CV_Error(cv::Error::StsError, "no data");
                     return TCL_ERROR;
                 }
 
@@ -747,7 +747,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 cv::Mat cropped_image = (*mat)(cv::Rect(x, y, width, height));
 
                 if (cropped_image.empty() || !cropped_image.data) {
-                    CV_Error(cv::Error::StsError, "No data");
+                    CV_Error(cv::Error::StsError, "no data");
                 }
 
                 dstmat = new cv::Mat(cropped_image);
@@ -793,7 +793,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 cv::Mat rect_image(*mat, cv::Rect(x, y, width, height));
 
                 if (rect_image.empty() || !rect_image.data) {
-                    CV_Error(cv::Error::StsError, "No image data");
+                    CV_Error(cv::Error::StsError, "no data");
                 }
 
                 dstmat = new cv::Mat(rect_image);
@@ -878,7 +878,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             }
 
             if (imageChanged.empty() || !imageChanged.data) {
-                CV_Error(cv::Error::StsError, "No data");
+                CV_Error(cv::Error::StsError, "no data");
             }
 
             dstmat = new cv::Mat(imageChanged);
@@ -920,7 +920,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             }
 
             if (imageChanged.empty() || !imageChanged.data) {
-                CV_Error(cv::Error::StsError, "No data");
+                CV_Error(cv::Error::StsError, "no data");
             }
 
             dstmat = new cv::Mat(imageChanged);
@@ -962,7 +962,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             }
 
             if (imageChanged.empty() || !imageChanged.data) {
-                CV_Error(cv::Error::StsError, "No data");
+                CV_Error(cv::Error::StsError, "no data");
             }
 
             dstmat = new cv::Mat(imageChanged);
@@ -1177,7 +1177,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             name = Tcl_GetString(objv[2]);
             photo = Tk_FindPhoto(interp, name);
             if (photo == NULL) {
-                Tcl_SetObjResult(interp, Tcl_ObjPrintf("Can't use \"%s\": not a photo image", name));
+                Tcl_SetObjResult(interp, Tcl_ObjPrintf("can't use \"%s\": not a photo image", name));
                 return TCL_ERROR;
             }
             if ((mat->type() == CV_8UC1 && mat->channels() == 1) ||
@@ -4224,7 +4224,7 @@ int kmeans(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         } else if (nolabelmatrix == 1 && (flags & cv::KMEANS_USE_INITIAL_LABELS) == 0) {
             value = cv::kmeans(*matrix, k, bestLabels, *termCriteria, attempts, flags, image);
         } else {
-            CV_Error(cv::Error::StsError, "Invalid argument");
+            CV_Error(cv::Error::StsBadArg, "invalid argument");
         }
     } catch (const cv::Exception &ex) {
         return Opencv_Exc2Tcl(interp, &ex);
@@ -4717,7 +4717,7 @@ int TermCriteria(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_Obj *pResultStr = NULL;
 
     if (objc != 1 && objc != 4) {
-        Tcl_WrongNumArgs(interp, 2, objv, "?type maxCount epsilon?");
+        Tcl_WrongNumArgs(interp, 1, objv, "?type maxCount epsilon?");
         return TCL_ERROR;
     }
 

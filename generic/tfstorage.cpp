@@ -459,6 +459,15 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                     keepInterpErr = 1;
                     pResultStr = Opencv_NewHandle(cd, interp, OPENCV_OOBJHOG, hog);
+                } else if (strcmp(type, "opencv-termcriteria") == 0) {
+                    cv::TermCriteria *tc = new cv::TermCriteria();
+                    if (node.isMap()) {
+                        node["type"] >> tc->type;
+                        node["maxcount"] >> tc->maxCount;
+                        node["epsilon"] >> tc->epsilon;
+                    }
+                    keepInterpErr = 1;
+                    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_TERMCRITERIA, tc);
                 } else if (strcmp(type, "opencv-clahe") == 0) {
                     if (CLAHE(cd, interp, 1, &empty) != TCL_OK) {
                         keepInterpErr = 1;
@@ -961,6 +970,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     case OPENCV_PCA:
                     case OPENCV_ODETECT:
                     case OPENCV_OOBJHOG:
+                    case OPENCV_TERMCRITERIA:
                         break;
                     default:
                         return Opencv_SetResult(interp, cv::Error::StsBadArg, "unsupported type");
@@ -1054,6 +1064,17 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                             (*fs) << "type" << "opencv-hogdescriptor";
                             hog->write(*fs, "data");
                             (*fs) << "}";
+                            break;
+                        }
+                        case OPENCV_TERMCRITERIA: {
+                            cv::TermCriteria *tc = (cv::TermCriteria *) obj->obj;
+                            (*fs) << name << "{";
+                            (*fs) << "type" << "opencv-termcriteria";
+                            (*fs) << "data" << "{";
+                            (*fs) << "type" << tc->type;
+                            (*fs) << "maxcount" << tc->maxCount;
+                            (*fs) << "epsilon" << tc->epsilon;
+                            (*fs) << "}" << "}";
                             break;
                         }
                     }

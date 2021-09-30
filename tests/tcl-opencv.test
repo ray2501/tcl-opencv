@@ -1179,6 +1179,7 @@ test opencv-1.87 {FileStorage (types)} {*}{
         $trd close
         lappend objlist $name
         foreach cmd {
+            cv::TermCriteria
             cv::CLAHE
             cv::FastFeatureDetector
             cv::AgastFeatureDetector

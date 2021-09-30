@@ -162,7 +162,7 @@ int drawKeypoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 #endif
                                  );
         } else {
-            CV_Error(cv::Error::StsError, "Invalid arguments");
+            CV_Error(cv::Error::StsBadArg, "invalid arguments");
         }
     } catch (const cv::Exception &ex) {
         return Opencv_Exc2Tcl(interp, &ex);
@@ -502,7 +502,7 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 #endif
                                );
         } else {
-            CV_Error(cv::Error::StsError, "Invalid arguments");
+            CV_Error(cv::Error::StsBadArg, "invalid arguments");
         }
     } catch (const cv::Exception &ex) {
         return Opencv_Exc2Tcl(interp, &ex);
