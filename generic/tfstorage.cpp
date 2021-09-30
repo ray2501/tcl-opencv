@@ -524,6 +524,14 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     if (!node.isNone()) {
                         cvd->briskdetector->read(node);
                     }
+                } else if (strcmp(type, "opencv-kaze") == 0) {
+                    if (KAZE(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
+                        throw cv::Exception();
+                    }
+                    if (!node.isNone()) {
+                        cvd->kazedetector->read(node);
+                    }
 #ifdef TCL_USE_SIFT
                 } else if (strcmp(type, "opencv-sift") == 0) {
                     if (SIFT(cd, interp, 1, &empty) != TCL_OK) {
@@ -988,6 +996,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     cmd == cvd->cmd_orbdetector ||
                     cmd == cvd->cmd_akazedetector ||
                     cmd == cvd->cmd_briskdetector ||
+                    cmd == cvd->cmd_kazedetector ||
 #ifdef TCL_USE_SIFT
                     cmd == cvd->cmd_siftdetector ||
 #endif
@@ -1145,6 +1154,16 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                         (*fs) << "data" << "{";
                         fs->elname = "data";
                         cvd->briskdetector->write(*fs);
+                        (*fs) << "}";
+                    }
+                    (*fs) << "}";
+                } else if (cmd == cvd->cmd_kazedetector) {
+                    (*fs) << name << "{";
+                    (*fs) << "type" << "opencv-kaze";
+                    if (!cvd->kazedetector->empty()) {
+                        (*fs) << "data" << "{";
+                        fs->elname = "data";
+                        cvd->kazedetector->write(*fs);
                         (*fs) << "}";
                     }
                     (*fs) << "}";

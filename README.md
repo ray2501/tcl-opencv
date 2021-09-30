@@ -409,6 +409,26 @@ Please notice, AKAZE command will only have 1 instance.
 
 Please notice, BRISK command will only have 1 instance.
 
+    ::cv::KAZE ?extended upright threshold nOctaves nOctaveLayers diffusivity?
+    KAZE detect matrix
+    KAZE compute matrix keypoints
+    KAZE detectAndCompute matrix
+    KAZE getDiffusivity
+    KAZE getExtended
+    KAZE getNOctaveLayers
+    KAZE getNOctaves
+    KAZE getThreshold
+    KAZE getUpright
+    KAZE setDiffusivity value
+    KAZE setExtended value
+    KAZE setNOctaveLayers value
+    KAZE setNOctaves value
+    KAZE setThreshold value
+    KAZE setUpright value
+    KAZE close
+
+Please notice, KAZE command will only have 1 instance.
+
     ::cv::SIFT ?nfeatures nOctaveLayers contrastThreshold edgeThreshold sigma?
     SIFT detect matrix
     SIFT compute matrix keypoints
@@ -1609,12 +1629,12 @@ TermCriteria type -
     ::cv::AKAZE_DESCRIPTOR_MLDB_UPRIGHT
     ::cv::AKAZE_DESCRIPTOR_MLDB
 
-`AKAZE` Diffusivity type -
+`KAZE` and `AKAZE` Diffusivity type -
 
-    ::cv::AKAZE_DIFF_PM_G1
-    ::cv::AKAZE_DIFF_PM_G2
-    ::cv::AKAZE_DIFF_WEICKERT
-    ::cv::AKAZE_DIFF_CHARBONNIER
+    ::cv::KAZE_DIFF_PM_G1
+    ::cv::KAZE_DIFF_PM_G2
+    ::cv::KAZE_DIFF_WEICKERT
+    ::cv::KAZE_DIFF_CHARBONNIER
 
 `drawKeypoints` and `drawMatches` flags
 

@@ -246,6 +246,7 @@ MODULE_SCOPE int MSER(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
 MODULE_SCOPE int ORB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int AKAZE(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int BRISK(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int KAZE(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #ifdef TCL_USE_SIFT
 MODULE_SCOPE int SIFT(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
@@ -432,6 +433,7 @@ typedef struct {
     cv::Ptr<cv::ORB> orbdetector;
     cv::Ptr<cv::AKAZE> akazedetector;
     cv::Ptr<cv::BRISK> briskdetector;
+    cv::Ptr<cv::KAZE> kazedetector;
 #ifdef TCL_USE_SIFT
     cv::Ptr<cv::SIFT> siftdetector;
 #endif
@@ -467,6 +469,7 @@ typedef struct {
     Tcl_Command cmd_orbdetector;
     Tcl_Command cmd_akazedetector;
     Tcl_Command cmd_briskdetector;
+    Tcl_Command cmd_kazedetector;
 #ifdef TCL_USE_SIFT
     Tcl_Command cmd_siftdetector;
 #endif

@@ -140,6 +140,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->briskdetector) {
         cvd->briskdetector.release();
     }
+    if (cvd->kazedetector) {
+        cvd->kazedetector.release();
+    }
 #ifdef TCL_USE_SIFT
     if (cvd->siftdetector) {
         cvd->siftdetector.release();
@@ -1501,6 +1504,10 @@ Opencv_Init(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp, "::" NS "::BRISK",
         (Tcl_ObjCmdProc *) BRISK,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::KAZE",
+        (Tcl_ObjCmdProc *) KAZE,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
 #ifdef TCL_USE_SIFT
@@ -4401,23 +4408,23 @@ Opencv_Init(Tcl_Interp *interp)
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*
-     * AKAZE Diffusivity type
+     * KAZE and AKAZE Diffusivity type
      */
 
 #ifdef TCL_USE_OPENCV4
-    strValue = Tcl_NewStringObj("::" NS "::AKAZE_DIFF_PM_G1", -1);
+    strValue = Tcl_NewStringObj("::" NS "::KAZE_DIFF_PM_G1", -1);
     setupValue = Tcl_NewIntObj(cv::KAZE::DiffusivityType::DIFF_PM_G1);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj("::" NS "::AKAZE_DIFF_PM_G2", -1);
+    strValue = Tcl_NewStringObj("::" NS "::KAZE_DIFF_PM_G2", -1);
     setupValue = Tcl_NewIntObj(cv::KAZE::DiffusivityType::DIFF_PM_G2);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj("::" NS "::AKAZE_DIFF_WEICKERT", -1);
+    strValue = Tcl_NewStringObj("::" NS "::KAZE_DIFF_WEICKERT", -1);
     setupValue = Tcl_NewIntObj(cv::KAZE::DiffusivityType::DIFF_WEICKERT);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
-    strValue = Tcl_NewStringObj("::" NS "::AKAZE_DIFF_CHARBONNIER", -1);
+    strValue = Tcl_NewStringObj("::" NS "::KAZE_DIFF_CHARBONNIER", -1);
     setupValue = Tcl_NewIntObj(cv::KAZE::DiffusivityType::DIFF_CHARBONNIER);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 #endif

@@ -3484,6 +3484,670 @@ int BRISK(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+static void KAZE_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->kazedetector) {
+        cvd->kazedetector.release();
+    }
+    cvd->cmd_kazedetector = NULL;
+}
+
+
+static int KAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "detect",
+        "compute",
+        "detectAndCompute",
+        "getDiffusivity",
+        "getExtended",
+        "getNOctaveLayers",
+        "getNOctaves",
+        "getThreshold",
+        "getUpright",
+        "setDiffusivity",
+        "setExtended",
+        "setNOctaveLayers",
+        "setNOctaves",
+        "setThreshold",
+        "setUpright",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_DETECT,
+        FUNC_COMPUTE,
+        FUNC_DETECTANDCOMPUTE,
+        FUNC_getDiffusivity,
+        FUNC_getExtended,
+        FUNC_getNOctaveLayers,
+        FUNC_getNOctaves,
+        FUNC_getThreshold,
+        FUNC_getUpright,
+        FUNC_setDiffusivity,
+        FUNC_setExtended,
+        FUNC_setNOctaveLayers,
+        FUNC_setNOctaves,
+        FUNC_setThreshold,
+        FUNC_setUpright,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->kazedetector == nullptr) {
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_DETECT: {
+            std::vector< cv::KeyPoint > keypoints;
+            cv::Mat *mat;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->kazedetector->detect(*mat, keypoints);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *pListStr = NULL;
+                pListStr = Tcl_NewListObj(0, NULL);
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+            }
+
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_COMPUTE: {
+            cv::Mat descriptors;
+            int count = 0;
+            std::vector< cv::KeyPoint > keypoints;
+            cv::Mat *mat, *dstmat;
+            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
+
+            if (objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix keypoints");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+            }
+
+            if (count == 0) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "no keypoints data");
+            } else {
+                for (int i = 0; i < count; i++) {
+                    Tcl_Obj *elemListPtr = NULL;
+                    int sub_count = 0;
+                    Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
+
+                    if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
+                        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid keypoints data");
+                    }
+
+                    if (sub_count != 7) {
+                        return Opencv_SetResult(interp, cv::Error::StsBadArg, "wrong  keypoints number");
+                    } else {
+                        Tcl_Obj *elemListSubPtr = NULL;
+                        double x, y, size, angle, response;
+                        int octave, class_id;
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 0, &elemListSubPtr);
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 1, &elemListSubPtr);
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 2, &elemListSubPtr);
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 3, &elemListSubPtr);
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 4, &elemListSubPtr);
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 5, &elemListSubPtr);
+                        if (Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 6, &elemListSubPtr);
+                        if (Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        cv::KeyPoint keypoint(cv::Point2f((float) x, (float)y), (float) size,
+                                            (float) angle, (float) response,
+                                            octave, class_id);
+
+                        keypoints.push_back(keypoint);
+                    }
+                }
+            }
+
+            try {
+                cvd->kazedetector->compute(*mat, keypoints, descriptors);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            pResultStr1 = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *pListStr = NULL;
+                pListStr = Tcl_NewListObj(0, NULL);
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+
+                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            }
+
+            dstmat = new cv::Mat(descriptors);
+
+            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_DETECTANDCOMPUTE: {
+            cv::Mat mask, descriptors;
+            std::vector< cv::KeyPoint > keypoints;
+            cv::Mat *mat1, *mat2, *dstmat;
+            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
+
+            if (objc != 3 && objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix ?mask?");
+                return TCL_ERROR;
+            }
+
+            mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat1) {
+                return TCL_ERROR;
+            }
+
+            if (objc == 4) {
+                mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+                if (!mat2) {
+                    return TCL_ERROR;
+                }
+                mask = *mat2;
+            }
+
+            try {
+                cvd->kazedetector->detectAndCompute(*mat1, mask, keypoints, descriptors);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            pResultStr1 = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *pListStr = NULL;
+                pListStr = Tcl_NewListObj(0, NULL);
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+
+                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            }
+
+            dstmat = new cv::Mat(descriptors);
+
+            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_getDiffusivity: {
+            int value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = (int) cvd->kazedetector->getDiffusivity();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getExtended: {
+            int value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = (int) cvd->kazedetector->getExtended();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewBooleanObj(value));
+            break;
+        }
+        case FUNC_getNOctaveLayers: {
+            int value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->kazedetector->getNOctaveLayers();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getNOctaves: {
+            int value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->kazedetector->getNOctaves();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getThreshold: {
+            double value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->kazedetector->getThreshold();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getUpright: {
+            int value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = (int) cvd->kazedetector->getUpright();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewBooleanObj(value));
+            break;
+        }
+        case FUNC_setDiffusivity: {
+            int value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+#ifdef TCL_USE_OPENCV4
+                cvd->kazedetector->setDiffusivity((cv::KAZE::DiffusivityType) value);
+#else
+                cvd->kazedetector->setDiffusivity(value);
+#endif
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setExtended: {
+            int value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetBooleanFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->kazedetector->setExtended((bool) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setNOctaveLayers: {
+            int value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->kazedetector->setNOctaveLayers(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setNOctaves: {
+            int value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->kazedetector->setNOctaves(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setThreshold: {
+            double value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->kazedetector->setThreshold(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setUpright: {
+            int value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetBooleanFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->kazedetector->setUpright((bool) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_kazedetector) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_kazedetector);
+            }
+
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_kazedetector) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_kazedetector, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::KAZE", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int KAZE(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int extended = 0, upright = 0, nOctaves = 4, nOctaveLayers = 4;
+    int diffusivity = (int) cv::KAZE::DIFF_PM_G2;
+    double threshold = 0.001f;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::KAZE> kazedetector;
+
+    if (objc != 1 && objc != 7) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "?extended upright threshold nOctaves nOctaveLayers diffusivity?");
+        return TCL_ERROR;
+    }
+
+    if (objc == 7) {
+        if (Tcl_GetBooleanFromObj(interp, objv[1], &extended) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetBooleanFromObj(interp, objv[2], &upright) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[3], &threshold) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[4], &nOctaves) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[5], &nOctaveLayers) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[6], &diffusivity) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+#ifdef TCL_USE_OPENCV4
+        kazedetector = cv::KAZE::create((bool) extended, (bool) upright,
+                                        (float) threshold, nOctaves, nOctaveLayers,
+                                        (cv::KAZE::DiffusivityType) diffusivity);
+#else
+        kazedetector = cv::KAZE::create((bool) extended, (bool) upright,
+                                        (float) threshold, nOctaves, nOctaveLayers,
+                                        diffusivity);
+#endif
+
+        if (kazedetector == nullptr) {
+            CV_Error(cv::Error::StsNullPtr, "KAZE nullptr");
+        }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-kazedetector", -1);
+
+    if (cvd->cmd_kazedetector) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_kazedetector);
+    }
+    cvd->cmd_kazedetector =
+        Tcl_CreateObjCommand(interp, "::cv-kazedetector",
+            (Tcl_ObjCmdProc *) KAZE_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) KAZE_DESTRUCTOR);
+
+    cvd->kazedetector = kazedetector;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 #ifdef TCL_USE_SIFT
 static void SIFT_DESTRUCTOR(void *cd)
 {
