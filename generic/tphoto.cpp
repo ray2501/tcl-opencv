@@ -697,8 +697,8 @@ static int AlignMTB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_PROCESS: {
-            std::vector< cv::Mat > src;
-            std::vector< cv::Mat > dst;
+            std::vector<cv::Mat> src;
+            std::vector<cv::Mat> dst;
             cv::Mat image;
             int count;
             Tcl_Obj *pResultStr = NULL;
@@ -902,8 +902,8 @@ static int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl
             cv::Mat image, responseDebevec;
             cv::Mat *dstmat;
             Tcl_Obj *pResultStr = NULL;
-            std::vector< cv::Mat > src;
-            std::vector< float > timesArray;
+            std::vector<cv::Mat> src;
+            std::vector<float> timesArray;
 
             if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix_list times_list");
@@ -1117,8 +1117,8 @@ static int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
             cv::Mat image, dst;
             cv::Mat *mat, *dstmat;
             Tcl_Obj *pResultStr = NULL;
-            std::vector< cv::Mat > src;
-            std::vector< float > timesArray;
+            std::vector<cv::Mat> src;
+            std::vector<float> timesArray;
 
             if (objc != 5) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix_list times_list response");
@@ -1320,7 +1320,7 @@ static int MergeMertens_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
             cv::Mat image, dst;
             cv::Mat *dstmat;
             Tcl_Obj *pResultStr = NULL;
-            std::vector< cv::Mat > src;
+            std::vector<cv::Mat> src;
 
             if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix_list");

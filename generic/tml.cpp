@@ -333,7 +333,7 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
             break;
         }
         case FUNC_train: {
-            cv::Ptr< cv::ml::TrainData > trainData;
+            cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
             int len = 0, flags = 0;
 
@@ -627,7 +627,7 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_train: {
-            cv::Ptr< cv::ml::TrainData > trainData;
+            cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
             int len = 0, flags = 0;
 
@@ -1185,7 +1185,7 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
             break;
         }
         case FUNC_train: {
-            cv::Ptr< cv::ml::TrainData > trainData;
+            cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
             int len = 0, flags = 0;
 
@@ -1953,7 +1953,7 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
             break;
         }
         case FUNC_train: {
-            cv::Ptr< cv::ml::TrainData > trainData;
+            cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
             int len = 0, flags = 0;
 
@@ -2569,7 +2569,7 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
             break;
         }
         case FUNC_train: {
-            cv::Ptr< cv::ml::TrainData > trainData;
+            cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
             int len = 0, flags = 0;
 
@@ -3274,7 +3274,7 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
             break;
         }
         case FUNC_train: {
-            cv::Ptr< cv::ml::TrainData > trainData;
+            cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
             int len = 0, flags = 0;
 
@@ -4113,7 +4113,7 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
             break;
         }
         case FUNC_train: {
-            cv::Ptr< cv::ml::TrainData > trainData;
+            cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
             int len = 0, flags = 0;
 
@@ -5002,7 +5002,7 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
             break;
         }
         case FUNC_train: {
-            cv::Ptr< cv::ml::TrainData > trainData;
+            cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
             int len = 0, flags = 0;
 
@@ -6002,7 +6002,7 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
             break;
         }
         case FUNC_train: {
-            cv::Ptr< cv::ml::TrainData > trainData;
+            cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
             int len = 0, flags = 0;
 

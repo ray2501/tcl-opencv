@@ -1,3 +1,7 @@
+2021-10-01 Danilo Chang
+
+	* Apply Christian's patch
+
 2021-09-30 Danilo Chang
 
 	* Change AKAZE Diffusivity type variable's name (AKAZE to KAZE)

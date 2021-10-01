@@ -243,7 +243,7 @@ int CascadeClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
         case FUNC_DETECTMULTISCALE: {
             double scaleFactor = 1.1;
             int minNeighbors = 3, minWidth = 0, minHeight = 0, maxWidth = 0, maxHeight = 0;
-            std::vector< cv::Rect > rect;
+            std::vector<cv::Rect> rect;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *mat;
 
@@ -446,7 +446,7 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_COMPUTE: {
-            std::vector< float > descriptors;
+            std::vector<float> descriptors;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *mat;
             int winStride_width = 8, winStride_height = 8, padding_width = 0, padding_height = 0;
@@ -503,7 +503,7 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
             break;
         }
         case FUNC_DETECTMULTISCALE: {
-            std::vector< cv::Rect > rect;
+            std::vector<cv::Rect> rect;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *mat;
             double hitThreshold = 0, scale = 1.05, finalThreshold = 2.0;

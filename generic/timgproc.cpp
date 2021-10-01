@@ -5314,7 +5314,9 @@ int fillPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 End:
     if (pts) {
         for (int index = 0; index < ncontours; index++) {
-            if(pts[index]) ckfree(pts[index]);
+            if (pts[index]) {
+                ckfree(pts[index]);
+            }
         }
 
         ckfree(pts);

@@ -7,7 +7,7 @@ extern "C" {
 int drawKeypoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat dst_image;
-    std::vector< cv::KeyPoint > keypoints;
+    std::vector<cv::KeyPoint> keypoints;
     int count = 0, flags = 0, new_B = 0, new_G = 0, new_R = 0, new_A = 0;
     int nodstimage = 0;
     Tcl_Obj *pResultStr = NULL;
@@ -183,8 +183,8 @@ int drawKeypoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int drawMatches(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat mask, dst_image;
-    std::vector< cv::KeyPoint > keypoints1, keypoints2;
-    std::vector< cv::DMatch > matches1to2;
+    std::vector<cv::KeyPoint> keypoints1, keypoints2;
+    std::vector<cv::DMatch> matches1to2;
     int count = 0, flags = 0, B1 = 0, G1 = 0, R1 = 0, A1 = 0;
     int B2 = 0, G2 = 0, R2 = 0, A2 = 0;
     int nodstimage = 0;
@@ -581,7 +581,7 @@ static int FastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, 
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL;
 
@@ -912,7 +912,7 @@ static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL;
 
@@ -1247,8 +1247,8 @@ static int MSER_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_detectRegions: {
-            std::vector< std::vector< cv::Point > > msers;
-            std::vector< cv::Rect > bboxes;
+            std::vector<std::vector<cv::Point>> msers;
+            std::vector<cv::Rect> bboxes;
             cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL, *pListResultStr = NULL;
 
@@ -1683,7 +1683,7 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL;
 
@@ -1727,7 +1727,7 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
         case FUNC_COMPUTE: {
             cv::Mat descriptors;
             int count = 0;
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
@@ -1844,7 +1844,7 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
         }
         case FUNC_DETECTANDCOMPUTE: {
             cv::Mat mask, descriptors;
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat1, *mat2, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
@@ -2477,7 +2477,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL;
 
@@ -2521,7 +2521,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         case FUNC_COMPUTE: {
             cv::Mat descriptors;
             int count = 0;
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
@@ -2638,7 +2638,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         }
         case FUNC_DETECTANDCOMPUTE: {
             cv::Mat mask, descriptors;
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat1, *mat2, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
@@ -3169,7 +3169,7 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL;
 
@@ -3213,7 +3213,7 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         case FUNC_COMPUTE: {
             cv::Mat descriptors;
             int count = 0;
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
@@ -3330,7 +3330,7 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         }
         case FUNC_DETECTANDCOMPUTE: {
             cv::Mat mask, descriptors;
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat1, *mat2, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
@@ -3561,7 +3561,7 @@ static int KAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL;
 
@@ -3605,7 +3605,7 @@ static int KAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         case FUNC_COMPUTE: {
             cv::Mat descriptors;
             int count = 0;
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
@@ -3722,7 +3722,7 @@ static int KAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         }
         case FUNC_DETECTANDCOMPUTE: {
             cv::Mat mask, descriptors;
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat1, *mat2, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
@@ -4202,7 +4202,7 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL;
 
@@ -4246,7 +4246,7 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         case FUNC_COMPUTE: {
             cv::Mat descriptors;
             int count = 0;
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
@@ -4363,7 +4363,7 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         }
         case FUNC_DETECTANDCOMPUTE: {
             cv::Mat mask, descriptors;
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat1, *mat2, *dstmat;
             Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
@@ -4580,7 +4580,7 @@ static int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
     switch ((enum FUNC_enum)choice) {
         case FUNC_MATCH: {
             cv::Mat *mat1, *mat2;
-            std::vector< cv::DMatch > matches;
+            std::vector<cv::DMatch> matches;
             Tcl_Obj *pResultStr = NULL;
 
             if (objc != 4) {
@@ -4623,7 +4623,7 @@ static int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
         }
         case FUNC_KNNMATCH: {
             cv::Mat *mat1, *mat2;
-            std::vector<std::vector<cv::DMatch> > vmatches;
+            std::vector<std::vector<cv::DMatch>> vmatches;
             Tcl_Obj *pResultStr = NULL;
             int k;
 
@@ -4822,7 +4822,7 @@ static int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tc
     switch ((enum FUNC_enum)choice) {
         case FUNC_MATCH: {
             cv::Mat *mat1, *mat2;
-            std::vector< cv::DMatch > matches;
+            std::vector<cv::DMatch> matches;
             Tcl_Obj *pResultStr = NULL;
 
             if (objc != 4) {
@@ -4865,7 +4865,7 @@ static int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tc
         }
         case FUNC_KNNMATCH: {
             cv::Mat *mat1, *mat2;
-            std::vector<std::vector<cv::DMatch> > vmatches;
+            std::vector<std::vector<cv::DMatch>> vmatches;
             Tcl_Obj *pResultStr = NULL;
             int k;
 
@@ -5126,7 +5126,7 @@ static int SimpleBlobDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, T
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat;
             Tcl_Obj *pResultStr = NULL;
 
@@ -5669,7 +5669,7 @@ int BOWImgDescriptorExtractor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, T
         case FUNC_compute: {
             cv::Mat descriptors;
             int count = 0;
-            std::vector< cv::KeyPoint > keypoints;
+            std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
             Tcl_Obj *pResultStr = NULL;
 
@@ -5903,8 +5903,8 @@ int BOWImgDescriptorExtractor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;
     Tcl_Obj *pResultStr = NULL;
-    cv::Ptr< cv::DescriptorExtractor > dextractor;
-    cv::Ptr< cv::DescriptorMatcher > dmatcher;
+    cv::Ptr<cv::DescriptorExtractor> dextractor;
+    cv::Ptr<cv::DescriptorMatcher> dmatcher;
     cv::BOWImgDescriptorExtractor *bowimgextractor;
     char *dextractor_name = NULL, *dmatcher_name = NULL;
     int len = 0;
@@ -5919,18 +5919,20 @@ int BOWImgDescriptorExtractor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
         return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid dextractor name");
     }
 
-    if (strcmp(dextractor_name, "::cv-siftdetector") == 0) {
-        if (cvd->siftdetector) {
-            dextractor = cvd->siftdetector;
-        } else {
-            CV_Error(cv::Error::StsNullPtr, "siftdetector nullptr");
-        }
-    } else if (strcmp(dextractor_name, "::cv-kazedetector") == 0) {
+    if (strcmp(dextractor_name, "::cv-kazedetector") == 0) {
         if (cvd->kazedetector) {
             dextractor = cvd->kazedetector;
         } else {
-            CV_Error(cv::Error::StsNullPtr, "kazedetector nullptr");
+            return Opencv_SetResult(interp, cv::Error::StsNullPtr, "KAZE nullptr");
         }
+#ifdef TCL_USE_SIFT
+    } else if (strcmp(dextractor_name, "::cv-siftdetector") == 0) {
+        if (cvd->siftdetector) {
+            dextractor = cvd->siftdetector;
+        } else {
+            return Opencv_SetResult(interp, cv::Error::StsNullPtr, "SIFT nullptr");
+        }
+#endif
     } else {
         return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid dextractor name");
     }
@@ -5944,7 +5946,7 @@ int BOWImgDescriptorExtractor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
         if (cvd->flannbasedmatcher) {
             dmatcher = cvd->flannbasedmatcher;
         } else {
-            CV_Error(cv::Error::StsNullPtr, "flannbasedmatcher nullptr");
+            return Opencv_SetResult(interp, cv::Error::StsNullPtr, "FlannBasedMatcher nullptr");
         }
     } else {
         return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid dmatcher name");
