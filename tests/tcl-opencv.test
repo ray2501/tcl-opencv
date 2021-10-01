@@ -1191,6 +1191,7 @@ test opencv-1.87 {FileStorage (types)} {*}{
             cv::BFMatcher
             cv::FlannBasedMatcher
             cv::SimpleBlobDetector
+            cv::BackgroundSubtractorKNN
             cv::BackgroundSubtractorMOG2
             cv::StereoBM
             cv::StereoSGBM
