@@ -5,6 +5,181 @@ extern "C" {
 #endif
 
 
+static void SubtractorKNN_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->bgsknn) {
+        cvd->bgsknn.release();
+    }
+    cvd->cmd_bgsknn = NULL;
+}
+
+
+static int SubtractorKNN_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "apply",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_APPLY,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->bgsknn == nullptr) {
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_APPLY: {
+            cv::Mat result_image;
+            Tcl_Obj *pResultStr = NULL;
+            cv::Mat *mat, *dstmat;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->bgsknn->apply(*mat, result_image);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            dstmat = new cv::Mat(result_image);
+
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_bgsknn) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_bgsknn);
+            }
+
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_bgsknn) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_bgsknn, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::BackgroundSubtractorKNN", TCL_STATIC);
+            break;
+        }
+
+    }
+
+    return TCL_OK;
+}
+
+
+int BackgroundSubtractorKNN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int history = 0, detectShadows = 1;
+    double dist2Threshold = 400.0;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::BackgroundSubtractorKNN> bgsknn;
+
+    if (objc > 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "?history dist2Threshold detectShadows?");
+        return TCL_ERROR;
+    }
+
+    if (objc > 1 && Tcl_GetIntFromObj(interp, objv[1], &history) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc > 2 && Tcl_GetDoubleFromObj(interp, objv[2], &dist2Threshold) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc > 3 && Tcl_GetBooleanFromObj(interp, objv[3], &detectShadows) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        bgsknn = cv::createBackgroundSubtractorKNN(history, dist2Threshold, (bool) detectShadows);
+
+        if (bgsknn == nullptr) {
+            CV_Error(cv::Error::StsNullPtr, "BackgroundSubtractorKNN nullptr");
+        }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-subtractorKNN", -1);
+
+    if (cvd->cmd_bgsknn) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_bgsknn);
+    }
+    cvd->cmd_bgsknn =
+        Tcl_CreateObjCommand(interp, "::cv-subtractorKNN",
+            (Tcl_ObjCmdProc *) SubtractorKNN_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) SubtractorKNN_DESTRUCTOR);
+
+    cvd->bgsknn = bgsknn;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 static void SubtractorMOG2_DESTRUCTOR(void *cd)
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;

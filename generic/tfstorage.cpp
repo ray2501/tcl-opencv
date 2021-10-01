@@ -566,6 +566,14 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     if (!node.isNone()) {
                         cvd->sbdetector->read(node);
                     }
+                } else if (strcmp(type, "opencv-backgroundsubtractorknn") == 0) {
+                    if (BackgroundSubtractorKNN(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
+                        throw cv::Exception();
+                    }
+                    if (!node.isNone()) {
+                        cvd->bgsknn->read(node);
+                    }
                 } else if (strcmp(type, "opencv-backgroundsubtractormog2") == 0) {
                     if (BackgroundSubtractorMOG2(cd, interp, 1, &empty) != TCL_OK) {
                         keepInterpErr = 1;
@@ -1002,6 +1010,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 #endif
                     cmd == cvd->cmd_bfmatcher ||
                     cmd == cvd->cmd_flannbasedmatcher ||
+                    cmd == cvd->cmd_bgsknn ||
                     cmd == cvd->cmd_bgsmog2 ||
                     cmd == cvd->cmd_sbdetector ||
                     cmd == cvd->cmd_stereobm ||
@@ -1206,6 +1215,16 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                         (*fs) << "data" << "{";
                         fs->elname = "data";
                         cvd->sbdetector->write(*fs);
+                        (*fs) << "}";
+                    }
+                    (*fs) << "}";
+                } else if (cmd == cvd->cmd_bgsknn) {
+                    (*fs) << name << "{";
+                    (*fs) << "type" << "opencv-backgroundsubtractorknn";
+                    if (!cvd->bgsknn->empty()) {
+                        (*fs) << "data" << "{";
+                        fs->elname = "data";
+                        cvd->bgsknn->write(*fs);
                         (*fs) << "}";
                     }
                     (*fs) << "}";

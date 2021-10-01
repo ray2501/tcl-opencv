@@ -154,6 +154,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->flannbasedmatcher) {
         cvd->flannbasedmatcher.release();
     }
+    if (cvd->bgsknn) {
+        cvd->bgsknn.release();
+    }
     if (cvd->bgsmog2) {
         cvd->bgsmog2.release();
     }
@@ -1619,6 +1622,10 @@ Opencv_Init(Tcl_Interp *interp)
     /*
      * For Video
      */
+
+    Tcl_CreateObjCommand(interp, "::" NS "::BackgroundSubtractorKNN",
+        (Tcl_ObjCmdProc *) BackgroundSubtractorKNN,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_CreateObjCommand(interp, "::" NS "::BackgroundSubtractorMOG2",
         (Tcl_ObjCmdProc *) BackgroundSubtractorMOG2,

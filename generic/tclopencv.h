@@ -287,6 +287,7 @@ MODULE_SCOPE int StereoSGBM(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
  * OpenCV video
  */
 
+MODULE_SCOPE int BackgroundSubtractorKNN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int BackgroundSubtractorMOG2(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int meanShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int CamShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
@@ -445,6 +446,7 @@ typedef struct {
 #endif
     cv::Ptr<cv::BFMatcher> bfmatcher;
     cv::Ptr<cv::FlannBasedMatcher> flannbasedmatcher;
+    cv::Ptr<cv::BackgroundSubtractorKNN> bgsknn;
     cv::Ptr<cv::BackgroundSubtractorMOG2> bgsmog2;
     cv::Ptr<cv::Stitcher> stitcher;
     cv::Ptr<cv::SimpleBlobDetector> sbdetector;
@@ -481,6 +483,7 @@ typedef struct {
 #endif
     Tcl_Command cmd_bfmatcher;
     Tcl_Command cmd_flannbasedmatcher;
+    Tcl_Command cmd_bgsknn;
     Tcl_Command cmd_bgsmog2;
     Tcl_Command cmd_stitcher;
     Tcl_Command cmd_sbdetector;

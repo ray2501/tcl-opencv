@@ -549,6 +549,12 @@ Please notice, StereoSGBM command will only have 1 instance.
 
 ### video
 
+    ::cv::BackgroundSubtractorKNN ?history dist2Threshold detectShadows?
+    BackgroundSubtractorKNN apply matrix
+    BackgroundSubtractorKNN close
+
+Please notice, BackgroundSubtractorKNN command will only have 1 instance.
+
     ::cv::BackgroundSubtractorMOG2 ?history varThreshold detectShadows?
     BackgroundSubtractorMOG2 apply matrix
     BackgroundSubtractorMOG2 close
