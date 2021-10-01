@@ -1,5 +1,7 @@
 2021-10-01 Danilo Chang
 
+	* Implement command: convexityDefects
+	* Improve convexHull command
 	* Apply Christian's patch
 
 2021-09-30 Danilo Chang

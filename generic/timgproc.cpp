@@ -4435,11 +4435,12 @@ int minEnclosingCircle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 int convexHull(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     std::vector<cv::Point> points, hull;
+    std::vector<int> hull_ind;
     Tcl_Obj *pResultStr = NULL;
-    int count = 0, clockwise = 0;
+    int count = 0, clockwise = 0, returnPoints = 1;
 
-    if (objc != 2 && objc != 3) {
-        Tcl_WrongNumArgs(interp, 1, objv, "contour ?clockwise?");
+    if (objc != 2 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "contour ?clockwise returnPoints?");
         return TCL_ERROR;
     }
 
@@ -4474,14 +4475,22 @@ int convexHull(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
     }
 
-    if (objc == 3) {
+    if (objc == 4) {
         if (Tcl_GetBooleanFromObj(interp, objv[2], &clockwise) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetBooleanFromObj(interp, objv[3], &returnPoints) != TCL_OK) {
             return TCL_ERROR;
         }
     }
 
     try {
-        cv::convexHull(points, hull, clockwise);
+        if (returnPoints == 1) {
+            cv::convexHull(points, hull, clockwise);
+        } else {
+            cv::convexHull(points, hull_ind, clockwise, 0);
+        }
     } catch (const cv::Exception &ex) {
         return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
@@ -4489,9 +4498,110 @@ int convexHull(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     pResultStr = Tcl_NewListObj(0, NULL);
-    for (size_t i = 0; i < hull.size(); i++) {
-        Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(hull.at(i).x));
-        Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(hull.at(i).y));
+    if (returnPoints == 1) {
+        for (size_t i = 0; i < hull.size(); i++) {
+            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(hull.at(i).x));
+            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(hull.at(i).y));
+        }
+    } else {
+        for (size_t i = 0; i < hull_ind.size(); i++) {
+            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(hull_ind[i]));
+        }
+    }
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
+int convexityDefects(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    std::vector<cv::Point> points;
+    std::vector<int> hull_ind;
+    std::vector<cv::Vec4i> results;
+    Tcl_Obj *pResultStr = NULL;
+    int count = 0;
+
+    if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "contour convexhull");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid contour data");
+    }
+
+    if (count%2 != 0) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid point data");
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+        int number_from_list_x;
+        int number_from_list_y;
+        int npts;
+
+        npts = count / 2;
+        for (int i = 0, j = 0; j < npts; i = i + 2, j = j + 1) {
+            cv::Point point;
+            Tcl_ListObjIndex(interp, objv[1], i, &elemListPtr);
+            if (Tcl_GetIntFromObj(interp, elemListPtr, &number_from_list_x) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            Tcl_ListObjIndex(interp, objv[1], i + 1, &elemListPtr);
+            if (Tcl_GetIntFromObj(interp, elemListPtr, &number_from_list_y) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            point.x = number_from_list_x;
+            point.y = number_from_list_y;
+            points.push_back (point);
+        }
+    }
+
+    if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid convexhull data");
+    }
+
+    if (count == 0) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid convexhull data");
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+
+        for (int i = 0; i < count; i++) {
+            int number = 0;
+
+            Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
+            if (Tcl_GetIntFromObj(interp, elemListPtr, &number) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            hull_ind.push_back (number);
+        }
+    }
+
+    try {
+        cv::convexityDefects(points, hull_ind, results);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+    for (size_t i = 0; i < results.size(); i++) {
+        Tcl_Obj *pListResultStr = NULL;
+
+        pListResultStr = Tcl_NewListObj(0, NULL);
+
+        /*
+         * start_index, end_index, farthest_pt_index, fixpt_depth
+         */
+        Tcl_ListObjAppendElement(NULL, pListResultStr, Tcl_NewIntObj(results[i][0]));
+        Tcl_ListObjAppendElement(NULL, pListResultStr, Tcl_NewIntObj(results[i][1]));
+        Tcl_ListObjAppendElement(NULL, pListResultStr, Tcl_NewIntObj(results[i][2]));
+        Tcl_ListObjAppendElement(NULL, pListResultStr, Tcl_NewIntObj(results[i][3]));
+
+        Tcl_ListObjAppendElement(NULL, pResultStr, pListResultStr);
     }
 
     Tcl_SetObjResult(interp, pResultStr);

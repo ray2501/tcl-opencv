@@ -252,8 +252,12 @@ For more FileStorage info, you can check
     ::cv::fitLine contour distType param reps aeps
     ::cv::boxPoints contour
     ::cv::minEnclosingCircle contour
-    ::cv::convexHull contour ?clockwise?
+    ::cv::convexHull contour ?clockwise returnPoints?
+    ::cv::convexityDefects contour convexhull
     ::cv::pointPolygonTest contour x y measureDist
+
+If users want to find the convexity defects of a contour,
+convex hull obtained using `::cv::convexHull` that required to set returnPoints to 0.
 
 If users need to know contour's moments, users need to use `::cv::Mat::Mat` to create
 a matrix and fill the contour's data to the matrix, then use `::cv::moments` to calculate.
