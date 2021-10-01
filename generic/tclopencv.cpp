@@ -1376,6 +1376,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) convexityDefects,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::matchShapes",
+        (Tcl_ObjCmdProc *) matchShapes,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::pointPolygonTest",
         (Tcl_ObjCmdProc *) pointPolygonTest,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
@@ -3624,6 +3628,22 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::MORPH_HITMISS", -1);
     setupValue = Tcl_NewIntObj(cv::MORPH_HITMISS);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * For Shape Match Modes
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::CONTOURS_MATCH_I1", -1);
+    setupValue = Tcl_NewIntObj(cv::ShapeMatchModes::CONTOURS_MATCH_I1);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::CONTOURS_MATCH_I2", -1);
+    setupValue = Tcl_NewIntObj(cv::ShapeMatchModes::CONTOURS_MATCH_I2);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::CONTOURS_MATCH_I3", -1);
+    setupValue = Tcl_NewIntObj(cv::ShapeMatchModes::CONTOURS_MATCH_I3);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*

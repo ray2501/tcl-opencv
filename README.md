@@ -254,6 +254,7 @@ For more FileStorage info, you can check
     ::cv::minEnclosingCircle contour
     ::cv::convexHull contour ?clockwise returnPoints?
     ::cv::convexityDefects contour convexhull
+    ::cv::matchShapes contour1 contour2 method
     ::cv::pointPolygonTest contour x y measureDist
 
 If users want to find the convexity defects of a contour,
@@ -1386,6 +1387,12 @@ Line Types -
     ::cv::MORPH_TOPHAT
     ::cv::MORPH_BLACKHAT
     ::cv::MORPH_HITMISS
+
+`::cv::matchShapes` method -
+
+    ::cv::CONTOURS_MATCH_I1
+    ::cv::CONTOURS_MATCH_I2
+    ::cv::CONTOURS_MATCH_I3
 
 `::cv::applyColorMap` colormap -
 

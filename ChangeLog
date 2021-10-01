@@ -1,6 +1,6 @@
 2021-10-01 Danilo Chang
 
-	* Implement command: convexityDefects
+	* Implement command: convexityDefects, matchShapes
 	* Improve convexHull command
 	* Apply Christian's patch
 
