@@ -2603,6 +2603,89 @@ Contours test -
         puts $em
     }
 
+Convex Hull test -
+
+    package require opencv
+
+    proc mysortproc {c1 c2} {
+        set value1 [::cv::contourArea $c1 0]
+        set value2 [::cv::contourArea $c2 0]
+
+        if {$value1 > $value2} {
+            return -1
+        } elseif {$value1 < $value2} {
+            return 1
+        } else {
+            return 0
+        }
+    }
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set image1 [::cv::imread $filename]
+
+        set skinColorUpper [list 15 204 153 0]
+        set skinColorLower [list 0 25 13 0]
+
+        # Try to filter
+        set hlsimage [cv::cvtColor $image1 $::cv::COLOR_BGR2HLS]
+        set rangeMask [cv::inRange $hlsimage $skinColorLower $skinColorUpper]
+        set blurred [cv::blur $rangeMask 10 10]
+        set image2 [::cv::threshold $blurred 200 255 $::cv::THRESH_BINARY]
+
+        $hlsimage close
+        $rangeMask close
+        $blurred close
+
+        set contours [::cv::findContours $image2 $::cv::RETR_EXTERNAL $::cv::CHAIN_APPROX_SIMPLE]
+        set scontours [lsort -command mysortproc $contours]
+        set contour [lindex $scontours 0]
+
+        set hull [cv::convexHull $contour 0 1]
+        for {set i 0} {$i < [llength $hull]} {incr i 2} {
+            set x [lindex $hull $i]
+            set y [lindex $hull [expr $i + 1]]
+            cv::circle $image1 $x $y 5 [list 255 0 0 0] 3
+        }
+
+        ::cv::drawContours $image1 [list $hull] -1 [list 0 255 0 0] 1 $::cv::LINE_AA 2 0 0
+
+        set hull [cv::convexHull $contour 0 0]
+        set defects [::cv::convexityDefects $contour $hull]
+        foreach d $defects {
+            set startx [lindex $contour [expr [lindex $d 0] * 2]]
+            set starty [lindex $contour [expr [lindex $d 0] * 2 + 1]]
+            set endx [lindex $contour [expr [lindex $d 1] * 2]]
+            set endy [lindex $contour [expr [lindex $d 1] * 2 + 1]]
+            set farx [lindex $contour [expr [lindex $d 2] * 2]]
+            set fary [lindex $contour [expr [lindex $d 2] * 2 + 1]]
+
+            set depth [expr [lindex $d 3]/256]
+
+            cv::line $image1 $startx $starty $farx $fary [list 0 0 255 0] 2
+            cv::line $image1 $endx $endy $farx $fary [list 0 0 255 0] 2
+            cv::circle $image1 $farx $fary 5 [list 255 255 0 0] 3
+        }
+
+        ::cv::namedWindow "Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Image" $image1
+        ::cv::namedWindow "Check" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Check" $image2
+
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $image2 close
+        $image1 close
+    } on error {em} {
+        puts $em
+    }
+
 AGAST Algorithm for Corner Detection -
 
     package require opencv
