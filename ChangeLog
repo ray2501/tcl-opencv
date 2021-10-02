@@ -2,6 +2,7 @@
 
 	* configure.ac: Add -std=c++11 flag
 	  For OpenCV 4.x+ requires enabled C++11 support issue.
+	* Implement command: computeECC, findTransformECC
 	* Implement command: cornerEigenValsAndVecs, cornerMinEigenVal
 	* Update BackgroundSubtractorMOG2 command
 

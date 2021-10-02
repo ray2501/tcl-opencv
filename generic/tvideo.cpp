@@ -920,6 +920,120 @@ int calcOpticalFlowFarneback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
     return TCL_OK;
 }
+
+
+#ifdef TCL_USE_OPENCV4
+int computeECC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    double ecc = 0;
+    cv::Mat *mat1, *mat2, *mask = nullptr;
+
+    if (objc != 3 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix_1 matrix_2 ?mask?");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 4) {
+        mask = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+        if (!mask) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        if (objc == 3) {
+            ecc = cv::computeECC(*mat1, *mat2);
+        } else {
+            ecc = cv::computeECC(*mat1, *mat2, *mask);
+        }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    Tcl_SetObjResult(interp, Tcl_NewDoubleObj(ecc));
+
+    return TCL_OK;
+}
+
+
+int findTransformECC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    double retval = 0;
+    int motionType = cv::MOTION_AFFINE, gaussFiltSize = 5;
+    cv::Mat *mat1, *mat2, *warpMatrix, *mask = nullptr;
+    cv::TermCriteria *termCriteria = nullptr;
+
+    if (objc != 5 && objc != 8) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "matrix_1 matrix_2 warpMatrix motionType ?termCriteria maks gaussFiltSize?");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    warpMatrix = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+    if (!warpMatrix) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[4], &motionType) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 8) {
+        termCriteria = (cv::TermCriteria *) Opencv_FindHandle(cd, interp, OPENCV_TERMCRITERIA, objv[5]);
+        if (!termCriteria) {
+            return TCL_ERROR;
+        }
+
+        mask = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[6]);
+        if (!mask) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[7], &gaussFiltSize) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        if (objc == 5) {
+            retval = cv::findTransformECC(*mat1, *mat2, *warpMatrix, motionType);
+        } else {
+            retval = cv::findTransformECC(*mat1, *mat2, *warpMatrix, motionType,
+                                          *termCriteria, *mask, gaussFiltSize);
+        }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    Tcl_SetObjResult(interp, Tcl_NewDoubleObj(retval));
+
+    return TCL_OK;
+}
+#endif
 #ifdef __cplusplus
 }
 #endif

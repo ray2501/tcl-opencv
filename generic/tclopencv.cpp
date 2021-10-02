@@ -1655,6 +1655,16 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) calcOpticalFlowFarneback,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+#ifdef TCL_USE_OPENCV4
+    Tcl_CreateObjCommand(interp, "::" NS "::computeECC",
+        (Tcl_ObjCmdProc *) computeECC,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::findTransformECC",
+        (Tcl_ObjCmdProc *) findTransformECC,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+#endif
+
     /*
      * For Photo
      */
@@ -4503,6 +4513,28 @@ Opencv_Init(Tcl_Interp *interp)
     strValue = Tcl_NewStringObj("::" NS "::DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS", -1);
     setupValue = Tcl_NewIntObj((int) cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * findTransformECC motion type
+     */
+
+#ifdef TCL_USE_OPENCV4
+    strValue = Tcl_NewStringObj("::" NS "::MOTION_TRANSLATION", -1);
+    setupValue = Tcl_NewIntObj(cv::MOTION_TRANSLATION);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::MOTION_EUCLIDEAN", -1);
+    setupValue = Tcl_NewIntObj(cv::MOTION_EUCLIDEAN);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::MOTION_AFFINE", -1);
+    setupValue = Tcl_NewIntObj(cv::MOTION_AFFINE);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::MOTION_HOMOGRAPHY", -1);
+    setupValue = Tcl_NewIntObj(cv::MOTION_HOMOGRAPHY);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+#endif
 
     /*
      * findChessboardCorners flags

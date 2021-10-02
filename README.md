@@ -580,6 +580,12 @@ Please notice, BackgroundSubtractorMOG2 command will only have 1 instance.
     ::cv::calcOpticalFlowPyrLK prevImg nextImg prevPts winSize_width winSize_height maxLevel termCriteria
     ::cv::calcOpticalFlowFarneback prevImg nextImg pyr_scale levels winsize iterations poly_n poly_sigma flags
 
+    ::cv::computeECC matrix_1 matrix_2 ?mask?
+    ::cv::findTransformECC matrix_1 matrix_2 warpMatrix motionType ?termCriteria maks gaussFiltSize?
+
+Users should use `::cv::Mat::eye` to create a 3x3 (for `$::Cv::MOTION_HOMOGRAPHY`)
+or 2x3 warpMatrix then pass to `::cv::findTransformECC`.
+
 ### photo
 
     ::cv::inpaint matrix inpaintMask inpaintRadius flags
@@ -1677,6 +1683,13 @@ TermCriteria type -
     ::cv::DRAW_MATCHES_FLAGS_DRAW_OVER_OUTIMG
     ::cv::DRAW_MATCHES_FLAGS_NOT_DRAW_SINGLE_POINTS
     ::cv::DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
+
+`::cv::findTransformECC` motion type -
+
+    ::cv::MOTION_TRANSLATION
+    ::cv::MOTION_EUCLIDEAN
+    ::cv::MOTION_AFFINE
+    ::cv::MOTION_HOMOGRAPHY
 
 `findChessboardCorners` flags -
 
