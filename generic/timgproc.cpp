@@ -3491,9 +3491,9 @@ int cornerMinEigenVal(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
     Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
-    if (objc != 3 && objc != 5) {
+    if (objc != 4 && objc != 5) {
         Tcl_WrongNumArgs(interp, 1, objv,
-            "matrix blockSize ?ksize borderType?");
+            "matrix blockSize ksize ?borderType?");
         return TCL_ERROR;
     }
 
@@ -3506,10 +3506,11 @@ int cornerMinEigenVal(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
         return TCL_ERROR;
     }
 
+    if (Tcl_GetIntFromObj(interp, objv[3], &ksize) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
     if (objc == 5) {
-        if (Tcl_GetIntFromObj(interp, objv[3], &ksize) != TCL_OK) {
-            return TCL_ERROR;
-        }
 
         if (Tcl_GetIntFromObj(interp, objv[4], &borderType) != TCL_OK) {
             return TCL_ERROR;
