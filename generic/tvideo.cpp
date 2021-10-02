@@ -23,6 +23,12 @@ static int SubtractorKNN_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
 
     static const char *FUNC_strs[] = {
         "apply",
+        "getDetectShadows",
+        "getDist2Threshold",
+        "getHistory",
+        "setDetectShadows",
+        "setDist2Threshold",
+        "setHistory",
         "close",
         "_command",
         "_name",
@@ -32,6 +38,12 @@ static int SubtractorKNN_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
 
     enum FUNC_enum {
         FUNC_APPLY,
+        FUNC_getDetectShadows,
+        FUNC_getDist2Threshold,
+        FUNC_getHistory,
+        FUNC_setDetectShadows,
+        FUNC_setDist2Threshold,
+        FUNC_setHistory,
         FUNC_CLOSE,
         FUNC__COMMAND,
         FUNC__NAME,
@@ -81,6 +93,129 @@ static int SubtractorKNN_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
             pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_getDetectShadows: {
+            int result = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                result = (int) cvd->bgsknn->getDetectShadows();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewBooleanObj(result));
+            break;
+        }
+        case FUNC_getDist2Threshold: {
+            double result = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                result = cvd->bgsknn->getDist2Threshold();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
+            break;
+        }
+        case FUNC_getHistory: {
+            int result = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                result = cvd->bgsknn->getHistory();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(result));
+            break;
+        }
+        case FUNC_setDetectShadows: {
+            int value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetBooleanFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->bgsknn->setDetectShadows((bool) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setDist2Threshold: {
+            double value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->bgsknn->setDist2Threshold(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setHistory: {
+            int value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->bgsknn->setHistory(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
             break;
         }
         case FUNC_CLOSE: {
@@ -198,6 +333,12 @@ static int SubtractorMOG2_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
 
     static const char *FUNC_strs[] = {
         "apply",
+        "getDetectShadows",
+        "getHistory",
+        "getVarThreshold",
+        "setDetectShadows",
+        "setHistory",
+        "setVarThreshold",
         "close",
         "_command",
         "_name",
@@ -207,6 +348,12 @@ static int SubtractorMOG2_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
 
     enum FUNC_enum {
         FUNC_APPLY,
+        FUNC_getDetectShadows,
+        FUNC_getHistory,
+        FUNC_getVarThreshold,
+        FUNC_setDetectShadows,
+        FUNC_setHistory,
+        FUNC_setVarThreshold,
         FUNC_CLOSE,
         FUNC__COMMAND,
         FUNC__NAME,
@@ -256,6 +403,129 @@ static int SubtractorMOG2_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
             pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_getDetectShadows: {
+            int result = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                result = (int) cvd->bgsmog2->getDetectShadows();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewBooleanObj(result));
+            break;
+        }
+        case FUNC_getHistory: {
+            int result = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                result = cvd->bgsmog2->getHistory();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(result));
+            break;
+        }
+        case FUNC_getVarThreshold: {
+            double result = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                result = cvd->bgsmog2->getVarThreshold();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(result));
+            break;
+        }
+        case FUNC_setDetectShadows: {
+            int value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetBooleanFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->bgsmog2->setDetectShadows((bool) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setHistory: {
+            int value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->bgsmog2->setHistory(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setVarThreshold: {
+            double value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->bgsmog2->setVarThreshold(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
             break;
         }
         case FUNC_CLOSE: {
