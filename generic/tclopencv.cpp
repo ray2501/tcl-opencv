@@ -1315,6 +1315,14 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) cornerHarris,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::cornerEigenValsAndVecs",
+        (Tcl_ObjCmdProc *) cornerEigenValsAndVecs,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::cornerMinEigenVal",
+        (Tcl_ObjCmdProc *) cornerMinEigenVal,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::cornerSubPix",
         (Tcl_ObjCmdProc *) cornerSubPix,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

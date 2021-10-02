@@ -3434,6 +3434,106 @@ int cornerHarris(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int cornerEigenValsAndVecs(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat dst;
+    int blockSize = 0, ksize = 0, borderType = cv::BORDER_DEFAULT;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *mat, *dstmat;
+
+    if (objc != 4 && objc != 5) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "matrix blockSize ksize ?borderType?");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &blockSize) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &ksize) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 5) {
+        if (Tcl_GetIntFromObj(interp, objv[4], &borderType) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::cornerEigenValsAndVecs(*mat, dst, blockSize, ksize, borderType);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    dstmat = new cv::Mat(dst);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
+int cornerMinEigenVal(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat dst;
+    int blockSize = 0, ksize = 0, borderType = cv::BORDER_DEFAULT;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *mat, *dstmat;
+
+    if (objc != 3 && objc != 5) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "matrix blockSize ?ksize borderType?");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &blockSize) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 5) {
+        if (Tcl_GetIntFromObj(interp, objv[3], &ksize) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[4], &borderType) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::cornerMinEigenVal(*mat, dst, blockSize, ksize, borderType);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    dstmat = new cv::Mat(dst);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
 int cornerSubPix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int winSize_width = 0, winSize_height = 0, zeroZone_widht = 0, zeroZone_height;

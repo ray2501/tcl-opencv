@@ -237,6 +237,8 @@ For more FileStorage info, you can check
     ::cv::watershed matrix markers
     ::cv::goodFeaturesToTrack matrix maxCorners qualityLevel minDistance ?mask blockSize useHarrisDetector k?
     ::cv::cornerHarris matrix blockSize ksize k ?borderType?
+    ::cv::cornerEigenValsAndVecs matrix blockSize ksize ?borderType?
+    ::cv::cornerMinEigenVal matrix blockSize ?ksize borderType?
     ::cv::cornerSubPix matrix corners winSize_width winSize_height zeroZone_widht zeroZone_height termCriteria
     ::cv::HoughCircles matrix method dp minDist ?param1 param2 minRadius maxRadius?
     ::cv::HoughLines matrix rho theta threshold ?srn stn min_theta max_theta?

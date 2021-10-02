@@ -1,5 +1,6 @@
 2021-10-02 Danilo Chang
 
+	* Implement command: cornerEigenValsAndVecs, cornerMinEigenVal
 	* Update BackgroundSubtractorMOG2 command
 
 2021-10-01 Danilo Chang

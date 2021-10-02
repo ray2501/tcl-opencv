@@ -307,16 +307,20 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 case CV_32SC2: return_int_val = &mat->at<cv::Vec2i>(index)[channel]; break;
                 case CV_32SC3: return_int_val = &mat->at<cv::Vec3i>(index)[channel]; break;
                 case CV_32SC4: return_int_val = &mat->at<cv::Vec4i>(index)[channel]; break;
+                case CV_32SC(6): return_int_val = &mat->at<cv::Vec6i>(index)[channel]; break;
+                case CV_32SC(8): return_int_val = &mat->at<cv::Vec8i>(index)[channel]; break;
 
                 case CV_32FC1: return_float_val = &mat->at<float>(index); break;
                 case CV_32FC2: return_float_val = &mat->at<cv::Vec2f>(index)[channel]; break;
                 case CV_32FC3: return_float_val = &mat->at<cv::Vec3f>(index)[channel]; break;
                 case CV_32FC4: return_float_val = &mat->at<cv::Vec4f>(index)[channel]; break;
+                case CV_32FC(6): return_float_val = &mat->at<cv::Vec6f>(index)[channel]; break;
 
                 case CV_64FC1: return_double_val = &mat->at<double>(index); break;
                 case CV_64FC2: return_double_val = &mat->at<cv::Vec2d>(index)[channel]; break;
                 case CV_64FC3: return_double_val = &mat->at<cv::Vec3d>(index)[channel]; break;
                 case CV_64FC4: return_double_val = &mat->at<cv::Vec4d>(index)[channel]; break;
+                case CV_64FC(6): return_double_val = &mat->at<cv::Vec6d>(index)[channel]; break;
 
                 default: {
                     ckfree(index);

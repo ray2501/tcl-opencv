@@ -182,6 +182,8 @@ MODULE_SCOPE int connectedComponentsWithStats(void *cd, Tcl_Interp *interp, int 
 MODULE_SCOPE int watershed(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int goodFeaturesToTrack(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int cornerHarris(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int cornerEigenValsAndVecs(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int cornerMinEigenVal(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int cornerSubPix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int HoughCircles(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int HoughLines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
