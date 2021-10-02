@@ -1,7 +1,19 @@
 #include "tclopencv.h"
+
 #ifdef TCL_USE_TKPHOTO
 #include <tk.h>
 #endif
+
+#ifdef TCL_USE_VECTCL
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <vectcl.h>
+#ifdef __cplusplus
+}
+#endif
+#endif
+
 #include <vector>
 
 #ifdef __cplusplus
@@ -47,6 +59,11 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         "setTo",
 #ifdef TCL_USE_TKPHOTO
         "toPhoto",
+        "fromPhoto",
+#endif
+#ifdef TCL_USE_VECTCL
+        "toNumArray",
+        "fromNumArray",
 #endif
         "close",
         "_command",
@@ -88,6 +105,11 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         FUNC_SETTO,
 #ifdef TCL_USE_TKPHOTO
         FUNC_TOPHOTO,
+        FUNC_FROMPHOTO,
+#endif
+#ifdef TCL_USE_VECTCL
+        FUNC_TONUMARRAY,
+        FUNC_FROMNUMARRAY,
 #endif
         FUNC_CLOSE,
         FUNC__COMMAND,
@@ -1178,6 +1200,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             if (Opencv_CheckForTk(cd, interp) != TCL_OK) {
                 return TCL_ERROR;
             }
+
             name = Tcl_GetString(objv[2]);
             photo = Tk_FindPhoto(interp, name);
             if (photo == NULL) {
@@ -1189,8 +1212,14 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 (mat->type() == CV_8UC3 && mat->channels() == 3) ||
                 (mat->type() == CV_8UC4 && mat->channels() == 4)) {
                 Tk_PhotoImageBlock blk;
-                unsigned char *data = mat->isContinuous() ? mat->data : mat->clone().data;
+                unsigned char *data;
+                cv::Mat tmat;
 
+                if (!mat->isContinuous()) {
+                    tmat = mat->clone();
+                    mat = &tmat;
+                }
+                data = mat->data;
                 blk.pixelPtr = data;
                 blk.width = mat->cols;
                 blk.height = mat->rows;
@@ -1220,6 +1249,234 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 }
             } else {
                 return Opencv_SetResult(interp, cv::Error::StsBadArg, "incompatible matrix");
+            }
+            break;
+        }
+        case FUNC_FROMPHOTO: {
+            char *name;
+            Tk_PhotoHandle photo;
+            Tk_PhotoImageBlock blk;
+            unsigned char *data;
+            int newType;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "photo");
+                return TCL_ERROR;
+            }
+
+            if (Opencv_CheckForTk(cd, interp) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            name = Tcl_GetString(objv[2]);
+            photo = Tk_FindPhoto(interp, name);
+            if (photo == NULL) {
+                Tcl_SetObjResult(interp, Tcl_ObjPrintf("can't use \"%s\": not a photo image", name));
+                return TCL_ERROR;
+            }
+            if ((mat->type() == CV_8UC1 && mat->channels() == 1) ||
+                (mat->type() == CV_8UC2 && mat->channels() == 2) ||
+                (mat->type() == CV_8UC3 && mat->channels() == 3) ||
+                (mat->type() == CV_8UC4 && mat->channels() == 4)) {
+                newType = mat->type();
+            } else {
+                newType = CV_8UC4;
+            }
+            Tk_PhotoGetImage(photo, &blk);
+            if (blk.width != mat->cols || blk.height != mat->rows || newType != mat->type()) {
+                try {
+                    mat->create(blk.height, blk.width, newType);
+                } catch (const cv::Exception &ex) {
+                    return Opencv_Exc2Tcl(interp, &ex);
+                } catch (...) {
+                    return Opencv_Exc2Tcl(interp, NULL);
+                }
+            }
+            if (!mat->isContinuous()) {
+                return Opencv_SetResult(interp, cv::Error::StsError, "matrix not continuous");
+            }
+            data = mat->data;
+            switch (mat->type()) {
+                case CV_8UC1:     /* grey */
+                    for (int y = 0; y < blk.height; y++) {
+                        int off = y * blk.width;
+                        unsigned char *pix = blk.pixelPtr + y * blk.pitch;
+                        for (int x = 0; x < blk.width; x++) {
+                            data[off++] =
+                                (114 * pix[blk.offset[0]] +
+                                 587 * pix[blk.offset[1]] +
+                                 299 * pix[blk.offset[2]]) / 1000;
+                            pix += blk.pixelSize;
+                        }
+                    }
+                    break;
+                case CV_8UC2:     /* grey + alpha */
+                    for (int y = 0; y < blk.height; y++) {
+                        int off = y * blk.width * 2;
+                        unsigned char *pix = blk.pixelPtr + y * blk.pitch;
+                        for (int x = 0; x < blk.width; x++) {
+                            data[off++] =
+                                (114 * pix[blk.offset[0]] +
+                                 587 * pix[blk.offset[1]] +
+                                 299 * pix[blk.offset[2]]) / 1000;
+                            data[off++] = pix[blk.offset[3]];
+                            pix += blk.pixelSize;
+                        }
+                    }
+                    break;
+                case CV_8UC3:     /* BGR */
+                    for (int y = 0; y < blk.height; y++) {
+                        int off = y * blk.width * 3;
+                        unsigned char *pix = blk.pixelPtr + y * blk.pitch;
+                        for (int x = 0; x < blk.width; x++) {
+                            data[off++] = pix[blk.offset[2]];
+                            data[off++] = pix[blk.offset[1]];
+                            data[off++] = pix[blk.offset[0]];
+                            pix += blk.pixelSize;
+                        }
+                    }
+                    break;
+                case CV_8UC4:     /* BGRA */
+                    for (int y = 0; y < blk.height; y++) {
+                        int off = y * blk.width * 4;
+                        unsigned char *pix = blk.pixelPtr + y * blk.pitch;
+                        for (int x = 0; x < blk.width; x++) {
+                            data[off++] = pix[blk.offset[2]];
+                            data[off++] = pix[blk.offset[1]];
+                            data[off++] = pix[blk.offset[0]];
+                            data[off++] = pix[blk.offset[3]];
+                            pix += blk.pixelSize;
+                        }
+                    }
+                    break;
+            }
+            break;
+        }
+#endif
+#ifdef TCL_USE_VECTCL
+        case FUNC_TONUMARRAY: {
+            Tcl_Obj *naObj;
+            NumArrayType natype = NumArray_NoType;
+            int ndims = -1, elsize;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, NULL);
+                return TCL_ERROR;
+            }
+
+            if (Opencv_CheckForVectcl(cd, interp) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (!mat->isContinuous()) {
+                return Opencv_SetResult(interp, cv::Error::StsError, "matrix not continuous");
+            }
+            ndims = mat->channels();
+            switch (mat->type() & CV_MAT_DEPTH_MASK) {
+                case CV_8U:
+                    natype = NumArray_Uint8;
+                    elsize = sizeof(unsigned char);
+                    break;
+                case CV_8S:
+                    natype = NumArray_Int8;
+                    elsize = sizeof(char);
+                    break;
+                case CV_16U:
+                    natype = NumArray_Uint16;
+                    elsize = sizeof(unsigned short);
+                    break;
+                case CV_16S:
+                    natype = NumArray_Int16;
+                    elsize = sizeof(short);
+                    break;
+                case CV_32S:
+                    natype = NumArray_Int32;
+                    elsize = sizeof(int);
+                    break;
+                case CV_32F:
+                    natype = NumArray_Float32;
+                    elsize = sizeof(float);
+                    break;
+                case CV_64F:
+                    natype = NumArray_Float64;
+                    elsize = sizeof(double);
+                    break;
+                default:
+                    return Opencv_SetResult(interp, cv::Error::StsNoConv, "unsupported data type");
+            }
+            if (ndims == 1) {
+                naObj = NumArrayNewMatrix(natype, mat->rows, mat->cols);
+                void *p = NumArrayGetPtrFromObj(interp, naObj);
+                memcpy(p, mat->data, mat->rows * mat->cols * elsize);
+            } else {
+                naObj = Tcl_NewObj();
+                index_t dims[3];
+                dims[0] = mat->rows;
+                dims[1] = mat->cols;
+                dims[2] = ndims;
+                NumArrayInfo *info = CreateNumArrayInfo(3, dims, natype);
+                NumArraySharedBuffer *shbuf = NumArrayNewSharedBuffer(info->bufsize);
+                NumArraySetInternalRep(naObj, shbuf, info);
+                void *p = NumArrayGetPtrFromObj(interp, naObj);
+                memcpy(p, mat->data, mat->rows * mat->cols * ndims * elsize);
+            }
+            Tcl_SetObjResult(interp, naObj);
+            break;
+        }
+        case FUNC_FROMNUMARRAY: {
+            NumArrayInfo *info;
+            int cvtype, dims[2];
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "numarray");
+                return TCL_ERROR;
+            }
+
+            if (Opencv_CheckForVectcl(cd, interp) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            info = NumArrayGetInfoFromObj(interp, objv[2]);
+            if (info == NULL) {
+                return TCL_ERROR;
+            }
+            switch (info->type) {
+                case NumArray_Int8: cvtype = CV_8S; break;
+                case NumArray_Uint8: cvtype = CV_8U; break;
+                case NumArray_Int16: cvtype = CV_16S; break;
+                case NumArray_Uint16: cvtype = CV_16U; break;
+                case NumArray_Int32: cvtype = CV_32S; break;
+                case NumArray_Uint32: cvtype = CV_32S; break;
+                case NumArray_Float32: cvtype = CV_32F; break;
+                case NumArray_Float64: cvtype = CV_64F; break;
+                case NumArray_Int:
+                    if (sizeof(NaWideInt) == sizeof(int)) {
+                        cvtype = CV_32S;
+                        break;
+                    }
+                default:
+                    return Opencv_SetResult(interp, cv::Error::StsNoConv, "unsupported data type");
+            }
+            if (info->nDim < 1 || info->nDim > 3) {
+                return Opencv_SetResult(interp, cv::Error::StsNoConv, "invalid number dimensions");
+            }
+            dims[0] = info->dims[0];
+            if (info->nDim > 1) {
+                dims[1] = info->dims[1];
+            } else {
+                dims[1] = 1;
+            }
+            if (info->nDim > 2) {
+                cvtype = CV_MAKE_TYPE(cvtype, info->dims[2]);
+            } else {
+                cvtype = CV_MAKE_TYPE(cvtype, 1);
+            }
+            try {
+                *mat = cv::Mat(2, dims, cvtype, NumArrayGetPtrFromObj(interp, objv[2]));
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
             }
             break;
         }

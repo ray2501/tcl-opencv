@@ -49,13 +49,38 @@ func_tk_config() {
 
 AC_MSG_CHECKING([whether to add support for Tk photo images])
 AC_ARG_ENABLE(tkphoto,
-    AC_HELP_STRING([--enable-tkphoto],[add support for Tk photo images]),
+    AC_HELP_STRING([--enable-tkphoto],
+		   [add support for Tk photo images (default:off)]),
 	[use_tkphoto=$enableval],[use_tkphoto=no])
 AC_MSG_RESULT([$use_tkphoto])
 
 if test "$use_tkphoto" = "yes"; then
     # wrapped in function to make it conditional on --enable-tkphoto
     func_tk_config
+fi
+
+#--------------------------------------------------------------------
+# Load the VecTcl stuff if necessary
+#--------------------------------------------------------------------
+
+func_vectcl_config() {
+    TEA_PATH_CONFIG([vectcl])
+    TEA_LOAD_CONFIG([vectcl])
+    if test -r "${with_vectcl}/generic/vectcl.h"; then
+	CFLAGS="$CFLAGS -I\"${with_vectcl}/generic\""
+    fi
+}
+
+AC_MSG_CHECKING([whether to add support for VecTcl])
+AC_ARG_ENABLE(vectcl,
+    AC_HELP_STRING([--enable-vectcl],
+		   [add support for VecTcl (default:off)]),
+	[use_vectcl=$enableval],[use_vectcl=no])
+AC_MSG_RESULT([$use_vectcl])
+
+if test "$use_vectcl" = "yes"; then
+    # wrapped in function to make it conditional on --enable-vectcl
+    func_vectcl_config
 fi
 
 #-----------------------------------------------------------------------
@@ -91,28 +116,34 @@ TEA_ADD_SOURCES([tclopencv.cpp tcore.cpp timgproc.cpp timgcodecs.cpp
 TEA_ADD_HEADERS([])
 TEA_ADD_INCLUDES([])
 AC_MSG_CHECKING([whether to use opencv4 package])
-AC_ARG_WITH(opencv4,
-    AC_HELP_STRING([--with-opencv4],[use opencv4]),
-	[tcl_ok=$withval],[tcl_ok=yes])
+if pkg-config opencv4 --exists; then
+    tcl_ok=yes
+else
+    tcl_ok=no
+fi
 AC_MSG_RESULT([$tcl_ok])
 if test "$tcl_ok" = "yes"; then
     TEA_ADD_CFLAGS([-std=c++11 -DTCL_USE_OPENCV4=1])
     TEA_ADD_CFLAGS([`pkg-config opencv4 --cflags`])
     TEA_ADD_LIBS([`pkg-config opencv4 --libs`])
+    AC_MSG_CHECKING([whether to use sift algorithm])
+    AC_ARG_ENABLE(sift,
+	AC_HELP_STRING([--enable-sift],
+		       [enable sift for opencv4 (default: on)]),
+	    [tcl_ok=$enableval],[tcl_ok=yes])
+    AC_MSG_RESULT([$tcl_ok])
+    if test "$tcl_ok" = "yes"; then
+	TEA_ADD_CFLAGS([-DTCL_USE_SIFT=1])
+    fi
 else
     TEA_ADD_CFLAGS([`pkg-config opencv --cflags`])
     TEA_ADD_LIBS([`pkg-config opencv --libs`])
 fi
-AC_MSG_CHECKING([whether to use sift algorithm])
-AC_ARG_WITH(sift,
-    AC_HELP_STRING([--with-sift],[enable sift]),
-    [tcl_ok=$withval],[tcl_ok=yes])
-AC_MSG_RESULT([$tcl_ok])
-if test "$tcl_ok" = "yes"; then
-    TEA_ADD_CFLAGS([-DTCL_USE_SIFT=1])
-fi
 if test "$use_tkphoto" = "yes"; then
     TEA_ADD_CFLAGS([-DTCL_USE_TKPHOTO=1])
+fi
+if test "$use_vectcl" = "yes"; then
+    TEA_ADD_CFLAGS([-DTCL_USE_VECTCL=1 -DUSE_VECTCL_STUBS=1])
 fi
 TEA_ADD_STUB_SOURCES([])
 TEA_ADD_TCL_SOURCES([])

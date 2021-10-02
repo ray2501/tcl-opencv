@@ -1,5 +1,7 @@
 2021-10-02 Danilo Chang
 
+	* Apply Christian's patch:
+	  Improved Tk photo support plus POC VecTcl support
 	* configure.ac: Add -std=c++11 flag
 	  For OpenCV 4.x+ requires enabled C++11 support issue.
 	* Implement command: computeECC, findTransformECC

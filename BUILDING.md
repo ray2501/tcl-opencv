@@ -26,6 +26,11 @@ below is an example:
     $ make
     $ make install
 
+Thanks for Christian's refactoring code, you can try to build this
+extension by using OpenCV 3.x. This extension will use pkg-config
+to detect opencv4. If opencv4 does not exist, this extension will
+try to build with OpenCV 3.x.
+
 SIFT (Scale-Invariant Feature Transform) algorithm has been moved to
 the OpenCV main repository in OpenCV 4.4.0 because its patent expired.
 You can use `--with-sift` flag to enable/disable SIFT related code.
@@ -37,25 +42,27 @@ Default is on, below is an exmaple to disable:
     $ make
     $ make install
 
-Thanks for Christian's refactoring code, you can try to build this
-extension by using OpenCV 3.x. You need setup `--with-opencv4` flag
-to no (and maybe also need to setup --with-sift flag to no).
-Default is on, below is an exmaple to disable:
-
-    $ export CC=g++
-    $ cd tcl-opencv
-    $ ./configure --with-opencv4=no
-    $ make
-    $ make install
-
 Christian also provides the configure option `--enable-tkphoto`
-to allow for optional Tk support in the cv::Mat class (toPhoto method)
-and a cv::fromPhoto function to make a cv::Mat from a Tk photo image.
+to allow for optional Tk support in the cv::Mat class (toPhoto and
+fromPhoto methods) and a cv::fromPhoto function to make a cv::Mat
+from a Tk photo image.
 Default is off, below is an example to enable:
 
     $ export CC=g++
     $ cd tcl-opencv
-    $ ./configure --enable-tkphoto
+    $ ./configure --enable-tkphoto [--with-tk=dir]
+    $ make
+    $ make install
+
+Christian also provides the configure option `--enable-vectcl`
+to allow for optional VecTcl NumArray support in the cv::Mat class
+(toNumArray and fromNumArray methods) and a cv::fromNumArray function
+to make a cv::Mat from a VecTcl NumArray.
+Default is off, below is an example to enable:
+
+    $ export CC=g++
+    $ cd tcl-opencv
+    $ ./configure --enable-vectcl [--with-vectcl=dir]
     $ make
     $ make install
 

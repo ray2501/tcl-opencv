@@ -654,6 +654,14 @@ GREP
 RANLIB
 SET_MAKE
 CPP
+vectcl_STUB_LIB_PATH
+vectcl_STUB_LIB_SPEC
+vectcl_STUB_LIB_FILE
+vectcl_LIB_SPEC
+vectcl_LIB_FILE
+vectcl_SRC_DIR
+vectcl_BIN_DIR
+vectcl_VERSION
 TK_XINCLUDES
 TK_LIBS
 TK_STUB_LIB_SPEC
@@ -750,8 +758,9 @@ enable_option_checking
 with_tcl
 with_tk
 enable_tkphoto
-with_opencv4
-with_sift
+with_vectcl
+enable_vectcl
+enable_sift
 with_tclinclude
 with_tkinclude
 enable_threads
@@ -1380,7 +1389,9 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-tkphoto        add support for Tk photo images
+  --enable-tkphoto        add support for Tk photo images (default:off)
+  --enable-vectcl         add support for VecTcl (default:off)
+  --enable-sift           enable sift for opencv4 (default: on)
   --enable-threads        build with threads (default: on)
   --enable-shared         build and link with shared libraries (default: on)
   --enable-stubs          build and link with stub libraries. Always true for
@@ -1396,8 +1407,7 @@ Optional Packages:
   --with-tcl              directory containing tcl configuration
                           (tclConfig.sh)
   --with-tk               directory containing tk configuration (tkConfig.sh)
-  --with-opencv4          use opencv4
-  --with-sift             enable sift
+  --with-vectcl              directory containing vectcl configuration (vectclConfig.sh)
   --with-tclinclude       directory containing the public Tcl header files
   --with-tkinclude        directory containing the public Tk header files
 
@@ -3747,6 +3757,281 @@ if test "$use_tkphoto" = "yes"; then
     func_tk_config
 fi
 
+#--------------------------------------------------------------------
+# Load the VecTcl stuff if necessary
+#--------------------------------------------------------------------
+
+func_vectcl_config() {
+
+    #
+    # Ok, lets find the vectcl configuration
+    # First, look for one uninstalled.
+    # the alternative search directory is invoked by --with-vectcl
+    #
+
+    if test x"${no_vectcl}" = x ; then
+	# we reset no_vectcl in case something fails here
+	no_vectcl=true
+
+# Check whether --with-vectcl was given.
+if test "${with_vectcl+set}" = set; then :
+  withval=$with_vectcl; with_vectclconfig=${withval}
+fi
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for vectcl configuration" >&5
+$as_echo_n "checking for vectcl configuration... " >&6; }
+	if ${ac_cv_c_vectclconfig+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+
+	    # First check to see if --with-vectcl was specified.
+	    if test x"${with_vectclconfig}" != x ; then
+		case ${with_vectclconfig} in
+		    */vectclConfig.sh )
+			if test -f ${with_vectclconfig}; then
+			    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --with-vectcl argument should refer to directory containing vectclConfig.sh, not to vectclConfig.sh itself" >&5
+$as_echo "$as_me: WARNING: --with-vectcl argument should refer to directory containing vectclConfig.sh, not to vectclConfig.sh itself" >&2;}
+			    with_vectclconfig=`echo ${with_vectclconfig} | sed 's!/vectclConfig\.sh$!!'`
+			fi;;
+		esac
+		if test -f "${with_vectclconfig}/vectclConfig.sh" ; then
+		    ac_cv_c_vectclconfig=`(cd ${with_vectclconfig}; pwd)`
+		else
+		    as_fn_error $? "${with_vectclconfig} directory doesn't contain vectclConfig.sh" "$LINENO" 5
+		fi
+	    fi
+
+	    # then check for a private vectcl installation
+	    if test x"${ac_cv_c_vectclconfig}" = x ; then
+		for i in \
+			../vectcl \
+			`ls -dr ../vectcl*[0-9].[0-9]*.[0-9]* 2>/dev/null` \
+			`ls -dr ../vectcl*[0-9].[0-9][0-9] 2>/dev/null` \
+			`ls -dr ../vectcl*[0-9].[0-9] 2>/dev/null` \
+			`ls -dr ../vectcl*[0-9].[0-9]* 2>/dev/null` \
+			../../vectcl \
+			`ls -dr ../../vectcl*[0-9].[0-9]*.[0-9]* 2>/dev/null` \
+			`ls -dr ../../vectcl*[0-9].[0-9][0-9] 2>/dev/null` \
+			`ls -dr ../../vectcl*[0-9].[0-9] 2>/dev/null` \
+			`ls -dr ../../vectcl*[0-9].[0-9]* 2>/dev/null` \
+			../../../vectcl \
+			`ls -dr ../../../vectcl*[0-9].[0-9]*.[0-9]* 2>/dev/null` \
+			`ls -dr ../../../vectcl*[0-9].[0-9][0-9] 2>/dev/null` \
+			`ls -dr ../../../vectcl*[0-9].[0-9] 2>/dev/null` \
+			`ls -dr ../../../vectcl*[0-9].[0-9]* 2>/dev/null` \
+			${srcdir}/../vectcl \
+			`ls -dr ${srcdir}/../vectcl*[0-9].[0-9]*.[0-9]* 2>/dev/null` \
+			`ls -dr ${srcdir}/../vectcl*[0-9].[0-9][0-9] 2>/dev/null` \
+			`ls -dr ${srcdir}/../vectcl*[0-9].[0-9] 2>/dev/null` \
+			`ls -dr ${srcdir}/../vectcl*[0-9].[0-9]* 2>/dev/null` \
+			; do
+		    if test -f "$i/vectclConfig.sh" ; then
+			ac_cv_c_vectclconfig=`(cd $i; pwd)`
+			break
+		    fi
+		    if test -f "$i/unix/vectclConfig.sh" ; then
+			ac_cv_c_vectclconfig=`(cd $i/unix; pwd)`
+			break
+		    fi
+		done
+	    fi
+
+	    # check in a few common install locations
+	    if test x"${ac_cv_c_vectclconfig}" = x ; then
+		for i in `ls -d ${libdir} 2>/dev/null` \
+			`ls -d ${exec_prefix}/lib 2>/dev/null` \
+			`ls -d ${prefix}/lib 2>/dev/null` \
+			`ls -d /usr/local/lib 2>/dev/null` \
+			`ls -d /usr/contrib/lib 2>/dev/null` \
+			`ls -d /usr/pkg/lib 2>/dev/null` \
+			`ls -d /usr/lib 2>/dev/null` \
+			`ls -d /usr/lib64 2>/dev/null` \
+			; do
+		    if test -f "$i/vectclConfig.sh" ; then
+			ac_cv_c_vectclconfig=`(cd $i; pwd)`
+			break
+		    fi
+		done
+	    fi
+
+fi
+
+
+	if test x"${ac_cv_c_vectclconfig}" = x ; then
+	    vectcl_BIN_DIR="# no vectcl configs found"
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Cannot find vectcl configuration definitions" >&5
+$as_echo "$as_me: WARNING: Cannot find vectcl configuration definitions" >&2;}
+	    exit 0
+	else
+	    no_vectcl=
+	    vectcl_BIN_DIR=${ac_cv_c_vectclconfig}
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: found $vectcl_BIN_DIR/vectclConfig.sh" >&5
+$as_echo "found $vectcl_BIN_DIR/vectclConfig.sh" >&6; }
+	fi
+    fi
+
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for existence of ${vectcl_BIN_DIR}/vectclConfig.sh" >&5
+$as_echo_n "checking for existence of ${vectcl_BIN_DIR}/vectclConfig.sh... " >&6; }
+
+    if test -f "${vectcl_BIN_DIR}/vectclConfig.sh" ; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: loading" >&5
+$as_echo "loading" >&6; }
+	. "${vectcl_BIN_DIR}/vectclConfig.sh"
+    else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: file not found" >&5
+$as_echo "file not found" >&6; }
+    fi
+
+    #
+    # If the vectcl_BIN_DIR is the build directory (not the install directory),
+    # then set the common variable name to the value of the build variables.
+    # For example, the variable vectcl_LIB_SPEC will be set to the value
+    # of vectcl_BUILD_LIB_SPEC. An extension should make use of vectcl_LIB_SPEC
+    # instead of vectcl_BUILD_LIB_SPEC since it will work with both an
+    # installed and uninstalled version of Tcl.
+    #
+
+    if test -f "${vectcl_BIN_DIR}/Makefile" ; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Found Makefile - using build library specs for vectcl" >&5
+$as_echo "$as_me: WARNING: Found Makefile - using build library specs for vectcl" >&2;}
+        vectcl_LIB_SPEC=${vectcl_BUILD_LIB_SPEC}
+        vectcl_STUB_LIB_SPEC=${vectcl_BUILD_STUB_LIB_SPEC}
+        vectcl_STUB_LIB_PATH=${vectcl_BUILD_STUB_LIB_PATH}
+        vectcl_INCLUDE_SPEC=${vectcl_BUILD_INCLUDE_SPEC}
+        vectcl_LIBRARY_PATH=${vectcl_LIBRARY_PATH}
+    fi
+
+
+
+
+
+
+
+
+
+
+
+
+    # Allow the caller to prevent this auto-check by specifying any 2nd arg
+    if test "x" = x; then :
+
+	# Check both upper and lower-case variants
+	# If a dev wanted non-stubs libs, this function could take an option
+	# to not use _STUB in the paths below
+	if test "x${vectcl_STUB_LIB_SPEC}" = x; then :
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking For VECTCL_STUB library for LIBS" >&5
+$as_echo_n "checking For VECTCL_STUB library for LIBS... " >&6; }
+    # This simplifies the use of stub libraries by automatically adding
+    # the stub lib to your path.  Normally this would add to SHLIB_LD_LIBS,
+    # but this is called before CONFIG_CFLAGS.  More importantly, this adds
+    # to PKG_LIBS, which becomes LIBS, and that is only used by SHLIB_LD.
+    if test "x${VECTCL_STUB_LIB_SPEC}" != "x" ; then
+	if test "${TEA_PLATFORM}" = "windows" -a "$GCC" != "yes" ; then
+
+    vars="\"`${CYGPATH} ${VECTCL_STUB_LIB_PATH}`\""
+    for i in $vars; do
+	if test "${TEA_PLATFORM}" = "windows" -a "$GCC" = "yes" ; then
+	    # Convert foo.lib to -lfoo for GCC.  No-op if not *.lib
+	    i=`echo "$i" | sed -e 's/^\([^-].*\)\.[lL][iI][bB]$/-l\1/'`
+	fi
+	PKG_LIBS="$PKG_LIBS $i"
+    done
+
+
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: using VECTCL_STUB_LIB_PATH ${VECTCL_STUB_LIB_PATH}" >&5
+$as_echo "using VECTCL_STUB_LIB_PATH ${VECTCL_STUB_LIB_PATH}" >&6; }
+	else
+
+    vars="${VECTCL_STUB_LIB_SPEC}"
+    for i in $vars; do
+	if test "${TEA_PLATFORM}" = "windows" -a "$GCC" = "yes" ; then
+	    # Convert foo.lib to -lfoo for GCC.  No-op if not *.lib
+	    i=`echo "$i" | sed -e 's/^\([^-].*\)\.[lL][iI][bB]$/-l\1/'`
+	fi
+	PKG_LIBS="$PKG_LIBS $i"
+    done
+
+
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: using VECTCL_STUB_LIB_SPEC ${VECTCL_STUB_LIB_SPEC}" >&5
+$as_echo "using VECTCL_STUB_LIB_SPEC ${VECTCL_STUB_LIB_SPEC}" >&6; }
+	fi
+    else
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: file not found" >&5
+$as_echo "file not found" >&6; }
+    fi
+
+else
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking For vectcl_STUB library for LIBS" >&5
+$as_echo_n "checking For vectcl_STUB library for LIBS... " >&6; }
+    # This simplifies the use of stub libraries by automatically adding
+    # the stub lib to your path.  Normally this would add to SHLIB_LD_LIBS,
+    # but this is called before CONFIG_CFLAGS.  More importantly, this adds
+    # to PKG_LIBS, which becomes LIBS, and that is only used by SHLIB_LD.
+    if test "x${vectcl_STUB_LIB_SPEC}" != "x" ; then
+	if test "${TEA_PLATFORM}" = "windows" -a "$GCC" != "yes" ; then
+
+    vars="\"`${CYGPATH} ${vectcl_STUB_LIB_PATH}`\""
+    for i in $vars; do
+	if test "${TEA_PLATFORM}" = "windows" -a "$GCC" = "yes" ; then
+	    # Convert foo.lib to -lfoo for GCC.  No-op if not *.lib
+	    i=`echo "$i" | sed -e 's/^\([^-].*\)\.[lL][iI][bB]$/-l\1/'`
+	fi
+	PKG_LIBS="$PKG_LIBS $i"
+    done
+
+
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: using vectcl_STUB_LIB_PATH ${vectcl_STUB_LIB_PATH}" >&5
+$as_echo "using vectcl_STUB_LIB_PATH ${vectcl_STUB_LIB_PATH}" >&6; }
+	else
+
+    vars="${vectcl_STUB_LIB_SPEC}"
+    for i in $vars; do
+	if test "${TEA_PLATFORM}" = "windows" -a "$GCC" = "yes" ; then
+	    # Convert foo.lib to -lfoo for GCC.  No-op if not *.lib
+	    i=`echo "$i" | sed -e 's/^\([^-].*\)\.[lL][iI][bB]$/-l\1/'`
+	fi
+	PKG_LIBS="$PKG_LIBS $i"
+    done
+
+
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: using vectcl_STUB_LIB_SPEC ${vectcl_STUB_LIB_SPEC}" >&5
+$as_echo "using vectcl_STUB_LIB_SPEC ${vectcl_STUB_LIB_SPEC}" >&6; }
+	fi
+    else
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: file not found" >&5
+$as_echo "file not found" >&6; }
+    fi
+
+fi
+
+fi
+
+    if test -r "${with_vectcl}/generic/vectcl.h"; then
+	CFLAGS="$CFLAGS -I\"${with_vectcl}/generic\""
+    fi
+}
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to add support for VecTcl" >&5
+$as_echo_n "checking whether to add support for VecTcl... " >&6; }
+# Check whether --enable-vectcl was given.
+if test "${enable_vectcl+set}" = set; then :
+  enableval=$enable_vectcl; use_vectcl=$enableval
+else
+  use_vectcl=no
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $use_vectcl" >&5
+$as_echo "$use_vectcl" >&6; }
+
+if test "$use_vectcl" = "yes"; then
+    # wrapped in function to make it conditional on --enable-vectcl
+    func_vectcl_config
+fi
+
 #-----------------------------------------------------------------------
 # Handle the --prefix=... option by defaulting to what Tcl gave.
 # Must be called after TEA_LOAD_TCLCONFIG and before TEA_SETUP_COMPILER.
@@ -5208,14 +5493,11 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use opencv4 package" >&5
 $as_echo_n "checking whether to use opencv4 package... " >&6; }
-
-# Check whether --with-opencv4 was given.
-if test "${with_opencv4+set}" = set; then :
-  withval=$with_opencv4; tcl_ok=$withval
+if pkg-config opencv4 --exists; then
+    tcl_ok=yes
 else
-  tcl_ok=yes
+    tcl_ok=no
 fi
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $tcl_ok" >&5
 $as_echo "$tcl_ok" >&6; }
 if test "$tcl_ok" = "yes"; then
@@ -5238,6 +5520,23 @@ if test "$tcl_ok" = "yes"; then
     done
 
 
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use sift algorithm" >&5
+$as_echo_n "checking whether to use sift algorithm... " >&6; }
+    # Check whether --enable-sift was given.
+if test "${enable_sift+set}" = set; then :
+  enableval=$enable_sift; tcl_ok=$enableval
+else
+  tcl_ok=yes
+fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $tcl_ok" >&5
+$as_echo "$tcl_ok" >&6; }
+    if test "$tcl_ok" = "yes"; then
+
+    PKG_CFLAGS="$PKG_CFLAGS -DTCL_USE_SIFT=1"
+
+
+    fi
 else
 
     PKG_CFLAGS="$PKG_CFLAGS `pkg-config opencv --cflags`"
@@ -5255,27 +5554,15 @@ else
 
 
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use sift algorithm" >&5
-$as_echo_n "checking whether to use sift algorithm... " >&6; }
-
-# Check whether --with-sift was given.
-if test "${with_sift+set}" = set; then :
-  withval=$with_sift; tcl_ok=$withval
-else
-  tcl_ok=yes
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $tcl_ok" >&5
-$as_echo "$tcl_ok" >&6; }
-if test "$tcl_ok" = "yes"; then
-
-    PKG_CFLAGS="$PKG_CFLAGS -DTCL_USE_SIFT=1"
-
-
-fi
 if test "$use_tkphoto" = "yes"; then
 
     PKG_CFLAGS="$PKG_CFLAGS -DTCL_USE_TKPHOTO=1"
+
+
+fi
+if test "$use_vectcl" = "yes"; then
+
+    PKG_CFLAGS="$PKG_CFLAGS -DTCL_USE_VECTCL=1 -DUSE_VECTCL_STUBS=1"
 
 
 fi

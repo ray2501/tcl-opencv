@@ -516,6 +516,9 @@ typedef struct {
 #ifdef TCL_USE_TKPHOTO
     int tkCheck;
 #endif
+#ifdef TCL_USE_VECTCL
+    int vtCheck;
+#endif
 } Opencv_Data;
 
 
@@ -540,6 +543,9 @@ MODULE_SCOPE Tcl_Obj *Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type
 MODULE_SCOPE void *Opencv_FindHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, Tcl_Obj *name);
 #ifdef TCL_USE_TKPHOTO
 MODULE_SCOPE int Opencv_CheckForTk(void *cd, Tcl_Interp *interp);
+#endif
+#ifdef TCL_USE_VECTCL
+MODULE_SCOPE int Opencv_CheckForVectcl(void *cd, Tcl_Interp *interp);
 #endif
 
 /*

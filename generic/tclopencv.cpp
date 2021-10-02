@@ -16,6 +16,16 @@ extern "C" {
 #include <tk.h>
 #endif
 
+#ifdef TCL_USE_VECTCL
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <vectcl.h>
+#ifdef __cplusplus
+}
+#endif
+#endif
+
 
 static void
 InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
@@ -691,6 +701,100 @@ Opencv_FromPhoto(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 #endif /* TCL_USE_TKPHOTO */
 
 
+#ifdef TCL_USE_VECTCL
+int Opencv_CheckForVectcl(void *cd, Tcl_Interp *interp)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->vtCheck < 0) {
+        Tcl_SetResult(interp, (char *) "package VecTcl not available", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    if (cvd->vtCheck == 0) {
+        if (Tcl_PkgPresent(interp, "vectcl", "0.3", 0) == NULL) {
+            return TCL_ERROR;
+        }
+#ifdef USE_VECTCL_STUBS
+        if (Vectcl_InitStubs(interp, "0.3", 0) == NULL) {
+            cvd->vtCheck = -1;
+            return TCL_ERROR;
+        }
+#else
+        if (Tcl_PkgRequire(interp, "vectcl", "0.3", 0) == NULL) {
+            cvd->vtCheck = -1;
+            return TCL_ERROR;
+        }
+#endif
+        cvd->vtCheck = 1;
+    }
+    return TCL_OK;
+}
+
+static int
+Opencv_FromNumArray(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    NumArrayInfo *info;
+    Tcl_Obj *pResultStr;
+    cv::Mat tmat, *mat;
+    int cvtype, dims[2];
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "numarray");
+        return TCL_ERROR;
+    }
+    if (Opencv_CheckForVectcl(cd, interp) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    info = NumArrayGetInfoFromObj(interp, objv[1]);
+    if (info == NULL) {
+        return TCL_ERROR;
+    }
+    switch (info->type) {
+        case NumArray_Int8: cvtype = CV_8S; break;
+        case NumArray_Uint8: cvtype = CV_8U; break;
+        case NumArray_Int16: cvtype = CV_16S; break;
+        case NumArray_Uint16: cvtype = CV_16U; break;
+        case NumArray_Int32: cvtype = CV_32S; break;
+        case NumArray_Uint32: cvtype = CV_32S; break;
+        case NumArray_Float32: cvtype = CV_32F; break;
+        case NumArray_Float64: cvtype = CV_64F; break;
+        case NumArray_Int:
+            if (sizeof(NaWideInt) == sizeof(int)) {
+                cvtype = CV_32S;
+                break;
+            }
+        default:
+            return Opencv_SetResult(interp, cv::Error::StsNoConv, "unsupported data type");
+    }
+    if (info->nDim < 1 || info->nDim > 3) {
+        return Opencv_SetResult(interp, cv::Error::StsNoConv, "invalid number dimensions");
+    }
+    dims[0] = info->dims[0];
+    if (info->nDim > 1) {
+        dims[1] = info->dims[1];
+    } else {
+        dims[1] = 1;
+    }
+    if (info->nDim > 2) {
+        cvtype = CV_MAKE_TYPE(cvtype, info->dims[2]);
+    } else {
+        cvtype = CV_MAKE_TYPE(cvtype, 1);
+    }
+    try {
+        tmat = cv::Mat(2, dims, cvtype, NumArrayGetPtrFromObj(interp, objv[1]));
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+    mat = new cv::Mat(tmat);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+#endif /* TCL_USE_VECTCL */
+
+
 /*
  *----------------------------------------------------------------------
  *
@@ -1062,6 +1166,12 @@ Opencv_Init(Tcl_Interp *interp)
 #ifdef TCL_USE_TKPHOTO
     Tcl_CreateObjCommand(interp, "::" NS "::fromPhoto",
         (Tcl_ObjCmdProc *) Opencv_FromPhoto,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+#endif
+
+#ifdef TCL_USE_VECTCL
+    Tcl_CreateObjCommand(interp, "::" NS "::fromNumArray",
+        (Tcl_ObjCmdProc *) Opencv_FromNumArray,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 #endif
 
@@ -3660,15 +3770,27 @@ Opencv_Init(Tcl_Interp *interp)
      */
 
     strValue = Tcl_NewStringObj("::" NS "::CONTOURS_MATCH_I1", -1);
+#ifdef TCL_USE_OPENCV4
     setupValue = Tcl_NewIntObj(cv::ShapeMatchModes::CONTOURS_MATCH_I1);
+#else
+    setupValue = Tcl_NewIntObj(CV_CONTOURS_MATCH_I1);
+#endif
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     strValue = Tcl_NewStringObj("::" NS "::CONTOURS_MATCH_I2", -1);
+#ifdef TCL_USE_OPENCV4
     setupValue = Tcl_NewIntObj(cv::ShapeMatchModes::CONTOURS_MATCH_I2);
+#else
+    setupValue = Tcl_NewIntObj(CV_CONTOURS_MATCH_I2);
+#endif
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     strValue = Tcl_NewStringObj("::" NS "::CONTOURS_MATCH_I3", -1);
+#ifdef TCL_USE_OPENCV4
     setupValue = Tcl_NewIntObj(cv::ShapeMatchModes::CONTOURS_MATCH_I3);
+#else
+    setupValue = Tcl_NewIntObj(CV_CONTOURS_MATCH_I3);
+#endif
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*
