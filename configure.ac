@@ -96,7 +96,7 @@ AC_ARG_WITH(opencv4,
 	[tcl_ok=$withval],[tcl_ok=yes])
 AC_MSG_RESULT([$tcl_ok])
 if test "$tcl_ok" = "yes"; then
-    TEA_ADD_CFLAGS([-DTCL_USE_OPENCV4=1])
+    TEA_ADD_CFLAGS([-std=c++11 -DTCL_USE_OPENCV4=1])
     TEA_ADD_CFLAGS([`pkg-config opencv4 --cflags`])
     TEA_ADD_LIBS([`pkg-config opencv4 --libs`])
 else

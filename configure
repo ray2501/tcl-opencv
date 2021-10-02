@@ -5220,7 +5220,7 @@ fi
 $as_echo "$tcl_ok" >&6; }
 if test "$tcl_ok" = "yes"; then
 
-    PKG_CFLAGS="$PKG_CFLAGS -DTCL_USE_OPENCV4=1"
+    PKG_CFLAGS="$PKG_CFLAGS -std=c++11 -DTCL_USE_OPENCV4=1"
 
 
 

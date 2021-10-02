@@ -672,7 +672,7 @@ S["INSTALL_PROGRAM"]="${INSTALL} -m 755"
 S["INSTALL_DATA"]="${INSTALL} -m 644"
 S["INSTALL_DATA_DIR"]="${INSTALL} -d -m 755"
 S["INSTALL"]="$(SHELL) $(srcdir)/tclconfig/install-sh -c"
-S["PKG_CFLAGS"]=" -DTCL_USE_OPENCV4=1  -DTCL_USE_SIFT=1"
+S["PKG_CFLAGS"]=" -std=c++11 -DTCL_USE_OPENCV4=1  -DTCL_USE_SIFT=1"
 S["PKG_LIBS"]=" -lopencv_aruco -lopencv_face -lopencv_gapi -lopencv_ml -lopencv_objdetect -lopencv_shape -lopencv_stitching -lopencv_superres -lopencv_optflow -lop"\
 "encv_tracking -lopencv_highgui -lopencv_plot -lopencv_videostab -lopencv_videoio -lopencv_photo -lopencv_ximgproc -lopencv_video -lopencv_calib3d -l"\
 "opencv_imgcodecs -lopencv_features2d -lopencv_dnn -lopencv_imgproc -lopencv_flann -lopencv_core"
