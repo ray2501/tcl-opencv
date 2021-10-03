@@ -4148,6 +4148,51 @@ int mat_solveCubic(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_solvePoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat image;
+    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL;
+    cv::Mat *mat1, *dstmat;
+    int maxIters = 300;
+    double result;
+
+    if (objc != 2 && objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix ?maxIters?");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 3) {
+        if (Tcl_GetIntFromObj(interp, objv[2], &maxIters) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        result = cv::solvePoly(*mat1, image, maxIters);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    dstmat = new cv::Mat(image);
+    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result));
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int mat_sqrt(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;

@@ -1103,6 +1103,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_solveCubic,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::solvePoly",
+        (Tcl_ObjCmdProc *) mat_solvePoly,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::sqrt",
         (Tcl_ObjCmdProc *) mat_sqrt,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

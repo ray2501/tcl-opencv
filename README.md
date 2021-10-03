@@ -115,6 +115,7 @@ Implement commands
     ::cv::setRNGSeed seed
     ::cv::solve matrix_1 matrix_2 ?flags?
     ::cv::solveCubic matrix
+    ::cv::solvePoly matrix ?maxIters?
     ::cv::sqrt matrix
     ::cv::subtract matrix_1 matrix_2
     ::cv::sum matrix
