@@ -114,6 +114,7 @@ Implement commands
     ::cv::rotate matrix rotateCode
     ::cv::setRNGSeed seed
     ::cv::solve matrix_1 matrix_2 ?flags?
+    ::cv::solveCubic matrix
     ::cv::sqrt matrix
     ::cv::subtract matrix_1 matrix_2
     ::cv::sum matrix
