@@ -966,6 +966,7 @@ int computeECC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     return TCL_OK;
 }
+#endif
 
 
 int findTransformECC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
@@ -1033,7 +1034,6 @@ int findTransformECC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
     return TCL_OK;
 }
-#endif
 #ifdef __cplusplus
 }
 #endif

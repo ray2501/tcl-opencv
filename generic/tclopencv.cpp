@@ -1773,11 +1773,11 @@ Opencv_Init(Tcl_Interp *interp)
     Tcl_CreateObjCommand(interp, "::" NS "::computeECC",
         (Tcl_ObjCmdProc *) computeECC,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+#endif
 
     Tcl_CreateObjCommand(interp, "::" NS "::findTransformECC",
         (Tcl_ObjCmdProc *) findTransformECC,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
-#endif
 
     /*
      * For Photo
