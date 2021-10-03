@@ -1,3 +1,8 @@
+2021-10-03 Danilo Chang
+
+	* Implement command: estimateAffine2D
+	* Improve findHomography command (interface changed)
+
 2021-10-02 Danilo Chang
 
 	* Apply Christian's patch:

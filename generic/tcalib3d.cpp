@@ -568,7 +568,7 @@ int computeCorrespondEpilines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
     Tcl_Obj *pResultStr = NULL;
 
     if (objc != 4) {
-        Tcl_WrongNumArgs(interp, 1, objv, "points whichImage F");
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix whichImage F");
         return TCL_ERROR;
     }
 
@@ -598,6 +598,79 @@ int computeCorrespondEpilines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
     dstmat = new cv::Mat(lines);
 
     pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
+
+int estimateAffine2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    double ransacReprojThreshold = 3, confidence = 0.99;
+    int method = cv::RANSAC;
+    size_t maxIters = 2000, refineIters = 10;
+    cv::Mat result, inliers;
+    cv::Mat *mat1, *mat2, *dstmat1, *dstmat2;
+    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
+
+    if (objc != 3 && objc != 8) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "matrix_1 matrix_2 ?method ransacReprojThreshold maxIters confidence refineIters?");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 8) {
+        if (Tcl_GetIntFromObj(interp, objv[3], &method) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[4], &ransacReprojThreshold) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetLongFromObj(interp, objv[5], (long *) &maxIters) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[6], &confidence) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetLongFromObj(interp, objv[7], (long *) &refineIters) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        result = cv::estimateAffine2D(*mat1, *mat2, inliers,
+                                      method, ransacReprojThreshold,
+                                      maxIters, confidence, refineIters);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    dstmat1 = new cv::Mat(result);
+    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+
+    dstmat2 = new cv::Mat(inliers);
+    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
 
     Tcl_SetObjResult(interp, pResultStr);
 
@@ -671,15 +744,15 @@ int findFundamentalMat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 
 int findHomography(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    double ransacReprojThreshold = 3;
-    int method = 0;
-    cv::Mat result;
-    cv::Mat *mat1, *mat2, *dstmat;
-    Tcl_Obj *pResultStr = NULL;
+    double ransacReprojThreshold = 3, confidence = 0.995;
+    int method = 0, maxIters = 2000;
+    cv::Mat result, mask;
+    cv::Mat *mat1, *mat2, *dstmat1, *dstmat2;
+    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
 
-    if (objc != 3 && objc != 5) {
+    if (objc != 3 && objc != 7) {
         Tcl_WrongNumArgs(interp, 1, objv,
-            "srcPoints dstPoints ?method ransacReprojThreshold?");
+            "matrix_1 matrix_2 ?method ransacReprojThreshold maxIters confidence?");
         return TCL_ERROR;
     }
 
@@ -693,7 +766,7 @@ int findHomography(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return TCL_ERROR;
     }
 
-    if (objc == 5) {
+    if (objc == 7) {
         if (Tcl_GetIntFromObj(interp, objv[3], &method) != TCL_OK) {
             return TCL_ERROR;
         }
@@ -701,20 +774,35 @@ int findHomography(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         if (Tcl_GetDoubleFromObj(interp, objv[4], &ransacReprojThreshold) != TCL_OK) {
             return TCL_ERROR;
         }
+
+        if (Tcl_GetIntFromObj(interp, objv[5], &maxIters) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[6], &confidence) != TCL_OK) {
+            return TCL_ERROR;
+        }
     }
 
     try {
         result = cv::findHomography(*mat1, *mat2,
-                                    method, ransacReprojThreshold);
+                                    method, ransacReprojThreshold,
+                                    mask, maxIters, confidence);
     } catch (const cv::Exception &ex) {
         return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    dstmat = new cv::Mat(result);
+    pResultStr = Tcl_NewListObj(0, NULL);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+    dstmat1 = new cv::Mat(result);
+    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+
+    dstmat2 = new cv::Mat(mask);
+    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
 
     Tcl_SetObjResult(interp, pResultStr);
 

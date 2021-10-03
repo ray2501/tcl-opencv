@@ -1721,6 +1721,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) computeCorrespondEpilines,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::estimateAffine2D",
+        (Tcl_ObjCmdProc *) estimateAffine2D,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::findFundamentalMat",
         (Tcl_ObjCmdProc *) findFundamentalMat,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

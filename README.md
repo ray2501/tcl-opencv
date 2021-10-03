@@ -508,9 +508,13 @@ they are placed in a certain order.
 And the retval value should be passed to `::cv::drawChessboardCorners`'s
 parameter `patternWasFound`.
 
-    ::cv::computeCorrespondEpilines points whichImage F
+    ::cv::computeCorrespondEpilines matrix whichImage F
+    ::cv::estimateAffine2D matrix_1 matrix_2 ?method ransacReprojThreshold maxIters confidence refineIters?
     ::cv::findFundamentalMat matrix_1 matrix_2 ?method ransacReprojThreshold confidence?
-    ::cv::findHomography srcPoints dstPoints ?method ransacReprojThreshold?
+    ::cv::findHomography matrix_1 matrix_2 ?method ransacReprojThreshold maxIters confidence?
+
+`::cv::estimateAffine2D`, `::cv::findFundamentalMat` and `::cv::findHomography` returns
+a list of (result, inliers or mask).
 
 Note that whenever an H matrix cannot be estimated, an empty one will be returned.
 You can use MATRIX `empty` to check this.
@@ -3059,7 +3063,9 @@ ORB, Feature Matching+ Homography to find Objects -
         $src_pts setData $srcPts
         set dst_pts [::cv::Mat::Mat 1 [expr [llength $dstPts]/2] $::cv::CV_32FC2]
         $dst_pts setData $dstPts
-        set M [::cv::findHomography $src_pts $dst_pts $::cv::RANSAC 5.0]
+        set MRes [::cv::findHomography $src_pts $dst_pts $::cv::RANSAC 5.0 2000 0.995]
+        set M [lindex $MRes 0]
+        set Mask [lindex $MRes 1]
         if {![$M empty]} {
             set h [$img1 rows]
             set w [$img1 cols]
@@ -3069,6 +3075,7 @@ ORB, Feature Matching+ Homography to find Objects -
         }
 
         $M close
+        $Mask close
         $src_pts close
         $dst_pts close
 
@@ -3147,7 +3154,9 @@ AKAZE, Feature Matching + Homography to find Objects -
         $src_pts setData $srcPts
         set dst_pts [::cv::Mat::Mat 1 [expr [llength $dstPts]/2] $::cv::CV_32FC2]
         $dst_pts setData $dstPts
-        set M [::cv::findHomography $src_pts $dst_pts $::cv::RANSAC 5.0]
+        set MRes [::cv::findHomography $src_pts $dst_pts $::cv::RANSAC 5.0 2000 0.995]
+        set M [lindex $MRes 0]
+        set Mask [lindex $MRes 1]
         if {![$M empty]} {
             set h [$img1 rows]
             set w [$img1 cols]
@@ -3157,6 +3166,7 @@ AKAZE, Feature Matching + Homography to find Objects -
         }
 
         $M close
+        $Mask close
         $src_pts close
         $dst_pts close
 
@@ -3235,7 +3245,9 @@ SIFT, Feature Matching + Homography to find Objects -
         $src_pts setData $srcPts
         set dst_pts [::cv::Mat::Mat 1 [expr [llength $dstPts]/2] $::cv::CV_32FC2]
         $dst_pts setData $dstPts
-        set M [::cv::findHomography $src_pts $dst_pts $::cv::RANSAC 5.0]
+        set MRes [::cv::findHomography $src_pts $dst_pts $::cv::RANSAC 5.0 2000 0.995]
+        set M [lindex $MRes 0]
+        set Mask [lindex $MRes 1]
         if {![$M empty]} {
             set h [$img1 rows]
             set w [$img1 cols]
@@ -3245,6 +3257,7 @@ SIFT, Feature Matching + Homography to find Objects -
         }
 
         $M close
+        $Mask close
         $src_pts close
         $dst_pts close
 
