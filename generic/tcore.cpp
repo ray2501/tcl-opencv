@@ -3997,6 +3997,48 @@ int mat_reduce(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_repeat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int ny = 0, nx = 0;
+    cv::Mat image;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *mat, *dstmat;
+
+    if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix ny nx");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &ny) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &nx) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        image = cv::repeat(*mat, ny, nx);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    dstmat = new cv::Mat(image);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int mat_rotate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int rotateCode = 0;

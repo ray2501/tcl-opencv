@@ -111,6 +111,7 @@ Implement commands
     ::cv::randu matrix min_list max_list
     ::cv::randShuffle matrix ?iterFactor?
     ::cv::reduce matrix dim rtype ?dtype?
+    ::cv::repeat matrix ny nx
     ::cv::rotate matrix rotateCode
     ::cv::setRNGSeed seed
     ::cv::solve matrix_1 matrix_2 ?flags?
