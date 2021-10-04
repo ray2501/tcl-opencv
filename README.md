@@ -116,6 +116,7 @@ Implement commands
     ::cv::solve matrix_1 matrix_2 ?flags?
     ::cv::solveCubic matrix
     ::cv::solvePoly matrix ?maxIters?
+    ::cv::sortIdx matrix flags
     ::cv::sqrt matrix
     ::cv::subtract matrix_1 matrix_2
     ::cv::sum matrix
@@ -1018,6 +1019,13 @@ Types -
     ::cv::FileStorage::FORMAT_JSON
     ::cv::FileStorage::BASE64
     ::cv::FileStorage::WRITE_BASE64
+
+`::cv::sortIdx` flags -
+
+    ::cv::SORT_EVERY_ROW
+    ::cv::SORT_EVERY_COLUMN
+    ::cv::SORT_ASCENDING
+    ::cv::SORT_DESCENDING
 
 `::cv::imread` flags -
 

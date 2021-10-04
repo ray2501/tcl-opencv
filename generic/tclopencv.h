@@ -83,6 +83,7 @@ MODULE_SCOPE int mat_setRNGSeed(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj 
 MODULE_SCOPE int mat_solve(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_solveCubic(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_solvePoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int mat_sortIdx(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_sqrt(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_subtract(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int mat_sum(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

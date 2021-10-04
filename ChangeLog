@@ -1,3 +1,7 @@
+2021-10-04 Danilo Chang
+
+	* Implement command: sortIdx
+
 2021-10-03 Danilo Chang
 
 	* Implement command: solveCubic, solvePoly

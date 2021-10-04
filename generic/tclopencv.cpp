@@ -1107,6 +1107,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_solvePoly,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::sortIdx",
+        (Tcl_ObjCmdProc *) mat_sortIdx,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::sqrt",
         (Tcl_ObjCmdProc *) mat_sqrt,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
@@ -2213,6 +2217,26 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::FileStorage::WRITE_BASE64", -1);
     setupValue = Tcl_NewIntObj(cv::FileStorage::WRITE_BASE64);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * sortIdx sort flags
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::SORT_EVERY_ROW", -1);
+    setupValue = Tcl_NewIntObj(cv::SortFlags::SORT_EVERY_ROW);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::SORT_EVERY_COLUMN", -1);
+    setupValue = Tcl_NewIntObj(cv::SortFlags::SORT_EVERY_COLUMN);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::SORT_ASCENDING", -1);
+    setupValue = Tcl_NewIntObj(cv::SortFlags::SORT_ASCENDING);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::SORT_DESCENDING", -1);
+    setupValue = Tcl_NewIntObj(cv::SortFlags::SORT_DESCENDING);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*
