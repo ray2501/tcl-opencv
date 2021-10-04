@@ -1,5 +1,7 @@
 2021-10-04 Danilo Chang
 
+	* Implement command: AffineFeature (required version 4.5.0)
+	  I use TCL_USE_SIFT flag for this command.
 	* Update TrainData command
 	* Implement command: sortIdx, repeat
 

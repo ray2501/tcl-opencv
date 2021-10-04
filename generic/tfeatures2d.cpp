@@ -4526,7 +4526,423 @@ int SIFT(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
+
+
+static void AffineFeature_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->asiftdetector) {
+        cvd->asiftdetector.release();
+    }
+    cvd->cmd_asiftdetector = NULL;
+}
+
+
+static int AffineFeature_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "detect",
+        "compute",
+        "detectAndCompute",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_DETECT,
+        FUNC_COMPUTE,
+        FUNC_DETECTANDCOMPUTE,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->asiftdetector == nullptr) {
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_DETECT: {
+            std::vector<cv::KeyPoint> keypoints;
+            cv::Mat *mat;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->asiftdetector->detect(*mat, keypoints);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *pListStr = NULL;
+                pListStr = Tcl_NewListObj(0, NULL);
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+            }
+
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_COMPUTE: {
+            cv::Mat descriptors;
+            int count = 0;
+            std::vector<cv::KeyPoint> keypoints;
+            cv::Mat *mat, *dstmat;
+            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
+
+            if (objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix keypoints");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+            }
+
+            if (count == 0) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "no keypoints data");
+            } else {
+                for (int i = 0; i < count; i++) {
+                    Tcl_Obj *elemListPtr = NULL;
+                    int sub_count = 0;
+                    Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
+
+                    if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
+                        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid keypoints data");
+                    }
+
+                    if (sub_count != 7) {
+                        return Opencv_SetResult(interp, cv::Error::StsBadArg, "wrong  keypoints number");
+                    } else {
+                        Tcl_Obj *elemListSubPtr = NULL;
+                        double x, y, size, angle, response;
+                        int octave, class_id;
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 0, &elemListSubPtr);
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &x) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 1, &elemListSubPtr);
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &y) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 2, &elemListSubPtr);
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &size) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 3, &elemListSubPtr);
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &angle) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 4, &elemListSubPtr);
+                        if (Tcl_GetDoubleFromObj(interp, elemListSubPtr, &response) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 5, &elemListSubPtr);
+                        if (Tcl_GetIntFromObj(interp, elemListSubPtr, &octave) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        Tcl_ListObjIndex(interp, elemListPtr, 6, &elemListSubPtr);
+                        if (Tcl_GetIntFromObj(interp, elemListSubPtr, &class_id) != TCL_OK) {
+                            return TCL_ERROR;
+                        }
+
+                        cv::KeyPoint keypoint(cv::Point2f((float) x, (float)y), (float) size,
+                                            (float) angle, (float) response,
+                                            octave, class_id);
+
+                        keypoints.push_back(keypoint);
+                    }
+                }
+            }
+
+            try {
+                cvd->asiftdetector->compute(*mat, keypoints, descriptors);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            pResultStr1 = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *pListStr = NULL;
+                pListStr = Tcl_NewListObj(0, NULL);
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+
+                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            }
+
+            dstmat = new cv::Mat(descriptors);
+
+            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_DETECTANDCOMPUTE: {
+            cv::Mat mask, descriptors;
+            std::vector<cv::KeyPoint> keypoints;
+            cv::Mat *mat1, *mat2, *dstmat;
+            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
+
+            if (objc != 3 && objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix ?mask?");
+                return TCL_ERROR;
+            }
+
+            mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat1) {
+                return TCL_ERROR;
+            }
+
+            if (objc == 4) {
+                mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[3]);
+                if (!mat2) {
+                    return TCL_ERROR;
+                }
+                mask = *mat2;
+            }
+
+            try {
+                cvd->asiftdetector->detectAndCompute(*mat1, mask, keypoints, descriptors);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            pResultStr1 = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *pListStr = NULL;
+                pListStr = Tcl_NewListObj(0, NULL);
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
+                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+
+                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            }
+
+            dstmat = new cv::Mat(descriptors);
+
+            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_asiftdetector) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_asiftdetector);
+            }
+
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_asiftdetector) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_asiftdetector, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::AffineFeature", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int AffineFeature(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    char *dextractor_name = NULL;
+    int len = 0, maxTilt = 5, minTilt = 0;
+    double tiltStep = 1.4142135623730951, rotateStepBase = 72;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::AffineFeature> asiftdetector;
+    cv::Ptr<cv::DescriptorExtractor> dextractor;
+
+    if (objc != 2 && objc != 6) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "backend ?maxTilt minTilt tiltStep rotateStepBase?");
+        return TCL_ERROR;
+    }
+
+    dextractor_name = Tcl_GetStringFromObj(objv[1], &len);
+    if (len < 1) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid dextractor name");
+    }
+
+    if (strcmp(dextractor_name, "::cv-siftdetector") == 0) {
+        if (cvd->siftdetector) {
+            dextractor = cvd->siftdetector;
+        } else {
+            return Opencv_SetResult(interp, cv::Error::StsNullPtr, "SIFT nullptr");
+        }
+    } else if (strcmp(dextractor_name, "::cv-kazedetector") == 0) {
+        if (cvd->kazedetector) {
+            dextractor = cvd->kazedetector;
+        } else {
+            return Opencv_SetResult(interp, cv::Error::StsNullPtr, "KAZE nullptr");
+        }
+    } else if (strcmp(dextractor_name, "::cv-orbdetector") == 0) {
+        if (cvd->orbdetector) {
+            dextractor = cvd->orbdetector;
+        } else {
+            return Opencv_SetResult(interp, cv::Error::StsNullPtr, "ORB nullptr");
+        }
+    } else if (strcmp(dextractor_name, "::cv-akazedetector") == 0) {
+        if (cvd->akazedetector) {
+            dextractor = cvd->akazedetector;
+        } else {
+            return Opencv_SetResult(interp, cv::Error::StsNullPtr, "AKAZE nullptr");
+        }
+    } else if (strcmp(dextractor_name, "::cv-briskdetector") == 0) {
+        if (cvd->briskdetector) {
+            dextractor = cvd->briskdetector;
+        } else {
+            return Opencv_SetResult(interp, cv::Error::StsNullPtr, "AKAZE nullptr");
+        }
+    } else {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid dextractor name");
+    }
+
+    if (objc == 6) {
+        if (Tcl_GetIntFromObj(interp, objv[2], &maxTilt) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[3], &minTilt) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[4], &tiltStep) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[5], &rotateStepBase) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        asiftdetector = cv::AffineFeature::create(dextractor, maxTilt, minTilt,
+                                                  (float) tiltStep,
+                                                  (float) rotateStepBase);
+        if (asiftdetector == nullptr) {
+            CV_Error(cv::Error::StsNullPtr, "AffineFeature nullptr");
+        }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-asiftdetector", -1);
+
+    if (cvd->cmd_asiftdetector) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_asiftdetector);
+    }
+    cvd->cmd_asiftdetector =
+        Tcl_CreateObjCommand(interp, "::cv-asiftdetector",
+            (Tcl_ObjCmdProc *) AffineFeature_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) AffineFeature_DESTRUCTOR);
+
+    cvd->asiftdetector = asiftdetector;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
 #endif /* TCL_USE_SIFT */
+
 
 static void BFMatcher_DESTRUCTOR(void *cd)
 {

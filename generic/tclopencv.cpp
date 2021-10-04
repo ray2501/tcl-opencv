@@ -157,6 +157,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->siftdetector) {
         cvd->siftdetector.release();
     }
+    if (cvd->asiftdetector) {
+        cvd->asiftdetector.release();
+    }
 #endif
     if (cvd->bfmatcher) {
         cvd->bfmatcher.release();
@@ -1674,6 +1677,10 @@ Opencv_Init(Tcl_Interp *interp)
 #ifdef TCL_USE_SIFT
     Tcl_CreateObjCommand(interp, "::" NS "::SIFT",
         (Tcl_ObjCmdProc *) SIFT,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::AffineFeature",
+        (Tcl_ObjCmdProc *) AffineFeature,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 #endif
 

@@ -261,6 +261,7 @@ MODULE_SCOPE int BRISK(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 MODULE_SCOPE int KAZE(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #ifdef TCL_USE_SIFT
 MODULE_SCOPE int SIFT(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int AffineFeature(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
 MODULE_SCOPE int BFMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
@@ -454,6 +455,7 @@ typedef struct {
     cv::Ptr<cv::KAZE> kazedetector;
 #ifdef TCL_USE_SIFT
     cv::Ptr<cv::SIFT> siftdetector;
+    cv::Ptr<cv::AffineFeature> asiftdetector;
 #endif
     cv::Ptr<cv::BFMatcher> bfmatcher;
     cv::Ptr<cv::FlannBasedMatcher> flannbasedmatcher;
@@ -491,6 +493,7 @@ typedef struct {
     Tcl_Command cmd_kazedetector;
 #ifdef TCL_USE_SIFT
     Tcl_Command cmd_siftdetector;
+    Tcl_Command cmd_asiftdetector;
 #endif
     Tcl_Command cmd_bfmatcher;
     Tcl_Command cmd_flannbasedmatcher;
