@@ -6259,6 +6259,10 @@ static int TrainData_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
     int choice;
 
     static const char *FUNC_strs[] = {
+        "getTestResponses",
+        "getTestSamples",
+        "setTrainTestSplit",
+        "setTrainTestSplitRatio",
         "close",
         "_command",
         "_name",
@@ -6267,6 +6271,10 @@ static int TrainData_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
     };
 
     enum FUNC_enum {
+        FUNC_getTestResponses,
+        FUNC_getTestSamples,
+        FUNC_setTrainTestSplit,
+        FUNC_setTrainTestSplitRatio,
         FUNC_CLOSE,
         FUNC__COMMAND,
         FUNC__NAME,
@@ -6287,6 +6295,112 @@ static int TrainData_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
     }
 
     switch ((enum FUNC_enum)choice) {
+        case FUNC_getTestResponses: {
+            cv::Mat value;
+            cv::Mat *dstmat;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->traindata->getTestResponses();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            dstmat = new cv::Mat(value);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_getTestSamples: {
+            cv::Mat value;
+            cv::Mat *dstmat;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->traindata->getTestSamples();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            dstmat = new cv::Mat(value);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_setTrainTestSplit: {
+            int count = 0;
+            int shuffle = 1;
+
+            if (objc != 3 && objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "count ?shuffle?");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &count) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (objc == 4) {
+                if (Tcl_GetBooleanFromObj(interp, objv[3], &shuffle) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                cvd->traindata->setTrainTestSplit(count, (bool) shuffle);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setTrainTestSplitRatio: {
+            double ratio = 0;
+            int shuffle = 1;
+
+            if (objc != 3 && objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "ratio ?shuffle?");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &ratio) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (objc == 4) {
+                if (Tcl_GetBooleanFromObj(interp, objv[3], &shuffle) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                cvd->traindata->setTrainTestSplitRatio(ratio, (bool) shuffle);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
         case FUNC_CLOSE: {
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);

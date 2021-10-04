@@ -926,6 +926,10 @@ Please notice, RTrees and RTrees::load command will only have 1 instance.
 Please notice, ANN_MLP and ANN_MLP::load command will only have 1 instance.
 
     ::cv::ml::TrainData samples layout responses
+    TrainData getTestResponses
+    TrainData getTestSamples
+    TrainData setTrainTestSplit count ?shuffle?
+    TrainData setTrainTestSplitRatio ratio ?shuffle?
     TrainData close
 
 Please notice, TrainData command will only have 1 instance.
