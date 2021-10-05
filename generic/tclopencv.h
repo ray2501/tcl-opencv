@@ -194,7 +194,9 @@ MODULE_SCOPE int HoughLines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 MODULE_SCOPE int HoughLinesP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 MODULE_SCOPE int findContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int findContoursWithHierarchy(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int drawContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int drawContoursWithHierarchy(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int arcLength(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int contourArea(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int boundingRect(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

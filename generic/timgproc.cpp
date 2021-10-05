@@ -3872,6 +3872,90 @@ int findContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int findContoursWithHierarchy(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int mode = 0, method = 0, offset_point_x = 0, offset_point_y = 0;
+    cv::Mat *mat;
+    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
+    std::vector<std::vector<cv::Point> > contours;
+    std::vector<cv::Vec4i> hierarchy;
+
+    if (objc != 4 && objc != 6) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix mode method ?offset_point_x offset_point_y?");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &mode) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &method) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 6) {
+        if (Tcl_GetIntFromObj(interp, objv[4], &offset_point_x) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[5], &offset_point_y) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        if (objc == 6) {
+            cv::findContours(*mat, contours, hierarchy, mode, method,
+                             cv::Point(offset_point_x, offset_point_y));
+        } else {
+            cv::findContours(*mat, contours, hierarchy, mode, method);
+        }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    pResultStr1 = Tcl_NewListObj(0, NULL);
+    for (size_t i = 0; i < contours.size(); i++) {
+        Tcl_Obj *pListStr = NULL;
+        pListStr = Tcl_NewListObj(0, NULL);
+
+        for (size_t j = 0; j < contours.at(i).size(); j++) {
+            Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(contours.at(i).at(j).x));
+            Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(contours.at(i).at(j).y));
+        }
+
+        Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+    }
+
+    pResultStr2 = Tcl_NewListObj(0, NULL);
+    for (size_t i = 0; i < hierarchy.size(); i++) {
+        Tcl_Obj *pListStr = NULL;
+        pListStr = Tcl_NewListObj(0, NULL);
+
+        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(hierarchy[i][0]));
+        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(hierarchy[i][1]));
+        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(hierarchy[i][2]));
+        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(hierarchy[i][3]));
+
+        Tcl_ListObjAppendElement(NULL, pResultStr2, pListStr);
+    }
+
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int drawContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int contourIdx = 0, thickness = 1, lineType = cv::LINE_8, maxLevel = INT_MAX;
@@ -3982,6 +4066,7 @@ int drawContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         if (Tcl_GetIntFromObj(interp, objv[6], &lineType) != TCL_OK) {
             return TCL_ERROR;
         }
+
         if (Tcl_GetIntFromObj(interp, objv[7], &maxLevel) != TCL_OK) {
             return TCL_ERROR;
         }
@@ -3999,6 +4084,186 @@ int drawContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         cv::Scalar color(B, G, R, A);
         cv::drawContours(*mat, contours, contourIdx, color,
                         thickness, lineType, cv::noArray(), maxLevel,
+                        cv::Point(offset_point_x, offset_point_y));
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    return TCL_OK;
+}
+
+
+int drawContoursWithHierarchy(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int contourIdx = 0, thickness = 1, lineType = cv::LINE_8, maxLevel = INT_MAX;
+    int B = 0, G = 0, R = 0, A = 0, count = 0;
+    int offset_point_x = 0, offset_point_y = 0;
+    cv::Mat *mat;
+    std::vector<std::vector<cv::Point> > contours;
+    std::vector<cv::Vec4i> hierarchy;
+
+    if (objc != 9 && objc != 11) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "matrix contours_list contourIdx color_list thickness lineType hierarchy maxLevel ?offset_point_x offset_point_y?");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+    }
+
+    if (count <= 0) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty list");
+    } else {
+        for (int contours_count = 0; contours_count < count; contours_count++) {
+            Tcl_Obj *elemListPtr = NULL;
+            int index_count = 0;
+            std::vector<cv::Point> points;
+
+            Tcl_ListObjIndex(interp, objv[2], contours_count, &elemListPtr);
+
+            if (Tcl_ListObjLength(interp, elemListPtr, &index_count) != TCL_OK) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid contours data");
+            }
+
+            if (index_count%2 != 0) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid points data");
+            } else {
+                Tcl_Obj *elemListSubPtr = NULL;
+                int number_from_list_x;
+                int number_from_list_y;
+                int npts;
+
+                npts = index_count / 2;
+                for (int i = 0, j = 0; j < npts; i = i + 2, j = j + 1) {
+                    cv::Point point;
+                    Tcl_ListObjIndex(interp, elemListPtr, i, &elemListSubPtr);
+                    if (Tcl_GetIntFromObj(interp, elemListSubPtr, &number_from_list_x) != TCL_OK) {
+                        return TCL_ERROR;
+                    }
+
+                    Tcl_ListObjIndex(interp, elemListPtr, i + 1, &elemListSubPtr);
+                    if (Tcl_GetIntFromObj(interp, elemListSubPtr, &number_from_list_y) != TCL_OK) {
+                        return TCL_ERROR;
+                    }
+
+                    point.x = number_from_list_x;
+                    point.y = number_from_list_y;
+                    points.push_back (point);
+                }
+            }
+
+            contours.push_back(points);
+        }
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &contourIdx) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_ListObjLength(interp, objv[4], &count) != TCL_OK) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+    }
+
+    if (count != 4) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+
+        Tcl_ListObjIndex(interp, objv[4], 0, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &B) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[4], 1, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &G) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[4], 2, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &R) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        Tcl_ListObjIndex(interp, objv[4], 3, &elemListPtr);
+        if (Tcl_GetIntFromObj(interp, elemListPtr, &A) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[5], &thickness) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[6], &lineType) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_ListObjLength(interp, objv[7], &count) != TCL_OK) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+    }
+
+    if (count <= 0) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty list");
+    } else {
+        for (int hierarchy_count = 0; hierarchy_count < count; hierarchy_count++) {
+            Tcl_Obj *elemListPtr = NULL;
+            int index_count = 0;
+            cv::Vec4i veci;
+
+            Tcl_ListObjIndex(interp, objv[7], hierarchy_count, &elemListPtr);
+
+            if (Tcl_ListObjLength(interp, elemListPtr, &index_count) != TCL_OK) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid hierarchy data");
+            }
+
+            if (index_count != 4) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid hierarchy data");
+            } else {
+                Tcl_Obj *elemListSubPtr = NULL;
+                int number;
+
+                for (int i = 0; i < 4; i++) {
+
+                    Tcl_ListObjIndex(interp, elemListPtr, i, &elemListSubPtr);
+                    if (Tcl_GetIntFromObj(interp, elemListSubPtr, &number) != TCL_OK) {
+                        return TCL_ERROR;
+                    }
+
+                    veci[i] = number;
+                }
+            }
+
+            hierarchy.push_back(veci);
+        }
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[8], &maxLevel) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 11) {
+
+        if (Tcl_GetIntFromObj(interp, objv[9], &offset_point_x) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[10], &offset_point_y) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::Scalar color(B, G, R, A);
+        cv::drawContours(*mat, contours, contourIdx, color,
+                        thickness, lineType, hierarchy, maxLevel,
                         cv::Point(offset_point_x, offset_point_y));
     } catch (const cv::Exception &ex) {
         return Opencv_Exc2Tcl(interp, &ex);

@@ -1,5 +1,6 @@
 2021-10-05 Danilo Chang
 
+	* Implement command: findContoursWithHierarchy, drawContoursWithHierarchy
 	* Implement command: readOpticalFlow, writeOpticalFlow
 
 2021-10-04 Danilo Chang

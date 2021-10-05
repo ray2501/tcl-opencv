@@ -1472,8 +1472,16 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) findContours,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::findContoursWithHierarchy",
+        (Tcl_ObjCmdProc *) findContoursWithHierarchy,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::drawContours",
         (Tcl_ObjCmdProc *) drawContours,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::drawContoursWithHierarchy",
+        (Tcl_ObjCmdProc *) drawContoursWithHierarchy,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_CreateObjCommand(interp, "::" NS "::arcLength",
