@@ -96,7 +96,9 @@ Implement commands
     ::cv::LUT matrix1 matrix2
     ::cv::Mahalanobis matrix1 matrix2 icovar_matrix
     ::cv::magnitude matrix1 matrix2
+    ::cv::max matrix1 matrix2
     ::cv::meanStdDev matrix
+    ::cv::min matrix1 matrix2
     ::cv::minMaxIdx matrix
     ::cv::minMaxLoc matrix
     ::cv::multiply matrix_1 matrix_2 ?scale?

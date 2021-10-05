@@ -3266,6 +3266,44 @@ int mat_magnitude(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int mat_max(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat image;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *mat1, *mat2, *dstmat;
+
+    if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix1 matrix2");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::max(*mat1, *mat2, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    dstmat = new cv::Mat(image);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int mat_meanStdDev(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat mean, stddev;
@@ -3301,6 +3339,44 @@ int mat_meanStdDev(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     pResultStr = Tcl_NewListObj(0, NULL);
     Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
     Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
+int mat_min(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat image;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *mat1, *mat2, *dstmat;
+
+    if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix1 matrix2");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::min(*mat1, *mat2, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    dstmat = new cv::Mat(image);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }

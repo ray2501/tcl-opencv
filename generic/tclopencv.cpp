@@ -1034,8 +1034,16 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_magnitude,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::max",
+        (Tcl_ObjCmdProc *) mat_max,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::meanStdDev",
         (Tcl_ObjCmdProc *) mat_meanStdDev,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::min",
+        (Tcl_ObjCmdProc *) mat_min,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     Tcl_CreateObjCommand(interp, "::" NS "::minMaxIdx",
