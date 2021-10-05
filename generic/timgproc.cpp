@@ -4275,6 +4275,76 @@ int drawContoursWithHierarchy(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 }
 
 
+int approxPolyDP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    std::vector<cv::Point> points, approxCurve;
+    int closed = 0, count = 0;
+    double epsilon = 0;
+    Tcl_Obj *pResultStr = NULL;
+
+    if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "contour epsilon closed");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid contour data");
+    }
+
+    if (count%2 != 0) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid points data");
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+        int number_from_list_x;
+        int number_from_list_y;
+        int npts;
+
+        npts = count / 2;
+        for (int i = 0, j = 0; j < npts; i = i + 2, j = j + 1) {
+            cv::Point point;
+            Tcl_ListObjIndex(interp, objv[1], i, &elemListPtr);
+            if (Tcl_GetIntFromObj(interp, elemListPtr, &number_from_list_x) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            Tcl_ListObjIndex(interp, objv[1], i + 1, &elemListPtr);
+            if (Tcl_GetIntFromObj(interp, elemListPtr, &number_from_list_y) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            point.x = number_from_list_x;
+            point.y = number_from_list_y;
+            points.push_back (point);
+        }
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[2], &epsilon) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetBooleanFromObj(interp, objv[3], &closed) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::approxPolyDP(points, approxCurve, epsilon, (bool) closed);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+    for (size_t i = 0; i < approxCurve.size(); i++) {
+        Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(approxCurve.at(i).x));
+        Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(approxCurve.at(i).y));
+    }
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int arcLength(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     std::vector<cv::Point> points;

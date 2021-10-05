@@ -252,6 +252,7 @@ For more FileStorage info, you can check
     ::cv::findContoursWithHierarchy matrix mode method ?offset_point_x offset_point_y?
     ::cv::drawContours matrix contours_list contourIdx color_list ?thickness lineType maxLevel offset_point_x offset_point_y?
     ::cv::drawContoursWithHierarchy matrix contours_list contourIdx color_list thickness lineType hierarchy maxLevel ?offset_point_x offset_point_y?
+    ::cv::approxPolyDP contour epsilon closed
     ::cv::arcLength contour closed
     ::cv::contourArea contour ?oriented?
     ::cv::boundingRect contour

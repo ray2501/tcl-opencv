@@ -1484,6 +1484,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) drawContoursWithHierarchy,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::approxPolyDP",
+        (Tcl_ObjCmdProc *) approxPolyDP,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::arcLength",
         (Tcl_ObjCmdProc *) arcLength,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
