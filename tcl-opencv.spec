@@ -42,7 +42,7 @@ functions mainly aimed at real-time computer vision.
 export CC=g++
 CFLAGS="%optflags" ./configure \
 %if 0%{?sle_version} < 150300 && 0%{?is_opensuse}
-    --with-opencv4=no --with-sift=no \
+    --with-sift=no \
 %endif
 	--prefix=%{directory} \
 	--exec-prefix=%{directory} \
