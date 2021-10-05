@@ -596,6 +596,8 @@ Please notice, BackgroundSubtractorMOG2 command will only have 1 instance.
     ::cv::CamShift matrix x y width height termCriteria
     ::cv::calcOpticalFlowPyrLK prevImg nextImg prevPts winSize_width winSize_height maxLevel termCriteria
     ::cv::calcOpticalFlowFarneback prevImg nextImg pyr_scale levels winsize iterations poly_n poly_sigma flags
+    ::cv::readOpticalFlow path
+    ::cv::writeOpticalFlow path flow_matrix
 
     ::cv::computeECC matrix_1 matrix_2 ?mask?
     ::cv::findTransformECC matrix_1 matrix_2 warpMatrix motionType ?termCriteria maks gaussFiltSize?

@@ -1793,6 +1793,14 @@ Opencv_Init(Tcl_Interp *interp)
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
 #ifdef TCL_USE_OPENCV4
+    Tcl_CreateObjCommand(interp, "::" NS "::readOpticalFlow",
+        (Tcl_ObjCmdProc *) readOpticalFlow,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::writeOpticalFlow",
+        (Tcl_ObjCmdProc *) writeOpticalFlow,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::computeECC",
         (Tcl_ObjCmdProc *) computeECC,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

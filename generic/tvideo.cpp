@@ -923,6 +923,86 @@ int calcOpticalFlowFarneback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
 
 #ifdef TCL_USE_OPENCV4
+int readOpticalFlow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    char *filename = NULL;
+    int len = 0;
+    cv::Mat flow;
+    cv::Mat *dstmat;
+    Tcl_Obj *pResultStr = NULL;
+    Tcl_DString ds;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "path");
+        return TCL_ERROR;
+    }
+
+    filename = Tcl_GetStringFromObj(objv[1], &len);
+    if (len < 1) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
+    }
+
+    filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
+    try {
+        flow = cv::readOpticalFlow(filename);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+    Tcl_DStringFree(&ds);
+
+    dstmat = new cv::Mat(flow);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
+int writeOpticalFlow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    char *filename = NULL;
+    int len = 0;
+    cv::Mat *mat1;
+    int result = 0;
+    Tcl_DString ds;
+
+    if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "path flow_matrix");
+        return TCL_ERROR;
+    }
+
+    filename = Tcl_GetStringFromObj(objv[1], &len);
+    if (len < 1) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid file name");
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
+    try {
+        result = (int) cv::writeOpticalFlow(filename, *mat1);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+    Tcl_DStringFree(&ds);
+
+    Tcl_SetObjResult(interp, Tcl_NewBooleanObj(result));
+    return TCL_OK;
+}
+
+
 int computeECC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double ecc = 0;
