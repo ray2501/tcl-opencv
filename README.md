@@ -252,7 +252,7 @@ For more FileStorage info, you can check
 
     ::cv::findContours matrix mode method ?offset_point_x offset_point_y?
     ::cv::findContoursWithHierarchy matrix mode method ?offset_point_x offset_point_y?
-    ::cv::drawContours matrix contours_list contourIdx color_list ?thickness lineType maxLevel offset_point_x offset_point_y?
+    ::cv::drawContours matrix contours_list contourIdx color_list thickness ?lineType maxLevel offset_point_x offset_point_y?
     ::cv::drawContoursWithHierarchy matrix contours_list contourIdx color_list thickness lineType hierarchy maxLevel ?offset_point_x offset_point_y?
     ::cv::approxPolyDP contour epsilon closed
     ::cv::arcLength contour closed
@@ -2856,7 +2856,7 @@ GeneralizedHoughBallard test -
                 set box [::cv::boxPoints $rect]
 
                 set color [list 0 0 255 0]
-                ::cv::drawContours $img2 [list $box] -1 $color
+                ::cv::drawContours $img2 [list $box] -1 $color 3
             }
         }
 

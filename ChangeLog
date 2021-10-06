@@ -1,3 +1,7 @@
+2021-10-07 Danilo Chang
+
+	* Update drawContours command (interface changed)
+
 2021-10-06 Danilo Chang
 
 	* Implement command: GeneralizedHoughBallard, GeneralizedHoughGuil

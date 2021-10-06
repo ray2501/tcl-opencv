@@ -3964,9 +3964,9 @@ int drawContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     cv::Mat *mat;
     std::vector<std::vector<cv::Point> > contours;
 
-    if (objc != 5 && objc != 10) {
+    if (objc != 6 && objc != 10) {
         Tcl_WrongNumArgs(interp, 1, objv,
-                "matrix contours_list contourIdx color_list ?thickness lineType maxLevel offset_point_x offset_point_y?");
+                "matrix contours_list contourIdx color_list thickness ?lineType maxLevel offset_point_x offset_point_y?");
         return TCL_ERROR;
     }
 
@@ -4058,11 +4058,11 @@ int drawContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
     }
 
-    if (objc == 10) {
-        if (Tcl_GetIntFromObj(interp, objv[5], &thickness) != TCL_OK) {
-            return TCL_ERROR;
-        }
+    if (Tcl_GetIntFromObj(interp, objv[5], &thickness) != TCL_OK) {
+        return TCL_ERROR;
+    }
 
+    if (objc == 10) {
         if (Tcl_GetIntFromObj(interp, objv[6], &lineType) != TCL_OK) {
             return TCL_ERROR;
         }
