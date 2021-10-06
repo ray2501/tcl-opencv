@@ -292,6 +292,64 @@ a matrix and fill the contour's data to the matrix, then use `::cv::moments` to 
 
 Please notice, CLAHE command will only have 1 instance.
 
+    ::cv::GeneralizedHoughBallard
+    GeneralizedHoughBallard detect matrix
+    GeneralizedHoughBallard getCannyHighThresh
+    GeneralizedHoughBallard getCannyLowThresh
+    GeneralizedHoughBallard getDp
+    GeneralizedHoughBallard getLevels
+    GeneralizedHoughBallard getMinDist
+    GeneralizedHoughBallard getVotesThreshold
+    GeneralizedHoughBallard setCannyHighThresh
+    GeneralizedHoughBallard setCannyLowThresh value
+    GeneralizedHoughBallard setDp value
+    GeneralizedHoughBallard setLevels value
+    GeneralizedHoughBallard setMinDist value
+    GeneralizedHoughBallard setTemplate matrix
+    GeneralizedHoughBallard setVotesThreshold value
+    GeneralizedHoughBallard close
+
+Please notice, GeneralizedHoughBallard command will only have 1 instance.
+
+    ::cv::GeneralizedHoughGuil
+    GeneralizedHoughGuil detect matrix
+    GeneralizedHoughGuil getAngleEpsilon
+    GeneralizedHoughGuil getAngleStep
+    GeneralizedHoughGuil getAngleThresh
+    GeneralizedHoughGuil getCannyHighThresh
+    GeneralizedHoughGuil getCannyLowThresh
+    GeneralizedHoughGuil getDp
+    GeneralizedHoughGuil getLevels
+    GeneralizedHoughGuil getMaxAngle
+    GeneralizedHoughGuil getMaxScale
+    GeneralizedHoughGuil getMinDist
+    GeneralizedHoughGuil getMinAngle
+    GeneralizedHoughGuil getMinScale
+    GeneralizedHoughGuil getPosThresh
+    GeneralizedHoughGuil getScaleStep
+    GeneralizedHoughGuil getScaleThresh
+    GeneralizedHoughGuil getXi
+    GeneralizedHoughGuil setAngleEpsilon value
+    GeneralizedHoughGuil setAngleStep value
+    GeneralizedHoughGuil setAngleThresh value
+    GeneralizedHoughGuil setCannyHighThresh value
+    GeneralizedHoughGuil setCannyLowThresh value
+    GeneralizedHoughGuil setDp value
+    GeneralizedHoughGuil setLevels value
+    GeneralizedHoughGuil setMaxAngle value
+    GeneralizedHoughGuil setMaxScale value
+    GeneralizedHoughGuil setMinDist value
+    GeneralizedHoughGuil setMinAngle value
+    GeneralizedHoughGuil setMinScale value
+    GeneralizedHoughGuil setPosThresh value
+    GeneralizedHoughGuil setScaleStep value
+    GeneralizedHoughGuil setScaleThresh value
+    GeneralizedHoughGuil setXi value
+    GeneralizedHoughGuil setTemplate matrix
+    GeneralizedHoughGuil close
+
+Please notice, GeneralizedHoughGuil command will only have 1 instance.
+
 ### videoio
 
     ::cv::VideoCapture file/index filename/number ?flags?
@@ -2757,6 +2815,63 @@ Convex Hull test -
 
         $image2 close
         $image1 close
+    } on error {em} {
+        puts $em
+    }
+
+GeneralizedHoughBallard test -
+
+    package require opencv
+
+    try {
+        #
+        # Download files from:
+        # https://github.com/opencv/opencv/tree/master/samples/data
+        #
+        set img [::cv::imread "pic1.png" 0]
+        set templ [::cv::imread "templ.png" 0]
+
+        set hough [::cv::GeneralizedHoughBallard]
+        $hough setMinDist 100
+        $hough setLevels  360
+        $hough setDp 2
+        $hough setVotesThreshold 50
+        $hough setTemplate $templ
+        set result [$hough detect $img]
+        set pos [lindex $result 0]
+        set votes [lindex $result 1]
+
+        set img2 [::cv::cvtColor $img $::cv::COLOR_GRAY2BGR]
+        for {set i 0} {$i < [$pos rows]} {incr i} {
+            for {set j 0} {$j < [$pos cols]} {incr j} {
+                set x [expr int([$pos at [list $i $j] 0])]
+                set y [expr int([$pos at [list $i $j] 1])]
+                set scale [$pos at [list $i $j] 2]
+                set angle [$pos at [list $i $j] 3]
+
+                set h [expr int($scale * [$templ rows])]
+                set w [expr int($scale * [$templ cols])]
+
+                set rect [list $x $y $w $h $angle]
+                set box [::cv::boxPoints $rect]
+
+                set color [list 0 0 255 0]
+                ::cv::drawContours $img2 [list $box] -1 $color
+            }
+        }
+
+        $pos close
+        $votes close
+        $hough close
+        $templ close
+        $img close
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $img2
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $img2 close
     } on error {em} {
         puts $em
     }

@@ -1,3 +1,7 @@
+2021-10-06 Danilo Chang
+
+	* Implement command: GeneralizedHoughBallard, GeneralizedHoughGuil
+
 2021-10-05 Danilo Chang
 
 	* Implement command: max, min

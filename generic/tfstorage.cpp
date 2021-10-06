@@ -476,6 +476,22 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     if (!node.isNone()) {
                         cvd->clahe->read(node);
                     }
+                } else if (strcmp(type, "opencv-houghballard") == 0) {
+                    if (GeneralizedHoughBallard(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
+                        throw cv::Exception();
+                    }
+                    if (!node.isNone()) {
+                        cvd->houghballard->read(node);
+                    }
+                } else if (strcmp(type, "opencv-houghbuil") == 0) {
+                    if (GeneralizedHoughGuil(cd, interp, 1, &empty) != TCL_OK) {
+                        keepInterpErr = 1;
+                        throw cv::Exception();
+                    }
+                    if (!node.isNone()) {
+                        cvd->houghbuil->read(node);
+                    }
                 } else if (strcmp(type, "opencv-fastfeaturedetector") == 0) {
                     if (FastFeatureDetector(cd, interp, 1, &empty) != TCL_OK) {
                         keepInterpErr = 1;
@@ -998,6 +1014,8 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     return TCL_ERROR;
                 }
                 if (cmd == cvd->cmd_clahe ||
+                    cmd == cvd->cmd_houghballard ||
+                    cmd == cvd->cmd_houghbuil ||
                     cmd == cvd->cmd_fastdetector ||
                     cmd == cvd->cmd_agastdetector ||
                     cmd == cvd->cmd_mserextractor ||
@@ -1103,6 +1121,26 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                         (*fs) << "data" << "{";
                         fs->elname = "data";
                         cvd->clahe->write(*fs);
+                        (*fs) << "}";
+                    }
+                    (*fs) << "}";
+                } else if (cmd == cvd->cmd_houghballard) {
+                    (*fs) << name << "{";
+                    (*fs) << "type" << "opencv-houghballard";
+                    if (!cvd->houghballard->empty()) {
+                        (*fs) << "data" << "{";
+                        fs->elname = "data";
+                        cvd->houghballard->write(*fs);
+                        (*fs) << "}";
+                    }
+                    (*fs) << "}";
+                } else if (cmd == cvd->cmd_houghbuil) {
+                    (*fs) << name << "{";
+                    (*fs) << "type" << "opencv-houghbuil";
+                    if (!cvd->houghbuil->empty()) {
+                        (*fs) << "data" << "{";
+                        fs->elname = "data";
+                        cvd->houghbuil->write(*fs);
                         (*fs) << "}";
                     }
                     (*fs) << "}";

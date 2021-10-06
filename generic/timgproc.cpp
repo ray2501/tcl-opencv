@@ -6571,6 +6571,1405 @@ int CLAHE(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
+
+
+static void GeneralizedHoughBallard_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->houghballard) {
+        cvd->houghballard.release();
+    }
+    cvd->cmd_houghballard = NULL;
+}
+
+
+static int GeneralizedHoughBallard_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "detect",
+        "getCannyHighThresh",
+        "getCannyLowThresh",
+        "getDp",
+        "getLevels",
+        "getMinDist",
+        "getVotesThreshold",
+        "setCannyHighThresh",
+        "setCannyLowThresh",
+        "setDp",
+        "setLevels",
+        "setMinDist",
+        "setTemplate",
+        "setVotesThreshold",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_detect,
+        FUNC_getCannyHighThresh,
+        FUNC_getCannyLowThresh,
+        FUNC_getDp,
+        FUNC_getLevels,
+        FUNC_getMinDist,
+        FUNC_getVotesThreshold,
+        FUNC_setCannyHighThresh,
+        FUNC_setCannyLowThresh,
+        FUNC_setDp,
+        FUNC_setLevels,
+        FUNC_setMinDist,
+        FUNC_setTemplate,
+        FUNC_setVotesThreshold,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->houghballard == nullptr) {
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_detect: {
+            cv::Mat positions, votes;
+            cv::Mat *mat, *dstmat1, *dstmat2;
+            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghballard->detect(*mat, positions, votes);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            dstmat1 = new cv::Mat(positions);
+
+            pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+
+            dstmat2 = new cv::Mat(votes);
+
+            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
+
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_getCannyHighThresh: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghballard->getCannyHighThresh();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getCannyLowThresh: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghballard->getCannyLowThresh();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getDp: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghballard->getDp();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getLevels: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghballard->getLevels();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getMinDist: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghballard->getMinDist();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getVotesThreshold: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghballard->getVotesThreshold();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_setCannyHighThresh: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghballard->setCannyHighThresh(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setCannyLowThresh: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghballard->setCannyLowThresh(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setDp: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghballard->setDp(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setLevels: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghballard->setLevels(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setMinDist: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghballard->setMinDist(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setTemplate: {
+            int x = -1, y = -1;
+            cv::Mat *mat;
+
+            if (objc != 3 && objc != 5) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix ?x y?");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            if (objc == 5) {
+                if (Tcl_GetIntFromObj(interp, objv[3], &x) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                if (Tcl_GetIntFromObj(interp, objv[4], &y) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                cvd->houghballard->setTemplate(*mat, cv::Point(x, y));
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setVotesThreshold: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghballard->setVotesThreshold(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_houghballard) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_houghballard);
+            }
+
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_houghballard) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_houghballard, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::GeneralizedHoughBallard", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int GeneralizedHoughBallard(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::GeneralizedHoughBallard> houghballard;
+
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, 0);
+        return TCL_ERROR;
+    }
+
+    try {
+        houghballard = cv::createGeneralizedHoughBallard();
+        if (houghballard == nullptr) {
+            CV_Error(cv::Error::StsNullPtr, "GeneralizedHoughBallard nullptr");
+        }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-houghballard", -1);
+
+    if (cvd->cmd_houghballard) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_houghballard);
+    }
+    cvd->cmd_houghballard =
+        Tcl_CreateObjCommand(interp, "::cv-houghballard",
+            (Tcl_ObjCmdProc *) GeneralizedHoughBallard_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) GeneralizedHoughBallard_DESTRUCTOR);
+
+    cvd->houghballard = houghballard;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
+static void GeneralizedHoughGuil_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->houghbuil) {
+        cvd->houghbuil.release();
+    }
+    cvd->cmd_houghbuil = NULL;
+}
+
+
+static int GeneralizedHoughGuil_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "detect",
+        "getAngleEpsilon",
+        "getAngleStep",
+        "getAngleThresh",
+        "getCannyHighThresh",
+        "getCannyLowThresh",
+        "getDp",
+        "getLevels",
+        "getMaxAngle",
+        "getMaxScale",
+        "getMinDist",
+        "getMinAngle",
+        "getMinScale",
+        "getPosThresh",
+        "getScaleStep",
+        "getScaleThresh",
+        "getXi",
+        "setAngleEpsilon",
+        "setAngleStep",
+        "setAngleThresh",
+        "setCannyHighThresh",
+        "setCannyLowThresh",
+        "setDp",
+        "setLevels",
+        "setMaxAngle",
+        "setMaxScale",
+        "setMinDist",
+        "setMinAngle",
+        "setMinScale",
+        "setPosThresh",
+        "setScaleStep",
+        "setScaleThresh",
+        "setXi",
+        "setTemplate",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_detect,
+        FUNC_getAngleEpsilon,
+        FUNC_getAngleStep,
+        FUNC_getAngleThresh,
+        FUNC_getCannyHighThresh,
+        FUNC_getCannyLowThresh,
+        FUNC_getDp,
+        FUNC_getLevels,
+        FUNC_getMaxAngle,
+        FUNC_getMaxScale,
+        FUNC_getMinDist,
+        FUNC_getMinAngle,
+        FUNC_getMinScale,
+        FUNC_getPosThresh,
+        FUNC_getScaleStep,
+        FUNC_getScaleThresh,
+        FUNC_getXi,
+        FUNC_setAngleEpsilon,
+        FUNC_setAngleStep,
+        FUNC_setAngleThresh,
+        FUNC_setCannyHighThresh,
+        FUNC_setCannyLowThresh,
+        FUNC_setDp,
+        FUNC_setLevels,
+        FUNC_setMaxAngle,
+        FUNC_setMaxScale,
+        FUNC_setMinDist,
+        FUNC_setMinAngle,
+        FUNC_setMinScale,
+        FUNC_setPosThresh,
+        FUNC_setScaleStep,
+        FUNC_setScaleThresh,
+        FUNC_setXi,
+        FUNC_setTemplate,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->houghbuil == nullptr) {
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_detect: {
+            cv::Mat positions, votes;
+            cv::Mat *mat, *dstmat1, *dstmat2;
+            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->detect(*mat, positions, votes);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            dstmat1 = new cv::Mat(positions);
+
+            pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+
+            dstmat2 = new cv::Mat(votes);
+
+            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
+            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
+
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_getAngleEpsilon: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getAngleEpsilon();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getAngleStep: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getAngleStep();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getAngleThresh: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getAngleThresh();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getCannyHighThresh: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getCannyHighThresh();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getCannyLowThresh: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getCannyLowThresh();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getDp: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getDp();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getLevels: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getLevels();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getMaxAngle: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getMaxAngle();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getMaxScale: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getMaxScale();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getMinDist: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getMinDist();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getMinAngle: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getMinAngle();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getMinScale: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getMinScale();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getPosThresh: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getPosThresh();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getScaleStep: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getScaleStep();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getScaleThresh: {
+            int value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getScaleThresh();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getXi: {
+            double value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = cvd->houghbuil->getXi();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_setAngleEpsilon: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setAngleEpsilon(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setAngleStep: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setAngleStep(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setAngleThresh: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setAngleThresh(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setCannyHighThresh: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setCannyHighThresh(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setCannyLowThresh: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setCannyLowThresh(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setDp: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setDp(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setLevels: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setLevels(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+
+        case FUNC_setMaxAngle: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setMaxAngle(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setMaxScale: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setMaxScale(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setMinDist: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setMinDist(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setMinAngle: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setMinAngle(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setMinScale: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setMinScale(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setPosThresh: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setPosThresh(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setScaleStep: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setScaleStep(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setScaleThresh: {
+            int value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setScaleThresh(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setXi: {
+            double value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->houghbuil->setXi(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setTemplate: {
+            int x = -1, y = -1;
+            cv::Mat *mat;
+
+            if (objc != 3 && objc != 5) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix ?x y?");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            if (objc == 5) {
+                if (Tcl_GetIntFromObj(interp, objv[3], &x) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                if (Tcl_GetIntFromObj(interp, objv[4], &y) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                cvd->houghbuil->setTemplate(*mat, cv::Point(x, y));
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_houghbuil) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_houghbuil);
+            }
+
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_houghbuil) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_houghbuil, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::GeneralizedHoughGuil", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int GeneralizedHoughGuil(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::GeneralizedHoughGuil> houghbuil;
+
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, 0);
+        return TCL_ERROR;
+    }
+
+    try {
+        houghbuil = cv::createGeneralizedHoughGuil();
+        if (houghbuil == nullptr) {
+            CV_Error(cv::Error::StsNullPtr, "GeneralizedHoughGuil nullptr");
+        }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-houghbuil", -1);
+
+    if (cvd->cmd_houghbuil) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_houghbuil);
+    }
+    cvd->cmd_houghbuil =
+        Tcl_CreateObjCommand(interp, "::cv-houghbuil",
+            (Tcl_ObjCmdProc *) GeneralizedHoughGuil_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) GeneralizedHoughGuil_DESTRUCTOR);
+
+    cvd->houghbuil = houghbuil;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
 #ifdef __cplusplus
 }
 #endif

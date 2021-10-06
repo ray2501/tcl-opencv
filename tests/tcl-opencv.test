@@ -1181,6 +1181,8 @@ test opencv-1.87 {FileStorage (types)} {*}{
         foreach cmd {
             cv::TermCriteria
             cv::CLAHE
+            cv::GeneralizedHoughBallard
+            cv::GeneralizedHoughGuil
             cv::FastFeatureDetector
             cv::AgastFeatureDetector
             cv::MSER

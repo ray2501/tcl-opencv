@@ -132,6 +132,12 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->clahe) {
         cvd->clahe.release();
     }
+    if (cvd->houghballard) {
+        cvd->houghballard.release();
+    }
+    if (cvd->houghbuil) {
+        cvd->houghbuil.release();
+    }
     if (cvd->fastdetector) {
         cvd->fastdetector.release();
     }
@@ -1590,6 +1596,14 @@ Opencv_Init(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp, "::" NS "::CLAHE",
         (Tcl_ObjCmdProc *) CLAHE,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::GeneralizedHoughBallard",
+        (Tcl_ObjCmdProc *) GeneralizedHoughBallard,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::GeneralizedHoughGuil",
+        (Tcl_ObjCmdProc *) GeneralizedHoughGuil,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     /*
