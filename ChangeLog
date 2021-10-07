@@ -1,5 +1,6 @@
 2021-10-07 Danilo Chang
 
+	* Bump version to v0.10
 	* Update drawContours command (interface changed)
 
 2021-10-06 Danilo Chang

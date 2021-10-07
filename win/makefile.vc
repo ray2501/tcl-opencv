@@ -18,7 +18,7 @@
 
 # The name of the package
 PROJECT = opencv
-DOTVERSION = 0.9
+DOTVERSION = 0.10
 
 PRJ_INCLUDES = -I"C:\opencv\build\include"
 PRJ_LIBS = C:\opencv\build\x64\vc15\lib\opencv_world453.lib
