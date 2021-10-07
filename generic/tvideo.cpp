@@ -1101,8 +1101,13 @@ int findTransformECC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         if (objc == 5) {
             retval = cv::findTransformECC(*mat1, *mat2, *warpMatrix, motionType);
         } else {
+#ifdef TCL_USE_OPENCV4
             retval = cv::findTransformECC(*mat1, *mat2, *warpMatrix, motionType,
                                           *termCriteria, *mask, gaussFiltSize);
+#else
+            retval = cv::findTransformECC(*mat1, *mat2, *warpMatrix, motionType,
+                                          *termCriteria, *mask);
+#endif
         }
     } catch (const cv::Exception &ex) {
         return Opencv_Exc2Tcl(interp, &ex);
