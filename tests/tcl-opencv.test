@@ -1433,7 +1433,31 @@ test opencv-1.94 {EMD test} {*}{
     -result {0}
 }
 
-test opencv-1.95 {Close test} {*}{
+test opencv-1.95 {col and row test} {*}{
+    -body {
+        set testMatData [cv::Mat::Mat 3 3 $::cv::CV_32S]
+        $testMatData setData [list 1 2 3 4 5 6 7 8 9]
+
+        set row [$testMatData row 1]
+        set col [$testMatData col 1]
+
+        if {[$row at [list 0 0] 0] != 4} {
+            error "Error"
+        }
+
+        if {[$col at [list 1 0] 0] != 5} {
+            error "Error"
+        }
+
+        $row close
+        $col close
+        $testMatData close
+    }
+    -returnCodes ok
+    -result {0}
+}
+
+test opencv-1.96 {Close test} {*}{
     -body {
         ::cv::imwrite output.png $image
         $tmatrix1 close
