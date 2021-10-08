@@ -3,6 +3,7 @@
 	* Apply Christian's patch:
 	  to/from bytearray methods plus refactoring
 	* Add col and row command to MATRIX function
+	* Add forwardWithNames command to READNET function
 	* Add getUnconnectedOutLayers command to READNET function
 	* Add getLayerNames command to READNET function
 	* Implement command: estimateAffine3D, estimateAffinePartial2D

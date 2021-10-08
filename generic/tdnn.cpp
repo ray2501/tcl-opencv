@@ -105,10 +105,12 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
     static const char *FUNC_strs[] = {
         "getLayerNames",
         "getUnconnectedOutLayers",
+        "getUnconnectedOutLayersNames",
         "setPreferableBackend",
         "setPreferableTarget",
         "setInput",
         "forward",
+        "forwardWithNames",
         "close",
         "_command",
         "_name",
@@ -119,10 +121,12 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
     enum FUNC_enum {
         FUNC_getLayerNames,
         FUNC_getUnconnectedOutLayers,
+        FUNC_getUnconnectedOutLayersNames,
         FUNC_setPreferableBackend,
         FUNC_setPreferableTarget,
         FUNC_setInput,
         FUNC_forward,
+        FUNC_forwardWithNames,
         FUNC_CLOSE,
         FUNC__COMMAND,
         FUNC__NAME,
@@ -194,6 +198,33 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
             for (size_t i = 0; i < value.size(); i++) {
                 Tcl_ListObjAppendElement(NULL, pResultStr,
                                          Tcl_NewIntObj(value[i]));
+            }
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_getUnconnectedOutLayersNames: {
+            std::vector<cv::String> value;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = net->getUnconnectedOutLayersNames();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+
+            for (size_t i = 0; i < value.size(); i++) {
+                Tcl_ListObjAppendElement(NULL, pResultStr,
+                                         Tcl_NewStringObj(value[i].c_str(), -1));
             }
 
             Tcl_SetObjResult(interp, pResultStr);
@@ -350,6 +381,59 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
             mat = new cv::Mat(result_mat);
 
             pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_forwardWithNames: {
+            std::vector<cv::String> outBlobNames;
+            std::vector<cv::Mat> outputBlobs;
+            int count = 0;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "outBlobNames");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+            }
+
+            if (count == 0) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty outBlobNames list");
+            } else {
+                Tcl_Obj *elemListPtr = NULL;
+                char *name;
+                int len = 0;
+
+                for (int i = 0; i < count; i++) {
+                    Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
+                    name = Tcl_GetStringFromObj(elemListPtr, &len);
+                    if (len < 1) {
+                        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid name");
+                    }
+
+                    outBlobNames.push_back(name);
+                }
+            }
+
+            try {
+                net->forward(outputBlobs, outBlobNames);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+
+            for (size_t i = 0; i < outputBlobs.size(); i++) {
+                cv::Mat *mat = new cv::Mat(outputBlobs[i]);
+                Tcl_Obj *dstmat = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, dstmat);
+            }
 
             Tcl_SetObjResult(interp, pResultStr);
             break;

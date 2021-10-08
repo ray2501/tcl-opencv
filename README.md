@@ -1026,10 +1026,12 @@ Please notice, TrainData command will only have 1 instance.
     ::cv::dnn::readNet model ?config framework?
     READNET getLayerNames
     READNET getUnconnectedOutLayers
+    READNET getUnconnectedOutLayersNames
     READNET setPreferableBackend backendId
     READNET setPreferableTarget targetId
     READNET setInput blob ?name scalefactor mean_color_list?
     READNET forward ?name?
+    READNET forwardWithNames outBlobNames
     READNET close
 
 If you want to know supported framework, you can check
