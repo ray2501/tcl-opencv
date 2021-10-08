@@ -1,3 +1,7 @@
+2021-10-09 Danilo Chang
+
+	* Implement command: getTextSize
+
 2021-10-08 Danilo Chang
 
 	* Apply Christian's patch:

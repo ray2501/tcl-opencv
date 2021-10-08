@@ -220,6 +220,7 @@ MODULE_SCOPE int drawMarker(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 MODULE_SCOPE int ellipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int fillConvexPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int fillPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int getTextSize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int line(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int polylines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int putText(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

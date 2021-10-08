@@ -1642,6 +1642,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) fillPoly,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::getTextSize",
+        (Tcl_ObjCmdProc *) getTextSize,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::line",
         (Tcl_ObjCmdProc *) line,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

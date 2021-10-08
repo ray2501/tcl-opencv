@@ -5953,6 +5953,58 @@ End:
 }
 
 
+int getTextSize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Size size;
+    char *text = NULL;
+    int len = 0, fontFace = 0, thickness = 0, baseline = 0;
+    double fontScale = 1.0;
+    Tcl_DString ds;
+    Tcl_Encoding enc;
+
+    if (objc != 5) {
+        Tcl_WrongNumArgs(interp, 1, objv, "text fontFace fontScale thickness");
+        return TCL_ERROR;
+    }
+
+    text = Tcl_GetStringFromObj(objv[1], &len);
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &fontFace) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[3], &fontScale) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[4], &thickness) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    enc = Tcl_GetEncoding(NULL, "utf-8");
+    text = Tcl_UtfToExternalDString(enc, text, len, &ds);
+    Tcl_FreeEncoding(enc);
+    try {
+        size = cv::getTextSize(text, fontFace, fontScale, thickness, &baseline);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        Tcl_DStringFree(&ds);
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+    Tcl_DStringFree(&ds);
+
+    Tcl_Obj *list[3];
+    list[0] = Tcl_NewIntObj(size.width);
+    list[1] = Tcl_NewIntObj(size.height);
+    list[2] = Tcl_NewIntObj(baseline);
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(3, list));
+    return TCL_OK;
+}
+
+
 int line(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat *mat;
