@@ -50,7 +50,9 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         "rect",
         "copyTo",
         "convertTo",
+        "col",
         "colRange",
+        "row",
         "rowRange",
         "pop_back",
         "push_back",
@@ -98,7 +100,9 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         FUNC_RECT,
         FUNC_COPYTO,
         FUNC_CONVERTTO,
+        FUNC_COL,
         FUNC_COLRANGE,
+        FUNC_ROW,
         FUNC_ROWRANGE,
         FUNC_POP_BACK,
         FUNC_PUSH_BACK,
@@ -918,6 +922,40 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             Tcl_SetObjResult(interp, pResultStr);
             break;
         }
+        case FUNC_COL: {
+            int index = 0;
+            cv::Mat imageChanged;
+            Tcl_Obj *pResultStr = NULL;
+            cv::Mat *dstmat;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "index");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &index) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                imageChanged = mat->col(index);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            if (imageChanged.empty() || !imageChanged.data) {
+                CV_Error(cv::Error::StsError, "no data");
+            }
+
+            dstmat = new cv::Mat(imageChanged);
+
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
         case FUNC_COLRANGE: {
             int startcol = 0, endcol = 0;
             cv::Mat imageChanged;
@@ -943,6 +981,40 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                  * endcol: An exclusive 0-based ending index of the column span.
                  */
                 imageChanged = mat->colRange(startcol, endcol);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            if (imageChanged.empty() || !imageChanged.data) {
+                CV_Error(cv::Error::StsError, "no data");
+            }
+
+            dstmat = new cv::Mat(imageChanged);
+
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_ROW: {
+            int index = 0;
+            cv::Mat imageChanged;
+            Tcl_Obj *pResultStr = NULL;
+            cv::Mat *dstmat;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "index");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &index) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                imageChanged = mat->row(index);
             } catch (const cv::Exception &ex) {
                 return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {

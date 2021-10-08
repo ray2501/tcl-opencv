@@ -43,7 +43,9 @@ Implement commands
     MATRIX rect x y width height
     MATRIX copyTo matrix ?mask?
     MATRIX convertTo type ?scale shift?
+    MATRIX col index
     MATRIX colRange startcol endcol
+    MATRIX row index
     MATRIX rowRange startcol endcol
     MATRIX pop_back ?nelems?
     MATRIX push_back matrix
