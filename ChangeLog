@@ -2,7 +2,7 @@
 
 	* Apply Christian's patch:
 	  to/from bytearray methods plus refactoring
-	* Implement command: estimateAffine3D
+	* Implement command: estimateAffine3D, estimateAffinePartial2D
 
 2021-10-07 Danilo Chang
 

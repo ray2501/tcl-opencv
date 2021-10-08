@@ -1846,6 +1846,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) estimateAffine2D,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::estimateAffinePartial2D",
+        (Tcl_ObjCmdProc *) estimateAffinePartial2D,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::estimateAffine3D",
         (Tcl_ObjCmdProc *) estimateAffine3D,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

@@ -663,6 +663,76 @@ int estimateAffine2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 }
 
 
+int estimateAffinePartial2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    double ransacReprojThreshold = 3, confidence = 0.99;
+    int method = cv::RANSAC;
+    size_t maxIters = 2000, refineIters = 10;
+    cv::Mat result, inliers;
+    cv::Mat *mat1, *mat2, *dstmat1, *dstmat2;
+
+    if (objc != 3 && objc != 8) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "matrix_1 matrix_2 ?method ransacReprojThreshold maxIters confidence refineIters?");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 8) {
+        if (Tcl_GetIntFromObj(interp, objv[3], &method) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[4], &ransacReprojThreshold) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetLongFromObj(interp, objv[5], (long *) &maxIters) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[6], &confidence) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetLongFromObj(interp, objv[7], (long *) &refineIters) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        result = cv::estimateAffinePartial2D(*mat1, *mat2, inliers,
+                                             method, ransacReprojThreshold,
+                                             maxIters, confidence, refineIters);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    Tcl_Obj *list[2];
+
+    dstmat1 = new cv::Mat(result);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+
+    dstmat2 = new cv::Mat(inliers);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
+
+    return TCL_OK;
+}
+
+
 int estimateAffine3D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double ransacThreshold = 3, confidence = 0.99;

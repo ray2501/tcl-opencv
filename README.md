@@ -594,12 +594,13 @@ parameter `patternWasFound`.
 
     ::cv::computeCorrespondEpilines matrix whichImage F
     ::cv::estimateAffine2D matrix_1 matrix_2 ?method ransacReprojThreshold maxIters confidence refineIters?
+    ::cv::estimateAffinePartial2D matrix_1 matrix_2 ?method ransacReprojThreshold maxIters confidence refineIters?
     ::cv::estimateAffine3D matrix_1 matrix_2 ?ransacThreshold confidence?
     ::cv::findFundamentalMat matrix_1 matrix_2 ?method ransacReprojThreshold confidence?
     ::cv::findHomography matrix_1 matrix_2 ?method ransacReprojThreshold maxIters confidence?
 
-`::cv::estimateAffine2D`, `::cv::estimateAffine3D`, `::cv::findFundamentalMat` and
-`::cv::findHomography` returns a list of (result, inliers or mask).
+`::cv::estimateAffine2D`, `::cv::estimateAffinePartial2D`, `::cv::estimateAffine3D`,
+`::cv::findFundamentalMat` and `::cv::findHomography` returns a list of (result, inliers or mask).
 
 Note that whenever an H matrix cannot be estimated, an empty one will be returned.
 You can use MATRIX `empty` to check this.
