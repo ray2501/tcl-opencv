@@ -3841,10 +3841,10 @@ Epipolar Geometry -
 
             # We select only inlier points
             if {$value == 1} {
-                set srccol [$src_pts colRange $i [expr $i + 1]]
+                set srccol [$src_pts col $i]
                 $nsrc_pts push_back $srccol
 
-                set dstcol [$dst_pts colRange $i [expr $i + 1]]
+                set dstcol [$dst_pts col $i]
                 $ndst_pts push_back $dstcol
 
                 $srccol close
