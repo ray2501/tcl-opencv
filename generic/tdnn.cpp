@@ -103,6 +103,7 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
     cv::dnn::Net *net;
 
     static const char *FUNC_strs[] = {
+        "getLayerNames",
         "setPreferableBackend",
         "setPreferableTarget",
         "setInput",
@@ -115,6 +116,7 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
     };
 
     enum FUNC_enum {
+        FUNC_getLayerNames,
         FUNC_setPreferableBackend,
         FUNC_setPreferableTarget,
         FUNC_setInput,
@@ -141,6 +143,33 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
     }
 
     switch ((enum FUNC_enum)choice) {
+        case FUNC_getLayerNames: {
+            std::vector<cv::String> value;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = net->getLayerNames();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            pResultStr = Tcl_NewListObj(0, NULL);
+
+            for (size_t i = 0; i < value.size(); i++) {
+                Tcl_ListObjAppendElement(NULL, pResultStr,
+                                         Tcl_NewStringObj(value[i].c_str(), -1));
+            }
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
         case FUNC_setPreferableBackend: {
             int backendId;
 
