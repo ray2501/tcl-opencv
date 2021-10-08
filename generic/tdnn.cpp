@@ -552,6 +552,131 @@ int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     return TCL_OK;
 }
 
+
+int dnn_NMSBoxes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    std::vector<cv::Rect> bboxes;
+    std::vector<float> scores;
+    double  score_threshold;
+    double  nms_threshold;
+    std::vector<int> indices;
+    double eta = 1.0;
+    int top_k = 0, count = 0;
+    Tcl_Obj *pResultStr = NULL;
+
+    if (objc != 5 && objc != 7) {
+        Tcl_WrongNumArgs(interp, 1, objv, "bboxes scores score_threshold nms_threshold ?eta top_k?");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+    }
+
+    if (count == 0) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty bboxes list");
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+        int subCount = 0;
+
+        for (int i = 0; i < count; i++) {
+            Tcl_ListObjIndex(interp, objv[1], i, &elemListPtr);
+
+            if (Tcl_ListObjLength(interp, elemListPtr, &subCount) != TCL_OK) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+            }
+
+            if (subCount != 4) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid rect list");
+            } else {
+                Tcl_Obj *elemSubListPtr = NULL;
+                int left = 0, top = 0, width = 0, height = 0;
+
+                Tcl_ListObjIndex(interp, elemListPtr, 1, &elemSubListPtr);
+                if (Tcl_GetIntFromObj(interp, elemSubListPtr, &left) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                Tcl_ListObjIndex(interp, elemListPtr, 1, &elemSubListPtr);
+                if (Tcl_GetIntFromObj(interp, elemSubListPtr, &top) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                Tcl_ListObjIndex(interp, elemListPtr, 2, &elemSubListPtr);
+                if (Tcl_GetIntFromObj(interp, elemSubListPtr, &width) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                Tcl_ListObjIndex(interp, elemListPtr, 3, &elemSubListPtr);
+                if (Tcl_GetIntFromObj(interp, elemSubListPtr, &height) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                bboxes.push_back(cv::Rect(left, top, width, height));
+            }
+        }
+    }
+
+    if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+    }
+
+    if (count == 0) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty scores list");
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+        double score = 0;
+
+        for (int i = 0; i < count; i++) {
+            Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
+            if (Tcl_GetDoubleFromObj(interp, elemListPtr, &score) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            scores.push_back((float) score);
+        }
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[3], &score_threshold) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[4], &nms_threshold) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if(objc == 7) {
+        if (Tcl_GetDoubleFromObj(interp, objv[5], &eta) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[6], &top_k) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::dnn::NMSBoxes(bboxes, scores,
+                          (float) score_threshold,
+                          (float) nms_threshold,
+                          indices, (float) eta, top_k);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewListObj(0, NULL);
+
+    for (size_t i = 0; i < indices.size(); i++) {
+        Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(indices[i]));
+    }
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+
 #endif /* TCL_USE_OPENCV4 */
 
 #ifdef __cplusplus

@@ -417,6 +417,7 @@ MODULE_SCOPE int QRCodeDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj 
 #ifdef TCL_USE_OPENCV4
 MODULE_SCOPE int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int dnn_NMSBoxes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
 
 /*

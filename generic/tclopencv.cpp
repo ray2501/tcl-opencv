@@ -2130,6 +2130,10 @@ Opencv_Init(Tcl_Interp *interp)
     Tcl_CreateObjCommand(interp, "::" NS "::dnn::readNet",
         (Tcl_ObjCmdProc *) dnn_readNet,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::dnn::NMSBoxes",
+        (Tcl_ObjCmdProc *) dnn_NMSBoxes,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 #endif
 
     /*

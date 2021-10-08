@@ -1024,6 +1024,7 @@ Please notice, TrainData command will only have 1 instance.
 
     ::cv::dnn::blobFromImage matrix scalefactor width height mean_color_list swapRB crop
     ::cv::dnn::readNet model ?config framework?
+    ::cv::dnn::NMSBoxes bboxes scores score_threshold nms_threshold ?eta top_k?
     READNET getLayerNames
     READNET getUnconnectedOutLayers
     READNET getUnconnectedOutLayersNames
