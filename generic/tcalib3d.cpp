@@ -663,6 +663,61 @@ int estimateAffine2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 }
 
 
+int estimateAffine3D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    double ransacThreshold = 3, confidence = 0.99;
+    cv::Mat result, inliers;
+    cv::Mat *mat1, *mat2, *dstmat1, *dstmat2;
+
+    if (objc != 3 && objc != 5) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+            "matrix_1 matrix_2 ?ransacThreshold confidence?");
+        return TCL_ERROR;
+    }
+
+    mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat1) {
+        return TCL_ERROR;
+    }
+
+    mat2 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+    if (!mat2) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 5) {
+        if (Tcl_GetDoubleFromObj(interp, objv[3], &ransacThreshold) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[4], &confidence) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::estimateAffine3D(*mat1, *mat2, result, inliers,
+                             ransacThreshold, confidence);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    Tcl_Obj *list[2];
+
+    dstmat1 = new cv::Mat(result);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+
+    dstmat2 = new cv::Mat(inliers);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
+
+    return TCL_OK;
+}
+
+
 int findFundamentalMat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double ransacReprojThreshold = 3, confidence = 0.99;
