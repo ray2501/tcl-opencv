@@ -60,7 +60,6 @@ int decolor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat dstimage1, dstimage2;
     cv::Mat *mat1, *dstmat1, *dstmat2;
-    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "matrix");
@@ -80,19 +79,15 @@ int decolor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    dstmat1 = new cv::Mat(dstimage1);
+    Tcl_Obj *list[2];
 
-    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+    dstmat1 = new cv::Mat(dstimage1);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
     dstmat2 = new cv::Mat(dstimage2);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
-    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
-
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
     return TCL_OK;
 }
@@ -550,7 +545,6 @@ int pencilSketch(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     double sigma_s = 60, sigma_r = 0.07, shade_factor = 0.02;
     cv::Mat dstimage1, dstimage2;
     cv::Mat *mat1, *dstmat1, *dstmat2;
-    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
     if (objc != 2 && objc != 5) {
         Tcl_WrongNumArgs(interp, 1, objv, "matrix ?sigma_s sigma_r shade_factor?");
@@ -585,19 +579,15 @@ int pencilSketch(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    dstmat1 = new cv::Mat(dstimage1);
+    Tcl_Obj *list[2];
 
-    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+    dstmat1 = new cv::Mat(dstimage1);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
     dstmat2 = new cv::Mat(dstimage2);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
-    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
-
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
     return TCL_OK;
 }

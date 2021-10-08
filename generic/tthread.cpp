@@ -195,7 +195,7 @@ int Opencv_Trecv(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
     Tcl_MutexUnlock(&cvthrMutex);
     if (msg != NULL) {
-        Tcl_Obj *pResultStr, *pResultList;
+        Tcl_Obj *pResultStr;
 
         if (msg->mat) {
             pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, msg->mat);
@@ -203,11 +203,10 @@ int Opencv_Trecv(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             pResultStr = Tcl_NewObj();
         }
         if (Tcl_DStringLength(&msg->ds) > 0) {
-            pResultList = Tcl_NewListObj(2, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultList, pResultStr);
-            Tcl_ListObjAppendElement(NULL, pResultList,
-                Tcl_NewStringObj(Tcl_DStringValue(&msg->ds), Tcl_DStringLength(&msg->ds)));
-            Tcl_SetObjResult(interp, pResultList);
+            Tcl_Obj *list[2];
+            list[0] = pResultStr;
+            list[1] = Tcl_NewStringObj(Tcl_DStringValue(&msg->ds), Tcl_DStringLength(&msg->ds));
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
         } else {
             Tcl_SetObjResult(interp, pResultStr);
         }

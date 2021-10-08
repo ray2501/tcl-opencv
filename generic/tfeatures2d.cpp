@@ -605,17 +605,17 @@ static int FastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, 
 
             pResultStr = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+                Tcl_Obj *sublist[7];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(7, sublist));
             }
 
             Tcl_SetObjResult(interp, pResultStr);
@@ -936,17 +936,17 @@ static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
 
             pResultStr = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+                Tcl_Obj *sublist[7];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(7, sublist));
             }
 
             Tcl_SetObjResult(interp, pResultStr);
@@ -1250,7 +1250,6 @@ static int MSER_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             std::vector<std::vector<cv::Point>> msers;
             std::vector<cv::Rect> bboxes;
             cv::Mat *mat;
-            Tcl_Obj *pResultStr = NULL, *pListResultStr = NULL;
 
             if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix");
@@ -1270,9 +1269,9 @@ static int MSER_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            Tcl_Obj *list[2];
 
-            pListResultStr = Tcl_NewListObj(0, NULL);
+            list[0] = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < msers.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
 
@@ -1282,25 +1281,22 @@ static int MSER_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(msers[i][j].y));
                 }
 
-                Tcl_ListObjAppendElement(NULL, pListResultStr, pListStr);
+                Tcl_ListObjAppendElement(NULL, list[0], pListStr);
             }
-            Tcl_ListObjAppendElement(NULL, pResultStr, pListResultStr);
 
-            pListResultStr = Tcl_NewListObj(0, NULL);
+            list[1] = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < bboxes.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
+                Tcl_Obj *sublist[4];
 
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(bboxes[i].x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(bboxes[i].y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(bboxes[i].width));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(bboxes[i].height));
+                sublist[0] = Tcl_NewIntObj(bboxes[i].x);
+                sublist[1] = Tcl_NewIntObj(bboxes[i].y);
+                sublist[2] = Tcl_NewIntObj(bboxes[i].width);
+                sublist[3] = Tcl_NewIntObj(bboxes[i].height);
 
-                Tcl_ListObjAppendElement(NULL, pListResultStr, pListStr);
+                Tcl_ListObjAppendElement(NULL, list[1], Tcl_NewListObj(4, sublist));
             }
-            Tcl_ListObjAppendElement(NULL, pResultStr, pListResultStr);
 
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -1707,17 +1703,17 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             pResultStr = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+                Tcl_Obj *sublist[7];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(7, sublist));
             }
 
             Tcl_SetObjResult(interp, pResultStr);
@@ -1729,7 +1725,6 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
             int count = 0;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
-            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
             if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix keypoints");
@@ -1816,29 +1811,27 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr1 = Tcl_NewListObj(0, NULL);
-            for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+            Tcl_Obj *list[2];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            list[0] = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *sublist[7];
+
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, list[0], Tcl_NewListObj(7, sublist));
             }
 
             dstmat = new cv::Mat(descriptors);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -1846,7 +1839,6 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
             cv::Mat mask, descriptors;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat1, *mat2, *dstmat;
-            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix ?mask?");
@@ -1874,29 +1866,27 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr1 = Tcl_NewListObj(0, NULL);
-            for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+            Tcl_Obj *list[2];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            list[0] = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *sublist[7];
+
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, list[0], Tcl_NewListObj(7, sublist));
             }
 
             dstmat = new cv::Mat(descriptors);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -2501,17 +2491,17 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             pResultStr = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+                Tcl_Obj *sublist[7];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(7, sublist));
             }
 
             Tcl_SetObjResult(interp, pResultStr);
@@ -2523,7 +2513,6 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
             int count = 0;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
-            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
             if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix keypoints");
@@ -2610,29 +2599,27 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr1 = Tcl_NewListObj(0, NULL);
-            for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+            Tcl_Obj *list[2];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            list[0] = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *sublist[7];
+
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, list[0], Tcl_NewListObj(7, sublist));
             }
 
             dstmat = new cv::Mat(descriptors);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -2640,7 +2627,6 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
             cv::Mat mask, descriptors;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat1, *mat2, *dstmat;
-            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix ?mask?");
@@ -2668,29 +2654,27 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr1 = Tcl_NewListObj(0, NULL);
-            for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+            Tcl_Obj *list[2];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            list[0] = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *sublist[7];
+
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, list[0], Tcl_NewListObj(7, sublist));
             }
 
             dstmat = new cv::Mat(descriptors);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -3193,17 +3177,17 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             pResultStr = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+                Tcl_Obj *sublist[7];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(7, sublist));
             }
 
             Tcl_SetObjResult(interp, pResultStr);
@@ -3215,7 +3199,6 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
             int count = 0;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
-            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
             if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix keypoints");
@@ -3302,29 +3285,27 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr1 = Tcl_NewListObj(0, NULL);
-            for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+            Tcl_Obj *list[2];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            list[0] = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *sublist[7];
+
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, list[0], Tcl_NewListObj(7, sublist));
             }
 
             dstmat = new cv::Mat(descriptors);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -3332,7 +3313,6 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
             cv::Mat mask, descriptors;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat1, *mat2, *dstmat;
-            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix ?mask?");
@@ -3360,29 +3340,27 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr1 = Tcl_NewListObj(0, NULL);
-            for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+            Tcl_Obj *list[2];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            list[0] = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *sublist[7];
+
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, list[0], Tcl_NewListObj(7, sublist));
             }
 
             dstmat = new cv::Mat(descriptors);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -3585,17 +3563,17 @@ static int KAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
             pResultStr = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+                Tcl_Obj *sublist[7];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(7, sublist));
             }
 
             Tcl_SetObjResult(interp, pResultStr);
@@ -3607,7 +3585,6 @@ static int KAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             int count = 0;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
-            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
             if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix keypoints");
@@ -3694,29 +3671,27 @@ static int KAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr1 = Tcl_NewListObj(0, NULL);
-            for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+            Tcl_Obj *list[2];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            list[0] = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *sublist[7];
+
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, list[0], Tcl_NewListObj(7, sublist));
             }
 
             dstmat = new cv::Mat(descriptors);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -3724,7 +3699,6 @@ static int KAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             cv::Mat mask, descriptors;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat1, *mat2, *dstmat;
-            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix ?mask?");
@@ -3752,29 +3726,27 @@ static int KAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr1 = Tcl_NewListObj(0, NULL);
-            for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+            Tcl_Obj *list[2];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            list[0] = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *sublist[7];
+
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, list[0], Tcl_NewListObj(7, sublist));
             }
 
             dstmat = new cv::Mat(descriptors);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -4226,17 +4198,17 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
             pResultStr = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+                Tcl_Obj *sublist[7];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(7, sublist));
             }
 
             Tcl_SetObjResult(interp, pResultStr);
@@ -4248,7 +4220,6 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             int count = 0;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
-            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
             if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix keypoints");
@@ -4335,29 +4306,27 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr1 = Tcl_NewListObj(0, NULL);
-            for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+            Tcl_Obj *list[2];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            list[0] = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *sublist[7];
+
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, list[0], Tcl_NewListObj(7, sublist));
             }
 
             dstmat = new cv::Mat(descriptors);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -4365,7 +4334,6 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             cv::Mat mask, descriptors;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat1, *mat2, *dstmat;
-            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix ?mask?");
@@ -4393,29 +4361,27 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr1 = Tcl_NewListObj(0, NULL);
-            for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+            Tcl_Obj *list[2];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            list[0] = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *sublist[7];
+
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, list[0], Tcl_NewListObj(7, sublist));
             }
 
             dstmat = new cv::Mat(descriptors);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -4605,17 +4571,17 @@ static int AffineFeature_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
 
             pResultStr = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+                Tcl_Obj *sublist[7];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(7, sublist));
             }
 
             Tcl_SetObjResult(interp, pResultStr);
@@ -4627,7 +4593,6 @@ static int AffineFeature_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
             int count = 0;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
-            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
             if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix keypoints");
@@ -4714,29 +4679,27 @@ static int AffineFeature_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr1 = Tcl_NewListObj(0, NULL);
-            for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+            Tcl_Obj *list[2];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            list[0] = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *sublist[7];
+
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, list[0], Tcl_NewListObj(7, sublist));
             }
 
             dstmat = new cv::Mat(descriptors);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -4744,7 +4707,6 @@ static int AffineFeature_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
             cv::Mat mask, descriptors;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat1, *mat2, *dstmat;
-            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix ?mask?");
@@ -4772,29 +4734,27 @@ static int AffineFeature_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr1 = Tcl_NewListObj(0, NULL);
-            for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+            Tcl_Obj *list[2];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+            list[0] = Tcl_NewListObj(0, NULL);
+            for (size_t i = 0; i < keypoints.size(); i++) {
+                Tcl_Obj *sublist[7];
+
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, list[0], Tcl_NewListObj(7, sublist));
             }
 
             dstmat = new cv::Mat(descriptors);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -5024,14 +4984,14 @@ static int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 
             pResultStr = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < matches.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(matches[i].queryIdx));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(matches[i].trainIdx));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(matches[i].imgIdx));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(matches[i].distance));
+                Tcl_Obj *sublist[4];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+                sublist[0] = Tcl_NewIntObj(matches[i].queryIdx);
+                sublist[1] = Tcl_NewIntObj(matches[i].trainIdx);
+                sublist[2] = Tcl_NewIntObj(matches[i].imgIdx);
+                sublist[3] = Tcl_NewDoubleObj(matches[i].distance);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(4, sublist));
             }
 
             Tcl_SetObjResult(interp, pResultStr);
@@ -5077,14 +5037,14 @@ static int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 
                 std::vector<cv::DMatch> matches = vmatches[i];
                 for (size_t j = 0; j < matches.size(); j++) {
-                    Tcl_Obj *pSubListStr = NULL;
-                    pSubListStr = Tcl_NewListObj(0, NULL);
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj(matches[j].queryIdx));
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj(matches[j].trainIdx));
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj(matches[j].imgIdx));
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewDoubleObj(matches[j].distance));
+                    Tcl_Obj *sublist[4];
 
-                    Tcl_ListObjAppendElement(NULL, pListStr, pSubListStr);
+                    sublist[0] = Tcl_NewIntObj(matches[j].queryIdx);
+                    sublist[1] = Tcl_NewIntObj(matches[j].trainIdx);
+                    sublist[2] = Tcl_NewIntObj(matches[j].imgIdx);
+                    sublist[3] = Tcl_NewDoubleObj(matches[j].distance);
+
+                    Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewListObj(4, sublist));
                 }
 
                 Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
@@ -5266,14 +5226,14 @@ static int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tc
 
             pResultStr = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < matches.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(matches[i].queryIdx));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(matches[i].trainIdx));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(matches[i].imgIdx));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(matches[i].distance));
+                Tcl_Obj *sublist[4];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+                sublist[0] = Tcl_NewIntObj(matches[i].queryIdx);
+                sublist[1] = Tcl_NewIntObj(matches[i].trainIdx);
+                sublist[2] = Tcl_NewIntObj(matches[i].imgIdx);
+                sublist[3] = Tcl_NewDoubleObj(matches[i].distance);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(4, sublist));
             }
 
             Tcl_SetObjResult(interp, pResultStr);
@@ -5319,14 +5279,14 @@ static int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tc
 
                 std::vector<cv::DMatch> matches = vmatches[i];
                 for (size_t j = 0; j < matches.size(); j++) {
-                    Tcl_Obj *pSubListStr = NULL;
-                    pSubListStr = Tcl_NewListObj(0, NULL);
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj(matches[j].queryIdx));
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj(matches[j].trainIdx));
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewIntObj(matches[j].imgIdx));
-                    Tcl_ListObjAppendElement(NULL, pSubListStr, Tcl_NewDoubleObj(matches[j].distance));
+                    Tcl_Obj *sublist[4];
 
-                    Tcl_ListObjAppendElement(NULL, pListStr, pSubListStr);
+                    sublist[0] = Tcl_NewIntObj(matches[j].queryIdx);
+                    sublist[1] = Tcl_NewIntObj(matches[j].trainIdx);
+                    sublist[2] = Tcl_NewIntObj(matches[j].imgIdx);
+                    sublist[3] = Tcl_NewDoubleObj(matches[j].distance);
+
+                    Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewListObj(4, sublist));
                 }
 
                 Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
@@ -5566,17 +5526,17 @@ static int SimpleBlobDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, T
 
             pResultStr = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].pt.y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].size));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].angle));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(keypoints[i].response));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].octave));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(keypoints[i].class_id));
+                Tcl_Obj *sublist[7];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+                sublist[0] = Tcl_NewDoubleObj(keypoints[i].pt.x);
+                sublist[1] = Tcl_NewDoubleObj(keypoints[i].pt.y);
+                sublist[2] = Tcl_NewDoubleObj(keypoints[i].size);
+                sublist[3] = Tcl_NewDoubleObj(keypoints[i].angle);
+                sublist[4] = Tcl_NewDoubleObj(keypoints[i].response);
+                sublist[5] = Tcl_NewIntObj(keypoints[i].octave);
+                sublist[6] = Tcl_NewIntObj(keypoints[i].class_id);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(7, sublist));
             }
 
             Tcl_SetObjResult(interp, pResultStr);

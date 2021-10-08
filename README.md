@@ -50,6 +50,8 @@ Implement commands
     MATRIX reshape cn ?rows?
     MATRIX setData list_data
     MATRIX setTo color_list ?mask?
+    MATRIX toByteArray
+    MATRIX fromByteArray width height bpp bytes
     MATRIX close
 
     ::cv::CV_8UC num
@@ -151,6 +153,12 @@ If flags is set to `$::cv::KMEANS_USE_INITIAL_LABELS`, users should provide a CV
 
     ::cv::TermCriteria ?type maxCount epsilon?
     TermCriteria close
+
+    ::cv::fromByteArray width height bpp bytes
+
+Creates a new `cv::Mat` from a gray (`bpp` equals 1) or RGB (`bpp` equals 3) byte array with `width` columns and `height` rows.
+Same rule regarding arguments applies to `MATRIX fromByteArray ...`.
+Likewise, the command `MATRIX toByteArray` returns a 4 element result list.
 
 ### fstorage
 

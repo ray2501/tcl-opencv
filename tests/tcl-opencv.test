@@ -1178,6 +1178,10 @@ test opencv-1.87 {FileStorage (types)} {*}{
         $mat close
         $trd close
         lappend objlist $name
+        # These are omitted in the list below
+        # due to OpenCV version dependencies:
+        #   cv::AffineFeature
+        #   cv::SIFT
         foreach cmd {
             cv::TermCriteria
             cv::CLAHE

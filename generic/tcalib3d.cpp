@@ -11,7 +11,6 @@ int findChessboardCorners(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
     bool retval;
     cv::Mat result;
     cv::Mat *mat1, *dstmat;
-    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL;
 
     if (objc != 4 && objc != 5) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -48,16 +47,13 @@ int findChessboardCorners(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[2];
 
+    list[0] = Tcl_NewBooleanObj((int) retval);
     dstmat = new cv::Mat(result);
-    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-    Tcl_SetObjResult(interp, pResultStr1);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewBooleanObj((int) retval));
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
     return TCL_OK;
 }
 
@@ -245,7 +241,6 @@ int getOptimalNewCameraMatrix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
     cv::Mat result_matrix;
     cv::Mat *cameraMatrix, *distCoeffs, *dstmat;
     cv::Rect validPixROI;
-    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
 
     if (objc != 8 && objc != 9) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -300,18 +295,17 @@ int getOptimalNewCameraMatrix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[5];
 
     dstmat = new cv::Mat(result_matrix);
-    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(validPixROI.x));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(validPixROI.y));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(validPixROI.width));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(validPixROI.height));
+    list[1] = Tcl_NewIntObj(validPixROI.x);
+    list[2] = Tcl_NewIntObj(validPixROI.y);
+    list[3] = Tcl_NewIntObj(validPixROI.width);
+    list[4] = Tcl_NewIntObj(validPixROI.height);
 
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(5, list));
 
     return TCL_OK;
 }
@@ -372,7 +366,6 @@ int initUndistortRectifyMap(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
     cv::Mat map1, map2;
     cv::Mat *cameraMatrix, *distCoeffs, *Rmatrix, *newCameraMatrix, *dstmat1, *dstmat2;
     int width = 0, height= 0, m1type = 0;
-    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
 
     if (objc != 8) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -427,17 +420,15 @@ int initUndistortRectifyMap(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[2];
 
     dstmat1 = new cv::Mat(map1);
-    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
     dstmat2 = new cv::Mat(map2);
-    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
     return TCL_OK;
 }
@@ -503,7 +494,6 @@ int solvePnP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat result_rvec, result_tvec;
     cv::Mat *objectPoints, *imagePoints, *cameraMatrix, *distCoeffs, *dstmat1, *dstmat2;
-    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
     bool result;
 
     if (objc != 5) {
@@ -542,19 +532,17 @@ int solvePnP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[3];
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewBooleanObj((int) result));
+    list[0] = Tcl_NewBooleanObj((int) result);
 
     dstmat1 = new cv::Mat(result_rvec);
-    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
     dstmat2 = new cv::Mat(result_tvec);
-    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+    list[2] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(3, list));
 
     return TCL_OK;
 }
@@ -612,7 +600,6 @@ int estimateAffine2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
     size_t maxIters = 2000, refineIters = 10;
     cv::Mat result, inliers;
     cv::Mat *mat1, *mat2, *dstmat1, *dstmat2;
-    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
 
     if (objc != 3 && objc != 8) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -662,17 +649,15 @@ int estimateAffine2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[2];
 
     dstmat1 = new cv::Mat(result);
-    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
     dstmat2 = new cv::Mat(inliers);
-    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
     return TCL_OK;
 }
@@ -684,7 +669,6 @@ int findFundamentalMat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
     int method = cv::FM_RANSAC;
     cv::Mat result, mask;
     cv::Mat *mat1, *mat2, *dstmat1, *dstmat2;
-    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
 
     if (objc != 3 && objc != 6) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -726,17 +710,15 @@ int findFundamentalMat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[2];
 
     dstmat1 = new cv::Mat(result);
-    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
     dstmat2 = new cv::Mat(mask);
-    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
     return TCL_OK;
 }
@@ -748,7 +730,6 @@ int findHomography(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int method = 0, maxIters = 2000;
     cv::Mat result, mask;
     cv::Mat *mat1, *mat2, *dstmat1, *dstmat2;
-    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
 
     if (objc != 3 && objc != 7) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -794,17 +775,15 @@ int findHomography(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[2];
 
     dstmat1 = new cv::Mat(result);
-    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
     dstmat2 = new cv::Mat(mask);
-    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
     return TCL_OK;
 }

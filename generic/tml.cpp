@@ -370,7 +370,6 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         case FUNC_predict: {
             cv::Mat *samples, *dstmat;
             cv::Mat results;
-            Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
             int flags = 0;
             float value;
 
@@ -398,13 +397,14 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            dstmat = new cv::Mat(results);
-            pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            Tcl_Obj *list[2];
 
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
-            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
-            Tcl_SetObjResult(interp, pResultStr);
+            list[0] = Tcl_NewDoubleObj(value);
+
+            dstmat = new cv::Mat(results);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -664,7 +664,6 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
         case FUNC_predict: {
             cv::Mat *samples, *dstmat;
             cv::Mat results;
-            Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
             int flags = 0;
             float value;
 
@@ -692,20 +691,20 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            dstmat = new cv::Mat(results);
-            pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            Tcl_Obj *list[2];
 
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
-            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
-            Tcl_SetObjResult(interp, pResultStr);
+            list[0] = Tcl_NewDoubleObj(value);
+
+            dstmat = new cv::Mat(results);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
         case FUNC_predictProb: {
             cv::Mat *samples, *dstmat1, *dstmat2;
             cv::Mat outputs, outputProbs;
-            Tcl_Obj *pResultStr = NULL, *pMatResultStr1 = NULL, *pMatResultStr2 = NULL;
             int flags = 0;
             float value;
 
@@ -733,17 +732,17 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
+            Tcl_Obj *list[3];
+
+            list[0] = Tcl_NewDoubleObj(value);
+
             dstmat1 = new cv::Mat(outputs);
-            pMatResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
             dstmat2 = new cv::Mat(outputProbs);
-            pMatResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+            list[2] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
-            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr2);
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(3, list));
 
             break;
         }
@@ -1148,7 +1147,6 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         case FUNC_findNearest: {
             cv::Mat *samples, *dstmat;
             cv::Mat results;
-            Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
             int k = 0;
             float value;
 
@@ -1174,13 +1172,14 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            dstmat = new cv::Mat(results);
-            pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            Tcl_Obj *list[2];
 
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
-            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
-            Tcl_SetObjResult(interp, pResultStr);
+            list[0] = Tcl_NewDoubleObj(value);
+
+            dstmat = new cv::Mat(results);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -1222,7 +1221,6 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         case FUNC_predict: {
             cv::Mat *samples, *dstmat;
             cv::Mat results;
-            Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
             int flags = 0;
             float value;
 
@@ -1250,13 +1248,14 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            dstmat = new cv::Mat(results);
-            pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            Tcl_Obj *list[2];
 
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
-            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
-            Tcl_SetObjResult(interp, pResultStr);
+            list[0] = Tcl_NewDoubleObj(value);
+
+            dstmat = new cv::Mat(results);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -1671,7 +1670,6 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
         case FUNC_getDecisionFunction: {
             cv::Mat alpha, svidx;
             cv::Mat *alphamat, *svidxmat;
-            Tcl_Obj *pResultStr = NULL, *pAlphaResultStr = NULL, *pSvidxResultStr = NULL;;
             int index = 0;
             double value = 0;
 
@@ -1692,17 +1690,18 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
+            Tcl_Obj *list[3];
+
+            list[0] = Tcl_NewDoubleObj(value);
+
             alphamat = new cv::Mat(alpha);
-            pAlphaResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, alphamat);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, alphamat);
 
             svidxmat = new cv::Mat(svidx);
-            pSvidxResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, svidxmat);
+            list[2] = Opencv_NewHandle(cd, interp, OPENCV_MAT, svidxmat);
 
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
-            Tcl_ListObjAppendElement(NULL, pResultStr, pAlphaResultStr);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pSvidxResultStr);
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(3, list));
+
             break;
         }
         case FUNC_getSupportVectors: {
@@ -1990,7 +1989,6 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
         case FUNC_predict: {
             cv::Mat *samples, *dstmat;
             cv::Mat results;
-            Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
             int flags = 0;
             float value;
 
@@ -2018,13 +2016,14 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            dstmat = new cv::Mat(results);
-            pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            Tcl_Obj *list[2];
 
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
-            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
-            Tcl_SetObjResult(interp, pResultStr);
+            list[0] = Tcl_NewDoubleObj(value);
+
+            dstmat = new cv::Mat(results);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -2606,7 +2605,6 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         case FUNC_predict: {
             cv::Mat *samples, *dstmat;
             cv::Mat results;
-            Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
             int flags = 0;
             float value;
 
@@ -2634,13 +2632,14 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            dstmat = new cv::Mat(results);
-            pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            Tcl_Obj *list[2];
 
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
-            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
-            Tcl_SetObjResult(interp, pResultStr);
+            list[0] = Tcl_NewDoubleObj(value);
+
+            dstmat = new cv::Mat(results);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -3311,7 +3310,6 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         case FUNC_predict: {
             cv::Mat *samples, *dstmat;
             cv::Mat results;
-            Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
             int flags = 0;
             float value;
 
@@ -3339,13 +3337,14 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            dstmat = new cv::Mat(results);
-            pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            Tcl_Obj *list[2];
 
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
-            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
-            Tcl_SetObjResult(interp, pResultStr);
+            list[0] = Tcl_NewDoubleObj(value);
+
+            dstmat = new cv::Mat(results);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -4150,7 +4149,6 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         case FUNC_predict: {
             cv::Mat *samples, *dstmat;
             cv::Mat results;
-            Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
             int flags = 0;
             float value;
 
@@ -4178,13 +4176,14 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            dstmat = new cv::Mat(results);
-            pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            Tcl_Obj *list[2];
 
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
-            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
-            Tcl_SetObjResult(interp, pResultStr);
+            list[0] = Tcl_NewDoubleObj(value);
+
+            dstmat = new cv::Mat(results);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -5039,7 +5038,6 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         case FUNC_predict: {
             cv::Mat *samples, *dstmat;
             cv::Mat results;
-            Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
             int flags = 0;
             float value;
 
@@ -5067,13 +5065,14 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            dstmat = new cv::Mat(results);
-            pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            Tcl_Obj *list[2];
 
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
-            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
-            Tcl_SetObjResult(interp, pResultStr);
+            list[0] = Tcl_NewDoubleObj(value);
+
+            dstmat = new cv::Mat(results);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -6039,7 +6038,6 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
         case FUNC_predict: {
             cv::Mat *samples, *dstmat;
             cv::Mat results;
-            Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
             int flags = 0;
             float value;
 
@@ -6067,13 +6065,14 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            dstmat = new cv::Mat(results);
-            pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            Tcl_Obj *list[2];
 
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
-            Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
-            Tcl_SetObjResult(interp, pResultStr);
+            list[0] = Tcl_NewDoubleObj(value);
+
+            dstmat = new cv::Mat(results);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }

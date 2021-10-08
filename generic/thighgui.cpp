@@ -242,7 +242,6 @@ int selectROI(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int showCrosshair = 1, fromCenter = 0;
     cv::Mat *mat;
-    Tcl_Obj *pResultStr = NULL;
     cv::Rect rect;
 
     if (objc != 2 && objc != 4) {
@@ -273,13 +272,14 @@ int selectROI(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) rect.x));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) rect.y));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) rect.width));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) rect.height));
+    Tcl_Obj *list[4];
 
-    Tcl_SetObjResult(interp, pResultStr);
+    list[0] = Tcl_NewIntObj((int) rect.x);
+    list[1] = Tcl_NewIntObj((int) rect.y);
+    list[2] = Tcl_NewIntObj((int) rect.width);
+    list[3] = Tcl_NewIntObj((int) rect.height);
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(4, list));
     return TCL_OK;
 }
 

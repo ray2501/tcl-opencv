@@ -83,7 +83,6 @@ int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
             break;
         }
         case FUNC_DETECTANDDECODE: {
-            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
             cv::Mat *srcmat, *dstmat, *codemat;
             cv::Mat points_matrix, code_matrix;
             std::string result;
@@ -108,22 +107,17 @@ int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            dstmat = new cv::Mat(points_matrix);
+            Tcl_Obj *list[3];
 
-            pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            list[0] = Tcl_NewByteArrayObj((const unsigned char *) result.c_str(), result.length());
+
+            dstmat = new cv::Mat(points_matrix);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
             codemat = new cv::Mat(code_matrix);
+            list[2] = Opencv_NewHandle(cd, interp, OPENCV_MAT, codemat);
 
-            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, codemat);
-
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr,
-                Tcl_NewStringObj(result.c_str(), result.length()));
-
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(3, list));
 
             break;
         }
@@ -297,14 +291,14 @@ int CascadeClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
             pResultStr = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < rect.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(rect[i].x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(rect[i].y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(rect[i].width));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(rect[i].height));
+                Tcl_Obj *sublist[4];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+                sublist[0] = Tcl_NewIntObj(rect[i].x);
+                sublist[1] = Tcl_NewIntObj(rect[i].y);
+                sublist[2] = Tcl_NewIntObj(rect[i].width);
+                sublist[3] = Tcl_NewIntObj(rect[i].height);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(4, sublist));
             }
 
             Tcl_SetObjResult(interp, pResultStr);
@@ -569,14 +563,14 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
             pResultStr = Tcl_NewListObj(0, NULL);
             for (size_t i = 0; i < rect.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(rect[i].x));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(rect[i].y));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(rect[i].width));
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(rect[i].height));
+                Tcl_Obj *sublist[4];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+                sublist[0] = Tcl_NewIntObj(rect[i].x);
+                sublist[1] = Tcl_NewIntObj(rect[i].y);
+                sublist[2] = Tcl_NewIntObj(rect[i].width);
+                sublist[3] = Tcl_NewIntObj(rect[i].height);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(4, sublist));
             }
 
             Tcl_SetObjResult(interp, pResultStr);

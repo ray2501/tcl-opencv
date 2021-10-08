@@ -1,5 +1,9 @@
 #include "tclopencv.h"
 
+#ifndef TCL_USE_OPENCV4
+#include <opencv2/optflow.hpp>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -632,7 +636,6 @@ int meanShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     cv::Rect window;
     cv::Mat *mat1;
     cv::TermCriteria *termCriteria;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 7) {
         Tcl_WrongNumArgs(interp, 1, objv, "matrix x y width height termCriteria");
@@ -674,14 +677,15 @@ int meanShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(retval));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(window.x));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(window.y));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(window.width));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(window.height));
+    Tcl_Obj *list[5];
 
-    Tcl_SetObjResult(interp, pResultStr);
+    list[0] = Tcl_NewIntObj(retval);
+    list[1] = Tcl_NewIntObj(window.x);
+    list[2] = Tcl_NewIntObj(window.y);
+    list[3] = Tcl_NewIntObj(window.width);
+    list[4] = Tcl_NewIntObj(window.height);
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(5, list));
 
     return TCL_OK;
 }
@@ -695,9 +699,6 @@ int CamShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     cv::Point2f points[4];
     cv::Mat *mat1;
     cv::TermCriteria *termCriteria;
-    Tcl_Obj *pResultStr = NULL;
-    Tcl_Obj *pSubListStr1 = NULL;
-    Tcl_Obj *pSubListStr2 = NULL;
 
     if (objc != 7) {
         Tcl_WrongNumArgs(interp, 1, objv, "matrix x y width height termCriteria");
@@ -739,30 +740,29 @@ int CamShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[2], *sublist[8];
 
-    pSubListStr1  = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pSubListStr1, Tcl_NewIntObj(window.x));
-    Tcl_ListObjAppendElement(NULL, pSubListStr1, Tcl_NewIntObj(window.y));
-    Tcl_ListObjAppendElement(NULL, pSubListStr1, Tcl_NewIntObj(window.width));
-    Tcl_ListObjAppendElement(NULL, pSubListStr1, Tcl_NewIntObj(window.height));
+    sublist[0] = Tcl_NewIntObj(window.x);
+    sublist[1] = Tcl_NewIntObj(window.y);
+    sublist[2] = Tcl_NewIntObj(window.width);
+    sublist[3] = Tcl_NewIntObj(window.height);
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, pSubListStr1);
+    list[0] = Tcl_NewListObj(4, sublist);
+
     rect_result.points(points);
 
-    pSubListStr2  = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pSubListStr2, Tcl_NewIntObj((int) points[0].x));
-    Tcl_ListObjAppendElement(NULL, pSubListStr2, Tcl_NewIntObj((int) points[0].y));
-    Tcl_ListObjAppendElement(NULL, pSubListStr2, Tcl_NewIntObj((int) points[1].x));
-    Tcl_ListObjAppendElement(NULL, pSubListStr2, Tcl_NewIntObj((int) points[1].y));
-    Tcl_ListObjAppendElement(NULL, pSubListStr2, Tcl_NewIntObj((int) points[2].x));
-    Tcl_ListObjAppendElement(NULL, pSubListStr2, Tcl_NewIntObj((int) points[2].y));
-    Tcl_ListObjAppendElement(NULL, pSubListStr2, Tcl_NewIntObj((int) points[3].x));
-    Tcl_ListObjAppendElement(NULL, pSubListStr2, Tcl_NewIntObj((int) points[3].y));
+    sublist[0] = Tcl_NewIntObj((int) points[0].x);
+    sublist[1] = Tcl_NewIntObj((int) points[0].y);
+    sublist[2] = Tcl_NewIntObj((int) points[1].x);
+    sublist[3] = Tcl_NewIntObj((int) points[1].y);
+    sublist[4] = Tcl_NewIntObj((int) points[2].x);
+    sublist[5] = Tcl_NewIntObj((int) points[2].y);
+    sublist[6] = Tcl_NewIntObj((int) points[3].x);
+    sublist[7] = Tcl_NewIntObj((int) points[3].y);
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, pSubListStr2);
+    list[1] = Tcl_NewListObj(8, sublist);
 
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
     return TCL_OK;
 }
@@ -775,8 +775,6 @@ int calcOpticalFlowPyrLK(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
     cv::Mat *mat1, *mat2, *mat3;
     cv::Mat *dstmat, *statusmat, *errmat;
     cv::TermCriteria *termCriteria;
-    Tcl_Obj *pResultStr = NULL;
-    Tcl_Obj *pResultStr1 = NULL, *pResultStr2 = NULL, *pResultStr3 = NULL;
 
     if (objc != 8) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -826,25 +824,18 @@ int calcOpticalFlowPyrLK(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[3];
 
     dstmat = new cv::Mat(nextPts);
-
-    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
     statusmat = new cv::Mat(status);
-
-    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, statusmat);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, statusmat);
 
     errmat = new cv::Mat(err);
+    list[2] = Opencv_NewHandle(cd, interp, OPENCV_MAT, errmat);
 
-    pResultStr3 = Opencv_NewHandle(cd, interp, OPENCV_MAT, errmat);
-
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr3);
-
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(3, list));
 
     return TCL_OK;
 }
@@ -922,7 +913,6 @@ int calcOpticalFlowFarneback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 }
 
 
-#ifdef TCL_USE_OPENCV4
 int readOpticalFlow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *filename = NULL;
@@ -944,7 +934,11 @@ int readOpticalFlow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
     try {
+#ifdef TCL_USE_OPENCV4
         flow = cv::readOpticalFlow(filename);
+#else
+        flow = cv::optflow::readOpticalFlow(filename);
+#endif
     } catch (const cv::Exception &ex) {
         Tcl_DStringFree(&ds);
         return Opencv_Exc2Tcl(interp, &ex);
@@ -988,7 +982,11 @@ int writeOpticalFlow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
     filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
     try {
+#ifdef TCL_USE_OPENCV4
         result = (int) cv::writeOpticalFlow(filename, *mat1);
+#else
+        result = (int) cv::optflow::writeOpticalFlow(filename, *mat1);
+#endif
     } catch (const cv::Exception &ex) {
         Tcl_DStringFree(&ds);
         return Opencv_Exc2Tcl(interp, &ex);
@@ -1003,6 +1001,7 @@ int writeOpticalFlow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 }
 
 
+#ifdef TCL_USE_OPENCV4
 int computeECC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double ecc = 0;

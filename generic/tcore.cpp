@@ -57,6 +57,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         "reshape",
         "setData",
         "setTo",
+        "toByteArray",
+        "fromByteArray",
 #ifdef TCL_USE_TKPHOTO
         "toPhoto",
         "fromPhoto",
@@ -103,6 +105,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         FUNC_RESHAPE,
         FUNC_SETDATA,
         FUNC_SETTO,
+        FUNC_TOBYTEA,
+        FUNC_FROMBYTEA,
 #ifdef TCL_USE_TKPHOTO
         FUNC_TOPHOTO,
         FUNC_FROMPHOTO,
@@ -155,11 +159,11 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             pResultStr = Tcl_NewListObj(0, NULL);
             for (int i = 0; i < mat->dims; i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-                Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(mat->size[i]));
+                Tcl_Obj *list[1];
 
-                Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+                list[0] = Tcl_NewIntObj(mat->size[i]);
+
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(1, list));
             }
 
             Tcl_SetObjResult(interp, pResultStr);
@@ -1185,6 +1189,169 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
+            break;
+        }
+        case FUNC_TOBYTEA: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, NULL);
+                return TCL_ERROR;
+            }
+
+            if ((mat->type() == CV_8UC1 && mat->channels() == 1) ||
+                (mat->type() == CV_8UC2 && mat->channels() == 2) ||
+                (mat->type() == CV_8UC3 && mat->channels() == 3) ||
+                (mat->type() == CV_8UC4 && mat->channels() == 4)) {
+                unsigned char *data;
+                cv::Mat tmat;
+                Tcl_Obj *list[4];
+
+                if (!mat->isContinuous()) {
+                    tmat = mat->clone();
+                    mat = &tmat;
+                }
+                data = mat->data;
+                switch ((int) mat->type()) {
+                    case CV_8UC1:     /* grey */
+                        list[0] = Tcl_NewIntObj(mat->cols);
+                        list[1] = Tcl_NewIntObj(mat->rows);
+                        list[2] = Tcl_NewIntObj(1);
+                        list[3] = Tcl_NewByteArrayObj(data, mat->cols * mat->rows);
+                        break;
+                    case CV_8UC2: {   /* grey + alpha */
+                        unsigned char *p;
+
+                        list[0] = Tcl_NewIntObj(mat->cols);
+                        list[1] = Tcl_NewIntObj(mat->rows);
+                        list[2] = Tcl_NewIntObj(1);
+                        p = (unsigned char *) attemptckalloc(mat->cols * mat->rows);
+                        if (p == NULL) {
+                            return Opencv_SetResult(interp, cv::Error::StsError, "out of memory");
+                        }
+                        for (int y = 0; y < mat->rows; y++) {
+                            unsigned char *dst = p + y * mat->cols;
+                            unsigned char *src = data + y * mat->cols * 2;
+                            for (int x = 0; x < mat->cols; x++) {
+                                *dst++ = *src;
+                                src += 2;
+                            }
+                        }
+                        list[3] = Tcl_NewByteArrayObj(p, mat->cols * mat->rows);
+                        ckfree(p);
+                        break;
+                    }
+                    case CV_8UC3:     /* BGR */
+                    case CV_8UC4: {   /* BGRA */
+                        unsigned char *p;
+
+                        list[0] = Tcl_NewIntObj(mat->cols);
+                        list[1] = Tcl_NewIntObj(mat->rows);
+                        list[2] = Tcl_NewIntObj(3);
+                        p = (unsigned char *) attemptckalloc(mat->cols * mat->rows * 3);
+                        if (p == NULL) {
+                            return Opencv_SetResult(interp, cv::Error::StsError, "out of memory");
+                        }
+                        for (int y = 0; y < mat->rows; y++) {
+                            unsigned char *dst = p + y * mat->cols * 3;
+                            int srcinc = (mat->type() == CV_8UC4) ? 4 : 3;
+                            unsigned char *src = data + y * mat->cols * srcinc;
+                            for (int x = 0; x < mat->cols; x++) {
+                                *dst++ = src[2];
+                                *dst++ = src[1];
+                                *dst++ = src[0];
+                                src += srcinc;
+                            }
+                        }
+                        list[3] = Tcl_NewByteArrayObj(p, mat->cols * mat->rows * 3);
+                        ckfree(p);
+                        break;
+                    }
+                }
+                Tcl_SetObjResult(interp, Tcl_NewListObj(4, list));
+            } else {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "incompatible matrix");
+            }
+            break;
+        }
+        case FUNC_FROMBYTEA: {
+            int width, height, bpp, len, newType;
+            unsigned char *bdata, *mdata;
+
+            if (objc != 6) {
+                Tcl_WrongNumArgs(interp, 2, objv, "width height bpp bytes");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &width) != TCL_OK) {
+                return TCL_ERROR;
+            }
+            if (Tcl_GetIntFromObj(interp, objv[3], &height) != TCL_OK) {
+                return TCL_ERROR;
+            }
+            if (Tcl_GetIntFromObj(interp, objv[4], &bpp) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            bdata = Tcl_GetByteArrayFromObj(objv[5], &len);
+            if (!(bpp == 1 && len == width * height) &&
+                !(bpp == 3 && len == width * height * 3)) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "inconsistent pararameters");
+            }
+            if ((mat->type() == CV_8UC1 && mat->channels() == 1) ||
+                (mat->type() == CV_8UC3 && mat->channels() == 3)) {
+                newType = mat->type();
+            } else {
+                newType = (bpp == 1) ? CV_8UC1 : CV_8UC3;
+            }
+            if (width != mat->cols || height != mat->rows || newType != mat->type()) {
+                try {
+                    mat->create(height, width, newType);
+                } catch (const cv::Exception &ex) {
+                    return Opencv_Exc2Tcl(interp, &ex);
+                } catch (...) {
+                    return Opencv_Exc2Tcl(interp, NULL);
+                }
+            }
+            if (!mat->isContinuous()) {
+                return Opencv_SetResult(interp, cv::Error::StsError, "matrix not continuous");
+            }
+            mdata = mat->data;
+            if (mat->type() == CV_8UC1 && bpp == 1) {
+                memcpy(mdata, bdata, width * height);
+            } else if (mat->type() == CV_8UC1 && bpp == 3) {
+                for (int y = 0; y < height; y++) {
+                    int off = y * width;
+                    unsigned char *pix = bdata + y * width * 3;
+                    for (int x = 0; x < width; x++) {
+                        mdata[off++] =
+                            (114 * pix[0] +
+                             587 * pix[1] +
+                             299 * pix[2]) / 1000;
+                        pix += 3;
+                    }
+                }
+            } else if (mat->type() == CV_8UC3 && bpp == 1) {
+                for (int y = 0; y < height; y++) {
+                    int off = y * width * 3;
+                    unsigned char *pix = bdata + y * width;
+                    for (int x = 0; x < width; x++) {
+                        mdata[off++] = *pix;
+                        mdata[off++] = *pix;
+                        mdata[off++] = *pix;
+                        pix++;
+                    }
+                }
+            } else {
+                for (int y = 0; y < height; y++) {
+                    int off = y * width * 3;
+                    unsigned char *pix = bdata + y * width * 3;
+                    for (int x = 0; x < width; x++) {
+                        mdata[off++] = pix[2];
+                        mdata[off++] = pix[1];
+                        mdata[off++] = pix[0];
+                        pix += 3;
+                    }
+                }
+            }
             break;
         }
 #ifdef TCL_USE_TKPHOTO
@@ -2326,7 +2493,6 @@ int mat_calcCovarMatrix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 {
     int flags = 0, ctype = CV_64F;
     cv::Mat covar, mean;
-    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
     cv::Mat *mat1, *matrix_covar, *matrix_mean;
 
     if  (objc != 3 && objc != 4) {
@@ -2357,17 +2523,15 @@ int mat_calcCovarMatrix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
+    Tcl_Obj *list[2];
+
     matrix_covar = new cv::Mat(covar);
-    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, matrix_covar);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, matrix_covar);
 
     matrix_mean = new cv::Mat(mean);
-    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, matrix_mean);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, matrix_mean);
 
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
     return TCL_OK;
 }
 
@@ -2376,7 +2540,6 @@ int mat_cartToPolar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int angleInDegrees = 0;
     cv::Mat magnitude, angle;
-    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
     cv::Mat *mat1, *mat2, *magnitudemat, *anglemat;
 
     if  (objc != 3 && objc != 4) {
@@ -2408,19 +2571,15 @@ int mat_cartToPolar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    magnitudemat = new cv::Mat(magnitude);
+    Tcl_Obj *list[2];
 
-    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, magnitudemat);
+    magnitudemat = new cv::Mat(magnitude);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, magnitudemat);
 
     anglemat = new cv::Mat(angle);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, anglemat);
 
-    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, anglemat);
-
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
     return TCL_OK;
 }
 
@@ -2713,7 +2872,6 @@ int mat_eigen(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     bool retval;
     cv::Mat image1, image2;
-    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
     cv::Mat *mat, *dstmat1, *dstmat2;
 
     if (objc != 2) {
@@ -2737,18 +2895,17 @@ int mat_eigen(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
+    Tcl_Obj *list[3];
+
+    list[0] = Tcl_NewBooleanObj((int) retval);
+
     dstmat1 = new cv::Mat(image1);
-    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
     dstmat2 = new cv::Mat(image2);
-    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+    list[2] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewBooleanObj((int) retval));
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(3, list));
     return TCL_OK;
 }
 
@@ -2757,7 +2914,6 @@ int mat_eigen(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_eigenNonSymmetric(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image1, image2;
-    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
     cv::Mat *mat, *dstmat1, *dstmat2;
 
     if (objc != 2) {
@@ -2778,17 +2934,15 @@ int mat_eigenNonSymmetric(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
+    Tcl_Obj *list[2];
+
     dstmat1 = new cv::Mat(image1);
-    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
     dstmat2 = new cv::Mat(image2);
-    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
     return TCL_OK;
 }
 #endif
@@ -3307,7 +3461,6 @@ int mat_max(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_meanStdDev(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat mean, stddev;
-    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
     cv::Mat *mat, *dstmat1, *dstmat2;
 
     if (objc != 2) {
@@ -3328,18 +3481,15 @@ int mat_meanStdDev(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    dstmat1 = new cv::Mat(mean);
+    Tcl_Obj *list[2];
 
-    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+    dstmat1 = new cv::Mat(mean);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
     dstmat2 = new cv::Mat(stddev);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
-    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
-
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
     return TCL_OK;
 }
 
@@ -3384,7 +3534,6 @@ int mat_min(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int mat_minMaxIdx(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    Tcl_Obj *pResultStr = NULL, *pSubResultStr = NULL;
     double minVal, maxVal;
     int minIdx, maxIdx;
     cv::Mat *mat;
@@ -3407,28 +3556,23 @@ int mat_minMaxIdx(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[2], *sublist[2];
 
-    pSubResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pSubResultStr, Tcl_NewDoubleObj(minVal));
-    Tcl_ListObjAppendElement(NULL, pSubResultStr, Tcl_NewIntObj(minIdx));
+    sublist[0] = Tcl_NewDoubleObj(minVal);
+    sublist[1] = Tcl_NewIntObj(minIdx);
+    list[0] = Tcl_NewListObj(2, sublist);
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, pSubResultStr);
+    sublist[0] = Tcl_NewDoubleObj(maxVal);
+    sublist[1] = Tcl_NewIntObj(maxIdx);
+    list[1] = Tcl_NewListObj(2, sublist);
 
-    pSubResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pSubResultStr, Tcl_NewDoubleObj(maxVal));
-    Tcl_ListObjAppendElement(NULL, pSubResultStr, Tcl_NewIntObj(maxIdx));
-
-    Tcl_ListObjAppendElement(NULL, pResultStr, pSubResultStr);
-
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
     return TCL_OK;
 }
 
 
 int mat_minMaxLoc(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    Tcl_Obj *pResultStr = NULL, *pSubResultStr = NULL;
     double minVal, maxVal;
     cv::Point minLoc, maxLoc;
     cv::Mat *mat;
@@ -3451,23 +3595,19 @@ int mat_minMaxLoc(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[2], *sublist[3];
 
-    pSubResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pSubResultStr, Tcl_NewDoubleObj(minVal));
-    Tcl_ListObjAppendElement(NULL, pSubResultStr, Tcl_NewIntObj(minLoc.x));
-    Tcl_ListObjAppendElement(NULL, pSubResultStr, Tcl_NewIntObj(minLoc.y));
+    sublist[0] = Tcl_NewDoubleObj(minVal);
+    sublist[1] = Tcl_NewIntObj(minLoc.x);
+    sublist[2] = Tcl_NewIntObj(minLoc.y);
+    list[0] = Tcl_NewListObj(3, sublist);
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, pSubResultStr);
+    sublist[0] = Tcl_NewDoubleObj(maxVal);
+    sublist[1] = Tcl_NewIntObj(maxLoc.x);
+    sublist[2] = Tcl_NewIntObj(maxLoc.y);
+    list[1] = Tcl_NewListObj(3, sublist);
 
-    pSubResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pSubResultStr, Tcl_NewDoubleObj(maxVal));
-    Tcl_ListObjAppendElement(NULL, pSubResultStr, Tcl_NewIntObj(maxLoc.x));
-    Tcl_ListObjAppendElement(NULL, pSubResultStr, Tcl_NewIntObj(maxLoc.y));
-
-    Tcl_ListObjAppendElement(NULL, pResultStr, pSubResultStr);
-
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
     return TCL_OK;
 }
 
@@ -4181,7 +4321,6 @@ int mat_setRNGSeed(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_solve(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
     bool result;
     int flags = cv::DECOMP_LU;
@@ -4215,15 +4354,14 @@ int mat_solve(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[2];
+
+    list[0] = Tcl_NewBooleanObj((int) result);
 
     dstmat = new cv::Mat(image);
-    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewBooleanObj((int) result));
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
     return TCL_OK;
 }
 
@@ -4231,7 +4369,6 @@ int mat_solve(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_solveCubic(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL;
     cv::Mat *mat1, *dstmat;
     int result;
 
@@ -4253,15 +4390,14 @@ int mat_solveCubic(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[2];
+
+    list[0] = Tcl_NewIntObj(result);
 
     dstmat = new cv::Mat(image);
-    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(result));
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
     return TCL_OK;
 }
 
@@ -4269,7 +4405,6 @@ int mat_solveCubic(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_solvePoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL;
     cv::Mat *mat1, *dstmat;
     int maxIters = 300;
     double result;
@@ -4298,15 +4433,14 @@ int mat_solvePoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[2];
+
+    list[0] = Tcl_NewDoubleObj(result);
 
     dstmat = new cv::Mat(image);
-    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result));
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
     return TCL_OK;
 }
 
@@ -4424,7 +4558,6 @@ int mat_subtract(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_sum(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Scalar result;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat;
 
     if (objc != 2) {
@@ -4445,13 +4578,14 @@ int mat_sum(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result[0]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result[1]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result[2]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result[3]));
+    Tcl_Obj *list[4];
 
-    Tcl_SetObjResult(interp, pResultStr);
+    list[0] = Tcl_NewDoubleObj(result[0]);
+    list[1] = Tcl_NewDoubleObj(result[1]);
+    list[2] = Tcl_NewDoubleObj(result[2]);
+    list[3] = Tcl_NewDoubleObj(result[3]);
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(4, list));
     return TCL_OK;
 }
 
@@ -4507,7 +4641,6 @@ int mat_SVBackSubst(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_SVDecomp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat w, v, ut;
-    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL;
     cv::Mat *mat1, *dstmat1, *dstmat2, *dstmat3;
     int flags = 0;
 
@@ -4535,21 +4668,18 @@ int mat_SVDecomp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[3];
 
     dstmat1 = new cv::Mat(w);
-    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
     dstmat2 = new cv::Mat(v);
-    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
     dstmat3 = new cv::Mat(ut);
-    pMatResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat3);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
+    list[2] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat3);
 
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(3, list));
     return TCL_OK;
 }
 
@@ -4557,7 +4687,6 @@ int mat_SVDecomp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_trace(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Scalar result;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat;
 
     if (objc != 2) {
@@ -4581,13 +4710,14 @@ int mat_trace(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result[0]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result[1]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result[2]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result[3]));
+    Tcl_Obj *list[4];
 
-    Tcl_SetObjResult(interp, pResultStr);
+    list[0] = Tcl_NewDoubleObj(result[0]);
+    list[1] = Tcl_NewDoubleObj(result[1]);
+    list[2] = Tcl_NewDoubleObj(result[2]);
+    list[3] = Tcl_NewDoubleObj(result[3]);
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(4, list));
     return TCL_OK;
 }
 
@@ -4709,7 +4839,6 @@ int mat_vconcat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int kmeans(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image, bestLabels;
-    Tcl_Obj *pResultStr = NULL, *pDstResultStr = NULL, *pLabelResultStr = NULL;
     cv::Mat *matrix = NULL, *labelsmst = NULL, *dstmat = NULL;
     cv::TermCriteria *termCriteria;
     int k = 0, attempts = 0, flags = 0;
@@ -4773,23 +4902,21 @@ int kmeans(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[3];
 
-    dstmat = new cv::Mat(image);
-    pDstResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+    list[0] = Tcl_NewDoubleObj(value);
 
     if (nolabelmatrix == 1) {
         labelsmst = new cv::Mat(bestLabels);
-        pLabelResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, labelsmst);
+        list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, labelsmst);
     } else {
-        pLabelResultStr = objv[3];
+        list[1] = objv[3];
     }
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(value));
-    Tcl_ListObjAppendElement(NULL, pResultStr, pLabelResultStr);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pDstResultStr);
+    dstmat = new cv::Mat(image);
+    list[2] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(3, list));
     return TCL_OK;
 }
 

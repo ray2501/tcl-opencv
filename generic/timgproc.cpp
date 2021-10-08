@@ -896,7 +896,6 @@ int moments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int binaryImage = 0;
     cv::Mat *mat;
     cv::Moments result;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 2 && objc != 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "matrix ?binaryImage?");
@@ -925,19 +924,20 @@ int moments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     /*
      * https://docs.opencv.org/master/d8/d23/classcv_1_1Moments.html
      */
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m00));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m10));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m01));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m20));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m11));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m02));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m30));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m21));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m12));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.m03));
+    Tcl_Obj *list[10];
 
-    Tcl_SetObjResult(interp, pResultStr);
+    list[0] = Tcl_NewDoubleObj(result.m00);
+    list[1] = Tcl_NewDoubleObj(result.m10);
+    list[2] = Tcl_NewDoubleObj(result.m01);
+    list[3] = Tcl_NewDoubleObj(result.m20);
+    list[4] = Tcl_NewDoubleObj(result.m11);
+    list[5] = Tcl_NewDoubleObj(result.m02);
+    list[6] = Tcl_NewDoubleObj(result.m30);
+    list[7] = Tcl_NewDoubleObj(result.m21);
+    list[8] = Tcl_NewDoubleObj(result.m12);
+    list[9] = Tcl_NewDoubleObj(result.m03);
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(10, list));
     return TCL_OK;
 }
 
@@ -1049,7 +1049,6 @@ int HuMoments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int count;
     double hu[7] ;
-    Tcl_Obj *pResultStr = NULL;
     double m00, m10, m01, m20, m11, m02, m30, m21, m12, m03;
 
     if (objc != 2) {
@@ -1126,17 +1125,17 @@ int HuMoments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[7];
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(hu[0]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(hu[1]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(hu[2]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(hu[3]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(hu[4]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(hu[5]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(hu[6]));
+    list[0] = Tcl_NewDoubleObj(hu[0]);
+    list[1] = Tcl_NewDoubleObj(hu[1]);
+    list[2] = Tcl_NewDoubleObj(hu[2]);
+    list[3] = Tcl_NewDoubleObj(hu[3]);
+    list[4] = Tcl_NewDoubleObj(hu[4]);
+    list[5] = Tcl_NewDoubleObj(hu[5]);
+    list[6] = Tcl_NewDoubleObj(hu[6]);
 
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(7, list));
 
     return TCL_OK;
 }
@@ -1146,7 +1145,6 @@ int integral(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat sum, sqsum, tilted;
     int sdepth = -1, sqdepth = -1;
-    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL, *pResultStr3 = NULL;
     cv::Mat *mat, *dstmat1, *dstmat2, *dstmat3;
 
     if (objc != 2 && objc != 4) {
@@ -1177,22 +1175,18 @@ int integral(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[3];
 
     dstmat1 = new cv::Mat(sum);
-    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
     dstmat2 = new cv::Mat(sqsum);
-    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
     dstmat3 = new cv::Mat(tilted);
-    pResultStr3 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat3);
+    list[2] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat3);
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr3);
-
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(3, list));
     return TCL_OK;
 }
 
@@ -2856,7 +2850,6 @@ int createHanningWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
 int phaseCorrelate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *window;
     cv::Point2d result;
 
@@ -2894,11 +2887,12 @@ int phaseCorrelate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.x));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(result.y));
+    Tcl_Obj *list[2];
 
-    Tcl_SetObjResult(interp, pResultStr);
+    list[0] = Tcl_NewDoubleObj(result.x);
+    list[1] = Tcl_NewDoubleObj(result.y);
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
     return TCL_OK;
 }
@@ -3230,7 +3224,6 @@ int connectedComponentsWithStats(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
     cv::Mat labels, stats, centroids;
     int ltype = CV_32S;
     int connectivity = 8;
-    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL, *pResultStr3 = NULL;
     cv::Mat *mat, *dstmat1, *dstmat2, *dstmat3;
 
     if (objc != 2 && objc != 3) {
@@ -3257,22 +3250,18 @@ int connectedComponentsWithStats(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[3];
 
     dstmat1 = new cv::Mat(labels);
-    pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
     dstmat2 = new cv::Mat(stats);
-    pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
     dstmat3 = new cv::Mat(centroids);
-    pResultStr3 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat3);
+    list[2] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat3);
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr3);
-
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(3, list));
 
     return TCL_OK;
 }
@@ -3653,13 +3642,13 @@ int HoughCircles(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewListObj(0, NULL);
     for (size_t i = 0; i < circles.size(); i++) {
-        Tcl_Obj *pListStr = NULL;
-        pListStr = Tcl_NewListObj(0, NULL);
-        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj((int) circles[i][0]));
-        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj((int) circles[i][1]));
-        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj((int) circles[i][2]));
+        Tcl_Obj *sublist[3];
 
-        Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+        sublist[0] = Tcl_NewIntObj((int) circles[i][0]);
+        sublist[1] = Tcl_NewIntObj((int) circles[i][1]);
+        sublist[2] = Tcl_NewIntObj((int) circles[i][2]);
+
+        Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(3, sublist));
     }
 
     Tcl_SetObjResult(interp, pResultStr);
@@ -3727,12 +3716,12 @@ int HoughLines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewListObj(0, NULL);
     for (size_t i = 0; i < lines.size(); i++) {
-        Tcl_Obj *pListStr = NULL;
-        pListStr = Tcl_NewListObj(0, NULL);
-        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(lines[i][0]));
-        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewDoubleObj(lines[i][1]));
+        Tcl_Obj *sublist[2];
 
-        Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+        sublist[0] = Tcl_NewDoubleObj(lines[i][0]);
+        sublist[1] = Tcl_NewDoubleObj(lines[i][1]);
+
+        Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(2, sublist));
     }
 
     Tcl_SetObjResult(interp, pResultStr);
@@ -3791,14 +3780,14 @@ int HoughLinesP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     pResultStr = Tcl_NewListObj(0, NULL);
     for (size_t i = 0; i < lines.size(); i++) {
-        Tcl_Obj *pListStr = NULL;
-        pListStr = Tcl_NewListObj(0, NULL);
-        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(lines[i][0]));
-        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(lines[i][1]));
-        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(lines[i][2]));
-        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(lines[i][3]));
+        Tcl_Obj *sublist[4];
 
-        Tcl_ListObjAppendElement(NULL, pResultStr, pListStr);
+        sublist[0] = Tcl_NewIntObj(lines[i][0]);
+        sublist[1] = Tcl_NewIntObj(lines[i][1]);
+        sublist[2] = Tcl_NewIntObj(lines[i][2]);
+        sublist[3] = Tcl_NewIntObj(lines[i][3]);
+
+        Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(4, sublist));
     }
 
     Tcl_SetObjResult(interp, pResultStr);
@@ -3876,7 +3865,6 @@ int findContoursWithHierarchy(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 {
     int mode = 0, method = 0, offset_point_x = 0, offset_point_y = 0;
     cv::Mat *mat;
-    Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
 
@@ -3921,9 +3909,9 @@ int findContoursWithHierarchy(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[2];
 
-    pResultStr1 = Tcl_NewListObj(0, NULL);
+    list[0] = Tcl_NewListObj(0, NULL);
     for (size_t i = 0; i < contours.size(); i++) {
         Tcl_Obj *pListStr = NULL;
         pListStr = Tcl_NewListObj(0, NULL);
@@ -3933,25 +3921,22 @@ int findContoursWithHierarchy(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
             Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(contours.at(i).at(j).y));
         }
 
-        Tcl_ListObjAppendElement(NULL, pResultStr1, pListStr);
+        Tcl_ListObjAppendElement(NULL, list[0], pListStr);
     }
 
-    pResultStr2 = Tcl_NewListObj(0, NULL);
+    list[1] = Tcl_NewListObj(0, NULL);
     for (size_t i = 0; i < hierarchy.size(); i++) {
-        Tcl_Obj *pListStr = NULL;
-        pListStr = Tcl_NewListObj(0, NULL);
+        Tcl_Obj *sublist[4];
 
-        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(hierarchy[i][0]));
-        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(hierarchy[i][1]));
-        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(hierarchy[i][2]));
-        Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(hierarchy[i][3]));
+        sublist[0] = Tcl_NewIntObj(hierarchy[i][0]);
+        sublist[1] = Tcl_NewIntObj(hierarchy[i][1]);
+        sublist[2] = Tcl_NewIntObj(hierarchy[i][2]);
+        sublist[3] = Tcl_NewIntObj(hierarchy[i][3]);
 
-        Tcl_ListObjAppendElement(NULL, pResultStr2, pListStr);
+        Tcl_ListObjAppendElement(NULL, list[1], Tcl_NewListObj(4, sublist));
     }
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-    Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
     return TCL_OK;
 }
 
@@ -4469,7 +4454,6 @@ int boundingRect(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     std::vector<cv::Point> points;
     cv::Rect rect;
-    Tcl_Obj *pResultStr = NULL;
     int count = 0;
 
     if (objc != 2) {
@@ -4516,13 +4500,14 @@ int boundingRect(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(rect.x));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(rect.y));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(rect.width));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(rect.height));
+    Tcl_Obj *list[4];
 
-    Tcl_SetObjResult(interp, pResultStr);
+    list[0] = Tcl_NewIntObj(rect.x);
+    list[1] = Tcl_NewIntObj(rect.y);
+    list[2] = Tcl_NewIntObj(rect.width);
+    list[3] = Tcl_NewIntObj(rect.height);
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(4, list));
     return TCL_OK;
 }
 
@@ -4531,7 +4516,6 @@ int minAreaRect(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     std::vector<cv::Point> points;
     cv::RotatedRect rect;
-    Tcl_Obj *pResultStr = NULL;
     int count = 0;
 
     if (objc != 2) {
@@ -4578,14 +4562,15 @@ int minAreaRect(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(rect.center.x));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(rect.center.y));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(rect.size.width));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(rect.size.height));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(rect.angle));
+    Tcl_Obj *list[5];
 
-    Tcl_SetObjResult(interp, pResultStr);
+    list[0] = Tcl_NewDoubleObj(rect.center.x);
+    list[1] = Tcl_NewDoubleObj(rect.center.y);
+    list[2] = Tcl_NewDoubleObj(rect.size.width);
+    list[3] = Tcl_NewDoubleObj(rect.size.height);
+    list[4] = Tcl_NewDoubleObj(rect.angle);
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(5, list));
     return TCL_OK;
 }
 
@@ -4594,7 +4579,6 @@ int fitEllipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     std::vector<cv::Point> points;
     cv::RotatedRect rect;
-    Tcl_Obj *pResultStr = NULL;
     int count = 0;
 
     if (objc != 2) {
@@ -4642,14 +4626,15 @@ int fitEllipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) rect.center.x));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) rect.center.y));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) rect.size.width));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) rect.size.height));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) rect.angle));
+    Tcl_Obj *list[5];
 
-    Tcl_SetObjResult(interp, pResultStr);
+    list[0] = Tcl_NewIntObj((int) rect.center.x);
+    list[1] = Tcl_NewIntObj((int) rect.center.y);
+    list[2] = Tcl_NewIntObj((int) rect.size.width);
+    list[3] = Tcl_NewIntObj((int) rect.size.height);
+    list[4] = Tcl_NewIntObj((int) rect.angle);
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(5, list));
     return TCL_OK;
 }
 
@@ -4659,7 +4644,6 @@ int fitLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     std::vector<cv::Point> points;
     cv::Vec4f line;
     cv::RotatedRect rect;
-    Tcl_Obj *pResultStr = NULL;
     int count = 0, distType = 0;
     double param = 0, reps = 0, aeps = 0;
 
@@ -4726,13 +4710,14 @@ int fitLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) line[0]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) line[1]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) line[2]));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) line[3]));
+    Tcl_Obj *list[4];
 
-    Tcl_SetObjResult(interp, pResultStr);
+    list[0] = Tcl_NewIntObj((int) line[0]);
+    list[1] = Tcl_NewIntObj((int) line[1]);
+    list[2] = Tcl_NewIntObj((int) line[2]);
+    list[3] = Tcl_NewIntObj((int) line[3]);
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(4, list));
     return TCL_OK;
 }
 
@@ -4811,7 +4796,6 @@ int minEnclosingCircle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
     std::vector<cv::Point> points;
     cv::Point2f center;
     float radius;
-    Tcl_Obj *pResultStr = NULL;
     int count = 0;
 
     if (objc != 2) {
@@ -4858,12 +4842,13 @@ int minEnclosingCircle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) center.x));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) center.y));
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) radius));
+    Tcl_Obj *list[3];
 
-    Tcl_SetObjResult(interp, pResultStr);
+    list[0] = Tcl_NewIntObj((int) center.x);
+    list[1] = Tcl_NewIntObj((int) center.y);
+    list[2] = Tcl_NewIntObj((int) radius);
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(3, list));
     return TCL_OK;
 }
 
@@ -5025,19 +5010,17 @@ int convexityDefects(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
     pResultStr = Tcl_NewListObj(0, NULL);
     for (size_t i = 0; i < results.size(); i++) {
-        Tcl_Obj *pListResultStr = NULL;
-
-        pListResultStr = Tcl_NewListObj(0, NULL);
+        Tcl_Obj *sublist[4];
 
         /*
          * start_index, end_index, farthest_pt_index, fixpt_depth
          */
-        Tcl_ListObjAppendElement(NULL, pListResultStr, Tcl_NewIntObj(results[i][0]));
-        Tcl_ListObjAppendElement(NULL, pListResultStr, Tcl_NewIntObj(results[i][1]));
-        Tcl_ListObjAppendElement(NULL, pListResultStr, Tcl_NewIntObj(results[i][2]));
-        Tcl_ListObjAppendElement(NULL, pListResultStr, Tcl_NewIntObj(results[i][3]));
+        sublist[0] = Tcl_NewIntObj(results[i][0]);
+        sublist[1] = Tcl_NewIntObj(results[i][1]);
+        sublist[2] = Tcl_NewIntObj(results[i][2]);
+        sublist[3] = Tcl_NewIntObj(results[i][3]);
 
-        Tcl_ListObjAppendElement(NULL, pResultStr, pListResultStr);
+        Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewListObj(4, sublist));
     }
 
     Tcl_SetObjResult(interp, pResultStr);
@@ -6650,7 +6633,6 @@ static int GeneralizedHoughBallard_FUNCTION(void *cd, Tcl_Interp *interp, int ob
         case FUNC_detect: {
             cv::Mat positions, votes;
             cv::Mat *mat, *dstmat1, *dstmat2;
-            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
             if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix");
@@ -6670,19 +6652,15 @@ static int GeneralizedHoughBallard_FUNCTION(void *cd, Tcl_Interp *interp, int ob
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            dstmat1 = new cv::Mat(positions);
+            Tcl_Obj *list[2];
 
-            pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+            dstmat1 = new cv::Mat(positions);
+            list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
             dstmat2 = new cv::Mat(votes);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
-            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
-
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }
@@ -7164,7 +7142,6 @@ static int GeneralizedHoughGuil_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
         case FUNC_detect: {
             cv::Mat positions, votes;
             cv::Mat *mat, *dstmat1, *dstmat2;
-            Tcl_Obj *pResultStr = NULL, *pResultStr1 = NULL, *pResultStr2 = NULL;
 
             if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix");
@@ -7184,19 +7161,15 @@ static int GeneralizedHoughGuil_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            dstmat1 = new cv::Mat(positions);
+            Tcl_Obj *list[2];
 
-            pResultStr1 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+            dstmat1 = new cv::Mat(positions);
+            list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
 
             dstmat2 = new cv::Mat(votes);
+            list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
 
-            pResultStr2 = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
-
-            pResultStr = Tcl_NewListObj(0, NULL);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr1);
-            Tcl_ListObjAppendElement(NULL, pResultStr, pResultStr2);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
             break;
         }

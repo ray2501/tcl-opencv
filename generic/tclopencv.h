@@ -309,9 +309,9 @@ MODULE_SCOPE int meanShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 MODULE_SCOPE int CamShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int calcOpticalFlowPyrLK(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int calcOpticalFlowFarneback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
-#ifdef TCL_USE_OPENCV4
 MODULE_SCOPE int readOpticalFlow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int writeOpticalFlow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#ifdef TCL_USE_OPENCV4
 MODULE_SCOPE int computeECC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
 MODULE_SCOPE int findTransformECC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
@@ -467,6 +467,7 @@ typedef struct {
     cv::Ptr<cv::KAZE> kazedetector;
 #ifdef TCL_USE_SIFT
     cv::Ptr<cv::SIFT> siftdetector;
+    const char *asiftdetector_backend;
     cv::Ptr<cv::AffineFeature> asiftdetector;
 #endif
     cv::Ptr<cv::BFMatcher> bfmatcher;

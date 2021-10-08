@@ -414,6 +414,9 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 cv::FileNode node = (*fs)[name];
                 cv::String typestring;
                 const char *type;
+#ifdef TCL_USE_SIFT
+                const char *backend = NULL;
+#endif
 
                 for (int i = 3; i < objc; i++) {
                     Tcl_DStringFree(&ds);
@@ -426,6 +429,12 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 }
                 typestring = node["type"].string();
                 type = typestring.c_str();
+#ifdef TCL_USE_SIFT
+                if (node["backend"].isString()) {
+                    cv::String str = node["backend"].string();
+                    backend = str.c_str();
+                }
+#endif
                 node = node["data"];
                 if (!(node.isMap() || node.isNone()) || type == NULL) {
                     CV_Error(cv::Error::StsParseError, "wrong node type or unknown data type");
@@ -556,6 +565,31 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     }
                     if (!node.isNone()) {
                         cvd->siftdetector->read(node);
+                    }
+                } else if (strcmp(type, "opencv-asift") == 0) {
+                    Tcl_Obj *args[2];
+                    Tcl_DString ds;
+                    int result;
+
+                    /* Proper name for constructor: prefix is "::cv-", strip "opencv-", add "detector" */
+                    Tcl_DStringInit(&ds);
+                    if (backend) {
+                        Tcl_DStringAppend(&ds, "::cv-", -1);
+                        Tcl_DStringAppend(&ds, backend + 7, -1);
+                        Tcl_DStringAppend(&ds, "detector", -1);
+                    }
+                    args[0] = empty;
+                    args[1] = Tcl_NewStringObj(Tcl_DStringValue(&ds), -1);
+                    Tcl_DStringFree(&ds);
+                    Tcl_IncrRefCount(args[1]);
+                    result = AffineFeature(cd, interp, 2, args);
+                    Tcl_DecrRefCount(args[1]);
+                    if (result != TCL_OK) {
+                        keepInterpErr = 1;
+                        throw cv::Exception();
+                    }
+                    if (!node.isNone()) {
+                        cvd->asiftdetector->read(node);
                     }
 #endif
                 } else if (strcmp(type, "opencv-bfmatcher") == 0) {
@@ -1222,6 +1256,17 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                         (*fs) << "data" << "{";
                         fs->elname = "data";
                         cvd->siftdetector->write(*fs);
+                        (*fs) << "}";
+                    }
+                    (*fs) << "}";
+                } else if (cmd == cvd->cmd_asiftdetector) {
+                    (*fs) << name << "{";
+                    (*fs) << "type" << "opencv-asift";
+                    if (!cvd->asiftdetector->empty()) {
+                        (*fs) << "backend" << cvd->asiftdetector_backend;
+                        (*fs) << "data" << "{";
+                        fs->elname = "data";
+                        cvd->asiftdetector->write(*fs);
                         (*fs) << "}";
                     }
                     (*fs) << "}";

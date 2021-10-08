@@ -631,6 +631,66 @@ Opencv_Info(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+static int
+Opencv_FromByteArray(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int width, height, bpp, len;
+    unsigned char *data;
+    Tcl_Obj *pResultStr;
+    cv::Mat img, *mat;
+
+    if (objc != 5) {
+        Tcl_WrongNumArgs(interp, 1, objv, "width height bpp bytes");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[1], &width) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (Tcl_GetIntFromObj(interp, objv[2], &height) != TCL_OK) {
+        return TCL_ERROR;
+    }
+    if (Tcl_GetIntFromObj(interp, objv[3], &bpp) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    data = Tcl_GetByteArrayFromObj(objv[5], &len);
+    if (!(bpp == 1 && len == width * height) &&
+        !(bpp == 3 && len == width * height * 3)) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "inconsistent pararameters");
+    }
+
+    try {
+        if (bpp == 1) {
+            img = cv::Mat(height, width, CV_8UC1, data, cv::Mat::AUTO_STEP);
+        } else {
+            img = cv::Mat(height, width, CV_8UC3, data, cv::Mat::AUTO_STEP);
+            for (int y = 0; y < height; y++) {
+                unsigned char *mdata = img.data + y * width * 3;
+                for (int x = 0; x < width; x++) {
+                    unsigned char r = mdata[0];
+                    unsigned char b = mdata[2];
+                    mdata[0] = b;
+                    mdata[2] = r;
+                    mdata += 3;
+                }
+            }
+        }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+    if (img.empty() || !img.data) {
+        return Opencv_SetResult(interp, cv::Error::StsError, "no image data");
+    }
+    mat = new cv::Mat(img);
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 #ifdef TCL_USE_TKPHOTO
 int Opencv_CheckForTk(void *cd, Tcl_Interp *interp)
 {
@@ -1194,6 +1254,10 @@ Opencv_Init(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp, "::" NS "::TermCriteria",
         (Tcl_ObjCmdProc *) TermCriteria,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::fromByteArray",
+        (Tcl_ObjCmdProc *) Opencv_FromByteArray,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
 #ifdef TCL_USE_TKPHOTO
@@ -1826,7 +1890,6 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) calcOpticalFlowFarneback,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
-#ifdef TCL_USE_OPENCV4
     Tcl_CreateObjCommand(interp, "::" NS "::readOpticalFlow",
         (Tcl_ObjCmdProc *) readOpticalFlow,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
@@ -1835,6 +1898,7 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) writeOpticalFlow,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+#ifdef TCL_USE_OPENCV4
     Tcl_CreateObjCommand(interp, "::" NS "::computeECC",
         (Tcl_ObjCmdProc *) computeECC,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
