@@ -1023,6 +1023,7 @@ Please notice, TrainData command will only have 1 instance.
     ::cv::dnn::blobFromImage matrix scalefactor width height mean_color_list swapRB crop
     ::cv::dnn::readNet model ?config framework?
     READNET getLayerNames
+    READNET getUnconnectedOutLayers
     READNET setPreferableBackend backendId
     READNET setPreferableTarget targetId
     READNET setInput blob ?name scalefactor mean_color_list?
