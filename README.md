@@ -4352,3 +4352,117 @@ Below is an DNN example (face detector) -
         puts $em
     }
 
+Object Detection using YOLOv3 -
+
+    package require opencv
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+
+    try {
+        set img1 [::cv::imread $filename $::cv::IMREAD_COLOR]
+        set blob [::cv::dnn::blobFromImage $img1 [expr 1.0/255.0] 416 416 \
+                    [list 0 0 0 0] 1 0]
+
+        #
+        # Load names of classes
+        #
+        set labelsFile [open "coco.names"]
+        set classes [list]
+        while {1} {
+            set line [gets $labelsFile]
+            if {[eof $labelsFile]} {
+                close $labelsFile
+                break
+            }
+
+            lappend classes $line
+        }
+
+        #
+        # Download the model from: https://pjreddie.com/darknet/yolo/
+        #
+        set model "yolov3.weights"
+        set config "yolov3.cfg"
+        set net [::cv::dnn::readNet $model $config Darknet]
+        $net setPreferableBackend $::cv::dnn::DNN_BACKEND_OPENCV
+        $net setPreferableTarget $::cv::dnn::DNN_TARGET_CPU
+        $net setInput $blob
+
+        # Runs the forward (pass to the output layers)
+        set names [$net getUnconnectedOutLayersNames]
+        set outputdata [$net forwardWithNames $names]
+
+        # Scan through all the bounding boxes output from the network
+        set boxes [list]
+        set confidences [list]
+        set classIDs [list]
+        foreach mat $outputdata {
+            for {set i 0} {$i < [$mat rows]} {incr i} {
+                set rowdata [$mat row $i]
+                set scores [$rowdata colRange 5 [$mat cols]]
+                set valueloc [::cv::minMaxLoc $scores]
+                set confidence [lindex [lindex $valueloc 1] 0]
+                set classId [lindex [lindex $valueloc 1] 1]
+                if {$confidence > 0.5} {
+                    set centerX [expr int([$rowdata at [list 0 0] 0] * [$img1 cols])]
+                    set centerY [expr int([$rowdata at [list 0 1] 0] * [$img1 rows])]
+                    set width [expr int([$rowdata at [list 0 2] 0] * [$img1 cols])]
+                    set height [expr int([$rowdata at [list 0 3] 0] * [$img1 rows])]
+                    set left [expr $centerX - $width/2]
+                    set top [expr $centerY - $height/2]
+
+                    lappend classIDs $classId
+                    lappend confidences $confidence
+                    lappend boxes [list $left $top $width $height]
+                }
+
+                $scores close
+                $rowdata close
+            }
+
+            $mat close
+        }
+
+        # Perform non maximum suppression to eliminate redundant overlapping boxes
+        set indicates [::cv::dnn::NMSBoxes $boxes $confidences 0.5 0.3]
+        foreach ind $indicates {
+            set box [lindex $boxes $ind]
+            set x1 [lindex $box 0]
+            set y1 [lindex $box 1]
+            set x2 [expr $x1 + [lindex $box 2]]
+            set y2 [expr $y1 + [lindex $box 3]]
+
+            set color [list 255 178 0 0]
+            ::cv::rectangle $img1 $x1 $y1 $x2 $y2 $color 3
+
+            set class [lindex $classes [lindex $classIDs $ind]]
+            append class ": " [format %.6f [lindex $confidences $ind]]
+
+            set thickness 2
+            set tsize [::cv::getTextSize $class $::cv::FONT_HERSHEY_SIMPLEX 0.5 $thickness]
+            set twidth [lindex $tsize 0]
+            set theight [lindex $tsize 1]
+            set baseline [expr [lindex $tsize 2] + $thickness]
+
+            ::cv::rectangle $img1 $x1 [expr $y1-$theight-$baseline] \
+                        [expr $x1+$twidth] [expr $y1] \
+                        [list 255 255 255 0] -1
+            ::cv::putText $img1 $class $x1 [expr $y1-$baseline] \
+                        $::cv::FONT_HERSHEY_SIMPLEX 0.5 [list 0 0 255 0] $thickness
+        }
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $img1
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $net close
+        $blob close
+        $img1 close
+    } on error {em} {
+        puts $em
+    }
