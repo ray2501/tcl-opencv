@@ -1,6 +1,6 @@
 2021-10-09 Danilo Chang
 
-	* Implement command: getTextSize
+	* Implement command: getTextSize, getFontScaleFromHeight
 
 2021-10-08 Danilo Chang
 

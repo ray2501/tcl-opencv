@@ -5953,6 +5953,43 @@ End:
 }
 
 
+int getFontScaleFromHeight(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int fontFace = 0, pixelHeight = 0, thickness = 1;
+    double fontScale = 1.0;
+
+    if (objc != 3 && objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv, "fontFace pixelHeight ?thickness?");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[1], &fontFace) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &pixelHeight) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 4) {
+        if (Tcl_GetIntFromObj(interp, objv[3], &thickness) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        fontScale = cv::getFontScaleFromHeight(fontFace, pixelHeight, thickness);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    Tcl_SetObjResult(interp, Tcl_NewDoubleObj(fontScale));
+    return TCL_OK;
+}
+
+
 int getTextSize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Size size;

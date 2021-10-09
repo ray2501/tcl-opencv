@@ -291,6 +291,7 @@ a matrix and fill the contour's data to the matrix, then use `::cv::moments` to 
     ::cv::ellipse matrix center_x center_y width hgieht angle startAngle endAngle color_list thickness ?lineType shift?
     ::cv::fillConvexPoly matrix point_list color_list ?lineType shift?
     ::cv::fillPoly matrix point_lists color_list ?lineType shift offset_x offset_y?
+    ::cv::getFontScaleFromHeight fontFace pixelHeight ?thickness?
     ::cv::getTextSize text fontFace fontScale thickness
     ::cv::line matrix point_x1 point_y1 point_x2 point_y2 color_list thickness ?lineType shift?
     ::cv::polylines matrix point_list ncontours isClosed color_list thickness ?lineType shift?

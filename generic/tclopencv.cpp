@@ -1642,6 +1642,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) fillPoly,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::getFontScaleFromHeight",
+        (Tcl_ObjCmdProc *) getFontScaleFromHeight,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::getTextSize",
         (Tcl_ObjCmdProc *) getTextSize,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
