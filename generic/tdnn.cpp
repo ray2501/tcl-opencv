@@ -9,9 +9,8 @@ extern "C" {
 int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat dstimage;
-    double scalefactor = 1.0;
-    int width = 0, height = 0, swapRB = 0, crop = 0;
-    int count = 0, B = 0, G = 0, R = 0, A = 0;
+    double scalefactor = 1.0, B = 0, G = 0, R = 0, A = 0;;
+    int width = 0, height = 0, swapRB = 0, crop = 0, count = 0;
     Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
@@ -48,22 +47,22 @@ int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
         Tcl_Obj *elemListPtr = NULL;
 
         Tcl_ListObjIndex(interp, objv[5], 0, &elemListPtr);
-        if (Tcl_GetIntFromObj(interp, elemListPtr, &B) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &B) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[5], 1, &elemListPtr);
-        if (Tcl_GetIntFromObj(interp, elemListPtr, &G) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &G) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[5], 2, &elemListPtr);
-        if (Tcl_GetIntFromObj(interp, elemListPtr, &R) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &R) != TCL_OK) {
             return TCL_ERROR;
         }
 
         Tcl_ListObjIndex(interp, objv[5], 3, &elemListPtr);
-        if (Tcl_GetIntFromObj(interp, elemListPtr, &A) != TCL_OK) {
+        if (Tcl_GetDoubleFromObj(interp, elemListPtr, &A) != TCL_OK) {
             return TCL_ERROR;
         }
     }

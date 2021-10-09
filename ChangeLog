@@ -1,5 +1,6 @@
 2021-10-09 Danilo Chang
 
+	* Update blobFromImage command (internal changes)
 	* Implement command: getTextSize, getFontScaleFromHeight
 
 2021-10-08 Danilo Chang
