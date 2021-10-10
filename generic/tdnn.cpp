@@ -595,7 +595,7 @@ int dnn_NMSBoxes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                     Tcl_Obj *elemSubListPtr = NULL;
                     int left = 0, top = 0, width = 0, height = 0;
 
-                    Tcl_ListObjIndex(interp, elemListPtr, 1, &elemSubListPtr);
+                    Tcl_ListObjIndex(interp, elemListPtr, 0, &elemSubListPtr);
                     if (Tcl_GetIntFromObj(interp, elemSubListPtr, &left) != TCL_OK) {
                         return TCL_ERROR;
                     }
@@ -621,7 +621,7 @@ int dnn_NMSBoxes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                     Tcl_Obj *elemSubListPtr = NULL;
                     double center_x = 0, center_y = 0, width = 0, height = 0, angle = 0;
 
-                    Tcl_ListObjIndex(interp, elemListPtr, 1, &elemSubListPtr);
+                    Tcl_ListObjIndex(interp, elemListPtr, 0, &elemSubListPtr);
                     if (Tcl_GetDoubleFromObj(interp, elemSubListPtr, &center_x) != TCL_OK) {
                         return TCL_ERROR;
                     }
