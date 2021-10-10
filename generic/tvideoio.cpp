@@ -158,7 +158,7 @@ int VideoWriter_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return TCL_ERROR;
             }
 
-            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+            Opencv_CloseHandle(interp, cvo);
 
             break;
         }
@@ -428,7 +428,7 @@ int VideoCapture_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
                 return TCL_ERROR;
             }
 
-            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+            Opencv_CloseHandle(interp, cvo);
 
             break;
         }

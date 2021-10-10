@@ -556,6 +556,7 @@ typedef struct {
     char *key;
     void *obj;
     Tcl_Command cmd;
+    int traced;            /* for cv::matvar */
     int flags;             /* for OPENCV_FSTORAGE */
     Tcl_DString ds1, ds2;  /* for OPENCV_FSTORAGE */
 } Opencv_Obj;
@@ -569,6 +570,7 @@ MODULE_SCOPE int Opencv_Exc2Tcl(Tcl_Interp *interp, const cv::Exception *ex);
 MODULE_SCOPE int Opencv_SetResult(Tcl_Interp *interp, int code, const char *msg);
 MODULE_SCOPE Tcl_Obj *Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj);
 MODULE_SCOPE void *Opencv_FindHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, Tcl_Obj *name);
+MODULE_SCOPE void Opencv_CloseHandle(Tcl_Interp *interp, Opencv_Obj *cvo);
 #ifdef TCL_USE_TKPHOTO
 MODULE_SCOPE int Opencv_CheckForTk(void *cd, Tcl_Interp *interp);
 #endif

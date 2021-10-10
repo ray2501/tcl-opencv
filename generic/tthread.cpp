@@ -95,6 +95,9 @@ int Opencv_Tsend(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (cvthrInitialized < 0) {
         return Opencv_SetResult(interp, cv::Error::StsNotImplemented, "no thread support");
     }
+    if (cvo != NULL && cvo->traced) {
+        return Opencv_SetResult(interp, cv::Error::StsError, "handle is traced");
+    }
     msg = (CvthrMsg *) ckalloc(sizeof(CvthrMsg));
     msg->next = NULL;
     msg->tail = msg;
@@ -102,7 +105,7 @@ int Opencv_Tsend(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     if (cvo != NULL) {
         msg->mat = (cv::Mat *) cvo->obj;
         cvo->obj = NULL;
-        Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+        Opencv_CloseHandle(interp, cvo);
     }
     Tcl_DStringInit(&msg->ds);
     if (objc > 3) {

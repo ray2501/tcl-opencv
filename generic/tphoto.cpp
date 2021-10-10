@@ -727,7 +727,7 @@ static int AlignMTB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(dst.size(), NULL);
             for (size_t i = 0; i < dst.size(); i++) {
                 Tcl_Obj *pSubResultStr = NULL;
                 cv::Mat *dstmat;

@@ -127,7 +127,7 @@ int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
                 return TCL_ERROR;
             }
 
-            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+            Opencv_CloseHandle(interp, cvo);
 
             break;
         }
@@ -289,7 +289,7 @@ int CascadeClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(rect.size(), NULL);
             for (size_t i = 0; i < rect.size(); i++) {
                 Tcl_Obj *sublist[4];
 
@@ -310,7 +310,7 @@ int CascadeClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
                 return TCL_ERROR;
             }
 
-            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+            Opencv_CloseHandle(interp, cvo);
 
             break;
         }
@@ -488,7 +488,7 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(descriptors.size(), NULL);
             for (size_t i = 0; i < descriptors.size(); i++) {
                 Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(descriptors[i]));
             }
@@ -561,7 +561,7 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(rect.size(), NULL);
             for (size_t i = 0; i < rect.size(); i++) {
                 Tcl_Obj *sublist[4];
 
@@ -593,7 +593,7 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(coefficients.size(), NULL);
             for (size_t i = 0; i < coefficients.size(); i++) {
                 Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(coefficients[i]));
             }
@@ -618,7 +618,7 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(coefficients.size(), NULL);
             for (size_t i = 0; i < coefficients.size(); i++) {
                 Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(coefficients[i]));
             }
@@ -671,7 +671,7 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
                 return TCL_ERROR;
             }
 
-            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+            Opencv_CloseHandle(interp, cvo);
 
             break;
         }

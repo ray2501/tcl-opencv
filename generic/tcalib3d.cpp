@@ -111,7 +111,6 @@ int calibrateCamera(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int width = 0, height = 0, count = 0;
     std::vector<cv::Mat> objectPoints, imagePoints, rvecs, tvecs;
     cv::Mat *cameraMatrix, *distCoeffs;
-    Tcl_Obj *pResultStr = NULL, *pMatResultStr = NULL, *pListResultStr = NULL;
     double ret = 0;
 
     if (objc != 7) {
@@ -194,17 +193,13 @@ int calibrateCamera(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    Tcl_Obj *list[5];
 
-    Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewDoubleObj(ret));
+    list[0] = Tcl_NewDoubleObj(ret);
+    list[1] = objv[5];
+    list[2] = objv[6];
 
-    pMatResultStr = objv[5];
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
-
-    pMatResultStr = objv[6];
-    Tcl_ListObjAppendElement(NULL, pResultStr, pMatResultStr);
-
-    pListResultStr = Tcl_NewListObj(0, NULL);
+    list[3] = Tcl_NewListObj(rvecs.size(), NULL);
     for (size_t i = 0; i < rvecs.size(); i++) {
         cv::Mat *dstmat;
         Tcl_Obj *pSubResultStr = NULL;
@@ -212,11 +207,10 @@ int calibrateCamera(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         dstmat = new cv::Mat(rvecs[i]);
 
         pSubResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-        Tcl_ListObjAppendElement(NULL, pListResultStr, pSubResultStr);
+        Tcl_ListObjAppendElement(NULL, list[3], pSubResultStr);
     }
-    Tcl_ListObjAppendElement(NULL, pResultStr, pListResultStr);
 
-    pListResultStr = Tcl_NewListObj(0, NULL);
+    list[4] = Tcl_NewListObj(tvecs.size(), NULL);
     for (size_t i = 0; i < tvecs.size(); i++) {
         cv::Mat *dstmat;
         Tcl_Obj *pSubResultStr = NULL;
@@ -224,11 +218,10 @@ int calibrateCamera(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         dstmat = new cv::Mat(tvecs[i]);
 
         pSubResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-        Tcl_ListObjAppendElement(NULL, pListResultStr, pSubResultStr);
+        Tcl_ListObjAppendElement(NULL, list[4], pSubResultStr);
     }
-    Tcl_ListObjAppendElement(NULL, pResultStr, pListResultStr);
 
-    Tcl_SetObjResult(interp, pResultStr);
+    Tcl_SetObjResult(interp, Tcl_NewListObj(5, list));
 
     return TCL_OK;
 }

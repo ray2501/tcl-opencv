@@ -1610,7 +1610,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                     ret = Opencv_Exc2Tcl(interp, NULL);
                 }
             }
-            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+            Opencv_CloseHandle(interp, cvo);
             if (ret != TCL_OK) {
                 return TCL_ERROR;
             }

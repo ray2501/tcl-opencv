@@ -1,3 +1,8 @@
+2021-10-10 Danilo Chang
+
+	* Apply Christian's patch (Refactoring)
+	* Update NMSBoxes command
+
 2021-10-09 Danilo Chang
 
 	* Update blobFromImage command (internal changes)

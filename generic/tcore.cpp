@@ -161,7 +161,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(mat->dims, NULL);
             for (int i = 0; i < mat->dims; i++) {
                 Tcl_Obj *list[1];
 
@@ -1726,7 +1726,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+            Opencv_CloseHandle(interp, cvo);
             Tcl_SetObjResult(interp, Tcl_NewIntObj(0));
 
             break;
@@ -3712,7 +3712,7 @@ int mat_split(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid channel size");
     }
 
-    listPtr = Tcl_NewListObj(0, NULL);
+    listPtr = Tcl_NewListObj(channels.size(), NULL);
     for (size_t i = 0; i < channels.size(); i++) {
         Tcl_Obj *pStr = NULL;
         cv::Mat *dstmat = NULL;
@@ -5282,7 +5282,7 @@ int PCA_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+            Opencv_CloseHandle(interp, cvo);
 
             break;
         }
@@ -5409,7 +5409,7 @@ int TERM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                 return TCL_ERROR;
             }
 
-            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+            Opencv_CloseHandle(interp, cvo);
 
             break;
         }

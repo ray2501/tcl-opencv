@@ -381,90 +381,97 @@ Opencv_DESTRUCTOR(ClientData cd)
     if ((unsigned) cvo->type >= OPENCV_MAXTYPE) {
         Tcl_Panic("wrong Opencv type");
     }
-    hashEntryPtr = Tcl_FindHashEntry(&cvd->tbl[cvo->type], cvo->key);
-    if (hashEntryPtr != NULL) {
-        Tcl_DeleteHashEntry(hashEntryPtr);
+    if (cvo->key) {
+        hashEntryPtr = Tcl_FindHashEntry(&cvd->tbl[cvo->type], cvo->key);
+        if (hashEntryPtr != NULL) {
+            Tcl_DeleteHashEntry(hashEntryPtr);
+        }
+        cvo->key = NULL;
     }
-    switch (cvo->type) {
-    case OPENCV_CALLBACK: {
-        CvCallbackInfo *cbinfo = (CvCallbackInfo *) cvo->obj;
-        ckfree(cbinfo);
-        break;
-    }
-    case OPENCV_MAT: {
-        cv::Mat *mat = (cv::Mat *) cvo->obj;
-        if (mat) {
+    if (cvo->obj) {
+        switch (cvo->type) {
+        case OPENCV_CALLBACK: {
+            CvCallbackInfo *cbinfo = (CvCallbackInfo *) cvo->obj;
+            ckfree(cbinfo);
+            break;
+        }
+        case OPENCV_MAT: {
+            cv::Mat *mat = (cv::Mat *) cvo->obj;
             delete mat;
+            break;
         }
-        break;
-    }
-    case OPENCV_FSTORAGE: {
-        cv::FileStorage *fs = (cv::FileStorage *) cvo->obj;
-        if (fs->isOpened()) {
-            fs->release();
+        case OPENCV_FSTORAGE: {
+            cv::FileStorage *fs = (cv::FileStorage *) cvo->obj;
+            if (fs->isOpened()) {
+                fs->release();
+            }
+            delete fs;
+            Tcl_DStringFree(&cvo->ds1);
+            Tcl_DStringFree(&cvo->ds2);
+            break;
         }
-        delete fs;
-        Tcl_DStringFree(&cvo->ds1);
-        Tcl_DStringFree(&cvo->ds2);
-        break;
-    }
-    case OPENCV_VIDEOCAPTURE: {
-        cv::VideoCapture *capture = (cv::VideoCapture *) cvo->obj;
-        capture->release();
-        delete capture;
-        break;
-    }
-    case OPENCV_VIDEOWRITER: {
-        cv::VideoWriter *writer = (cv::VideoWriter *) cvo->obj;
-        writer->release();
-        delete writer;
-        break;
-    }
-    case OPENCV_PCA: {
-        cv::PCA *pca = (cv::PCA *) cvo->obj;
-        delete pca;
-        break;
-    }
-    case OPENCV_TERMCRITERIA: {
-        cv::TermCriteria *termCriteria = (cv::TermCriteria *) cvo->obj;
-        delete termCriteria;
-        break;
-    }
-    case OPENCV_ODETECT: {
-        cv::CascadeClassifier *cas = (cv::CascadeClassifier *) cvo->obj;
-        delete cas;
-        break;
-    }
-    case OPENCV_OOBJHOG: {
-        cv::HOGDescriptor *hog = (cv::HOGDescriptor *) cvo->obj;
-        delete hog;
-        break;
-    }
+        case OPENCV_VIDEOCAPTURE: {
+            cv::VideoCapture *capture = (cv::VideoCapture *) cvo->obj;
+            capture->release();
+            delete capture;
+            break;
+        }
+        case OPENCV_VIDEOWRITER: {
+            cv::VideoWriter *writer = (cv::VideoWriter *) cvo->obj;
+            writer->release();
+            delete writer;
+            break;
+        }
+        case OPENCV_PCA: {
+            cv::PCA *pca = (cv::PCA *) cvo->obj;
+            delete pca;
+            break;
+        }
+        case OPENCV_TERMCRITERIA: {
+            cv::TermCriteria *termCriteria = (cv::TermCriteria *) cvo->obj;
+            delete termCriteria;
+            break;
+        }
+        case OPENCV_ODETECT: {
+            cv::CascadeClassifier *cas = (cv::CascadeClassifier *) cvo->obj;
+            delete cas;
+            break;
+        }
+        case OPENCV_OOBJHOG: {
+            cv::HOGDescriptor *hog = (cv::HOGDescriptor *) cvo->obj;
+            delete hog;
+            break;
+        }
 #ifdef TCL_USE_OPENCV4
-    case OPENCV_NDETECT: {
-        cv::dnn::Net *net = (cv::dnn::Net *) cvo->obj;
-        delete net;
-        break;
-    }
-    case OPENCV_QDETECT: {
-        cv::QRCodeDetector *qrdet = (cv::QRCodeDetector *) cvo->obj;
-        delete qrdet;
-        break;
-    }
+        case OPENCV_NDETECT: {
+            cv::dnn::Net *net = (cv::dnn::Net *) cvo->obj;
+            delete net;
+            break;
+        }
+        case OPENCV_QDETECT: {
+            cv::QRCodeDetector *qrdet = (cv::QRCodeDetector *) cvo->obj;
+            delete qrdet;
+            break;
+        }
 #endif
-    case OPENCV_BOWTRAINER: {
-        cv::BOWKMeansTrainer *bowtrainer = (cv::BOWKMeansTrainer *) cvo->obj;
-        delete bowtrainer;
-        break;
+        case OPENCV_BOWTRAINER: {
+            cv::BOWKMeansTrainer *bowtrainer = (cv::BOWKMeansTrainer *) cvo->obj;
+            delete bowtrainer;
+            break;
+        }
+        case OPENCV_BOWEXTRACTOR: {
+            cv::BOWImgDescriptorExtractor *bowimgextractor = (cv::BOWImgDescriptorExtractor *) cvo->obj;
+            delete bowimgextractor;
+            break;
+        }
+        default:
+            Tcl_Panic("wrong Opencv type");
+            break;
+        }
     }
-    case OPENCV_BOWEXTRACTOR: {
-        cv::BOWImgDescriptorExtractor *bowimgextractor = (cv::BOWImgDescriptorExtractor *) cvo->obj;
-        delete bowimgextractor;
-        break;
-    }
-    default:
-        Tcl_Panic("wrong Opencv type");
-        break;
+    if (cvo->traced && cvo->obj) {
+        cvo->obj = NULL;
+        return;
     }
     ckfree(cvo);
 }
@@ -552,6 +559,7 @@ Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj)
     Tcl_SetHashValue(hashEntryPtr, cvo);
     cvo->key = (char *) Tcl_GetHashKey(&cvd->tbl[type], hashEntryPtr);
     cvo->cmd = NULL;
+    cvo->traced = 0;
     cvo->flags = 0;
     if (type == OPENCV_FSTORAGE) {
         Tcl_DStringInit(&cvo->ds1);
@@ -559,7 +567,6 @@ Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj)
     }
     if (proc) {
         name = Tcl_NewStringObj(buffer, -1);
-        Tcl_IncrRefCount(name);
         cvo->cmd = Tcl_CreateObjCommand(interp, buffer, proc, cvo, Opencv_DESTRUCTOR);
         return name;
     }
@@ -598,6 +605,20 @@ Opencv_FindHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, Tcl_Obj *name)
         return cvo;
     }
     return cvo->obj;
+}
+
+
+void
+Opencv_CloseHandle(Tcl_Interp *interp, Opencv_Obj *cvo)
+{
+    if (cvo->traced) {
+        return;
+    }
+    if (cvo->cmd) {
+        Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+    } else {
+        Opencv_DESTRUCTOR((ClientData)cvo);
+    }
 }
 
 
@@ -862,6 +883,75 @@ Opencv_FromNumArray(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     return TCL_OK;
 }
 #endif /* TCL_USE_VECTCL */
+
+
+static char *
+TraceProc(ClientData clientData, Tcl_Interp *interp, const char *name1, const char *name2, int flags)
+{
+    Opencv_Obj *cvo = (Opencv_Obj *)clientData;;
+
+    if (flags & TCL_TRACE_UNSETS) {
+        if (Tcl_InterpDeleted(interp)) {
+            return NULL;
+        }
+        if (cvo->cmd) {
+            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+        } else {
+            Opencv_DESTRUCTOR((ClientData)cvo);
+        }
+        return NULL;
+    }
+    Tcl_UntraceVar2(interp, name1, NULL, TCL_TRACE_WRITES | TCL_TRACE_UNSETS, TraceProc, cvo);
+    cvo->traced = 0;
+    if (cvo->cmd) {
+        Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+    } else {
+        Opencv_DESTRUCTOR((ClientData)cvo);
+    }
+    return NULL;
+}
+
+
+static int
+Opencv_Matvar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Opencv_Obj *cvo;
+    Tcl_Obj *value;
+    Tcl_HashEntry *hashEntryPtr;
+    char *string;
+    int type;
+
+    if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "varName newValue");
+        return TCL_ERROR;
+    }
+    value = Tcl_ObjSetVar2(interp, objv[1], NULL, objv[2], TCL_LEAVE_ERR_MSG);
+    if (value == NULL) {
+        return TCL_ERROR;
+    }
+    string = Tcl_GetString(value);
+    for (type = 0; type < OPENCV_MAXTYPE; type++) {
+        hashEntryPtr = Tcl_FindHashEntry(&cvd->tbl[type], string);
+        if (hashEntryPtr != NULL) {
+            break;
+        }
+    }
+    if (hashEntryPtr != NULL) {
+        cvo = (Opencv_Obj *) Tcl_GetHashValue(hashEntryPtr);
+        if (cvo == NULL) {
+            Tcl_Panic("null CV handle");
+        }
+        if (cvo->obj != NULL && !cvo->traced) {
+            string = Tcl_GetString(objv[1]);
+            Tcl_UntraceVar2(interp, string, NULL, TCL_TRACE_WRITES | TCL_TRACE_UNSETS, TraceProc, cvo);
+            Tcl_TraceVar2(interp, string, NULL, TCL_TRACE_WRITES | TCL_TRACE_UNSETS, TraceProc, cvo);
+            cvo->traced = 1;
+        }
+    }
+    Tcl_SetObjResult(interp, value);
+    return TCL_OK;
+}
 
 
 /*
@@ -1258,6 +1348,10 @@ Opencv_Init(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp, "::" NS "::fromByteArray",
         (Tcl_ObjCmdProc *) Opencv_FromByteArray,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::matvar",
+        (Tcl_ObjCmdProc *) Opencv_Matvar,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
 #ifdef TCL_USE_TKPHOTO

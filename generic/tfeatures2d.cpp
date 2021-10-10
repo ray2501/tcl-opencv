@@ -603,7 +603,7 @@ static int FastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, 
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -934,7 +934,7 @@ static int AgastFeatureDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -1271,11 +1271,11 @@ static int MSER_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
             Tcl_Obj *list[2];
 
-            list[0] = Tcl_NewListObj(0, NULL);
+            list[0] = Tcl_NewListObj(msers.size(), NULL);
             for (size_t i = 0; i < msers.size(); i++) {
                 Tcl_Obj *pListStr = NULL;
 
-                pListStr = Tcl_NewListObj(0, NULL);
+                pListStr = Tcl_NewListObj(msers[i].size(), NULL);
                 for (size_t j = 0; j < msers[i].size(); j++) {
                     Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(msers[i][j].x));
                     Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(msers[i][j].y));
@@ -1284,7 +1284,7 @@ static int MSER_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 Tcl_ListObjAppendElement(NULL, list[0], pListStr);
             }
 
-            list[1] = Tcl_NewListObj(0, NULL);
+            list[1] = Tcl_NewListObj(bboxes.size(), NULL);
             for (size_t i = 0; i < bboxes.size(); i++) {
                 Tcl_Obj *sublist[4];
 
@@ -1701,7 +1701,7 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -1813,7 +1813,7 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             Tcl_Obj *list[2];
 
-            list[0] = Tcl_NewListObj(0, NULL);
+            list[0] = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -1868,7 +1868,7 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             Tcl_Obj *list[2];
 
-            list[0] = Tcl_NewListObj(0, NULL);
+            list[0] = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -2489,7 +2489,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -2601,7 +2601,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             Tcl_Obj *list[2];
 
-            list[0] = Tcl_NewListObj(0, NULL);
+            list[0] = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -2656,7 +2656,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             Tcl_Obj *list[2];
 
-            list[0] = Tcl_NewListObj(0, NULL);
+            list[0] = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -3175,7 +3175,7 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -3287,7 +3287,7 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             Tcl_Obj *list[2];
 
-            list[0] = Tcl_NewListObj(0, NULL);
+            list[0] = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -3342,7 +3342,7 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             Tcl_Obj *list[2];
 
-            list[0] = Tcl_NewListObj(0, NULL);
+            list[0] = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -3561,7 +3561,7 @@ static int KAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -3673,7 +3673,7 @@ static int KAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
             Tcl_Obj *list[2];
 
-            list[0] = Tcl_NewListObj(0, NULL);
+            list[0] = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -3728,7 +3728,7 @@ static int KAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
             Tcl_Obj *list[2];
 
-            list[0] = Tcl_NewListObj(0, NULL);
+            list[0] = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -4196,7 +4196,7 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -4308,7 +4308,7 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
             Tcl_Obj *list[2];
 
-            list[0] = Tcl_NewListObj(0, NULL);
+            list[0] = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -4363,7 +4363,7 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
             Tcl_Obj *list[2];
 
-            list[0] = Tcl_NewListObj(0, NULL);
+            list[0] = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -4569,7 +4569,7 @@ static int AffineFeature_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -4681,7 +4681,7 @@ static int AffineFeature_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
 
             Tcl_Obj *list[2];
 
-            list[0] = Tcl_NewListObj(0, NULL);
+            list[0] = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -4736,7 +4736,7 @@ static int AffineFeature_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
 
             Tcl_Obj *list[2];
 
-            list[0] = Tcl_NewListObj(0, NULL);
+            list[0] = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -4982,7 +4982,7 @@ static int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(matches.size(), NULL);
             for (size_t i = 0; i < matches.size(); i++) {
                 Tcl_Obj *sublist[4];
 
@@ -5030,12 +5030,10 @@ static int BFMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(vmatches.size(), NULL);
             for (size_t i = 0; i < vmatches.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-
                 std::vector<cv::DMatch> matches = vmatches[i];
+                Tcl_Obj *pListStr = Tcl_NewListObj(matches.size(), NULL);
                 for (size_t j = 0; j < matches.size(); j++) {
                     Tcl_Obj *sublist[4];
 
@@ -5224,7 +5222,7 @@ static int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tc
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(matches.size(), NULL);
             for (size_t i = 0; i < matches.size(); i++) {
                 Tcl_Obj *sublist[4];
 
@@ -5272,12 +5270,10 @@ static int FlannBasedMatcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tc
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(vmatches.size(), NULL);
             for (size_t i = 0; i < vmatches.size(); i++) {
-                Tcl_Obj *pListStr = NULL;
-                pListStr = Tcl_NewListObj(0, NULL);
-
                 std::vector<cv::DMatch> matches = vmatches[i];
+                Tcl_Obj *pListStr = Tcl_NewListObj(matches.size(), NULL);
                 for (size_t j = 0; j < matches.size(); j++) {
                     Tcl_Obj *sublist[4];
 
@@ -5524,7 +5520,7 @@ static int SimpleBlobDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, T
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
+            pResultStr = Tcl_NewListObj(keypoints.size(), NULL);
             for (size_t i = 0; i < keypoints.size(); i++) {
                 Tcl_Obj *sublist[7];
 
@@ -5882,8 +5878,7 @@ int BOWKMeansTrainer_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
                 return Opencv_Exc2Tcl(interp, NULL);
             }
 
-            pResultStr = Tcl_NewListObj(0, NULL);
-
+            pResultStr = Tcl_NewListObj(value.size(), NULL);
             for (size_t i = 0; i < value.size(); i++) {
                 Tcl_Obj *pMatResultStr = NULL;
                 cv::Mat *dstmat;
@@ -5903,7 +5898,7 @@ int BOWKMeansTrainer_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
                 return TCL_ERROR;
             }
 
-            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+            Opencv_CloseHandle(interp, cvo);
 
             break;
         }
@@ -6235,7 +6230,7 @@ int BOWImgDescriptorExtractor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, T
                 return TCL_ERROR;
             }
 
-            Tcl_DeleteCommandFromToken(interp, cvo->cmd);
+            Opencv_CloseHandle(interp, cvo);
 
             break;
         }

@@ -2631,9 +2631,8 @@ int buildPyramid(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
-
-    for(size_t i = 0; i < dst.size(); i++) {
+    pResultStr = Tcl_NewListObj(dst.size(), NULL);
+    for (size_t i = 0; i < dst.size(); i++) {
         cv::Mat *dstmat;
         Tcl_Obj *pMatResultStr = NULL;
 
@@ -3640,7 +3639,7 @@ int HoughCircles(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    pResultStr = Tcl_NewListObj(circles.size(), NULL);
     for (size_t i = 0; i < circles.size(); i++) {
         Tcl_Obj *sublist[3];
 
@@ -3714,7 +3713,7 @@ int HoughLines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    pResultStr = Tcl_NewListObj(lines.size(), NULL);
     for (size_t i = 0; i < lines.size(); i++) {
         Tcl_Obj *sublist[2];
 
@@ -3778,7 +3777,7 @@ int HoughLinesP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    pResultStr = Tcl_NewListObj(lines.size(), NULL);
     for (size_t i = 0; i < lines.size(); i++) {
         Tcl_Obj *sublist[4];
 
@@ -3843,10 +3842,10 @@ int findContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    pResultStr = Tcl_NewListObj(contours.size(), NULL);
     for (size_t i = 0; i < contours.size(); i++) {
         Tcl_Obj *pListStr = NULL;
-        pListStr = Tcl_NewListObj(0, NULL);
+        pListStr = Tcl_NewListObj(contours.at(i).size(), NULL);
 
         for (size_t j = 0; j < contours.at(i).size(); j++) {
             Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(contours.at(i).at(j).x));
@@ -3911,10 +3910,10 @@ int findContoursWithHierarchy(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 
     Tcl_Obj *list[2];
 
-    list[0] = Tcl_NewListObj(0, NULL);
+    list[0] = Tcl_NewListObj(contours.size(), NULL);
     for (size_t i = 0; i < contours.size(); i++) {
         Tcl_Obj *pListStr = NULL;
-        pListStr = Tcl_NewListObj(0, NULL);
+        pListStr = Tcl_NewListObj(contours.at(i).size(), NULL);
 
         for (size_t j = 0; j < contours.at(i).size(); j++) {
             Tcl_ListObjAppendElement(NULL, pListStr, Tcl_NewIntObj(contours.at(i).at(j).x));
@@ -3924,7 +3923,7 @@ int findContoursWithHierarchy(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
         Tcl_ListObjAppendElement(NULL, list[0], pListStr);
     }
 
-    list[1] = Tcl_NewListObj(0, NULL);
+    list[1] = Tcl_NewListObj(hierarchy.size(), NULL);
     for (size_t i = 0; i < hierarchy.size(); i++) {
         Tcl_Obj *sublist[4];
 
@@ -4319,7 +4318,7 @@ int approxPolyDP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    pResultStr = Tcl_NewListObj(approxCurve.size(), NULL);
     for (size_t i = 0; i < approxCurve.size(); i++) {
         Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(approxCurve.at(i).x));
         Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(approxCurve.at(i).y));
@@ -4918,13 +4917,14 @@ int convexHull(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
     if (returnPoints == 1) {
+        pResultStr = Tcl_NewListObj(hull.size(), NULL);
         for (size_t i = 0; i < hull.size(); i++) {
             Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(hull.at(i).x));
             Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(hull.at(i).y));
         }
     } else {
+        pResultStr = Tcl_NewListObj(hull_ind.size(), NULL);
         for (size_t i = 0; i < hull_ind.size(); i++) {
             Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(hull_ind[i]));
         }
@@ -5008,7 +5008,7 @@ int convexityDefects(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    pResultStr = Tcl_NewListObj(results.size(), NULL);
     for (size_t i = 0; i < results.size(); i++) {
         Tcl_Obj *sublist[4];
 
@@ -5956,7 +5956,9 @@ End:
 int getFontScaleFromHeight(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int fontFace = 0, pixelHeight = 0, thickness = 1;
+#ifdef TCL_USE_OPENCV4
     double fontScale = 1.0;
+#endif
 
     if (objc != 3 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "fontFace pixelHeight ?thickness?");
@@ -5977,6 +5979,7 @@ int getFontScaleFromHeight(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         }
     }
 
+#ifdef TCL_USE_OPENCV4
     try {
         fontScale = cv::getFontScaleFromHeight(fontFace, pixelHeight, thickness);
     } catch (const cv::Exception &ex) {
@@ -5987,6 +5990,9 @@ int getFontScaleFromHeight(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
     Tcl_SetObjResult(interp, Tcl_NewDoubleObj(fontScale));
     return TCL_OK;
+#else
+    return Opencv_SetResult(interp, cv::Error::StsNotImplemented, "not supported");
+#endif
 }
 
 
