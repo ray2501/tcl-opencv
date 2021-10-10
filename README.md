@@ -4467,3 +4467,134 @@ Object Detection using YOLOv3 -
     } on error {em} {
         puts $em
     }
+
+Text Detection (EAST text detector) -
+
+    package require opencv
+
+    proc decode {scores geometry scoreThresh} {
+        set size [$scores size]
+        set height [lindex $size 2]
+        set width [lindex $size 3]
+
+        set confidences [list]
+        set boxes [list]
+        for {set y 0} {$y < $height} {incr y} {
+            for {set x 0} {$x < $width} {incr x} {
+                # Extract the scores (probabilities)
+                set score [$scores at [list 0 0 $y $x] 0]
+
+                if {$score < $scoreThresh} {
+                    continue
+                }
+
+                set x0 [$geometry at [list 0 0 $y $x] 0]
+                set x1 [$geometry at [list 0 1 $y $x] 0]
+                set x2 [$geometry at [list 0 2 $y $x] 0]
+                set x3 [$geometry at [list 0 3 $y $x] 0]
+                set angle [$geometry at [list 0 4 $y $x] 0]
+
+                set offsetX [expr $x * 4.0]
+                set offsetY [expr $y * 4.0]
+                set cosA [expr cos($angle)]
+                set sinA [expr sin($angle)]
+
+                set h [expr $x0+$x2]
+                set w [expr $x1+$x3]
+
+                set ox [expr $offsetX + $cosA * $x1 + $sinA * $x2]
+                set oy [expr $offsetY - $sinA * $x1 + $cosA * $x2]
+                set p1x [expr $ox - $sinA * $h]
+                set p1y [expr $oy - $cosA * $h]
+                set p3x [expr $ox - $cosA * $w]
+                set p3y [expr $oy + $sinA * $w]
+                set box [list [expr ($p1x+$p3x)*0.5] [expr ($p1y+$p3y)*0.5] $w $h \
+                        [expr -$angle*180.0/3.1415926535897932384626433832795]]
+
+                lappend confidences $score
+                lappend boxes $box
+            }
+        }
+
+        return [list $boxes $confidences]
+    }
+
+    if {$argc != 1} {
+        exit
+    }
+
+    set filename [lindex $argv 0]
+    set SIZE 320
+
+    try {
+        set img1 [::cv::imread $filename $::cv::IMREAD_COLOR]
+        set blob [::cv::dnn::blobFromImage $img1 1.0 $SIZE $SIZE \
+                    [list 123.68 116.78 103.94 0] 1 0]
+
+        #
+        # Text detection model: https://github.com/argman/EAST
+        # Download the model from:
+        # https://www.dropbox.com/s/r2ingd0l3zt8hxs/frozen_east_text_detection.tar.gz?dl=1
+        #
+        set model "frozen_east_text_detection.pb"
+        set net [::cv::dnn::readNet $model]
+        $net setPreferableBackend $::cv::dnn::DNN_BACKEND_OPENCV
+        $net setPreferableTarget $::cv::dnn::DNN_TARGET_CPU
+        $net setInput $blob
+
+        # Runs the forward (pass to the output layers)
+        set names [list "feature_fusion/Conv_7/Sigmoid" "feature_fusion/concat_3"]
+        set out [$net forwardWithNames $names]
+        set scores [lindex $out 0]
+        set geometry [lindex $out 1]
+
+        # Process the output
+        set result [decode $scores $geometry 0.5]
+        set boxes [lindex $result 0]
+        set confidences [lindex $result 1]
+
+        set hRatio [expr [$img1 rows]/double($SIZE)]
+        set wRatio [expr [$img1 cols]/double($SIZE)]
+
+        # Get the final predictions
+        set indicates [::cv::dnn::NMSBoxes $boxes $confidences 0.5 0.4]
+        foreach ind $indicates {
+            set box [lindex $boxes $ind]
+
+            # Use ::cv::boxPoints to get RotatedRect 4 points
+            set box2 [::cv::boxPoints $box]
+            set mybox [list]
+
+            # Scale the bounding box coordinates based on the respective ratios
+            for {set i 0} {$i < 8} {incr i 2} {
+                set x [expr int([lindex $box2 $i] * $wRatio)]
+                set y [expr int([lindex $box2 [expr $i + 1]] * $hRatio)]
+                lappend mybox $x $y
+            }
+
+            # Draw the box
+            #::cv::drawContours $img1 [list $mybox] -1 [list 0 255 0 0] 2
+            for {set i 0} {$i < 8} {incr i 2} {
+                set x1 [lindex $mybox [expr $i%8]]
+                set y1 [lindex $mybox [expr ($i+1)%8]]
+                set x2 [lindex $mybox [expr ($i+2)%8]]
+                set y2 [lindex $mybox [expr ($i+3)%8]]
+
+                ::cv::line $img1 $x1 $y1 $x2 $y2 [list 0 255 0 0] 2
+            }
+        }
+
+        $scores close
+        $geometry close
+
+        ::cv::namedWindow "Display Image" $::cv::WINDOW_AUTOSIZE
+        ::cv::imshow "Display Image" $img1
+        ::cv::waitKey 0
+        ::cv::destroyAllWindows
+
+        $net close
+        $blob close
+        $img1 close
+    } on error {em} {
+        puts $em
+    }
