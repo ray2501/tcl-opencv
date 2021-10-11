@@ -231,6 +231,7 @@ MODULE_SCOPE int CLAHE(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 
 MODULE_SCOPE int GeneralizedHoughBallard(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int GeneralizedHoughGuil(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int LineSegmentDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 
 /*
  * For videoio
@@ -463,6 +464,7 @@ typedef struct {
     cv::Ptr<cv::CLAHE> clahe;
     cv::Ptr<cv::GeneralizedHoughBallard> houghballard;
     cv::Ptr<cv::GeneralizedHoughGuil> houghbuil;
+    cv::Ptr<cv::LineSegmentDetector> lsdetector;
     cv::Ptr<cv::FastFeatureDetector> fastdetector;
     cv::Ptr<cv::AgastFeatureDetector> agastdetector;
     cv::Ptr<cv::MSER> mserextractor;
@@ -504,6 +506,7 @@ typedef struct {
     Tcl_Command cmd_clahe;
     Tcl_Command cmd_houghballard;
     Tcl_Command cmd_houghbuil;
+    Tcl_Command cmd_lsdetector;
     Tcl_Command cmd_fastdetector;
     Tcl_Command cmd_agastdetector;
     Tcl_Command cmd_mserextractor;

@@ -1,3 +1,7 @@
+2021-10-11 Danilo Chang
+
+	* Implement command: LineSegmentDetector
+
 2021-10-10 Danilo Chang
 
 	* Apply Christian's patch (Refactoring)

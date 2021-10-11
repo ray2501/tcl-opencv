@@ -362,6 +362,18 @@ Please notice, GeneralizedHoughBallard command will only have 1 instance.
 
 Please notice, GeneralizedHoughGuil command will only have 1 instance.
 
+    ::cv::LineSegmentDetector ?refine scale sigma_scale quant ang_th log_eps density_th n_bins?
+    LineSegmentDetector detect matrix
+    LineSegmentDetector drawSegments matrix lines
+    LineSegmentDetector close
+
+LineSegmentDetector's implementation has been removed from OpenCV version 3.4.6 to 3.4.15 and
+version 4.1.0 to 4.5.3 due original code license conflict. Restored in 4.5.4 again after
+[Computation of a NFA](https://github.com/rafael-grompone-von-gioi/binomial_nfa) code published
+under the MIT licens.
+
+Please notice, LineSegmentDetector command will only have 1 instance.
+
 ### videoio
 
     ::cv::VideoCapture file/index filename/number ?flags?
@@ -1599,6 +1611,12 @@ Line Types -
     ::cv::HISTCMP_HELLINGER
     ::cv::HISTCMP_CHISQR_ALT
     ::cv::HISTCMP_KL_DIV
+
+LineSegmentDetector modes -
+
+    ::cv::LSD_REFINE_NONE
+    ::cv::LSD_REFINE_STD
+    ::cv::LSD_REFINE_ADV
 
 `::cv::dft` command flags -
 

@@ -8038,6 +8038,308 @@ int GeneralizedHoughGuil(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
+
+
+static void LineSegmentDetector_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->lsdetector) {
+        cvd->lsdetector.release();
+    }
+    cvd->cmd_lsdetector = NULL;
+}
+
+
+static int LineSegmentDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "detect",
+        "drawSegments",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_detect,
+        FUNC_drawSegments,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->lsdetector == nullptr) {
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_detect: {
+            std::vector<cv::Vec4f> lines_std;
+            std::vector<double> widths;
+            std::vector<double> precisions;
+            std::vector<double> nfas;
+            cv::Mat *mat;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cvd->lsdetector->detect(*mat, lines_std, widths, precisions, nfas);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_Obj *list[4];
+            list[0] =  Tcl_NewListObj(lines_std.size(), NULL);
+            for (size_t i = 0; i < lines_std.size(); i++) {
+                Tcl_Obj *pListResultStr = Tcl_NewListObj(4, NULL);
+
+                Tcl_ListObjAppendElement(NULL, pListResultStr, Tcl_NewDoubleObj(lines_std[i][0]));
+                Tcl_ListObjAppendElement(NULL, pListResultStr, Tcl_NewDoubleObj(lines_std[i][1]));
+                Tcl_ListObjAppendElement(NULL, pListResultStr, Tcl_NewDoubleObj(lines_std[i][2]));
+                Tcl_ListObjAppendElement(NULL, pListResultStr, Tcl_NewDoubleObj(lines_std[i][3]));
+
+                Tcl_ListObjAppendElement(NULL, list[0], pListResultStr);
+            }
+
+            list[1] = Tcl_NewListObj(widths.size(), NULL);
+            for (size_t i = 0; i < widths.size(); i++) {
+                Tcl_ListObjAppendElement(NULL, list[1], Tcl_NewDoubleObj(widths[i]));
+            }
+
+            list[2] = Tcl_NewListObj(precisions.size(), NULL);
+            for (size_t i = 0; i < precisions.size(); i++) {
+                Tcl_ListObjAppendElement(NULL, list[2], Tcl_NewDoubleObj(precisions[i]));
+            }
+
+            list[3] = Tcl_NewListObj(nfas.size(), NULL);
+            for (size_t i = 0; i < nfas.size(); i++) {
+                Tcl_ListObjAppendElement(NULL, list[3], Tcl_NewDoubleObj(nfas[i]));
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewListObj(4, list));
+
+            break;
+        }
+        case FUNC_drawSegments: {
+            int count = 0;
+            std::vector<cv::Vec4f> lines_std;
+            cv::Mat *mat;
+
+            if (objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix lines");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_ListObjLength(interp, objv[3], &count) != TCL_OK) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid lines data");
+            }
+
+            if (count == 0) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty list");
+            } else {
+                for (int i = 0; i < count; i++) {
+                    Tcl_Obj *elemListPtr = NULL;
+                    int subCount = 0;
+                    cv::Vec4f values;
+
+                    Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
+                    if (Tcl_ListObjLength(interp, elemListPtr, &subCount) != TCL_OK) {
+                        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+                    }
+
+                    if (subCount != 4) {
+                        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid data");
+                    } else {
+                            Tcl_Obj *elemSubListPtr = NULL;
+                            double value = 0;
+
+                            Tcl_ListObjIndex(interp, elemListPtr, 0, &elemSubListPtr);
+                            if (Tcl_GetDoubleFromObj(interp, elemSubListPtr, &value) != TCL_OK) {
+                                return TCL_ERROR;
+                            }
+                            values[0] = (float) value;
+
+                            Tcl_ListObjIndex(interp, elemListPtr, 1, &elemSubListPtr);
+                            if (Tcl_GetDoubleFromObj(interp, elemSubListPtr, &value) != TCL_OK) {
+                                return TCL_ERROR;
+                            }
+                            values[1] = (float) value;
+
+                            Tcl_ListObjIndex(interp, elemListPtr, 2, &elemSubListPtr);
+                            if (Tcl_GetDoubleFromObj(interp, elemSubListPtr, &value) != TCL_OK) {
+                                return TCL_ERROR;
+                            }
+                            values[2] = (float) value;
+
+                            Tcl_ListObjIndex(interp, elemListPtr, 3, &elemSubListPtr);
+                            if (Tcl_GetDoubleFromObj(interp, elemSubListPtr, &value) != TCL_OK) {
+                                return TCL_ERROR;
+                            }
+                            values[3] = (float) value;
+                    }
+
+                    lines_std.push_back(values);
+                }
+            }
+
+            try {
+                cvd->lsdetector->drawSegments(*mat, lines_std);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_lsdetector) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_lsdetector);
+            }
+
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_lsdetector) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_lsdetector, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::LineSegmentDetector", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int LineSegmentDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    double scale = 0.8, sigma_scale = 0.6, quant = 2.0, ang_th = 22.5, log_eps = 0, density_th = 0.7;
+    int refine = cv::LSD_REFINE_STD, n_bins = 1024;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::LineSegmentDetector> lsdetector;
+
+    if (objc != 1 && objc != 9) {
+        Tcl_WrongNumArgs(interp, 1, objv, "?refine scale sigma_scale quant ang_th log_eps density_th n_bins?");
+        return TCL_ERROR;
+    }
+
+    if (objc == 9) {
+        if (Tcl_GetIntFromObj(interp, objv[1], &refine) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[2], &scale) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[3], &sigma_scale) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[4], &quant) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[5], &ang_th) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[6], &log_eps) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[7], &density_th) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[8], &n_bins) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        lsdetector = cv::createLineSegmentDetector(refine, scale, sigma_scale, quant,
+                                                   ang_th, log_eps, density_th, n_bins);
+        if (lsdetector == nullptr) {
+            CV_Error(cv::Error::StsNullPtr, "LineSegmentDetector nullptr");
+        }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-lsdetector", -1);
+
+    if (cvd->cmd_lsdetector) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_lsdetector);
+    }
+    cvd->cmd_lsdetector =
+        Tcl_CreateObjCommand(interp, "::cv-lsdetector",
+            (Tcl_ObjCmdProc *) LineSegmentDetector_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) LineSegmentDetector_DESTRUCTOR);
+
+    cvd->lsdetector = lsdetector;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
 #ifdef __cplusplus
 }
 #endif

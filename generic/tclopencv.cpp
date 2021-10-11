@@ -138,6 +138,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->houghbuil) {
         cvd->houghbuil.release();
     }
+    if (cvd->lsdetector) {
+        cvd->lsdetector.release();
+    }
     if (cvd->fastdetector) {
         cvd->fastdetector.release();
     }
@@ -1770,6 +1773,10 @@ Opencv_Init(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp, "::" NS "::GeneralizedHoughGuil",
         (Tcl_ObjCmdProc *) GeneralizedHoughGuil,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
+    Tcl_CreateObjCommand(interp, "::" NS "::LineSegmentDetector",
+        (Tcl_ObjCmdProc *) LineSegmentDetector,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
     /*
@@ -4316,6 +4323,22 @@ Opencv_Init(Tcl_Interp *interp)
 
     strValue = Tcl_NewStringObj("::" NS "::HISTCMP_KL_DIV", -1);
     setupValue = Tcl_NewIntObj(cv::HISTCMP_KL_DIV);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    /*
+     * LineSegmentDetector modes
+     */
+
+    strValue = Tcl_NewStringObj("::" NS "::LSD_REFINE_NONE", -1);
+    setupValue = Tcl_NewIntObj(cv::LSD_REFINE_NONE);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::LSD_REFINE_STD", -1);
+    setupValue = Tcl_NewIntObj(cv::LSD_REFINE_STD);
+    Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
+
+    strValue = Tcl_NewStringObj("::" NS "::LSD_REFINE_ADV", -1);
+    setupValue = Tcl_NewIntObj(cv::LSD_REFINE_ADV);
     Tcl_ObjSetVar2(interp, strValue, NULL, setupValue, TCL_NAMESPACE_ONLY);
 
     /*
