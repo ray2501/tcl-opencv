@@ -76,7 +76,7 @@ Implement commands
 `::cv::matvar` is provided which does some automatic resource/life-cycle
 management using traces on variables. It's an experimental combination of
 the set command with a unset/write variable trace on the (local or global)
-ariable. You can check
+variable. You can check
 [example](https://github.com/ray2501/tcl-opencv/issues/14#issuecomment-939336696).
 
     ::cv::abs matrix
