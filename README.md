@@ -71,6 +71,14 @@ Implement commands
     ::cv::Mat::ones rows cols type
     ::cv::Mat::zeros rows cols type
 
+    ::cv::matvar name mat
+
+`::cv::matvar` is provided which does some automatic resource/life-cycle
+management using traces on variables. It's an experimental combination of
+the set command with a unset/write variable trace on the (local or global)
+ariable. You can check
+[example](https://github.com/ray2501/tcl-opencv/issues/14#issuecomment-939336696).
+
     ::cv::abs matrix
     ::cv::absdiff matrix_1 matrix_2
     ::cv::add matrix_1 matrix_2
