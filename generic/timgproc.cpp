@@ -1929,7 +1929,7 @@ int getDerivKernels(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     if (objc == 6) {
-        if (Tcl_GetBooleanFromObj(interp, objv[5], &normalize) != TCL_OK) {
+        if (Tcl_GetBooleanFromObj(interp, objv[4], &normalize) != TCL_OK) {
             return TCL_ERROR;
         }
 
