@@ -539,6 +539,9 @@ Please notice, KAZE command will only have 1 instance.
     SIFT detectAndCompute matrix
     SIFT close
 
+SIFT (Scale-Invariant Feature Transform) algorithm has been moved to
+the OpenCV main repository in OpenCV 4.4.0 because its patent expired.
+
 Please notice, SIFT command will only have 1 instance.
 
     ::cv::AffineFeature backend ?maxTilt minTilt tiltStep rotateStepBase?
@@ -546,6 +549,8 @@ Please notice, SIFT command will only have 1 instance.
     AffineFeature compute matrix keypoints
     AffineFeature detectAndCompute matrix
     AffineFeature close
+
+OpenCV 4.5.0 add AffineFeature (A-SIFT) API.
 
 Please notice, AffineFeature command will only have 1 instance.
 And backend supports SIFT, KAZE, ORB, AKAZE and BRISK.
