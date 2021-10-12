@@ -1905,6 +1905,65 @@ int sepFilter2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int getDerivKernels(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat kx_mat, ky_mat;
+    int dx = 0, dy = 0, ksize = 0, normalize = 0, ktype = CV_32F;
+    cv::Mat *dstmat1, *dstmat2;
+
+    if (objc != 4 && objc != 6) {
+        Tcl_WrongNumArgs(interp, 1, objv, "dx dy ksize ?normalize ktype?");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[1], &dx) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &dy) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &ksize) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 6) {
+        if (Tcl_GetBooleanFromObj(interp, objv[5], &normalize) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[5], &ktype) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (ktype != CV_32F && ktype != CV_64F) {
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "wrong getDerivKernels kernel type");
+        }
+    }
+
+    try {
+        cv::getDerivKernels(kx_mat, ky_mat, dx, dy,
+                            ksize, normalize, ktype);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    Tcl_Obj *list[2];
+
+    dstmat1 = new cv::Mat(kx_mat);
+    list[0] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat1);
+
+    dstmat2 = new cv::Mat(ky_mat);
+    list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat2);
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
+    return TCL_OK;
+}
+
+
 int getGaborKernel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat result_mat;

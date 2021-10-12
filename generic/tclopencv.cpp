@@ -1511,6 +1511,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) sepFilter2D,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::getDerivKernels",
+        (Tcl_ObjCmdProc *) getDerivKernels,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::getGaborKernel",
         (Tcl_ObjCmdProc *) getGaborKernel,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);

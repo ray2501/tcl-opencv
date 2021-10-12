@@ -158,6 +158,7 @@ MODULE_SCOPE int warpPolar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 
 MODULE_SCOPE int filter2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int sepFilter2D(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int getDerivKernels(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int getGaborKernel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int getGaussianKernel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int blur(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
