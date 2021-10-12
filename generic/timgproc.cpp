@@ -1944,7 +1944,7 @@ int getDerivKernels(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         cv::getDerivKernels(kx_mat, ky_mat, dx, dy,
-                            ksize, normalize, ktype);
+                            ksize, (bool) normalize, ktype);
     } catch (const cv::Exception &ex) {
         return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
