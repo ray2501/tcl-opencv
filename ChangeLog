@@ -1,3 +1,7 @@
+2021-10-12 Danilo Chang
+
+	* Implement command: findNonZero
+
 2021-10-11 Danilo Chang
 
 	* Implement command: LineSegmentDetector

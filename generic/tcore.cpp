@@ -3094,6 +3094,39 @@ int mat_extractChannel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 }
 
 
+int mat_findNonZero(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat image;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Mat *mat, *dstmat;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "matrix");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::findNonZero(*mat, image);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    dstmat = new cv::Mat(image);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+
+
 int mat_flip(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;

@@ -1153,6 +1153,10 @@ Opencv_Init(Tcl_Interp *interp)
         (Tcl_ObjCmdProc *) mat_extractChannel,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
 
+    Tcl_CreateObjCommand(interp, "::" NS "::findNonZero",
+        (Tcl_ObjCmdProc *) mat_findNonZero,
+        (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
+
     Tcl_CreateObjCommand(interp, "::" NS "::flip",
         (Tcl_ObjCmdProc *) mat_flip,
         (ClientData)cvd, (Tcl_CmdDeleteProc *)NULL);
