@@ -1,3 +1,7 @@
+2021-10-14 Danilo Chang
+
+	* Bump version to v0.11
+
 2021-10-12 Danilo Chang
 
 	* Implement command: getDerivKernels
