@@ -703,6 +703,10 @@ Please notice, BackgroundSubtractorMOG2 command will only have 1 instance.
     ::cv::readOpticalFlow path
     ::cv::writeOpticalFlow path flow_matrix
 
+`::cv::readOpticalFlow` and `::cv::writeOpticalFlow` in OpenCV 3.x is in
+contrib module (optflow). If you build this extension with OpenCV 3.x failed,
+you need build optflow module or disable 2 commands by youself.
+
     ::cv::computeECC matrix_1 matrix_2 ?mask?
     ::cv::findTransformECC matrix_1 matrix_2 warpMatrix motionType ?termCriteria maks gaussFiltSize?
 
