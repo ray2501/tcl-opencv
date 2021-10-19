@@ -134,6 +134,7 @@ int Opencv_Trecv(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_HashEntry *hashEntryPtr;
     char *tag;
     CvthrMsg *msg = NULL;
+    int ms = 10000;
     Tcl_Time t0, t1, timeout = { 10, 0 };
 
     if (objc != 2 && objc != 3) {
@@ -147,8 +148,6 @@ int Opencv_Trecv(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_SetResult(interp, cv::Error::StsNotImplemented, "no thread support");
     }
     if (objc > 2) {
-        int ms;
-
         if (Tcl_GetIntFromObj(interp, objv[2], &ms) != TCL_OK) {
             return TCL_ERROR;
         }
@@ -163,13 +162,16 @@ int Opencv_Trecv(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     t0.sec += timeout.sec;
     t0.usec += timeout.usec;
     if (t0.usec > 1000000) {
-        t0.usec -= 1000000;
         t0.sec += 1;
+        t0.usec -= 1000000;
     }
     Tcl_MutexLock(&cvthrMutex);
     while (1) {
         hashEntryPtr = Tcl_FindHashEntry(&cvthrHash, tag);
         if (hashEntryPtr == NULL) {
+            if (ms == 0) {
+                break;
+            }
             Tcl_GetTime(&t1);
             timeout.sec = t0.sec - t1.sec;
             timeout.usec = t0.usec - t1.usec;
@@ -181,8 +183,19 @@ int Opencv_Trecv(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
                     break;
                 }
             } else if (timeout.usec < 0) {
-                timeout.usec += 1000000;
                 timeout.sec -= 1;
+                timeout.usec += 1000000;
+            }
+            if (timeout.sec * 1000 + timeout.usec / 1000 > ms) {
+                timeout.sec = ms / 1000;
+                timeout.usec = (ms % 1000) * 1000;
+                t0 = t1;
+                t0.sec += timeout.sec;
+                t0.usec += timeout.usec;
+                if (t0.usec > 1000000) {
+                    t0.sec += 1;
+                    t0.usec -= 1000000;
+                }
             }
             Tcl_ConditionWait(&cvthrCond, &cvthrMutex, &timeout);
             continue;
