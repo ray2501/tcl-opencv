@@ -1,3 +1,8 @@
+2021-10-20 Danilo Chang
+
+	* Try to fix Build fails on 4.5.1 issue
+	  Add flag to check VideoCapture/VideoWriter property
+
 2021-10-19 Danilo Chang
 
 	* Apply Christian's patch (Refactoring)
