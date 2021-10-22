@@ -182,6 +182,13 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->bgsmog2) {
         cvd->bgsmog2.release();
     }
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
+    if (cvd->trackerMIL) {
+        cvd->trackerMIL.release();
+    }
+#endif
+#endif
     if (cvd->stitcher) {
         cvd->stitcher.release();
     }
@@ -1548,6 +1555,12 @@ Opencv_Init(Tcl_Interp *interp)
           (Tcl_ObjCmdProc *) BackgroundSubtractorKNN },
         { "BackgroundSubtractorMOG2",
           (Tcl_ObjCmdProc *) BackgroundSubtractorMOG2 },
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
+        { "TrackerMIL",
+          (Tcl_ObjCmdProc *) TrackerMIL },
+#endif
+#endif
         { "meanShift",
           (Tcl_ObjCmdProc *) meanShift },
         { "CamShift",
@@ -1921,9 +1934,7 @@ Opencv_Init(Tcl_Interp *interp)
         { "CAP_PROP_BITRATE", cv::CAP_PROP_BITRATE },
         { "CAP_PROP_ORIENTATION_META", cv::CAP_PROP_ORIENTATION_META },
         { "CAP_PROP_ORIENTATION_AUTO", cv::CAP_PROP_ORIENTATION_AUTO },
-#if (CV_VERSION_MAJOR > 4  \
-		|| (CV_VERSION_MAJOR == 4 && CV_VERSION_MINOR > 5) \
-		|| (CV_VERSION_MAJOR == 4 && CV_VERSION_MINOR == 5 && CV_VERSION_REVISION >= 2))
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 2)
         { "CAP_PROP_HW_ACCELERATION", cv::CAP_PROP_HW_ACCELERATION },
         { "CAP_PROP_HW_DEVICE", cv::CAP_PROP_HW_DEVICE },
 #endif
@@ -1939,9 +1950,7 @@ Opencv_Init(Tcl_Interp *interp)
 #ifdef TCL_USE_OPENCV4
         { "VIDEOWRITER_PROP_IS_COLOR", cv::VIDEOWRITER_PROP_IS_COLOR },
         { "VIDEOWRITER_PROP_DEPTH", cv::VIDEOWRITER_PROP_DEPTH },
-#if (CV_VERSION_MAJOR > 4  \
-		|| (CV_VERSION_MAJOR == 4 && CV_VERSION_MINOR > 5) \
-		|| (CV_VERSION_MAJOR == 4 && CV_VERSION_MINOR == 5 && CV_VERSION_REVISION >= 2))
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 2)
         { "VIDEOWRITER_PROP_HW_ACCELERATION", cv::VIDEOWRITER_PROP_HW_ACCELERATION },
         { "VIDEOWRITER_PROP_HW_DEVICE", cv::VIDEOWRITER_PROP_HW_DEVICE },
 #endif

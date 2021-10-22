@@ -16,6 +16,11 @@ extern "C" {
 #define MODULE_SCOPE
 #endif
 
+#define CV_VERSION_GREATER_OR_EQUAL(major, minor, revision) \
+	( CV_VERSION_MAJOR > major  \
+		|| (CV_VERSION_MAJOR == major && CV_VERSION_MINOR > minor) \
+		|| (CV_VERSION_MAJOR == major && CV_VERSION_MINOR == minor && CV_VERSION_REVISION >= revision) )
+
 /*
  * OpenCV core
  */
@@ -312,6 +317,11 @@ MODULE_SCOPE int StereoSGBM(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
 MODULE_SCOPE int BackgroundSubtractorKNN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int BackgroundSubtractorMOG2(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
+MODULE_SCOPE int TrackerMIL(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
+#endif
 MODULE_SCOPE int meanShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int CamShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int calcOpticalFlowPyrLK(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
@@ -483,6 +493,11 @@ typedef struct {
     cv::Ptr<cv::FlannBasedMatcher> flannbasedmatcher;
     cv::Ptr<cv::BackgroundSubtractorKNN> bgsknn;
     cv::Ptr<cv::BackgroundSubtractorMOG2> bgsmog2;
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
+    cv::Ptr<cv::TrackerMIL> trackerMIL;
+#endif
+#endif
     cv::Ptr<cv::Stitcher> stitcher;
     cv::Ptr<cv::SimpleBlobDetector> sbdetector;
     cv::Ptr<cv::StereoBM> stereobm;
@@ -524,6 +539,11 @@ typedef struct {
     Tcl_Command cmd_flannbasedmatcher;
     Tcl_Command cmd_bgsknn;
     Tcl_Command cmd_bgsmog2;
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
+    Tcl_Command cmd_trackerMIL;
+#endif
+#endif
     Tcl_Command cmd_stitcher;
     Tcl_Command cmd_sbdetector;
     Tcl_Command cmd_stereobm;

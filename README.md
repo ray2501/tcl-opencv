@@ -713,6 +713,15 @@ you need build optflow module or disable 2 commands by youself.
 Users should use `::cv::Mat::eye` to create a 3x3 (for `$::Cv::MOTION_HOMOGRAPHY`)
 or 2x3 warpMatrix then pass to `::cv::findTransformECC`.
 
+    cv::TrackerMIL
+    TrackerMIL init matrix x y width height
+    TrackerMIL update matrix
+    TrackerMIL close
+
+OpenCV 4.5.1 add `cv::TrackerMIL`.
+
+Please notice, TrackerMIL command will only have 1 instance.
+
 ### photo
 
     ::cv::inpaint matrix inpaintMask inpaintRadius flags

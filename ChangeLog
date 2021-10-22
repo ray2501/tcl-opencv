@@ -1,3 +1,8 @@
+2021-10-21 Danilo Chang
+
+	* Add CV_VERSION_GREATER_OR_EQUAL macro
+	* Implement command: TrackerMIL
+
 2021-10-20 Danilo Chang
 
 	* Try to fix Build fails on 4.5.1 issue
