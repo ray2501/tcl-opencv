@@ -840,6 +840,239 @@ int TrackerMIL(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
+
+
+static void TrackerGOTURN_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->trackerGOTURN) {
+        cvd->trackerGOTURN.release();
+    }
+    cvd->cmd_trackerGOTURN = NULL;
+}
+
+
+static int TrackerGOTURN_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "init",
+        "update",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_INIT,
+        FUNC_UPDATE,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->trackerGOTURN == nullptr) {
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_INIT: {
+            int x = 0, y = 0, width = 0, height = 0;
+            cv::Rect window;
+            cv::Mat *mat1;
+
+            if (objc != 7) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix x y width height");
+                return TCL_ERROR;
+            }
+
+            mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat1) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[3], &x) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[4], &y) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[5], &width) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[6], &height) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                window = cv::Rect(x, y, width, height);
+                cvd->trackerGOTURN->init(*mat1, window);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_UPDATE: {
+            bool retval = false;
+            cv::Rect window;
+            cv::Mat *mat1;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            mat1 = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat1) {
+                return TCL_ERROR;
+            }
+
+            try {
+                retval = cvd->trackerGOTURN->update(*mat1, window);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_Obj *list[5];
+
+            list[0] = Tcl_NewBooleanObj((int) retval);
+            list[1] = Tcl_NewIntObj(window.x);
+            list[2] = Tcl_NewIntObj(window.y);
+            list[3] = Tcl_NewIntObj(window.width);
+            list[4] = Tcl_NewIntObj(window.height);
+
+            Tcl_SetObjResult(interp, Tcl_NewListObj(5, list));
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_trackerGOTURN) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_trackerGOTURN);
+            }
+
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_trackerGOTURN) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_trackerGOTURN, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::TrackerGOTURN", TCL_STATIC);
+            break;
+        }
+
+    }
+
+    return TCL_OK;
+}
+
+
+int TrackerGOTURN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::TrackerGOTURN> trackerGOTURN;
+    cv::TrackerGOTURN::Params parameters = cv::TrackerGOTURN::Params();
+    char *modelBin = NULL, *modelTxt = NULL;
+    int len;
+
+    if (objc != 1 && objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "?modelBin modelTxt?");
+        return TCL_ERROR;
+    }
+
+    if (objc == 3) {
+        modelBin = Tcl_GetStringFromObj(objv[1], &len);
+        if (len < 1) {
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid modelBin");
+        }
+
+        parameters.modelBin = modelBin;
+
+        modelTxt = Tcl_GetStringFromObj(objv[2], &len);
+        if (len < 1) {
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid modelTxt");
+        }
+
+        parameters.modelTxt = modelTxt;
+    }
+
+    try {
+        /*
+         * If users do not sepcify modelBin and modelTxt,
+         * OpenCV will try to find it in current folder.
+         */
+        trackerGOTURN = cv::TrackerGOTURN::create(parameters);
+
+        if (trackerGOTURN == nullptr) {
+            CV_Error(cv::Error::StsNullPtr, "TrackerGOTURN nullptr");
+        }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-trackerGOTURN", -1);
+
+    if (cvd->cmd_trackerGOTURN) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_trackerGOTURN);
+    }
+    cvd->cmd_trackerGOTURN =
+        Tcl_CreateObjCommand(interp, "::cv-trackerGOTURN",
+            (Tcl_ObjCmdProc *) TrackerGOTURN_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) TrackerGOTURN_DESTRUCTOR);
+
+    cvd->trackerGOTURN = trackerGOTURN;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
 #endif
 #endif
 

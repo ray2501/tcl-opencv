@@ -187,6 +187,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->trackerMIL) {
         cvd->trackerMIL.release();
     }
+    if (cvd->trackerGOTURN) {
+        cvd->trackerGOTURN.release();
+    }
 #endif
 #endif
     if (cvd->stitcher) {
@@ -1559,6 +1562,8 @@ Opencv_Init(Tcl_Interp *interp)
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
         { "TrackerMIL",
           (Tcl_ObjCmdProc *) TrackerMIL },
+        { "TrackerGOTURN",
+          (Tcl_ObjCmdProc *) TrackerGOTURN },
 #endif
 #endif
         { "meanShift",

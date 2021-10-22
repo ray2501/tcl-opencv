@@ -722,6 +722,18 @@ OpenCV 4.5.1 add `cv::TrackerMIL`.
 
 Please notice, TrackerMIL command will only have 1 instance.
 
+    cv::TrackerGOTURN ?modelBin modelTxt?
+    TrackerGOTURN init matrix x y width height
+    TrackerGOTURN update matrix
+    TrackerGOTURN close
+
+OpenCV 4.5.1 add `cv::TrackerGOTURN`.
+You can get related files from [OpenCV extra](https://github.com/opencv/opencv_extra/tree/c4219d5eb3105ed8e634278fad312a1a8d2c182d/testdata/tracking) or
+[here](https://github.com/Mogball/goturn-files).
+If uesrs need more info, I think you can check [OpenCV documentation](https://docs.opencv.org/master/d7/d4c/classcv_1_1TrackerGOTURN.html).
+
+Please notice, TrackerGOTURN command will only have 1 instance.
+
 ### photo
 
     ::cv::inpaint matrix inpaintMask inpaintRadius flags

@@ -320,6 +320,7 @@ MODULE_SCOPE int BackgroundSubtractorMOG2(void *cd, Tcl_Interp *interp, int objc
 #ifdef TCL_USE_OPENCV4
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
 MODULE_SCOPE int TrackerMIL(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int TrackerGOTURN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
 #endif
 MODULE_SCOPE int meanShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
@@ -496,6 +497,7 @@ typedef struct {
 #ifdef TCL_USE_OPENCV4
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
     cv::Ptr<cv::TrackerMIL> trackerMIL;
+    cv::Ptr<cv::TrackerGOTURN> trackerGOTURN;
 #endif
 #endif
     cv::Ptr<cv::Stitcher> stitcher;
@@ -542,6 +544,7 @@ typedef struct {
 #ifdef TCL_USE_OPENCV4
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
     Tcl_Command cmd_trackerMIL;
+    Tcl_Command cmd_trackerGOTURN;
 #endif
 #endif
     Tcl_Command cmd_stitcher;

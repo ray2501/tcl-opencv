@@ -1,7 +1,7 @@
 2021-10-22 Danilo Chang
 
 	* Add CV_VERSION_GREATER_OR_EQUAL macro
-	* Implement command: TrackerMIL
+	* Implement command: TrackerMIL, TrackerGOTURN
 
 2021-10-20 Danilo Chang
 
