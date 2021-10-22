@@ -1,4 +1,4 @@
-2021-10-21 Danilo Chang
+2021-10-22 Danilo Chang
 
 	* Add CV_VERSION_GREATER_OR_EQUAL macro
 	* Implement command: TrackerMIL
