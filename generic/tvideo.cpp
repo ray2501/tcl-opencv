@@ -1044,7 +1044,7 @@ int TrackerGOTURN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     try {
         /*
-         * If users do not sepcify modelBin and modelTxt,
+         * If users do not specify modelBin and modelTxt,
          * OpenCV will try to find it in current folder.
          */
         trackerGOTURN = cv::TrackerGOTURN::create(parameters);
