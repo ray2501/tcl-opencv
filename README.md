@@ -1096,6 +1096,21 @@ Users could check
 [official OpenCV documentation](https://docs.opencv.org/master/d6/d0f/group__dnn.html#ga3b34fe7a29494a6a4295c169a7d32422) to know about the different frameworks,
 their model files and the configuration files.
 
+    cv::dnn::TextDetectionModel_EAST model ?config?
+    TextDetectionModel_EAST detect matrix
+    TextDetectionModel_EAST getConfidenceThreshold
+    TextDetectionModel_EAST getNMSThreshold
+    TextDetectionModel_EAST setConfidenceThreshold value
+    TextDetectionModel_EAST setNMSThreshold value
+    TextDetectionModel_EAST setInputParams scalefactor width height mean_color_list ?swapRB crop?
+    TextDetectionModel_EAST close
+
+TextDetectionModel_EAST is the high-level API for text detection DL networks
+compatible with EAST model. OpenCV 4.5.1 add the high-level API.
+
+Model files download links are provided in
+[here](https://github.com/opencv/opencv/blob/34d359fe035a92d48a399c6e6975c77513bd5139/doc/tutorials/dnn/dnn_text_spotting/dnn_text_spotting.markdown).
+
 ### thread support
 
     ::cv::thread::info ?tag?
