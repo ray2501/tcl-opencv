@@ -120,6 +120,11 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
                 delete db;
                 break;
             }
+            case OPENCV_TEXTRECOGNITION: {
+                cv::dnn::TextRecognitionModel *recognizer = (cv::dnn::TextRecognitionModel *) cvo->obj;
+                delete recognizer;
+                break;
+            }
 #endif
 #endif
             case OPENCV_BOWTRAINER: {
@@ -489,6 +494,11 @@ Opencv_DESTRUCTOR(ClientData cd)
             delete db;
             break;
         }
+        case OPENCV_TEXTRECOGNITION: {
+            cv::dnn::TextRecognitionModel *recognizer = (cv::dnn::TextRecognitionModel *) cvo->obj;
+            delete recognizer;
+            break;
+        }
 #endif
 #endif
         case OPENCV_BOWTRAINER: {
@@ -579,6 +589,10 @@ Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj)
     case OPENCV_TEXTDETECTDB:
         prefix = "cv-textdetectdb";
         proc = TEXTDETECT_DB_FUNCTION;
+        break;
+    case OPENCV_TEXTRECOGNITION:
+        prefix = "cv-textrecognition";
+        proc = TEXTRECOGNITION_FUNCTION;
         break;
 #endif
 #endif
@@ -1757,6 +1771,8 @@ Opencv_Init(Tcl_Interp *interp)
           (Tcl_ObjCmdProc *) TextDetectionModel_EAST },
         { "dnn::TextDetectionModel_DB",
           (Tcl_ObjCmdProc *) TextDetectionModel_DB },
+        { "dnn::TextRecognitionModel",
+          (Tcl_ObjCmdProc *) TextRecognitionModel },
 #endif
 #endif
 

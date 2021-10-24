@@ -1124,6 +1124,18 @@ compatible with EAST model. OpenCV 4.5.1 add the high-level API.
 TextDetectionModel_DB is the high-level API for text detection DL networks
 compatible with DB model. OpenCV 4.5.1 add the high-level API.
 
+    cv::dnn::TextRecognitionModel model ?config?
+    TextRecognitionModel recognize matrix
+    TextRecognitionModel getDecodeType
+    TextRecognitionModel getVocabulary
+    TextRecognitionModel setDecodeType value
+    TextRecognitionModel setVocabulary vocabulary
+    TextRecognitionModel setInputParams scalefactor width height mean_color_list swapRB ?crop?
+    TextRecognitionModel close
+
+TextRecognitionModel is the high-level API  for text recognition networks.
+OpenCV 4.5.1 add the high-level API.
+
 Model files download links are provided in
 [here](https://github.com/opencv/opencv/blob/34d359fe035a92d48a399c6e6975c77513bd5139/doc/tutorials/dnn/dnn_text_spotting/dnn_text_spotting.markdown).
 

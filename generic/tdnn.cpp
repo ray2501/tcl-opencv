@@ -1517,6 +1517,372 @@ int TextDetectionModel_DB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
     return TCL_OK;
 }
+
+
+int TEXTRECOGNITION_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Obj *cvo = (Opencv_Obj *)cd;
+    int choice;
+    cv::dnn::TextRecognitionModel *recognizer;
+
+    static const char *FUNC_strs[] = {
+        "recognize",
+        "getDecodeType",
+        "getVocabulary",
+        "setDecodeType",
+        "setVocabulary",
+        "setInputParams",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_recognize,
+        FUNC_getDecodeType,
+        FUNC_getVocabulary,
+        FUNC_setDecodeType,
+        FUNC_setVocabulary,
+        FUNC_setInputParams,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    cd = (void *) cvo->top;
+    recognizer = (cv::dnn::TextRecognitionModel *) cvo->obj;
+    if (!recognizer) {
+        Tcl_Panic("null TextRecognitionModel object");
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_recognize: {
+            cv::Mat *mat;
+            std::string value;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                value = recognizer->recognize(*mat);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewStringObj(value.c_str(), value.length()));
+            break;
+        }
+        case FUNC_getDecodeType: {
+            std::string value;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = recognizer->getDecodeType();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewStringObj(value.c_str(), value.length()));
+            break;
+        }
+        case FUNC_getVocabulary: {
+            std::vector<std::string> vocabulary;
+            Tcl_Obj *listPtr;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                vocabulary = recognizer->getVocabulary();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            listPtr = Tcl_NewListObj(vocabulary.size(), NULL);
+            for (size_t i = 0; i < vocabulary.size(); i++) {
+                std::string value = vocabulary[i];
+                Tcl_ListObjAppendElement(NULL, listPtr, Tcl_NewStringObj(value.c_str(), value.length()));
+            }
+
+            Tcl_SetObjResult(interp, listPtr);
+
+            break;
+        }
+        case FUNC_setDecodeType: {
+            char *value = NULL;
+            int len = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            value = Tcl_GetStringFromObj(objv[2], &len);
+            if (len < 1) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid value");
+            }
+
+            try {
+                /*
+                 * The decoding method of translating the network output into string:
+                 * {'CTC-greedy': greedy decoding for the output of CTC-based methods}
+                 */
+                *recognizer = recognizer->setDecodeType(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setVocabulary: {
+            std::vector<std::string> vocabulary;
+            int count = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "vocabulary");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+            }
+
+            if (count == 0) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty list");
+            } else {
+                Tcl_Obj *elemListPtr = NULL;
+                char *vocstring = NULL;
+                int len = 0;
+
+                for (int i = 0; i < count; i++) {
+                    Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
+                    vocstring = Tcl_GetStringFromObj(elemListPtr, &len);
+                    if (len < 1) {
+                        return TCL_ERROR;
+                    }
+
+                    vocabulary.push_back(vocstring);
+                }
+            }
+
+            try {
+                *recognizer = recognizer->setVocabulary(vocabulary);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setInputParams: {
+            double scalefactor = 1.0, B = 0, G = 0, R = 0, A = 0;;
+            int width = 0, height = 0, swapRB = 0, crop = 0, count = 0;
+
+            if (objc != 7 && objc != 8) {
+                Tcl_WrongNumArgs(interp, 1, objv,
+                                "scalefactor width height mean_color_list swapRB ?crop?");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &scalefactor) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[3], &width) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[4], &height) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_ListObjLength(interp, objv[5], &count) != TCL_OK) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+            }
+
+            if (count != 4) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
+            } else {
+                Tcl_Obj *elemListPtr = NULL;
+
+                Tcl_ListObjIndex(interp, objv[5], 0, &elemListPtr);
+                if (Tcl_GetDoubleFromObj(interp, elemListPtr, &B) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                Tcl_ListObjIndex(interp, objv[5], 1, &elemListPtr);
+                if (Tcl_GetDoubleFromObj(interp, elemListPtr, &G) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                Tcl_ListObjIndex(interp, objv[5], 2, &elemListPtr);
+                if (Tcl_GetDoubleFromObj(interp, elemListPtr, &R) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                Tcl_ListObjIndex(interp, objv[5], 3, &elemListPtr);
+                if (Tcl_GetDoubleFromObj(interp, elemListPtr, &A) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            if (Tcl_GetBooleanFromObj(interp, objv[6], &swapRB) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (objc == 8) {
+                if (Tcl_GetBooleanFromObj(interp, objv[7], &crop) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                cv::Scalar color(B, G, R, A);
+                cv::Size size(width, height);
+
+                recognizer->setInputParams(scalefactor, size, color, (bool) swapRB, (bool) crop);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Opencv_CloseHandle(interp, cvo);
+
+            break;
+        }
+        case FUNC__COMMAND: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            Tcl_GetCommandFullName(interp, cvo->cmd, obj);
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__NAME: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewStringObj(cvo->key, -1));
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::dnn:TextRecognitionModel", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int TextRecognitionModel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    char *model = NULL, *config = NULL;
+    int len = 0;
+    Tcl_Obj *pResultStr = NULL;
+    cv::dnn::TextRecognitionModel *recognizer;
+    Tcl_DString ds1, ds2;
+
+    if (objc != 2 && objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "model ?config?");
+        return TCL_ERROR;
+    }
+
+    model = Tcl_GetStringFromObj(objv[1], &len);
+    if (len < 1) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid model name");
+    }
+    model = Tcl_UtfToExternalDString(NULL, model, len, &ds1);
+
+    if (objc == 3) {
+        config = Tcl_GetStringFromObj(objv[2], &len);
+        if (len < 1) {
+            Tcl_DStringFree(&ds1);
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid config name");
+        }
+        config = Tcl_UtfToExternalDString(NULL, config, len, &ds2);
+    } else {
+        Tcl_DStringInit(&ds2);
+    }
+
+    try {
+        if (objc == 2) {
+            recognizer = new cv::dnn::TextRecognitionModel(model);
+        } else {
+            recognizer = new cv::dnn::TextRecognitionModel(model, config);
+        }
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+    Tcl_DStringFree(&ds1);
+    Tcl_DStringFree(&ds2);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_TEXTRECOGNITION, recognizer);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
 #endif
 #endif /* TCL_USE_OPENCV4 */
 
