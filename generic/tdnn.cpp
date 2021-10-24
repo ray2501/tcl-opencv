@@ -903,9 +903,9 @@ int TEXTDETECT_EAST_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
             double scalefactor = 1.0, B = 0, G = 0, R = 0, A = 0;;
             int width = 0, height = 0, swapRB = 0, crop = 0, count = 0;
 
-            if (objc != 6 && objc != 8) {
+            if (objc != 7 && objc != 8) {
                 Tcl_WrongNumArgs(interp, 1, objv,
-                                "scalefactor width height mean_color_list ?swapRB crop?");
+                                "scalefactor width height mean_color_list swapRB ?crop?");
                 return TCL_ERROR;
             }
 
@@ -951,11 +951,11 @@ int TEXTDETECT_EAST_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
                 }
             }
 
-            if (objc == 8) {
-                if (Tcl_GetBooleanFromObj(interp, objv[6], &swapRB) != TCL_OK) {
-                    return TCL_ERROR;
-                }
+            if (Tcl_GetBooleanFromObj(interp, objv[6], &swapRB) != TCL_OK) {
+                return TCL_ERROR;
+            }
 
+            if (objc == 8) {
                 if (Tcl_GetBooleanFromObj(interp, objv[7], &crop) != TCL_OK) {
                     return TCL_ERROR;
                 }

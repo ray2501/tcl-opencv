@@ -1102,7 +1102,7 @@ their model files and the configuration files.
     TextDetectionModel_EAST getNMSThreshold
     TextDetectionModel_EAST setConfidenceThreshold value
     TextDetectionModel_EAST setNMSThreshold value
-    TextDetectionModel_EAST setInputParams scalefactor width height mean_color_list ?swapRB crop?
+    TextDetectionModel_EAST setInputParams scalefactor width height mean_color_list swapRB ?crop?
     TextDetectionModel_EAST close
 
 TextDetectionModel_EAST is the high-level API for text detection DL networks
