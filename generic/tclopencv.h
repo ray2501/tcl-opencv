@@ -436,6 +436,7 @@ MODULE_SCOPE int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 MODULE_SCOPE int dnn_NMSBoxes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
 MODULE_SCOPE int TextDetectionModel_EAST(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int TextDetectionModel_DB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
 #endif
 
@@ -469,6 +470,7 @@ typedef enum {
     OPENCV_QDETECT,
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
     OPENCV_TEXTDETECTEAST,
+    OPENCV_TEXTDETECTDB,
 #endif
 #endif
     OPENCV_BOWTRAINER,
@@ -628,6 +630,7 @@ MODULE_SCOPE int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc,
 MODULE_SCOPE int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
 MODULE_SCOPE int TEXTDETECT_EAST_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int TEXTDETECT_DB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
 #endif
 MODULE_SCOPE int BOWKMeansTrainer_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

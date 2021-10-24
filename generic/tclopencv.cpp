@@ -115,6 +115,11 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
                 delete east;
                 break;
             }
+            case OPENCV_TEXTDETECTDB: {
+                cv::dnn::TextDetectionModel_DB *db = (cv::dnn::TextDetectionModel_DB *) cvo->obj;
+                delete db;
+                break;
+            }
 #endif
 #endif
             case OPENCV_BOWTRAINER: {
@@ -479,6 +484,11 @@ Opencv_DESTRUCTOR(ClientData cd)
             delete east;
             break;
         }
+        case OPENCV_TEXTDETECTDB: {
+            cv::dnn::TextDetectionModel_DB *db = (cv::dnn::TextDetectionModel_DB *) cvo->obj;
+            delete db;
+            break;
+        }
 #endif
 #endif
         case OPENCV_BOWTRAINER: {
@@ -565,6 +575,10 @@ Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj)
     case OPENCV_TEXTDETECTEAST:
         prefix = "cv-textdetecteast";
         proc = TEXTDETECT_EAST_FUNCTION;
+        break;
+    case OPENCV_TEXTDETECTDB:
+        prefix = "cv-textdetectdb";
+        proc = TEXTDETECT_DB_FUNCTION;
         break;
 #endif
 #endif
@@ -1741,6 +1755,8 @@ Opencv_Init(Tcl_Interp *interp)
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
         { "dnn::TextDetectionModel_EAST",
           (Tcl_ObjCmdProc *) TextDetectionModel_EAST },
+        { "dnn::TextDetectionModel_DB",
+          (Tcl_ObjCmdProc *) TextDetectionModel_DB },
 #endif
 #endif
 

@@ -1,3 +1,7 @@
+2021-10-24 Danilo Chang
+
+	* Implement command: TextDetectionModel_DB
+
 2021-10-23 Danilo Chang
 
 	* Implement command: TextDetectionModel_EAST

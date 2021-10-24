@@ -1074,6 +1074,449 @@ int TextDetectionModel_EAST(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
     return TCL_OK;
 }
+
+
+int TEXTDETECT_DB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Obj *cvo = (Opencv_Obj *)cd;
+    int choice;
+    cv::dnn::TextDetectionModel_DB *db;
+
+    static const char *FUNC_strs[] = {
+        "detect",
+        "getBinaryThreshold",
+        "getMaxCandidates",
+        "getPolygonThreshold",
+        "getUnclipRatio",
+        "setBinaryThreshold",
+        "setMaxCandidates",
+        "setPolygonThreshold",
+        "setUnclipRatio",
+        "setInputParams",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_detect,
+        FUNC_getBinaryThreshold,
+        FUNC_getMaxCandidates,
+        FUNC_getPolygonThreshold,
+        FUNC_getUnclipRatio,
+        FUNC_setBinaryThreshold,
+        FUNC_setMaxCandidates,
+        FUNC_setPolygonThreshold,
+        FUNC_setUnclipRatio,
+        FUNC_setInputParams,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    cd = (void *) cvo->top;
+    db = (cv::dnn::TextDetectionModel_DB *) cvo->obj;
+    if (!db) {
+        Tcl_Panic("null TextDetectionModel_DB object");
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_detect: {
+            cv::Mat *mat;
+            std::vector<std::vector<cv::Point>> detections;
+            std::vector<float> confidences;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                db->detect(*mat, detections, confidences);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_Obj *list[2];
+
+            list[0] =  Tcl_NewListObj(detections.size(), NULL);
+            for (size_t i = 0; i < detections.size(); i++) {
+                Tcl_Obj *pListResultStr = Tcl_NewListObj(0, NULL);
+
+                for (size_t j = 0; j < detections[i].size(); j++) {
+                    Tcl_ListObjAppendElement(NULL, pListResultStr, Tcl_NewIntObj(detections[i][j].x));
+                    Tcl_ListObjAppendElement(NULL, pListResultStr, Tcl_NewIntObj(detections[i][j].y));
+                }
+
+                Tcl_ListObjAppendElement(NULL, list[0], pListResultStr);
+            }
+
+            list[1] =  Tcl_NewListObj(confidences.size(), NULL);
+            for (size_t i = 0; i < confidences.size(); i++) {
+                Tcl_ListObjAppendElement(NULL, list[1], Tcl_NewDoubleObj(confidences[i]));
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
+            break;
+        }
+        case FUNC_getBinaryThreshold: {
+            double value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = db->getBinaryThreshold();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getMaxCandidates: {
+            int value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = db->getMaxCandidates();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewIntObj(value));
+            break;
+        }
+        case FUNC_getPolygonThreshold: {
+            double value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = db->getPolygonThreshold();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_getUnclipRatio: {
+            double value = 0;
+
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            try {
+                value = db->getUnclipRatio();
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewDoubleObj(value));
+            break;
+        }
+        case FUNC_setBinaryThreshold: {
+            double value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                *db = db->setBinaryThreshold((float) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setMaxCandidates: {
+            int value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                *db = db->setMaxCandidates(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setPolygonThreshold: {
+            double value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                *db = db->setPolygonThreshold((float) value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setUnclipRatio: {
+            double value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                *db = db->setUnclipRatio(value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setInputParams: {
+            double scalefactor = 1.0, B = 0, G = 0, R = 0, A = 0;;
+            int width = 0, height = 0, swapRB = 0, crop = 0, count = 0;
+
+            if (objc != 7 && objc != 8) {
+                Tcl_WrongNumArgs(interp, 1, objv,
+                                "scalefactor width height mean_color_list swapRB ?crop?");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &scalefactor) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[3], &width) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[4], &height) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_ListObjLength(interp, objv[5], &count) != TCL_OK) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+            }
+
+            if (count != 4) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid color data");
+            } else {
+                Tcl_Obj *elemListPtr = NULL;
+
+                Tcl_ListObjIndex(interp, objv[5], 0, &elemListPtr);
+                if (Tcl_GetDoubleFromObj(interp, elemListPtr, &B) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                Tcl_ListObjIndex(interp, objv[5], 1, &elemListPtr);
+                if (Tcl_GetDoubleFromObj(interp, elemListPtr, &G) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                Tcl_ListObjIndex(interp, objv[5], 2, &elemListPtr);
+                if (Tcl_GetDoubleFromObj(interp, elemListPtr, &R) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                Tcl_ListObjIndex(interp, objv[5], 3, &elemListPtr);
+                if (Tcl_GetDoubleFromObj(interp, elemListPtr, &A) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            if (Tcl_GetBooleanFromObj(interp, objv[6], &swapRB) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (objc == 8) {
+                if (Tcl_GetBooleanFromObj(interp, objv[7], &crop) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                cv::Scalar color(B, G, R, A);
+                cv::Size size(width, height);
+
+                db->setInputParams(scalefactor, size, color, (bool) swapRB, (bool) crop);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Opencv_CloseHandle(interp, cvo);
+
+            break;
+        }
+        case FUNC__COMMAND: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            Tcl_GetCommandFullName(interp, cvo->cmd, obj);
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__NAME: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewStringObj(cvo->key, -1));
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::dnn:TextDetectionModel_DB", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int TextDetectionModel_DB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    char *model = NULL, *config = NULL;
+    int len = 0;
+    Tcl_Obj *pResultStr = NULL;
+    cv::dnn::TextDetectionModel_DB *db;
+    Tcl_DString ds1, ds2;
+
+    if (objc != 2 && objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "model ?config?");
+        return TCL_ERROR;
+    }
+
+    model = Tcl_GetStringFromObj(objv[1], &len);
+    if (len < 1) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid model name");
+    }
+    model = Tcl_UtfToExternalDString(NULL, model, len, &ds1);
+
+    if (objc == 3) {
+        config = Tcl_GetStringFromObj(objv[2], &len);
+        if (len < 1) {
+            Tcl_DStringFree(&ds1);
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid config name");
+        }
+        config = Tcl_UtfToExternalDString(NULL, config, len, &ds2);
+    } else {
+        Tcl_DStringInit(&ds2);
+    }
+
+    try {
+        if (objc == 2) {
+            db = new cv::dnn::TextDetectionModel_DB(model);
+        } else {
+            db = new cv::dnn::TextDetectionModel_DB(model, config);
+        }
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+    Tcl_DStringFree(&ds1);
+    Tcl_DStringFree(&ds2);
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_TEXTDETECTDB, db);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
 #endif
 #endif /* TCL_USE_OPENCV4 */
 

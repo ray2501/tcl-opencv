@@ -1108,6 +1108,22 @@ their model files and the configuration files.
 TextDetectionModel_EAST is the high-level API for text detection DL networks
 compatible with EAST model. OpenCV 4.5.1 add the high-level API.
 
+    cv::dnn::TextDetectionModel_DB model ?config?
+    TextDetectionModel_DB detect matrix
+    TextDetectionModel_DB getBinaryThreshold
+    TextDetectionModel_DB getMaxCandidates
+    TextDetectionModel_DB getPolygonThreshold
+    TextDetectionModel_DB getUnclipRatio
+    TextDetectionModel_DB setBinaryThreshold value
+    TextDetectionModel_DB setMaxCandidates value
+    TextDetectionModel_DB setPolygonThreshold value
+    TextDetectionModel_DB setUnclipRatio value
+    TextDetectionModel_DB setInputParams scalefactor width height mean_color_list swapRB ?crop?
+    TextDetectionModel_DB close
+
+TextDetectionModel_DB is the high-level API for text detection DL networks
+compatible with DB model. OpenCV 4.5.1 add the high-level API.
+
 Model files download links are provided in
 [here](https://github.com/opencv/opencv/blob/34d359fe035a92d48a399c6e6975c77513bd5139/doc/tutorials/dnn/dnn_text_spotting/dnn_text_spotting.markdown).
 
