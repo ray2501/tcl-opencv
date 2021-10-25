@@ -734,6 +734,17 @@ If uesrs need more info, I think you can check [OpenCV documentation](https://do
 
 Please notice, TrackerGOTURN command will only have 1 instance.
 
+    cv::TrackerDaSiamRPN ?-model value? ?-kernel_cls1 value? ?-kernel_r1 value? ?-backend value? ?-target value?
+    TrackerDaSiamRPN init matrix x y width height
+    TrackerDaSiamRPN update matrix
+    TrackerDaSiamRPN getTrackingScore
+    TrackerDaSiamRPN close
+
+OpenCV 4.5.3 add `cv::TrackerDaSiamRPN`. You can get links to onnx models from
+[C++ sample](https://github.com/opencv/opencv/blob/61359a5bd05fc6f808644c7a1e73ca2e47e0e9fe/samples/dnn/dasiamrpn_tracker.cpp).
+
+Please notice, TrackerDaSiamRPN command will only have 1 instance.
+
 ### photo
 
     ::cv::inpaint matrix inpaintMask inpaintRadius flags

@@ -1,3 +1,7 @@
+2021-10-25 Danilo Chang
+
+	* Implement command: TrackerDaSiamRPN
+
 2021-10-24 Danilo Chang
 
 	* Implement command: TextDetectionModel_DB, TextRecognitionModel

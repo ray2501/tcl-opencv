@@ -208,6 +208,11 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
         cvd->trackerGOTURN.release();
     }
 #endif
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 3)
+    if (cvd->trackerDaSiamRPN) {
+        cvd->trackerDaSiamRPN.release();
+    }
+#endif
 #endif
     if (cvd->stitcher) {
         cvd->stitcher.release();
@@ -1612,6 +1617,10 @@ Opencv_Init(Tcl_Interp *interp)
           (Tcl_ObjCmdProc *) TrackerMIL },
         { "TrackerGOTURN",
           (Tcl_ObjCmdProc *) TrackerGOTURN },
+#endif
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 3)
+        { "TrackerDaSiamRPN",
+          (Tcl_ObjCmdProc *) TrackerDaSiamRPN },
 #endif
 #endif
         { "meanShift",

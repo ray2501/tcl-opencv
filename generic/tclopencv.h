@@ -322,6 +322,9 @@ MODULE_SCOPE int BackgroundSubtractorMOG2(void *cd, Tcl_Interp *interp, int objc
 MODULE_SCOPE int TrackerMIL(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int TrackerGOTURN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 3)
+MODULE_SCOPE int TrackerDaSiamRPN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
 #endif
 MODULE_SCOPE int meanShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int CamShift(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
@@ -509,6 +512,9 @@ typedef struct {
     cv::Ptr<cv::TrackerMIL> trackerMIL;
     cv::Ptr<cv::TrackerGOTURN> trackerGOTURN;
 #endif
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 3)
+    cv::Ptr<cv::TrackerDaSiamRPN> trackerDaSiamRPN;
+#endif
 #endif
     cv::Ptr<cv::Stitcher> stitcher;
     cv::Ptr<cv::SimpleBlobDetector> sbdetector;
@@ -555,6 +561,9 @@ typedef struct {
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
     Tcl_Command cmd_trackerMIL;
     Tcl_Command cmd_trackerGOTURN;
+#endif
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 3)
+    Tcl_Command cmd_trackerDaSiamRPN;
 #endif
 #endif
     Tcl_Command cmd_stitcher;
