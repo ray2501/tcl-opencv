@@ -1020,6 +1020,7 @@ int TrackerGOTURN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     cv::TrackerGOTURN::Params parameters = cv::TrackerGOTURN::Params();
     char *modelBin = NULL, *modelTxt = NULL;
     int len;
+    Tcl_DString ds1, ds2;
 
     if (objc != 1 && objc != 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "?modelBin modelTxt?");
@@ -1032,13 +1033,16 @@ int TrackerGOTURN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid modelBin");
         }
 
+        modelBin = Tcl_UtfToExternalDString(NULL, modelBin, len, &ds1);
         parameters.modelBin = modelBin;
 
         modelTxt = Tcl_GetStringFromObj(objv[2], &len);
         if (len < 1) {
+            Tcl_DStringFree(&ds1);
             return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid modelTxt");
         }
 
+        modelTxt = Tcl_UtfToExternalDString(NULL, modelTxt, len, &ds2);
         parameters.modelTxt = modelTxt;
     }
 
@@ -1053,10 +1057,17 @@ int TrackerGOTURN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             CV_Error(cv::Error::StsNullPtr, "TrackerGOTURN nullptr");
         }
     } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
         return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
         return Opencv_Exc2Tcl(interp, NULL);
     }
+
+    Tcl_DStringFree(&ds1);
+    Tcl_DStringFree(&ds2);
 
     pResultStr = Tcl_NewStringObj("::cv-trackerGOTURN", -1);
 
