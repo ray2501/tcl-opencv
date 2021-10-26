@@ -722,6 +722,144 @@ int dnn_NMSBoxes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 4)
+int dnn_softNMSBoxes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    std::vector<cv::Rect> bboxes;
+    std::vector<float> scores;
+    std::vector<float> updated_scores;
+    double  score_threshold;
+    double  nms_threshold;
+    std::vector<int> indices;
+    double sigma = 0.5;
+    int top_k = 0, method = (int) cv::dnn::SoftNMSMethod::SOFTNMS_GAUSSIAN, count = 0;
+
+    if (objc != 5 && objc != 8) {
+        Tcl_WrongNumArgs(interp, 1, objv, "bboxes scores score_threshold nms_threshold ?top_k sigma method?");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_ListObjLength(interp, objv[1], &count) != TCL_OK) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+    }
+
+    if (count == 0) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty bboxes list");
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+        int subCount = 0;
+
+        for (int i = 0; i < count; i++) {
+            Tcl_ListObjIndex(interp, objv[1], i, &elemListPtr);
+
+            if (Tcl_ListObjLength(interp, elemListPtr, &subCount) != TCL_OK) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+            }
+
+            if (subCount != 4) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid rect list");
+            } else {
+                Tcl_Obj *elemSubListPtr = NULL;
+                int left = 0, top = 0, width = 0, height = 0;
+
+                Tcl_ListObjIndex(interp, elemListPtr, 0, &elemSubListPtr);
+                if (Tcl_GetIntFromObj(interp, elemSubListPtr, &left) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                Tcl_ListObjIndex(interp, elemListPtr, 1, &elemSubListPtr);
+                if (Tcl_GetIntFromObj(interp, elemSubListPtr, &top) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                Tcl_ListObjIndex(interp, elemListPtr, 2, &elemSubListPtr);
+                if (Tcl_GetIntFromObj(interp, elemSubListPtr, &width) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                Tcl_ListObjIndex(interp, elemListPtr, 3, &elemSubListPtr);
+                if (Tcl_GetIntFromObj(interp, elemSubListPtr, &height) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                bboxes.push_back(cv::Rect(left, top, width, height));
+            }
+        }
+    }
+
+    if (Tcl_ListObjLength(interp, objv[2], &count) != TCL_OK) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid list data");
+    }
+
+    if (count == 0) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty scores list");
+    } else {
+        Tcl_Obj *elemListPtr = NULL;
+        double score = 0;
+
+        for (int i = 0; i < count; i++) {
+            Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
+            if (Tcl_GetDoubleFromObj(interp, elemListPtr, &score) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            scores.push_back((float) score);
+        }
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[3], &score_threshold) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetDoubleFromObj(interp, objv[4], &nms_threshold) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 8) {
+        if (Tcl_GetIntFromObj(interp, objv[5], &top_k) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[6], &sigma) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[7], &method) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    try {
+        cv::dnn::softNMSBoxes(bboxes, scores, updated_scores,
+                        (float) score_threshold,
+                        (float) nms_threshold,
+                        indices, top_k, (float) sigma,
+                        (cv::dnn::SoftNMSMethod) method);
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    Tcl_Obj *list[2];
+
+    list[0] =  Tcl_NewListObj(updated_scores.size(), NULL);
+    for (size_t i = 0; i < updated_scores.size(); i++) {
+        Tcl_ListObjAppendElement(NULL, list[0], Tcl_NewDoubleObj(updated_scores[i]));
+    }
+
+    list[1] =  Tcl_NewListObj(indices.size(), NULL);
+    for (size_t i = 0; i < indices.size(); i++) {
+        Tcl_ListObjAppendElement(NULL, list[1], Tcl_NewIntObj(indices[i]));
+    }
+
+    Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
+
+    return TCL_OK;
+}
+#endif
+
+
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
 int TEXTDETECT_EAST_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {

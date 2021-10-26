@@ -1090,6 +1090,7 @@ Please notice, TrainData command will only have 1 instance.
     ::cv::dnn::blobFromImage matrix scalefactor width height mean_color_list swapRB crop
     ::cv::dnn::readNet model ?config framework?
     ::cv::dnn::NMSBoxes bboxes scores score_threshold nms_threshold ?eta top_k?
+    ::cv::dnn::softNMSBoxes bboxes scores score_threshold nms_threshold ?top_k sigma method?
     READNET getLayerNames
     READNET getUnconnectedOutLayers
     READNET getUnconnectedOutLayersNames
@@ -1099,6 +1100,8 @@ Please notice, TrainData command will only have 1 instance.
     READNET forward ?name?
     READNET forwardWithNames outBlobNames
     READNET close
+
+OpenCV 4.5.4 add `::cv::dnn::softNMSBoxes`.
 
 If you want to know supported framework, you can check
 [Deep Learning in OpenCV](https://github.com/opencv/opencv/wiki/Deep-Learning-in-OpenCV).
@@ -2068,6 +2071,11 @@ READNET `setPreferableTarget` targetId -
     ::cv::dnn::DNN_TARGET_CUDA
     ::cv::dnn::DNN_TARGET_CUDA_FP16
     ::cv::dnn::DNN_TARGET_HDDL
+
+`cv::dnn::softNMSBoxes` method -
+
+    cv::dnn::SOFTNMS_LINEAR
+    cv::dnn::SOFTNMS_GAUSSIAN
 
 Examples
 =====

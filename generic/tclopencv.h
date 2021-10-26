@@ -437,6 +437,9 @@ MODULE_SCOPE int QRCodeDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj 
 MODULE_SCOPE int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int dnn_NMSBoxes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 4)
+MODULE_SCOPE int dnn_softNMSBoxes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
 MODULE_SCOPE int TextDetectionModel_EAST(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int TextDetectionModel_DB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

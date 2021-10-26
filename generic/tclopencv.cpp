@@ -1775,6 +1775,10 @@ Opencv_Init(Tcl_Interp *interp)
           (Tcl_ObjCmdProc *) dnn_readNet },
         { "dnn::NMSBoxes",
           (Tcl_ObjCmdProc *) dnn_NMSBoxes },
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 4)
+        { "dnn::softNMSBoxes",
+          (Tcl_ObjCmdProc *) dnn_softNMSBoxes },
+#endif
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 1)
         { "dnn::TextDetectionModel_EAST",
           (Tcl_ObjCmdProc *) TextDetectionModel_EAST },
@@ -2914,6 +2918,17 @@ Opencv_Init(Tcl_Interp *interp)
         { "dnn::DNN_TARGET_CUDA", cv::dnn::DNN_TARGET_CUDA },
         { "dnn::DNN_TARGET_CUDA_FP16", cv::dnn::DNN_TARGET_CUDA_FP16 },
         { "dnn::DNN_TARGET_HDDL", cv::dnn::DNN_TARGET_HDDL },
+#endif
+
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 4)
+        /*
+         * DNN softNMSBoxes method
+         */
+
+        { "dnn::SOFTNMS_LINEAR", (int) cv::dnn::SoftNMSMethod::SOFTNMS_LINEAR },
+        { "dnn::SOFTNMS_GAUSSIAN", (int) cv::dnn::SoftNMSMethod::SOFTNMS_GAUSSIAN },
+#endif
 #endif
     };
 
