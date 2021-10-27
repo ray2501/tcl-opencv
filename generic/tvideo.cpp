@@ -1286,8 +1286,13 @@ int TrackerDaSiamRPN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
     cv::Ptr<cv::TrackerDaSiamRPN> trackerDaSiamRPN;
     cv::TrackerDaSiamRPN::Params parameters = cv::TrackerDaSiamRPN::Params();
     char *zArg = NULL;
+    Tcl_DString ds1, ds2, ds3;
 
-   if ((objc&1) != 1) {
+    Tcl_DStringInit(&ds1);
+    Tcl_DStringInit(&ds2);
+    Tcl_DStringInit(&ds3);
+
+    if ((objc&1) != 1) {
         Tcl_WrongNumArgs(interp, 1, objv, "?-model value? ?-kernel_cls1 value? ?-kernel_r1 value? ?-backend value? ?-target value?");
         return TCL_ERROR;
     }
@@ -1301,9 +1306,13 @@ int TrackerDaSiamRPN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
             model = Tcl_GetStringFromObj(objv[i+1], &len);
             if (len < 1) {
+                Tcl_DStringFree(&ds1);
+                Tcl_DStringFree(&ds2);
+                Tcl_DStringFree(&ds3);
                 return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid model");
             }
 
+            model = Tcl_UtfToExternalDString(NULL, model, len, &ds1);
             parameters.model = model;
         } else if (strcmp(zArg, "-kernel_cls1") == 0) {
             char *kernel_cls1;
@@ -1311,9 +1320,13 @@ int TrackerDaSiamRPN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
             kernel_cls1 = Tcl_GetStringFromObj(objv[i+1], &len);
             if (len < 1) {
+                Tcl_DStringFree(&ds1);
+                Tcl_DStringFree(&ds2);
+                Tcl_DStringFree(&ds3);
                 return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid kernel_cls1");
             }
 
+            kernel_cls1 = Tcl_UtfToExternalDString(NULL, kernel_cls1, len, &ds1);
             parameters.kernel_cls1 = kernel_cls1;
         } else if (strcmp(zArg, "-kernel_r1") == 0) {
             char *kernel_r1;
@@ -1321,13 +1334,20 @@ int TrackerDaSiamRPN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
             kernel_r1 = Tcl_GetStringFromObj(objv[i+1], &len);
             if (len < 1) {
+                Tcl_DStringFree(&ds1);
+                Tcl_DStringFree(&ds2);
+                Tcl_DStringFree(&ds3);
                 return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid kernel_r1");
             }
 
+            kernel_r1 = Tcl_UtfToExternalDString(NULL, kernel_r1, len, &ds1);
             parameters.kernel_r1 = kernel_r1;
         } else if (strcmp(zArg, "-backend") == 0) {
             int value = 0;
             if (Tcl_GetIntFromObj(interp, objv[i+1], &value) != TCL_OK) {
+                Tcl_DStringFree(&ds1);
+                Tcl_DStringFree(&ds2);
+                Tcl_DStringFree(&ds3);
                 return TCL_ERROR;
             }
 
@@ -1335,11 +1355,17 @@ int TrackerDaSiamRPN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         } else if (strcmp(zArg, "-target") == 0) {
             int value = 0;
             if (Tcl_GetIntFromObj(interp, objv[i+1], &value) != TCL_OK) {
+                Tcl_DStringFree(&ds1);
+                Tcl_DStringFree(&ds2);
+                Tcl_DStringFree(&ds3);
                 return TCL_ERROR;
             }
 
             parameters.target = value;
         } else {
+            Tcl_DStringFree(&ds1);
+            Tcl_DStringFree(&ds2);
+            Tcl_DStringFree(&ds3);
             return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid parameter");
         }
     }
@@ -1351,10 +1377,20 @@ int TrackerDaSiamRPN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
             CV_Error(cv::Error::StsNullPtr, "TrackerDaSiamRPN nullptr");
         }
     } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
+        Tcl_DStringFree(&ds3);
         return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
+        Tcl_DStringFree(&ds3);
         return Opencv_Exc2Tcl(interp, NULL);
     }
+
+    Tcl_DStringFree(&ds1);
+    Tcl_DStringFree(&ds2);
+    Tcl_DStringFree(&ds3);
 
     pResultStr = Tcl_NewStringObj("::cv-trackerDaSiamRPN", -1);
 
