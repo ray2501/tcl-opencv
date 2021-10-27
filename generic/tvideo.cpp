@@ -1326,7 +1326,7 @@ int TrackerDaSiamRPN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
                 return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid kernel_cls1");
             }
 
-            kernel_cls1 = Tcl_UtfToExternalDString(NULL, kernel_cls1, len, &ds1);
+            kernel_cls1 = Tcl_UtfToExternalDString(NULL, kernel_cls1, len, &ds2);
             parameters.kernel_cls1 = kernel_cls1;
         } else if (strcmp(zArg, "-kernel_r1") == 0) {
             char *kernel_r1;
@@ -1340,7 +1340,7 @@ int TrackerDaSiamRPN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
                 return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid kernel_r1");
             }
 
-            kernel_r1 = Tcl_UtfToExternalDString(NULL, kernel_r1, len, &ds1);
+            kernel_r1 = Tcl_UtfToExternalDString(NULL, kernel_r1, len, &ds3);
             parameters.kernel_r1 = kernel_r1;
         } else if (strcmp(zArg, "-backend") == 0) {
             int value = 0;
