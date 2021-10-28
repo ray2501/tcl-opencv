@@ -5082,7 +5082,7 @@ int perspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Tcl_NewListObj(0, NULL);
+    pResultStr = Tcl_NewListObj(dst_points.size() * 2, NULL);
     for (size_t i = 0; i < dst_points.size(); i++) {
         Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) dst_points[i].x));
         Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj((int) dst_points[i].y));

@@ -189,9 +189,12 @@ int resizeWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int destroyWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
+    Opencv_Data *cvd = (Opencv_Data *)cd;
     char *winname = NULL;
     int len = 0;
     Tcl_DString ds;
+    Tcl_HashEntry *hashEntryPtr;
+    Tcl_HashSearch search;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "winname");
@@ -213,13 +216,35 @@ int destroyWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         Tcl_DStringFree(&ds);
         return Opencv_Exc2Tcl(interp, NULL);
     }
+
+    for (hashEntryPtr = Tcl_FirstHashEntry(&cvd->tbl[OPENCV_CALLBACK], &search);
+         hashEntryPtr != NULL; hashEntryPtr = Tcl_NextHashEntry(&search)) {
+        Opencv_Obj *cvo = (Opencv_Obj *) Tcl_GetHashValue(hashEntryPtr);
+        CvCallbackInfo *cbinfo = (CvCallbackInfo *) cvo->obj;
+        if (strcmp(Tcl_DStringValue(&cbinfo->winname), winname) == 0) {
+            cvo->top = NULL;
+            cvo->key = NULL;
+            cvo->cmd = NULL;
+            Tcl_DStringFree(&cbinfo->winname);
+            Tcl_DecrRefCount(cbinfo->callback_code);
+            ckfree(cbinfo);
+            ckfree(cvo);
+            Tcl_DeleteHashEntry(hashEntryPtr);
+        }
+    }
+
     Tcl_DStringFree(&ds);
+
     return TCL_OK;
 }
 
 
 int destroyAllWindows(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_HashEntry *hashEntryPtr;
+    Tcl_HashSearch search;
+
     if (objc != 1) {
         Tcl_WrongNumArgs(interp, 0, objv, "destroyAllWindows");
         return TCL_ERROR;
@@ -232,6 +257,21 @@ int destroyAllWindows(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
     } catch (...) {
         return Opencv_Exc2Tcl(interp, NULL);
     }
+
+    for (hashEntryPtr = Tcl_FirstHashEntry(&cvd->tbl[OPENCV_CALLBACK], &search);
+         hashEntryPtr != NULL; hashEntryPtr = Tcl_NextHashEntry(&search)) {
+        Opencv_Obj *cvo = (Opencv_Obj *) Tcl_GetHashValue(hashEntryPtr);
+        CvCallbackInfo *cbinfo = (CvCallbackInfo *) cvo->obj;
+        cvo->top = NULL;
+        cvo->key = NULL;
+        cvo->cmd = NULL;
+        Tcl_DStringFree(&cbinfo->winname);
+        Tcl_DecrRefCount(cbinfo->callback_code);
+        ckfree(cbinfo);
+        ckfree(cvo);
+        Tcl_DeleteHashEntry(hashEntryPtr);
+    }
+
     return TCL_OK;
 }
 
@@ -293,7 +333,7 @@ void CallBackFunc(int event, int x, int y, int flags, void *userdata)
         Tcl_Obj *script_obj[5];
         int i = 0;
 
-        script_obj[0] = Tcl_NewStringObj(callbackinfo->callback_code, -1);
+        script_obj[0] = callbackinfo->callback_code;
         script_obj[1] = Tcl_NewIntObj(event);
         script_obj[2] = Tcl_NewIntObj(x);
         script_obj[3] = Tcl_NewIntObj(y);
@@ -316,7 +356,7 @@ int setMouseCallback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 {
     char *winname = NULL, *callback_code = NULL;
     int len = 0, len2 = 0;
-    CvCallbackInfo *callbackinfo;
+    CvCallbackInfo *callbackinfo = NULL;
     Tcl_DString ds;
 
     if (objc != 3) {
@@ -338,18 +378,29 @@ int setMouseCallback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
     try {
         callbackinfo = (CvCallbackInfo *) ckalloc(sizeof (CvCallbackInfo));
         callbackinfo->interp = interp;
-        callbackinfo->callback_code = callback_code;
+        Tcl_DStringInit(&callbackinfo->winname);
+        Tcl_DStringAppend(&callbackinfo->winname, winname, -1);
+        callbackinfo->callback_code = objv[2];
         callbackinfo->value = 0;
         cv::setMouseCallback(winname, CallBackFunc, callbackinfo);
     } catch (const cv::Exception &ex) {
+        if (callbackinfo != NULL) {
+            Tcl_DStringFree(&callbackinfo->winname);
+            ckfree(callbackinfo);
+        }
         Tcl_DStringFree(&ds);
         return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
+        if (callbackinfo != NULL) {
+            Tcl_DStringFree(&callbackinfo->winname);
+            ckfree(callbackinfo);
+        }
         Tcl_DStringFree(&ds);
         return Opencv_Exc2Tcl(interp, NULL);
     }
     Tcl_DStringFree(&ds);
 
+    Tcl_IncrRefCount(callbackinfo->callback_code);
     Opencv_NewHandle(cd, interp, OPENCV_CALLBACK, callbackinfo);
 
     return TCL_OK;
@@ -363,7 +414,7 @@ void TrackbarCallback(int value, void *userdata)
         Tcl_Obj *script_obj[2];
         int i = 0;
 
-        script_obj[0] = Tcl_NewStringObj(callbackinfo->callback_code, -1);
+        script_obj[0] = callbackinfo->callback_code;
         script_obj[1] = Tcl_NewIntObj(value);
 
         for (i = 0; i < 2; i++) {
@@ -384,7 +435,7 @@ int createTrackbar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     char *trackbarname = NULL, *winname = NULL, *callback_code = NULL;
     int init_value = 0, max_value = 0;
     int len = 0, tlen = 0, wlen = 0;
-    CvCallbackInfo *callbackinfo;
+    CvCallbackInfo *callbackinfo = NULL;
     Tcl_DString ds1, ds2;
 
     if (objc != 6) {
@@ -419,16 +470,26 @@ int createTrackbar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     try {
         callbackinfo = (CvCallbackInfo *) ckalloc(sizeof (CvCallbackInfo));
         callbackinfo->interp = interp;
-        callbackinfo->callback_code = callback_code;
+        Tcl_DStringInit(&callbackinfo->winname);
+        Tcl_DStringAppend(&callbackinfo->winname, winname, -1);
+        callbackinfo->callback_code = objv[5];
         callbackinfo->value = init_value;
 
         cv::createTrackbar(trackbarname, winname, &(callbackinfo->value),
                            max_value, TrackbarCallback, callbackinfo);
     } catch (const cv::Exception &ex) {
+        if (callbackinfo != NULL) {
+            Tcl_DStringFree(&callbackinfo->winname);
+            ckfree(callbackinfo);
+        }
         Tcl_DStringFree(&ds1);
         Tcl_DStringFree(&ds2);
         return Opencv_Exc2Tcl(interp, &ex);
     } catch (...) {
+        if (callbackinfo != NULL) {
+            Tcl_DStringFree(&callbackinfo->winname);
+            ckfree(callbackinfo);
+        }
         Tcl_DStringFree(&ds1);
         Tcl_DStringFree(&ds2);
         return Opencv_Exc2Tcl(interp, NULL);
@@ -436,6 +497,7 @@ int createTrackbar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_DStringFree(&ds1);
     Tcl_DStringFree(&ds2);
 
+    Tcl_IncrRefCount(callbackinfo->callback_code);
     Opencv_NewHandle(cd, interp, OPENCV_CALLBACK, callbackinfo);
 
     return TCL_OK;

@@ -693,16 +693,16 @@ int dnn_NMSBoxes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     try {
-        if (isRect==1) {
+        if (isRect == 1) {
             cv::dnn::NMSBoxes(bboxes, scores,
-                          (float) score_threshold,
-                          (float) nms_threshold,
-                          indices, (float) eta, top_k);
+                              (float) score_threshold,
+                              (float) nms_threshold,
+                              indices, (float) eta, top_k);
         } else {
             cv::dnn::NMSBoxes(bboxes_r, scores,
-                          (float) score_threshold,
-                          (float) nms_threshold,
-                          indices, (float) eta, top_k);
+                              (float) score_threshold,
+                              (float) nms_threshold,
+                              indices, (float) eta, top_k);
         }
     } catch (const cv::Exception &ex) {
         return Opencv_Exc2Tcl(interp, &ex);

@@ -46,6 +46,8 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
             switch ((Opencv_Type) i) {
             case OPENCV_CALLBACK: {
                 CvCallbackInfo *cbinfo = (CvCallbackInfo *) cvo->obj;
+                Tcl_DStringFree(&cbinfo->winname);
+                Tcl_DecrRefCount(cbinfo->callback_code);
                 ckfree(cbinfo);
                 break;
             }
@@ -427,6 +429,8 @@ Opencv_DESTRUCTOR(ClientData cd)
         switch (cvo->type) {
         case OPENCV_CALLBACK: {
             CvCallbackInfo *cbinfo = (CvCallbackInfo *) cvo->obj;
+            Tcl_DStringFree(&cbinfo->winname);
+            Tcl_DecrRefCount(cbinfo->callback_code);
             ckfree(cbinfo);
             break;
         }
