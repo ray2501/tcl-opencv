@@ -1457,7 +1457,44 @@ test opencv-1.95 {col and row test} {*}{
     -result {0}
 }
 
-test opencv-1.96 {Close test} {*}{
+test opencv-1.96 {setMouseCallback} {*}{
+    -body {
+        proc mouse_proc0 {event x y flag} {
+            puts stderr "mouse_proc0 $event $x $y $value"
+        }
+        proc mouse_proc1 {event x y flag} {
+            puts stderr "mouse_proc1 $event $x $y $value"
+        }
+        ::cv::namedWindow "Display"
+        ::cv::setMouseCallback "Display" mouse_proc0
+        ::cv::setMouseCallback "Display" mouse_proc1
+        ::cv::destroyWindow "Display"
+    }
+    -returnCodes ok
+}
+
+test opencv-1.97 {createTrackbar} {*}{
+    -body {
+        proc tb_proc0 {value} {
+            puts stderr "tb_proc0 $value"
+        }
+        proc tb_proc1 {value} {
+            puts stderr "tb_proc1 $value"
+        }
+        set result {}
+        ::cv::namedWindow "Display"
+        ::cv::createTrackbar "TB" "Display" 0 100 tb_proc0
+        lappend result [::cv::getTrackbarPos "TB" "Display"]
+        ::cv::createTrackbar "TB" "Display" 1 99 tb_proc1
+        lappend result [::cv::getTrackbarPos "TB" "Display"]
+        ::cv::destroyWindow "Display"
+        set result
+    }
+    -returnCodes ok
+    -result {0 1}
+}
+
+test opencv-1.98 {Close test} {*}{
     -body {
         ::cv::imwrite output.png $image
         $tmatrix1 close

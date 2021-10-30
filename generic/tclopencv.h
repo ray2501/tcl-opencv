@@ -662,8 +662,10 @@ MODULE_SCOPE int TrainData_CONSTRUCTOR(void *cd, Tcl_Interp *interp, cv::Mat &sa
 #endif
 
 typedef struct CvCallbackInfo {
+    int istb;
     Tcl_Interp *interp;
     Tcl_DString winname;
+    Tcl_DString tbname;
     Tcl_Obj *callback_code;
     int value;
 } CvCallbackInfo;
