@@ -255,6 +255,7 @@ MODULE_SCOPE int imshow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 MODULE_SCOPE int waitKey(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int moveWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int resizeWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int setWindowTitle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int destroyWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int destroyAllWindows(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #ifdef TCL_USE_OPENCV4

@@ -411,6 +411,7 @@ is filename or camera id.
     ::cv::waitKey delay
     ::cv::moveWindow winname x y
     ::cv::resizeWindow winname width height
+    ::cv::setWindowTitle winname title
     ::cv::destroyWindow winname
     ::cv::destroyAllWindows
     ::cv::selectROI matrix ?showCrosshair fromCenter?

@@ -1522,6 +1522,8 @@ Opencv_Init(Tcl_Interp *interp)
           (Tcl_ObjCmdProc *) moveWindow },
         { "resizeWindow",
           (Tcl_ObjCmdProc *) resizeWindow },
+        { "setWindowTitle",
+          (Tcl_ObjCmdProc *) setWindowTitle },
         { "destroyWindow",
           (Tcl_ObjCmdProc *) destroyWindow },
         { "destroyAllWindows",

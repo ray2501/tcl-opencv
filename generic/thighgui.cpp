@@ -187,6 +187,47 @@ int resizeWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+int setWindowTitle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    char *winname = NULL, *title = NULL;
+    int len1 = 0, len2 = 0;
+    Tcl_DString ds1, ds2;
+
+    if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 1, objv, "winname title");
+        return TCL_ERROR;
+    }
+
+    winname = Tcl_GetStringFromObj(objv[1], &len1);
+    if (len1 < 1) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid window name");
+    }
+
+    title = Tcl_GetStringFromObj(objv[2], &len2);
+    if (len2 < 1) {
+        return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid title");
+    }
+
+    winname = Tcl_UtfToExternalDString(NULL, winname, len1, &ds1);
+    title = Tcl_UtfToExternalDString(NULL, title, len2, &ds2);
+    try {
+        cv::setWindowTitle(winname, title);
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+    Tcl_DStringFree(&ds1);
+    Tcl_DStringFree(&ds2);
+
+    return TCL_OK;
+}
+
+
 int destroyWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;
