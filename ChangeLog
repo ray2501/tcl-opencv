@@ -1,5 +1,6 @@
 2021-10-31 Danilo Chang
 
+	* Bump version to v0.12
 	* Implement command: setWindowTitle
 
 2021-10-30 Danilo Chang
