@@ -323,13 +323,13 @@ static int FaceDetectorYN_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
 
 int FaceDetectorYN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    int width = 0, height = 0, top_k = 5000, backend_id = 0, target_id = 0;
-    double score_threshold = 0.9, nms_threshold = 0.3;
     Opencv_Data *cvd = (Opencv_Data *)cd;
     Tcl_Obj *pResultStr = NULL;
     cv::Ptr<cv::FaceDetectorYN> faceDetectorYN;
     char *model = NULL, *config = NULL;
     int len1 = 0, len2 = 0;
+    int width = 0, height = 0, top_k = 5000, backend_id = 0, target_id = 0;
+    double score_threshold = 0.9, nms_threshold = 0.3;
     Tcl_DString ds1, ds2;
 
     if (objc != 5 && objc != 10) {
