@@ -430,6 +430,7 @@ MODULE_SCOPE int HOGDescriptor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 MODULE_SCOPE int QRCodeDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 4)
 MODULE_SCOPE int FaceDetectorYN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+MODULE_SCOPE int FaceRecognizerSF(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
 #endif
 
@@ -524,6 +525,7 @@ typedef struct {
 #endif
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 4)
     cv::Ptr<cv::FaceDetectorYN> faceDetectorYN;
+    cv::Ptr<cv::FaceRecognizerSF> faceRecognizerSF;
 #endif
 #endif
     cv::Ptr<cv::Stitcher> stitcher;
@@ -577,6 +579,7 @@ typedef struct {
 #endif
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 4)
     Tcl_Command cmd_faceDetectorYN;
+    Tcl_Command cmd_faceRecognizerSF;
 #endif
 #endif
     Tcl_Command cmd_stitcher;

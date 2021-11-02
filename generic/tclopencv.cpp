@@ -222,6 +222,9 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
     if (cvd->faceDetectorYN) {
         cvd->faceDetectorYN.release();
     }
+    if (cvd->faceRecognizerSF) {
+        cvd->faceRecognizerSF.release();
+    }
 #endif
 #endif
     if (cvd->stitcher) {
@@ -1723,6 +1726,8 @@ Opencv_Init(Tcl_Interp *interp)
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 4)
         { "FaceDetectorYN",
           (Tcl_ObjCmdProc *) FaceDetectorYN },
+        { "FaceRecognizerSF",
+          (Tcl_ObjCmdProc *) FaceRecognizerSF },
 #endif
 #endif
 
@@ -2801,6 +2806,17 @@ Opencv_Init(Tcl_Interp *interp)
 
         { "PANORAMA", cv::Stitcher::PANORAMA },
         { "SCANS", cv::Stitcher::SCANS },
+
+        /*
+         * FaceRecognizerSF DisType
+         */
+
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 4)
+        { "FR_COSINE", cv::FaceRecognizerSF::DisType::FR_COSINE },
+        { "FR_NORM_L2", cv::FaceRecognizerSF::DisType::FR_NORM_L2 },
+#endif
+#endif
 
         /*
          * ML sample types

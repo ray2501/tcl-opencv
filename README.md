@@ -849,6 +849,15 @@ if encoded QR Code data is long when I test it.
 OpenCV 4.5.4 add `::cv::FaceDetectorYN` (DNN-based face detector).
 Please notice, FaceDetectorYN command will only have 1 instance.
 
+    ::cv::FaceRecognizerSF model config ?backend_id target_id?
+    FaceRecognizerSF alignCrop matrix face_box
+    FaceRecognizerSF feature aligned_img
+    FaceRecognizerSF match face_feature1 face_feature2 ?dis_type?
+    FaceRecognizerSF close
+
+OpenCV 4.5.4 add `::cv::FaceRecognizerSF` (DNN-based face recognizer).
+Please notice, FaceRecognizerSF command will only have 1 instance.
+
 You can check [related tutorial](https://docs.opencv.org/master/d0/dd4/tutorial_dnn_face.html)
 and get model download link.
 
@@ -1981,6 +1990,11 @@ Stitcher mode -
 
     ::cv::PANORAMA
     ::cv::SCANS
+
+`::cv::FaceRecognizerSF` dis_type -
+
+    ::cv::FR_COSINE
+    ::cv::FR_NORM_L2
 
 ML sample types -
 
