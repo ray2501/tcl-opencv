@@ -842,6 +842,16 @@ Please notice, Stitcher command will only have 1 instance.
 Please notice, QRCodeDetector looks like have issues
 if encoded QR Code data is long when I test it.
 
+    ::cv::FaceDetectorYN model config width height ?score_threshold nms_threshold top_k backend_id target_id?
+    FaceDetectorYN detect matrix
+    FaceDetectorYN close
+
+OpenCV 4.5.4 add `::cv::FaceDetectorYN` (DNN-based face detector).
+Please notice, FaceDetectorYN command will only have 1 instance.
+
+You can check [related tutorial](https://docs.opencv.org/master/d0/dd4/tutorial_dnn_face.html)
+and get model download link.
+
 ### ml
 
     ::cv::ml::LogisticRegression

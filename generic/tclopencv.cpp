@@ -218,6 +218,11 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
         cvd->trackerDaSiamRPN.release();
     }
 #endif
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 4)
+    if (cvd->faceDetectorYN) {
+        cvd->faceDetectorYN.release();
+    }
+#endif
 #endif
     if (cvd->stitcher) {
         cvd->stitcher.release();
@@ -1715,6 +1720,10 @@ Opencv_Init(Tcl_Interp *interp)
 #ifdef TCL_USE_OPENCV4
         { "QRCodeDetector",
           (Tcl_ObjCmdProc *) QRCodeDetector },
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 4)
+        { "FaceDetectorYN",
+          (Tcl_ObjCmdProc *) FaceDetectorYN },
+#endif
 #endif
 
         /*

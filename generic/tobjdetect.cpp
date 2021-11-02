@@ -192,6 +192,225 @@ int QRCodeDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     return TCL_OK;
 }
 
+
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 4)
+static void FaceDetectorYN_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->faceDetectorYN) {
+        cvd->faceDetectorYN.release();
+    }
+    cvd->cmd_faceDetectorYN = NULL;
+}
+
+
+static int FaceDetectorYN_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "detect",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_DETECT,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->faceDetectorYN == nullptr) {
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_DETECT: {
+            Tcl_Obj *pResultStr = NULL;
+            cv::Mat *srcmat, *dstmat;
+            cv::Mat faces_matrix;
+            int result = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            srcmat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!srcmat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                result = cvd->faceDetectorYN->detect(*srcmat, faces_matrix);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_Obj *list[2];
+
+            list[0] = Tcl_NewIntObj(result);
+
+            dstmat = new cv::Mat(faces_matrix);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            list[1] = pResultStr;
+
+            Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_faceDetectorYN) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_faceDetectorYN);
+            }
+
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_faceDetectorYN) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_faceDetectorYN, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::FaceDetectorYN", TCL_STATIC);
+            break;
+        }
+
+    }
+
+    return TCL_OK;
+}
+
+
+int FaceDetectorYN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    int width = 0, height = 0, top_k = 5000, backend_id = 0, target_id = 0;
+    double score_threshold = 0.9, nms_threshold = 0.3;
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::FaceDetectorYN> faceDetectorYN;
+    char *model = NULL, *config = NULL;
+    int len1 = 0, len2 = 0;
+    Tcl_DString ds1, ds2;
+
+    if (objc != 5 && objc != 10) {
+        Tcl_WrongNumArgs(interp, 1, objv, "model config width height ?score_threshold nms_threshold top_k backend_id target_id?");
+        return TCL_ERROR;
+    }
+
+    model = Tcl_GetStringFromObj(objv[1], &len1);
+    config = Tcl_GetStringFromObj(objv[2], &len2);
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &width) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[4], &height) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (objc == 10) {
+        if (Tcl_GetDoubleFromObj(interp, objv[5], &score_threshold) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetDoubleFromObj(interp, objv[6], &nms_threshold) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[7], &top_k) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[8], &backend_id) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        if (Tcl_GetIntFromObj(interp, objv[9], &target_id) != TCL_OK) {
+            return TCL_ERROR;
+        }
+    }
+
+    model = Tcl_UtfToExternalDString(NULL, model, len1, &ds1);
+    config = Tcl_UtfToExternalDString(NULL, config, len2, &ds2);
+    try {
+        faceDetectorYN = cv::FaceDetectorYN::create(model, config, cv::Size(width, height),
+                                                    (float) score_threshold,
+                                                    (float) nms_threshold,
+                                                    top_k, backend_id, target_id);
+
+        if (faceDetectorYN == nullptr) {
+            CV_Error(cv::Error::StsNullPtr, "FaceDetectorYN nullptr");
+        }
+    } catch (const cv::Exception &ex) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        Tcl_DStringFree(&ds1);
+        Tcl_DStringFree(&ds2);
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    Tcl_DStringFree(&ds1);
+    Tcl_DStringFree(&ds2);
+
+    pResultStr = Tcl_NewStringObj("::cv-faceDetectorYN", -1);
+
+    if (cvd->cmd_faceDetectorYN) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_faceDetectorYN);
+    }
+    cvd->cmd_faceDetectorYN =
+        Tcl_CreateObjCommand(interp, "::cv-faceDetectorYN",
+            (Tcl_ObjCmdProc *) FaceDetectorYN_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) FaceDetectorYN_DESTRUCTOR);
+
+    cvd->faceDetectorYN = faceDetectorYN;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+#endif
+
 #endif /* TCL_USE_OPENCV4 */
 
 
