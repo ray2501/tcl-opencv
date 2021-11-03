@@ -1171,7 +1171,7 @@ TextRecognitionModel is the high-level API  for text recognition networks.
 OpenCV 4.5.1 add the high-level API.
 
 Model files download links are provided in
-[here](https://github.com/opencv/opencv/blob/34d359fe035a92d48a399c6e6975c77513bd5139/doc/tutorials/dnn/dnn_text_spotting/dnn_text_spotting.markdown).
+[here](https://docs.opencv.org/master/d4/d43/tutorial_dnn_text_spotting.html).
 
 ### thread support
 
