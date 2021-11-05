@@ -8450,7 +8450,7 @@ int INTELLIGENTSMB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
     cd = (void *) cvo->top;
     tool = (::cv::segmentation::IntelligentScissorsMB *) cvo->obj;
     if (!tool) {
-        Tcl_Panic("null TextRecognitionModel object");
+        Tcl_Panic("null IntelligentScissorsMB object");
     }
 
     switch ((enum FUNC_enum)choice) {
