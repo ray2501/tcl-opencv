@@ -131,6 +131,13 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
                 break;
             }
 #endif
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 2)
+            case OPENCV_INTELLIGENTSMB: {
+                cv::segmentation::IntelligentScissorsMB *tool = (cv::segmentation::IntelligentScissorsMB *) cvo->obj;
+                delete tool;
+                break;
+            }
+#endif
 #endif
             case OPENCV_BOWTRAINER: {
                 cv::BOWKMeansTrainer *bowkmeanstrainer = (cv::BOWKMeansTrainer *) cvo->obj;
@@ -523,6 +530,13 @@ Opencv_DESTRUCTOR(ClientData cd)
             break;
         }
 #endif
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 2)
+        case OPENCV_INTELLIGENTSMB: {
+            cv::segmentation::IntelligentScissorsMB *tool = (cv::segmentation::IntelligentScissorsMB *) cvo->obj;
+            delete tool;
+            break;
+        }
+#endif
 #endif
         case OPENCV_BOWTRAINER: {
             cv::BOWKMeansTrainer *bowtrainer = (cv::BOWKMeansTrainer *) cvo->obj;
@@ -616,6 +630,12 @@ Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj)
     case OPENCV_TEXTRECOGNITION:
         prefix = "cv-textrecognition";
         proc = TEXTRECOGNITION_FUNCTION;
+        break;
+#endif
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 2)
+    case OPENCV_INTELLIGENTSMB:
+        prefix = "cv-intelligentsmb";
+        proc = INTELLIGENTSMB_FUNCTION;
         break;
 #endif
 #endif
@@ -1506,6 +1526,12 @@ Opencv_Init(Tcl_Interp *interp)
           (Tcl_ObjCmdProc *) GeneralizedHoughGuil },
         { "LineSegmentDetector",
           (Tcl_ObjCmdProc *) LineSegmentDetector },
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 2)
+        { "segmentation::IntelligentScissorsMB",
+          (Tcl_ObjCmdProc *) IntelligentScissorsMB },
+#endif
+#endif
 
         /*
          * For videoio

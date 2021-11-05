@@ -1,3 +1,7 @@
+2021-11-05 Danilo Chang
+
+	* Implement command: IntelligentScissorsMB
+
 2021-11-02 Danilo Chang
 
 	* Implement command: FaceDetectorYN, FaceRecognizerSF

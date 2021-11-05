@@ -384,6 +384,19 @@ under the MIT licens.
 
 Please notice, LineSegmentDetector command will only have 1 instance.
 
+    ::cv::segmentation::IntelligentScissorsMB
+    IntelligentScissorsMB applyImage matrix
+    IntelligentScissorsMB buildMap x y
+    IntelligentScissorsMB getContour x y ?backward?
+    IntelligentScissorsMB setEdgeFeatureCannyParameters threshold1 threshold2 ?apertureSize L2gradient?
+    IntelligentScissorsMB setEdgeFeatureZeroCrossingParameters gradient_magnitude_min_value
+    IntelligentScissorsMB setGradientMagnitudeMaxLimit gradient_magnitude_threshold_max
+    IntelligentScissorsMB setWeights weight_non_edge weight_gradient_direction weight_gradient_magnitude
+    IntelligentScissorsMB close
+
+OpenCV 4.5.2 add `::cv::segmentation::IntelligentScissorsMB`.
+It is used to find the path (contour) between two points which can be used for image segmentation.
+
 ### videoio
 
     ::cv::VideoCapture file/index filename/number ?flags?

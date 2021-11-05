@@ -8399,6 +8399,342 @@ int LineSegmentDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
     Tcl_SetObjResult(interp, pResultStr);
     return TCL_OK;
 }
+
+
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 2)
+int INTELLIGENTSMB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Obj *cvo = (Opencv_Obj *)cd;
+    int choice;
+    ::cv::segmentation::IntelligentScissorsMB *tool;
+
+    static const char *FUNC_strs[] = {
+        "applyImage",
+        "buildMap",
+        "getContour",
+        "setEdgeFeatureCannyParameters",
+        "setEdgeFeatureZeroCrossingParameters",
+        "setGradientMagnitudeMaxLimit",
+        "setWeights",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_applyImage,
+        FUNC_buildMap,
+        FUNC_getContour,
+        FUNC_setEdgeFeatureCannyParameters,
+        FUNC_setEdgeFeatureZeroCrossingParameters,
+        FUNC_setGradientMagnitudeMaxLimit,
+        FUNC_setWeights,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    cd = (void *) cvo->top;
+    tool = (::cv::segmentation::IntelligentScissorsMB *) cvo->obj;
+    if (!tool) {
+        Tcl_Panic("null TextRecognitionModel object");
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_applyImage: {
+            cv::Mat *mat;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!mat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                *tool = tool->applyImage(*mat);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_buildMap: {
+            int x = 0, y = 0;
+
+            if (objc != 4) {
+                Tcl_WrongNumArgs(interp, 2, objv, "x y");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &x) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[3], &y) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                cv::Point point(x, y);
+                tool->buildMap(point);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_getContour: {
+            int x = 0, y = 0;
+            int backward = 0;
+            std::vector<cv::Point> contour;
+            Tcl_Obj *pResultStr = NULL;
+
+            if (objc != 4 && objc != 5) {
+                Tcl_WrongNumArgs(interp, 2, objv, "x y ?backward?");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[2], &x) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetIntFromObj(interp, objv[3], &y) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (objc == 5) {
+                if (Tcl_GetBooleanFromObj(interp, objv[4], &backward) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                cv::Point point(x, y);
+                tool->getContour(point, contour, (bool) backward);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            pResultStr = Tcl_NewListObj(contour.size() * 2, NULL);
+            for (size_t i = 0; i < contour.size(); i++) {
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(contour.at(i).x));
+                Tcl_ListObjAppendElement(NULL, pResultStr, Tcl_NewIntObj(contour.at(i).y));
+            }
+
+            Tcl_SetObjResult(interp, pResultStr);
+            break;
+        }
+        case FUNC_setEdgeFeatureCannyParameters: {
+            double threshold1 = 0, threshold2 = 0;
+            int apertureSize = 3, L2gradient = 0;
+
+            if (objc != 4 && objc != 6) {
+                Tcl_WrongNumArgs(interp, 2, objv, "threshold1 threshold2 ?apertureSize L2gradient?");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &threshold1) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[3], &threshold2) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (objc == 6) {
+                if (Tcl_GetIntFromObj(interp, objv[4], &apertureSize) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+
+                if (Tcl_GetBooleanFromObj(interp, objv[5], &L2gradient) != TCL_OK) {
+                    return TCL_ERROR;
+                }
+            }
+
+            try {
+                *tool = tool->setEdgeFeatureCannyParameters((float) threshold1,
+                                                            (float) threshold2,
+                                                            apertureSize,
+                                                            (bool) L2gradient);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setEdgeFeatureZeroCrossingParameters: {
+            double gradient_magnitude_min_value = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "gradient_magnitude_min_value");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &gradient_magnitude_min_value) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                *tool = tool->setEdgeFeatureZeroCrossingParameters((float) gradient_magnitude_min_value);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setGradientMagnitudeMaxLimit: {
+            double gradient_magnitude_threshold_max = 0;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "gradient_magnitude_threshold_max");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &gradient_magnitude_threshold_max) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                *tool = tool->setGradientMagnitudeMaxLimit((float) gradient_magnitude_threshold_max);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_setWeights: {
+            double weight_non_edge = 0, weight_gradient_direction = 0, weight_gradient_magnitude = 0;
+
+            if (objc != 5) {
+                Tcl_WrongNumArgs(interp, 2, objv, "weight_non_edge weight_gradient_direction weight_gradient_magnitude");
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[2], &weight_non_edge) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[3], &weight_gradient_direction) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            if (Tcl_GetDoubleFromObj(interp, objv[4], &weight_gradient_magnitude) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            try {
+                *tool = tool->setWeights((float) weight_non_edge,
+                                         (float) weight_gradient_direction,
+                                         (float) weight_gradient_magnitude);
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Opencv_CloseHandle(interp, cvo);
+
+            break;
+        }
+        case FUNC__COMMAND: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            Tcl_GetCommandFullName(interp, cvo->cmd, obj);
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__NAME: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetObjResult(interp, Tcl_NewStringObj(cvo->key, -1));
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "::cv::segmentation::IntelligentScissorsMB", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int IntelligentScissorsMB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Tcl_Obj *pResultStr = NULL;
+    ::cv::segmentation::IntelligentScissorsMB *tool;
+
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, 0);
+        return TCL_ERROR;
+    }
+
+    try {
+        tool = new ::cv::segmentation::IntelligentScissorsMB();
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_INTELLIGENTSMB, tool);
+
+    Tcl_SetObjResult(interp, pResultStr);
+
+    return TCL_OK;
+}
+#endif
+#endif /* TCL_USE_OPENCV4 */
 #ifdef __cplusplus
 }
 #endif

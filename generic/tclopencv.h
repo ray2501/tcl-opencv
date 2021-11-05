@@ -239,6 +239,11 @@ MODULE_SCOPE int CLAHE(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 MODULE_SCOPE int GeneralizedHoughBallard(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int GeneralizedHoughGuil(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int LineSegmentDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 2)
+MODULE_SCOPE int IntelligentScissorsMB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
+#endif
 
 /*
  * For videoio
@@ -485,6 +490,9 @@ typedef enum {
     OPENCV_TEXTDETECTDB,
     OPENCV_TEXTRECOGNITION,
 #endif
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 2)
+    OPENCV_INTELLIGENTSMB,
+#endif
 #endif
     OPENCV_BOWTRAINER,
     OPENCV_BOWEXTRACTOR,
@@ -659,6 +667,9 @@ MODULE_SCOPE int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
 MODULE_SCOPE int TEXTDETECT_EAST_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int TEXTDETECT_DB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int TEXTRECOGNITION_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 2)
+MODULE_SCOPE int INTELLIGENTSMB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 #endif
 #endif
 MODULE_SCOPE int BOWKMeansTrainer_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
