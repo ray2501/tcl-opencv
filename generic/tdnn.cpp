@@ -11,7 +11,6 @@ int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
     cv::Mat dstimage;
     double scalefactor = 1.0, B = 0, G = 0, R = 0, A = 0;;
     int width = 0, height = 0, swapRB = 0, crop = 0, count = 0;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 8) {
@@ -88,10 +87,7 @@ int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
 
     dstmat = new cv::Mat(dstimage);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -350,7 +346,6 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
             cv::Mat result_mat;
             char *name = NULL;
             int len;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *mat;
 
             if (objc != 2 && objc != 3) {
@@ -379,9 +374,8 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
             mat = new cv::Mat(result_mat);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, mat);
 
-            Tcl_SetObjResult(interp, pResultStr);
             break;
         }
         case FUNC_forwardWithNames: {
@@ -487,7 +481,6 @@ int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *model = NULL, *config = NULL, *framework = NULL;
     int len = 0;
-    Tcl_Obj *pResultStr = NULL;
     cv::dnn::Net *net;
     Tcl_DString ds1, ds2, ds3;
 
@@ -544,11 +537,7 @@ int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_DStringFree(&ds2);
     Tcl_DStringFree(&ds3);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_NDETECT, net);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_NDETECT, net);
 }
 
 
@@ -1162,7 +1151,6 @@ int TextDetectionModel_EAST(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 {
     char *model = NULL, *config = NULL;
     int len = 0;
-    Tcl_Obj *pResultStr = NULL;
     cv::dnn::TextDetectionModel_EAST *east;
     Tcl_DString ds1, ds2;
 
@@ -1206,11 +1194,7 @@ int TextDetectionModel_EAST(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
     Tcl_DStringFree(&ds1);
     Tcl_DStringFree(&ds2);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_TEXTDETECTEAST, east);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_TEXTDETECTEAST, east);
 }
 
 
@@ -1605,7 +1589,6 @@ int TextDetectionModel_DB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 {
     char *model = NULL, *config = NULL;
     int len = 0;
-    Tcl_Obj *pResultStr = NULL;
     cv::dnn::TextDetectionModel_DB *db;
     Tcl_DString ds1, ds2;
 
@@ -1649,11 +1632,7 @@ int TextDetectionModel_DB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
     Tcl_DStringFree(&ds1);
     Tcl_DStringFree(&ds2);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_TEXTDETECTDB, db);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_TEXTDETECTDB, db);
 }
 
 
@@ -1971,7 +1950,6 @@ int TextRecognitionModel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 {
     char *model = NULL, *config = NULL;
     int len = 0;
-    Tcl_Obj *pResultStr = NULL;
     cv::dnn::TextRecognitionModel *recognizer;
     Tcl_DString ds1, ds2;
 
@@ -2015,11 +1993,7 @@ int TextRecognitionModel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
     Tcl_DStringFree(&ds1);
     Tcl_DStringFree(&ds2);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_TEXTRECOGNITION, recognizer);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_TEXTRECOGNITION, recognizer);
 }
 #endif
 #endif /* TCL_USE_OPENCV4 */

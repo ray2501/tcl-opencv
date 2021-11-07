@@ -10,7 +10,6 @@ int imread(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int len = 0;
     int flags = cv::IMREAD_COLOR;
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat;
     Tcl_DString ds;
 
@@ -48,10 +47,7 @@ int imread(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     mat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, mat);
 }
 
 
@@ -61,7 +57,6 @@ int imdecode(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int len = 0;
     int flags = cv::IMREAD_COLOR;
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat;
 
     if (objc != 2 && objc != 3) {
@@ -96,10 +91,7 @@ int imdecode(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     mat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, mat);
 }
 
 

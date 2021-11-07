@@ -56,7 +56,6 @@ static int Stitcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
             int count = 0;
             std::vector<cv::Mat> imgs;
             cv::Mat result_image;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 3) {
@@ -100,9 +99,7 @@ static int Stitcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             dstmat = new cv::Mat(result_image);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_CLOSE: {

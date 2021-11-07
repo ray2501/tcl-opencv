@@ -308,7 +308,6 @@ int undistort(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat result_matrix;
     cv::Mat *matrix, *cameraMatrix, *distCoeffs, *newCameraMatrix, *dstmat;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 5) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -346,11 +345,7 @@ int undistort(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(result_matrix);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -431,7 +426,6 @@ int projectPoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat result_matrix;
     cv::Mat *objectPoints, *rvec, *tvec, *cameraMatrix, *distCoeffs, *dstmat;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 6) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -475,11 +469,7 @@ int projectPoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(result_matrix);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -546,7 +536,6 @@ int computeCorrespondEpilines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
     int whichImage = 0;
     cv::Mat lines;
     cv::Mat *mat1, *mat2, *dstmat;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "matrix whichImage F");
@@ -578,11 +567,7 @@ int computeCorrespondEpilines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 
     dstmat = new cv::Mat(lines);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -981,7 +966,6 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
     switch ((enum FUNC_enum)choice) {
         case FUNC_COMPUTE: {
             cv::Mat dst;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *mat1, *mat2, *dstmat;
 
             if (objc != 4) {
@@ -1009,9 +993,7 @@ static int StereoBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
             dstmat = new cv::Mat(dst);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_getPreFilterCap: {
@@ -1423,7 +1405,6 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
     switch ((enum FUNC_enum)choice) {
         case FUNC_COMPUTE: {
             cv::Mat dst;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *mat1, *mat2, *dstmat;
 
             if (objc != 4) {
@@ -1451,9 +1432,7 @@ static int StereoSGBM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 
             dstmat = new cv::Mat(dst);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUMC_getMode: {

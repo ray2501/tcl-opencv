@@ -678,6 +678,20 @@ Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj)
 }
 
 
+int
+Opencv_NewHandleResult(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj)
+{
+    Tcl_Obj *resultObj;
+
+    resultObj = Opencv_NewHandle(cd, interp, type, obj);
+    if (obj == NULL) {
+        Tcl_Panic("result object is NULL");
+    }
+    Tcl_SetObjResult(interp, resultObj);
+    return TCL_OK;
+}
+
+
 void *
 Opencv_FindHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, Tcl_Obj *name)
 {
@@ -761,7 +775,6 @@ Opencv_FromByteArray(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 {
     int width, height, bpp, len;
     unsigned char *data;
-    Tcl_Obj *pResultStr;
     cv::Mat img, *mat;
 
     if (objc != 5) {
@@ -810,9 +823,7 @@ Opencv_FromByteArray(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         return Opencv_SetResult(interp, cv::Error::StsError, "no image data");
     }
     mat = new cv::Mat(img);
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, mat);
 }
 
 
@@ -856,7 +867,6 @@ Opencv_FromPhoto(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     char *name;
     Tk_PhotoHandle photo;
     Tk_PhotoImageBlock blk;
-    Tcl_Obj *pResultStr;
     cv::Mat img1, img2, *mat;
 
     if (objc != 2) {
@@ -888,9 +898,7 @@ Opencv_FromPhoto(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_SetResult(interp, cv::Error::StsError, "no image data");
     }
     mat = new cv::Mat(img2);
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, mat);
 }
 #endif /* TCL_USE_TKPHOTO */
 
@@ -928,7 +936,6 @@ static int
 Opencv_FromNumArray(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     NumArrayInfo *info;
-    Tcl_Obj *pResultStr;
     cv::Mat tmat, *mat;
     int cvtype, dims[2];
 
@@ -982,9 +989,7 @@ Opencv_FromNumArray(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
     mat = new cv::Mat(tmat);
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, mat);
 }
 #endif /* TCL_USE_VECTCL */
 

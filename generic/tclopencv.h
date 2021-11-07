@@ -17,9 +17,9 @@ extern "C" {
 #endif
 
 #define CV_VERSION_GREATER_OR_EQUAL(major, minor, revision) \
-	( CV_VERSION_MAJOR > major  \
-		|| (CV_VERSION_MAJOR == major && CV_VERSION_MINOR > minor) \
-		|| (CV_VERSION_MAJOR == major && CV_VERSION_MINOR == minor && CV_VERSION_REVISION >= revision) )
+        ( CV_VERSION_MAJOR > major  \
+                || (CV_VERSION_MAJOR == major && CV_VERSION_MINOR > minor) \
+                || (CV_VERSION_MAJOR == major && CV_VERSION_MINOR == minor && CV_VERSION_REVISION >= revision) )
 
 /*
  * OpenCV core
@@ -640,6 +640,7 @@ extern "C" {
 MODULE_SCOPE int Opencv_Exc2Tcl(Tcl_Interp *interp, const cv::Exception *ex);
 MODULE_SCOPE int Opencv_SetResult(Tcl_Interp *interp, int code, const char *msg);
 MODULE_SCOPE Tcl_Obj *Opencv_NewHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj);
+MODULE_SCOPE int Opencv_NewHandleResult(void *cd, Tcl_Interp *interp, Opencv_Type type, void *obj);
 MODULE_SCOPE void *Opencv_FindHandle(void *cd, Tcl_Interp *interp, Opencv_Type type, Tcl_Obj *name);
 MODULE_SCOPE void Opencv_CloseHandle(Tcl_Interp *interp, Opencv_Obj *cvo);
 #ifdef TCL_USE_TKPHOTO

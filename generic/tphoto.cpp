@@ -11,7 +11,6 @@ int inpaint(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int flags = 0;
     cv::Mat dstimage;
     cv::Mat *mat1, *mat2, *dstmat;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 5) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -48,11 +47,7 @@ int inpaint(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(dstimage);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -99,7 +94,6 @@ int fastNlMeansDenoising(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
     int templateWindowSize = 7, searchWindowSize = 21;
     cv::Mat dstimage;
     cv::Mat *mat1, *dstmat;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 2 && objc != 5) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -138,11 +132,7 @@ int fastNlMeansDenoising(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
     dstmat = new cv::Mat(dstimage);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -152,7 +142,6 @@ int fastNlMeansDenoisingColored(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj 
     int templateWindowSize = 7, searchWindowSize = 21;
     cv::Mat dstimage;
     cv::Mat *mat1, *dstmat;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 2 && objc != 6) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -196,11 +185,7 @@ int fastNlMeansDenoisingColored(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj 
 
     dstmat = new cv::Mat(dstimage);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -209,7 +194,6 @@ int colorChange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     double red_mul = 1.0, green_mul = 1.0, blue_mul = 1.0;
     cv::Mat dstimage;
     cv::Mat *mat1, *mat2, *dstmat;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 6) {
         Tcl_WrongNumArgs(interp, 1, objv, "matrix mask red_mul green_mul blue_mul");
@@ -249,11 +233,7 @@ int colorChange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(dstimage);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -262,7 +242,6 @@ int illuminationChange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
     double alpha = 0.2, beta = 0.4;
     cv::Mat dstimage;
     cv::Mat *mat1, *mat2, *dstmat;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 5) {
         Tcl_WrongNumArgs(interp, 1, objv, "matrix mask alpha beta");
@@ -306,11 +285,7 @@ int illuminationChange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 
     dstmat = new cv::Mat(dstimage);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -320,7 +295,6 @@ int textureFlattening(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
     int kernel_size = 3;
     cv::Mat dstimage;
     cv::Mat *mat1, *mat2, *dstmat;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 5 && objc != 6) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -371,11 +345,7 @@ int textureFlattening(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
 
     dstmat = new cv::Mat(dstimage);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -384,7 +354,6 @@ int seamlessClone(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int x = 0, y = 0, flags = cv::NORMAL_CLONE;
     cv::Mat dstimage;
     cv::Mat *mat1, *mat2, *mat3, *dstmat;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 7) {
         Tcl_WrongNumArgs(interp, 1, objv, "src_matrix dst_matrix mask x y flags");
@@ -437,11 +406,7 @@ int seamlessClone(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(dstimage);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -450,7 +415,6 @@ int detailEnhance(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     double sigma_s = 10, sigma_r = 0.15;
     cv::Mat dstimage;
     cv::Mat *mat1, *dstmat;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 2 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "matrix ?sigma_s sigma_r?");
@@ -482,11 +446,7 @@ int detailEnhance(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(dstimage);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -496,7 +456,6 @@ int edgePreservingFilter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
     double sigma_s = 60, sigma_r = 0.4;
     cv::Mat dstimage;
     cv::Mat *mat1, *dstmat;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 2 && objc != 5) {
         Tcl_WrongNumArgs(interp, 1, objv, "matrix ?flags sigma_s sigma_r?");
@@ -532,11 +491,7 @@ int edgePreservingFilter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
     dstmat = new cv::Mat(dstimage);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -598,7 +553,6 @@ int stylization(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     double sigma_s = 60, sigma_r = 0.45;
     cv::Mat dstimage;
     cv::Mat *mat1, *dstmat;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 2 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "matrix ?sigma_s sigma_r?");
@@ -630,11 +584,7 @@ int stylization(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(dstimage);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -891,7 +841,6 @@ static int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl
             int count;
             cv::Mat image, responseDebevec;
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
             std::vector<cv::Mat> src;
             std::vector<float> timesArray;
 
@@ -951,9 +900,7 @@ static int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl
 
             dstmat = new cv::Mat(responseDebevec);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_CLOSE: {
@@ -1106,7 +1053,6 @@ static int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
             int count;
             cv::Mat image, dst;
             cv::Mat *mat, *dstmat;
-            Tcl_Obj *pResultStr = NULL;
             std::vector<cv::Mat> src;
             std::vector<float> timesArray;
 
@@ -1170,9 +1116,7 @@ static int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
 
             dstmat = new cv::Mat(dst);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_CLOSE: {
@@ -1309,7 +1253,6 @@ static int MergeMertens_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
             int count;
             cv::Mat image, dst;
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
             std::vector<cv::Mat> src;
 
             if (objc != 3) {
@@ -1348,9 +1291,7 @@ static int MergeMertens_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
 
             dstmat = new cv::Mat(dst);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_CLOSE: {
@@ -1503,7 +1444,6 @@ static int TonemapDrago_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
         case FUNC_PROCESS: {
             cv::Mat image, dst;
             cv::Mat *mat, *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "hdrDebevec");
@@ -1525,9 +1465,7 @@ static int TonemapDrago_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
 
             dstmat = new cv::Mat(dst);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_CLOSE: {
@@ -1678,7 +1616,6 @@ static int TonemapMantiuk_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
         case FUNC_PROCESS: {
             cv::Mat image, dst;
             cv::Mat *mat, *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "hdrDebevec");
@@ -1700,9 +1637,7 @@ static int TonemapMantiuk_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
 
             dstmat = new cv::Mat(dst);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_CLOSE: {
@@ -1853,7 +1788,6 @@ static int TonemapReinhard_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
         case FUNC_PROCESS: {
             cv::Mat image, dst;
             cv::Mat *mat, *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "hdrDebevec");
@@ -1875,9 +1809,7 @@ static int TonemapReinhard_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
 
             dstmat = new cv::Mat(dst);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_CLOSE: {

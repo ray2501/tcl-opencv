@@ -71,7 +71,6 @@ static int SubtractorKNN_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
     switch ((enum FUNC_enum)choice) {
         case FUNC_APPLY: {
             cv::Mat result_image;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *mat, *dstmat;
 
             if (objc != 3) {
@@ -94,9 +93,7 @@ static int SubtractorKNN_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
 
             dstmat = new cv::Mat(result_image);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_getDetectShadows: {
@@ -381,7 +378,6 @@ static int SubtractorMOG2_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
     switch ((enum FUNC_enum)choice) {
         case FUNC_APPLY: {
             cv::Mat result_image;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *mat, *dstmat;
 
             if (objc != 3) {
@@ -404,9 +400,7 @@ static int SubtractorMOG2_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
 
             dstmat = new cv::Mat(result_image);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_getDetectShadows: {
@@ -1630,7 +1624,6 @@ int calcOpticalFlowFarneback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
     int levels = 0, winsize = 0, iterations = 0, poly_n = 0, flags = 0;
     cv::Mat flow;
     cv::Mat *mat1, *mat2, *dstmat;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 10) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -1688,11 +1681,7 @@ int calcOpticalFlowFarneback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
     dstmat = new cv::Mat(flow);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -1702,7 +1691,6 @@ int readOpticalFlow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int len = 0;
     cv::Mat flow;
     cv::Mat *dstmat;
-    Tcl_Obj *pResultStr = NULL;
     Tcl_DString ds;
 
     if (objc != 2) {
@@ -1733,10 +1721,7 @@ int readOpticalFlow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(flow);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 

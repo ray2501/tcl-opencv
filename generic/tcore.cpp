@@ -421,7 +421,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         case FUNC_INV: {
             int method = cv::DECOMP_LU;
             cv::Mat result_mat;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 2 && objc != 3) {
@@ -449,10 +448,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             dstmat = new cv::Mat(result_mat);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
-
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_DOT: {
@@ -481,7 +477,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             break;
         }
         case FUNC_CROSS: {
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat result_mat;
             cv::Mat *mat2, *dstmat;
 
@@ -513,13 +508,10 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             dstmat = new cv::Mat(result_mat);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_MULTIPLICATION: {
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat result_mat;
             cv::Mat *mat2, *dstmat;
 
@@ -547,14 +539,11 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             dstmat = new cv::Mat(result_mat);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_ADD: {
             double value = 0;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 3) {
@@ -575,9 +564,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
                 dstmat = new cv::Mat(result_mat);
 
-                pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-                Tcl_SetObjResult(interp, pResultStr);
+                Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             } catch (const cv::Exception &ex) {
                 return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
@@ -588,7 +575,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_SUBTRACT: {
             double value = 0;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 3) {
@@ -609,9 +595,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
                 dstmat = new cv::Mat(result_mat);
 
-                pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-                Tcl_SetObjResult(interp, pResultStr);
+                Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             } catch (const cv::Exception &ex) {
                 return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
@@ -622,7 +606,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_MULTIPLY: {
             double value = 0;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 3) {
@@ -643,9 +626,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
                 dstmat = new cv::Mat(result_mat);
 
-                pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-                Tcl_SetObjResult(interp, pResultStr);
+                Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             } catch (const cv::Exception &ex) {
                 return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
@@ -656,7 +637,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_DIVIDE: {
             double value = 0;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 3) {
@@ -677,9 +657,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
                 dstmat = new cv::Mat(result_mat);
 
-                pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-                Tcl_SetObjResult(interp, pResultStr);
+                Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             } catch (const cv::Exception &ex) {
                 return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
@@ -689,7 +667,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             break;
         }
         case FUNC_TRANSPOSE: {
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 2) {
@@ -707,9 +684,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
                 dstmat = new cv::Mat(result_mat);
 
-                pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-                Tcl_SetObjResult(interp, pResultStr);
+                Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             } catch (const cv::Exception &ex) {
                 return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
@@ -721,7 +696,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         case FUNC_DIAG: {
             int d = 0;
             cv::Mat diag_image;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 2 && objc != 3) {
@@ -745,15 +719,11 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             dstmat = new cv::Mat(diag_image);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
-
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_CROP: {
             int x = 0, y= 0, width = 0, height = 0;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 6) {
@@ -786,9 +756,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
                 dstmat = new cv::Mat(cropped_image);
 
-                pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-                Tcl_SetObjResult(interp, pResultStr);
+                Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             } catch (const cv::Exception &ex) {
                 return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
@@ -799,7 +767,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
         case FUNC_RECT: {
             int x = 0, y= 0, width = 0, height = 0;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 6) {
@@ -832,9 +799,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
                 dstmat = new cv::Mat(rect_image);
 
-                pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-                Tcl_SetObjResult(interp, pResultStr);
+                Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             } catch (const cv::Exception &ex) {
                 return Opencv_Exc2Tcl(interp, &ex);
             } catch (...) {
@@ -881,7 +846,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             int type = 0;
             double scale = 1, shift = 0;
             cv::Mat imageChanged;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 3 && objc != 5) {
@@ -917,15 +881,12 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             dstmat = new cv::Mat(imageChanged);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_COL: {
             int index = 0;
             cv::Mat imageChanged;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 3) {
@@ -951,15 +912,12 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             dstmat = new cv::Mat(imageChanged);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_COLRANGE: {
             int startcol = 0, endcol = 0;
             cv::Mat imageChanged;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 4) {
@@ -993,15 +951,12 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             dstmat = new cv::Mat(imageChanged);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_ROW: {
             int index = 0;
             cv::Mat imageChanged;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 3) {
@@ -1027,15 +982,12 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             dstmat = new cv::Mat(imageChanged);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_ROWRANGE: {
             int startcol = 0, endcol = 0;
             cv::Mat imageChanged;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 4) {
@@ -1069,9 +1021,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             dstmat = new cv::Mat(imageChanged);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_POP_BACK: {
@@ -1124,7 +1074,6 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         case FUNC_RESHAPE: {
             int cn = 0, rows = 0;
             cv::Mat dstimage;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
 
             if (objc != 3 && objc != 4) {
@@ -1156,9 +1105,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
             dstmat = new cv::Mat(dstimage);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_SETDATA: {
@@ -1904,7 +1851,6 @@ int mat_mat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int rows, cols, type;
     int count = 0, B = 0, G = 0, R = 0, A = 0;
     cv::Mat mat_mat;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *dstmat;
 
     if (objc != 4 && objc != 5) {
@@ -1965,10 +1911,7 @@ int mat_mat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(mat_mat);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -1977,7 +1920,6 @@ int mat_matwithdims(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int dims, *index, type;
     int count = 0, B = 0, G = 0, R = 0, A = 0;
     cv::Mat mat_mat;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *dstmat;
 
     if (objc != 4 && objc != 5) {
@@ -2067,9 +2009,8 @@ int mat_matwithdims(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(mat_mat);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+    Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 
-    Tcl_SetObjResult(interp, pResultStr);
     ckfree(index);
     return TCL_OK;
 }
@@ -2078,7 +2019,6 @@ int mat_matwithdims(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_diag(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat diag_image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 2) {
@@ -2098,10 +2038,7 @@ int mat_diag(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(diag_image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -2109,7 +2046,6 @@ int mat_eye(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int rows, cols, type;
     cv::Mat eye_mat;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *dstmat;
 
     if (objc != 4) {
@@ -2133,10 +2069,7 @@ int mat_eye(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(eye_mat);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -2144,7 +2077,6 @@ int mat_ones(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int rows, cols, type;
     cv::Mat ones_mat;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *dstmat;
 
     if (objc != 4) {
@@ -2168,10 +2100,7 @@ int mat_ones(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(ones_mat);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -2179,7 +2108,6 @@ int mat_zeros(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int rows, cols, type;
     cv::Mat zeros_mat;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *dstmat;
 
     if (objc != 4) {
@@ -2203,17 +2131,13 @@ int mat_zeros(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(zeros_mat);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
 int mat_abs(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *dstmat;
 
     if (objc != 2) {
@@ -2236,17 +2160,13 @@ int mat_abs(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
 int mat_absdiff(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 3) {
@@ -2274,17 +2194,13 @@ int mat_absdiff(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
 int mat_add(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 3) {
@@ -2312,10 +2228,7 @@ int mat_add(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -2323,7 +2236,6 @@ int mat_addWeighted(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
     double alpha = 0.0, beta = 0.0, gamma = 0.0;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 6) {
@@ -2363,17 +2275,13 @@ int mat_addWeighted(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
 int mat_bitwise_and(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *mat3, *dstmat;
 
     if (objc != 3 && objc != 4) {
@@ -2412,17 +2320,13 @@ int mat_bitwise_and(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
 int mat_bitwise_or(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *mat3, *dstmat;
 
     if (objc != 3 && objc != 4) {
@@ -2461,17 +2365,13 @@ int mat_bitwise_or(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
 int mat_bitwise_xor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *mat3, *dstmat;
 
     if (objc != 3 && objc != 4) {
@@ -2510,17 +2410,13 @@ int mat_bitwise_xor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
 int mat_bitwise_not(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat dstimage;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 2 && objc != 3) {
@@ -2554,10 +2450,7 @@ int mat_bitwise_not(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(dstimage);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -2660,7 +2553,6 @@ int mat_compare(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int cmpop = 0;
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 4) {
@@ -2692,10 +2584,7 @@ int mat_compare(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -2703,7 +2592,6 @@ int mat_convertScaleAbs(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 {
     double alpha = 1, beta = 0;
     cv::Mat dstimage;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 4) {
@@ -2734,10 +2622,7 @@ int mat_convertScaleAbs(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
     dstmat = new cv::Mat(dstimage);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -2747,7 +2632,6 @@ int mat_copyMakeBorder(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
     int B = 0, G = 0, R = 0, A = 0;
     int count = 0;
     cv::Mat dstimage;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 7 && objc != 8) {
@@ -2828,10 +2712,7 @@ int mat_copyMakeBorder(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 
     dstmat = new cv::Mat(dstimage);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -2899,7 +2780,6 @@ int mat_divide(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double scale = 1.0;
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 3 && objc != 4) {
@@ -2933,10 +2813,7 @@ int mat_divide(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -3023,7 +2900,6 @@ int mat_eigenNonSymmetric(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 int mat_exp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 2) {
@@ -3046,10 +2922,7 @@ int mat_exp(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -3057,7 +2930,6 @@ int mat_extractChannel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 {
     cv::Mat image;
     int coi = 0;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 3) {
@@ -3087,17 +2959,13 @@ int mat_extractChannel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
 int mat_findNonZero(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 2) {
@@ -3120,10 +2988,7 @@ int mat_findNonZero(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -3131,7 +2996,6 @@ int mat_flip(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
     int flipCode = 0;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 3) {
@@ -3163,10 +3027,7 @@ int mat_flip(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -3201,7 +3062,6 @@ int mat_dft(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int flags = 0, nonzeroRows = 0;
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 2 && objc != 4) {
@@ -3234,10 +3094,7 @@ int mat_dft(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -3247,7 +3104,6 @@ int mat_inRange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int count = 0;
     int B1 = 0, G1 = 0, R1 = 0, A1 = 0;
     int B2 = 0, G2 = 0, R2 = 0, A2 = 0;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 4) {
@@ -3331,10 +3187,7 @@ int mat_inRange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -3381,7 +3234,6 @@ int mat_insertChannel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
 int mat_log(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 2) {
@@ -3404,17 +3256,13 @@ int mat_log(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
 int mat_lut(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 3) {
@@ -3442,10 +3290,7 @@ int mat_lut(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -3490,7 +3335,6 @@ int mat_Mahalanobis(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_magnitude(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 3) {
@@ -3518,17 +3362,13 @@ int mat_magnitude(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
 int mat_max(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 3) {
@@ -3556,10 +3396,7 @@ int mat_max(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -3602,7 +3439,6 @@ int mat_meanStdDev(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_min(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 3) {
@@ -3630,10 +3466,7 @@ int mat_min(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -3747,14 +3580,14 @@ int mat_split(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     listPtr = Tcl_NewListObj(channels.size(), NULL);
     for (size_t i = 0; i < channels.size(); i++) {
-        Tcl_Obj *pStr = NULL;
+        Tcl_Obj *pSubResultStr = NULL;
         cv::Mat *dstmat = NULL;
 
         dstmat = new cv::Mat(channels[i]);
 
-        pStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+        pSubResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-        Tcl_ListObjAppendElement(NULL, listPtr, pStr);
+        Tcl_ListObjAppendElement(NULL, listPtr, pSubResultStr);
     }
 
     Tcl_SetObjResult(interp, listPtr);
@@ -3766,7 +3599,6 @@ int mat_multiply(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double scale = 1.0;
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 3 && objc != 4) {
@@ -3800,10 +3632,7 @@ int mat_multiply(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -3811,7 +3640,6 @@ int mat_mulSpectrums(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 {
     int flags = 0, conjB = 0;
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 4 && objc != 5) {
@@ -3849,10 +3677,7 @@ int mat_mulSpectrums(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -3860,7 +3685,6 @@ int mat_merge(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     std::vector<cv::Mat> channels;
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *dstmat;
     int count = 0;
 
@@ -3900,10 +3724,7 @@ int mat_merge(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -3960,7 +3781,6 @@ int mat_normalize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     double alpha = 0, beta = 0;
     int norm_type = cv::NORM_L2;
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 5) {
@@ -3995,10 +3815,7 @@ int mat_normalize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -4006,7 +3823,6 @@ int mat_pow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double power = 0;
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 3) {
@@ -4033,10 +3849,7 @@ int mat_pow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -4267,7 +4080,6 @@ int mat_reduce(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int dim = 0, rtype = 0, dtype = -1;
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 4 && objc != 5) {
@@ -4311,10 +4123,7 @@ int mat_reduce(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -4322,7 +4131,6 @@ int mat_repeat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int ny = 0, nx = 0;
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 4) {
@@ -4353,10 +4161,7 @@ int mat_repeat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -4364,7 +4169,6 @@ int mat_rotate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int rotateCode = 0;
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 3) {
@@ -4391,10 +4195,7 @@ int mat_rotate(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -4553,7 +4354,6 @@ int mat_solvePoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_sortIdx(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *dstmat;
     int flags;
 
@@ -4581,18 +4381,13 @@ int mat_sortIdx(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
 int mat_sqrt(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat, *dstmat;
 
     if (objc != 2) {
@@ -4615,17 +4410,13 @@ int mat_sqrt(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
 int mat_subtract(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 3) {
@@ -4653,10 +4444,7 @@ int mat_subtract(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -4698,7 +4486,6 @@ int mat_sum(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_SVBackSubst(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat result;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *mat3, *mat4, *dstmat;
 
     if (objc != 5) {
@@ -4736,10 +4523,7 @@ int mat_SVBackSubst(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(result);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -4830,7 +4614,6 @@ int mat_trace(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_transform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 3) {
@@ -4858,17 +4641,13 @@ int mat_transform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
 int mat_hconcat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 3) {
@@ -4896,17 +4675,13 @@ int mat_hconcat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
 int mat_vconcat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *dstmat;
 
     if (objc != 3) {
@@ -4934,10 +4709,7 @@ int mat_vconcat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -5208,7 +4980,6 @@ int PCA_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     switch ((enum FUNC_enum)choice) {
         case FUNC_mean: {
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
@@ -5216,14 +4987,12 @@ int PCA_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             }
 
             dstmat = new cv::Mat(pca->mean);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-            Tcl_SetObjResult(interp, pResultStr);
 
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_eigenvalues: {
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
@@ -5231,14 +5000,12 @@ int PCA_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             }
 
             dstmat = new cv::Mat(pca->eigenvalues);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-            Tcl_SetObjResult(interp, pResultStr);
 
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_eigenvectors: {
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
@@ -5246,13 +5013,11 @@ int PCA_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             }
 
             dstmat = new cv::Mat(pca->eigenvectors);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-            Tcl_SetObjResult(interp, pResultStr);
 
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_backProject: {
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat image;
             cv::Mat *mat, *dstmat;
 
@@ -5275,13 +5040,11 @@ int PCA_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             }
 
             dstmat = new cv::Mat(image);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-            Tcl_SetObjResult(interp, pResultStr);
 
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_project: {
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat image;
             cv::Mat *mat, *dstmat;
 
@@ -5304,9 +5067,8 @@ int PCA_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             }
 
             dstmat = new cv::Mat(image);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-            Tcl_SetObjResult(interp, pResultStr);
 
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_CLOSE: {
@@ -5361,7 +5123,6 @@ int PCA(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     cv::PCA local_pca;
     cv::PCA *pca;
     cv::Mat *mat;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 3 && objc != 4) {
         Tcl_WrongNumArgs(interp, 2, objv, "matrix flags ?maxComponents?");
@@ -5392,10 +5153,8 @@ int PCA(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
 
     pca = new cv::PCA(local_pca);
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_PCA, pca);
 
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_PCA, pca);
 }
 
 
@@ -5487,7 +5246,6 @@ int TermCriteria(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int type = 1, maxCount = 1;
     double epsilon = 1;
     cv::TermCriteria term_crit, *termCriteria;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 1 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "?type maxCount epsilon?");
@@ -5522,10 +5280,7 @@ int TermCriteria(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     termCriteria = new cv::TermCriteria(term_crit);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_TERMCRITERIA, termCriteria);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_TERMCRITERIA, termCriteria);
 }
 #ifdef __cplusplus
 }

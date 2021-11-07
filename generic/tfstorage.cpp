@@ -350,7 +350,6 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             int nlen;
             Tcl_DString ds;
             Tcl_Encoding enc;
-            Tcl_Obj *pResultStr;
             cv::Mat rmat, *mat;
             if (objc < 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "name ...");
@@ -387,8 +386,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             Tcl_FreeEncoding(enc);
             Tcl_DStringFree(&ds);
             mat = new cv::Mat(rmat);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, mat);
             break;
         }
         case FUNC_RDOBJ: {
@@ -396,7 +394,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             int nlen;
             Tcl_DString ds;
             Tcl_Encoding enc;
-            Tcl_Obj *pResultStr = NULL, *empty;
+            Tcl_Obj *empty;
             if (objc < 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "name ...");
                 return TCL_ERROR;
@@ -446,28 +444,28 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                         mat = new cv::Mat(node.mat());
                     }
                     keepInterpErr = 1;
-                    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
+                    Opencv_NewHandleResult(cd, interp, OPENCV_MAT, mat);
                 } else if (strcmp(type, "opencv-pca") == 0) {
                     cv::PCA *pca = new cv::PCA();
                     if (!node.isNone()) {
                         pca->read(node);
                     }
                     keepInterpErr = 1;
-                    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_PCA, pca);
+                    Opencv_NewHandleResult(cd, interp, OPENCV_PCA, pca);
                 } else if (strcmp(type, "opencv-cascadeclassifier") == 0) {
                     cv::CascadeClassifier *cas = new cv::CascadeClassifier();
                     if (!node.isNone()) {
                         cas->read(node);
                     }
                     keepInterpErr = 1;
-                    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_ODETECT, cas);
+                    Opencv_NewHandleResult(cd, interp, OPENCV_ODETECT, cas);
                 } else if (strcmp(type, "opencv-hogdescriptor") == 0) {
                     cv::HOGDescriptor *hog = new cv::HOGDescriptor();
                     if (!node.isNone()) {
                         hog->read(node);
                     }
                     keepInterpErr = 1;
-                    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_OOBJHOG, hog);
+                    Opencv_NewHandleResult(cd, interp, OPENCV_OOBJHOG, hog);
                 } else if (strcmp(type, "opencv-termcriteria") == 0) {
                     cv::TermCriteria *tc = new cv::TermCriteria();
                     if (node.isMap()) {
@@ -476,7 +474,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
                         node["epsilon"] >> tc->epsilon;
                     }
                     keepInterpErr = 1;
-                    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_TERMCRITERIA, tc);
+                    Opencv_NewHandleResult(cd, interp, OPENCV_TERMCRITERIA, tc);
                 } else if (strcmp(type, "opencv-clahe") == 0) {
                     if (CLAHE(cd, interp, 1, &empty) != TCL_OK) {
                         keepInterpErr = 1;
@@ -818,9 +816,6 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             Tcl_DecrRefCount(empty);
             Tcl_FreeEncoding(enc);
             Tcl_DStringFree(&ds);
-            if (pResultStr != NULL) {
-                Tcl_SetObjResult(interp, pResultStr);
-            }
             break;
         }
         case FUNC_RDSTR: {
@@ -1673,7 +1668,6 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
 
 int FileStorage(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    Tcl_Obj *pResultStr = NULL;
     cv::FileStorage *fs;
 
     if (objc != 1) {
@@ -1683,10 +1677,7 @@ int FileStorage(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     fs = new cv::FileStorage();
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_FSTORAGE, fs);
-
-    Tcl_SetObjResult(interp, pResultStr);
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_FSTORAGE, fs);
 }
 #ifdef __cplusplus
 }

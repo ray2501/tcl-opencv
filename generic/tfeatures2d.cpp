@@ -10,7 +10,6 @@ int drawKeypoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     std::vector<cv::KeyPoint> keypoints;
     int count = 0, flags = 0, new_B = 0, new_G = 0, new_R = 0, new_A = 0;
     int nodstimage = 0;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2 = NULL, *dstmat;
 
     if (objc != 5 && objc != 6) {
@@ -172,11 +171,7 @@ int drawKeypoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(dst_image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -188,7 +183,6 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int count = 0, flags = 0, B1 = 0, G1 = 0, R1 = 0, A1 = 0;
     int B2 = 0, G2 = 0, R2 = 0, A2 = 0;
     int nodstimage = 0;
-    Tcl_Obj *pResultStr = NULL;
     cv::Mat *mat1, *mat2, *mat3 = NULL, *dstmat;
 
     if (objc != 9 && objc != 10) {
@@ -512,11 +506,7 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
     dstmat = new cv::Mat(dst_image);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
 }
 
 
@@ -5808,7 +5798,6 @@ int BOWKMeansTrainer_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
         case FUNC_CLUSTER: {
             cv::Mat result;
             cv::Mat *mat, *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2 && objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "?descriptors?");
@@ -5836,10 +5825,7 @@ int BOWKMeansTrainer_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 
             dstmat = new cv::Mat(result);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
-
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_descriptorsCount: {
@@ -5940,7 +5926,6 @@ int BOWKMeansTrainer_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 
 int BOWKMeansTrainer(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    Tcl_Obj *pResultStr = NULL;
     int clusterCount = 0, attempts = 3, flags = cv::KMEANS_PP_CENTERS;
     cv::TermCriteria *termCriteria;
     cv::BOWKMeansTrainer *bowkmeanstrainer;
@@ -5982,11 +5967,7 @@ int BOWKMeansTrainer(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_BOWTRAINER, bowkmeanstrainer);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_BOWTRAINER, bowkmeanstrainer);
 }
 
 
@@ -6042,7 +6023,6 @@ int BOWImgDescriptorExtractor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, T
             int count = 0;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "matrix keypoints");
@@ -6131,10 +6111,7 @@ int BOWImgDescriptorExtractor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, T
 
             dstmat = new cv::Mat(descriptors);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
-
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_descriptorSize: {
@@ -6178,7 +6155,6 @@ int BOWImgDescriptorExtractor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, T
         case FUNC_getVocabulary: {
             cv::Mat result;
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
@@ -6195,10 +6171,7 @@ int BOWImgDescriptorExtractor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, T
 
             dstmat = new cv::Mat(result);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
-
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_setVocabulary: {
@@ -6273,7 +6246,6 @@ int BOWImgDescriptorExtractor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, T
 int BOWImgDescriptorExtractor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;
-    Tcl_Obj *pResultStr = NULL;
     cv::Ptr<cv::DescriptorExtractor> dextractor;
     cv::Ptr<cv::DescriptorMatcher> dmatcher;
     cv::BOWImgDescriptorExtractor *bowimgextractor;
@@ -6335,11 +6307,7 @@ int BOWImgDescriptorExtractor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_BOWEXTRACTOR, bowimgextractor);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_BOWEXTRACTOR, bowimgextractor);
 }
 #ifdef __cplusplus
 }

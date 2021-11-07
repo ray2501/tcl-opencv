@@ -206,7 +206,6 @@ int VideoWriter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     double fps = 0, width = 0, height = 0;
     int fourccvalue = 0, isColor = 1;
     cv::VideoWriter *writer;
-    Tcl_Obj *pResultStr = NULL;
     Tcl_DString ds;
 
     if (objc != 6 && objc != 7) {
@@ -259,11 +258,7 @@ int VideoWriter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
     Tcl_DStringFree(&ds);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_VIDEOWRITER, writer);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_VIDEOWRITER, writer);
 }
 
 
@@ -337,7 +332,6 @@ int VideoCapture_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         }
         case FUNC_READ: {
             cv::Mat frame;
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *mat;
             bool isSuccess;
 
@@ -360,9 +354,7 @@ int VideoCapture_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
             mat = new cv::Mat(frame);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, mat);
-
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, mat);
             break;
         }
         case FUNC_GET: {
@@ -477,7 +469,6 @@ int VideoCapture(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int type = 1;
     int flags = cv::CAP_ANY;
     cv::VideoCapture *capture;
-    Tcl_Obj *pResultStr = NULL;
     Tcl_DString ds;
 
     if (objc != 3 && objc != 4) {
@@ -535,11 +526,7 @@ int VideoCapture(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
     Tcl_DStringFree(&ds);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_VIDEOCAPTURE, capture);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_VIDEOCAPTURE, capture);
 }
 #ifdef __cplusplus
 }

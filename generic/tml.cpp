@@ -83,7 +83,6 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         case FUNC_get_learnt_thetas: {
             cv::Mat value;
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
@@ -99,9 +98,8 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
             }
 
             dstmat = new cv::Mat(value);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_getIterations: {
@@ -1707,7 +1705,6 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
         case FUNC_getSupportVectors: {
             cv::Mat vectors;
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
@@ -1724,14 +1721,12 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             dstmat = new cv::Mat(vectors);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_getUncompressedSupportVectors: {
             cv::Mat vectors;
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
@@ -1748,8 +1743,7 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
 
             dstmat = new cv::Mat(vectors);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_setC: {
@@ -2387,7 +2381,6 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         case FUNC_getWeights: {
             cv::Mat value;
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
@@ -2403,9 +2396,8 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
             }
 
             dstmat = new cv::Mat(value);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_setInitialStepSize: {
@@ -2975,7 +2967,6 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         case FUNC_getPriors: {
             cv::Mat results;
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
@@ -2991,10 +2982,8 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
             }
 
             dstmat = new cv::Mat(results);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            Tcl_SetObjResult(interp, pResultStr);
-
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_getRegressionAccuracy: {
@@ -3691,7 +3680,6 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         case FUNC_getPriors: {
             cv::Mat results;
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
@@ -3707,10 +3695,8 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
             }
 
             dstmat = new cv::Mat(results);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            Tcl_SetObjResult(interp, pResultStr);
-
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_getRegressionAccuracy: {
@@ -4536,7 +4522,6 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         case FUNC_getPriors: {
             cv::Mat results;
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
@@ -4552,10 +4537,8 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
             }
 
             dstmat = new cv::Mat(results);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            Tcl_SetObjResult(interp, pResultStr);
-
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_getRegressionAccuracy: {
@@ -4675,7 +4658,6 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         case FUNC_getVarImportance: {
             cv::Mat results;
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
@@ -4691,10 +4673,8 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
             }
 
             dstmat = new cv::Mat(results);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            Tcl_SetObjResult(interp, pResultStr);
-
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
 #ifdef TCL_USE_OPENCV4
@@ -4702,7 +4682,6 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
             int flags = 0;
             cv::Mat results;
             cv::Mat *samples, *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "samples flags");
@@ -4727,10 +4706,8 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
             }
 
             dstmat = new cv::Mat(results);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            Tcl_SetObjResult(interp, pResultStr);
-
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
 #endif
@@ -5572,7 +5549,6 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
         case FUNC_getLayerSizes: {
             cv::Mat layer;
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
@@ -5588,10 +5564,8 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
             }
 
             dstmat = new cv::Mat(layer);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            Tcl_SetObjResult(interp, pResultStr);
-
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_getTrainMethod: {
@@ -5617,7 +5591,6 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
             int layerIdx;
             cv::Mat weights;
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "layerIdx");
@@ -5638,10 +5611,8 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
 
             dstmat = new cv::Mat(weights);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            Tcl_SetObjResult(interp, pResultStr);
-
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
 #ifdef TCL_USE_OPENCV4
@@ -6297,7 +6268,6 @@ static int TrainData_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
         case FUNC_getTestResponses: {
             cv::Mat value;
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
@@ -6313,15 +6283,13 @@ static int TrainData_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
             }
 
             dstmat = new cv::Mat(value);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_getTestSamples: {
             cv::Mat value;
             cv::Mat *dstmat;
-            Tcl_Obj *pResultStr = NULL;
 
             if (objc != 2) {
                 Tcl_WrongNumArgs(interp, 2, objv, 0);
@@ -6337,9 +6305,8 @@ static int TrainData_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
             }
 
             dstmat = new cv::Mat(value);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            Tcl_SetObjResult(interp, pResultStr);
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_setTrainTestSplit: {

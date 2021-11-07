@@ -48,7 +48,6 @@ int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *srcmat, *dstmat;
             cv::Mat points_matrix;
             bool result;
@@ -76,10 +75,7 @@ int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             dstmat = new cv::Mat(points_matrix);
 
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-
-            Tcl_SetObjResult(interp, pResultStr);
-
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_DETECTANDDECODE: {
@@ -170,7 +166,6 @@ int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 int QRCodeDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::QRCodeDetector *qrdet;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 1) {
         Tcl_WrongNumArgs(interp, 1, objv, 0);
@@ -185,11 +180,7 @@ int QRCodeDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_QDETECT, qrdet);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_QDETECT, qrdet);
 }
 
 
@@ -243,7 +234,7 @@ static int FaceDetectorYN_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_DETECT: {
-            Tcl_Obj *pResultStr = NULL;
+            Tcl_Obj *pSubResultStr = NULL;
             cv::Mat *srcmat, *dstmat;
             cv::Mat faces_matrix;
             int result = 0;
@@ -271,8 +262,8 @@ static int FaceDetectorYN_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_O
             list[0] = Tcl_NewIntObj(result);
 
             dstmat = new cv::Mat(faces_matrix);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
-            list[1] = pResultStr;
+            pSubResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+            list[1] = pSubResultStr;
 
             Tcl_SetObjResult(interp, Tcl_NewListObj(2, list));
 
@@ -464,7 +455,6 @@ static int FaceRecognizerSF_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_alignCrop: {
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *srcmat, *face_box, *dstmat;
             cv::Mat aligned_img;
 
@@ -492,14 +482,11 @@ static int FaceRecognizerSF_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl
             }
 
             dstmat = new cv::Mat(aligned_img);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            Tcl_SetObjResult(interp, pResultStr);
-
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_feature: {
-            Tcl_Obj *pResultStr = NULL;
             cv::Mat *srcmat, *dstmat;
             cv::Mat face_feature;
 
@@ -522,10 +509,8 @@ static int FaceRecognizerSF_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl
             }
 
             dstmat = new cv::Mat(face_feature);
-            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
 
-            Tcl_SetObjResult(interp, pResultStr);
-
+            Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
             break;
         }
         case FUNC_match: {
@@ -838,7 +823,6 @@ int CascadeClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
     char *filename = NULL;
     int len = 0;
     cv::CascadeClassifier *cas;
-    Tcl_Obj *pResultStr = NULL;
     Tcl_DString ds;
 
     if (objc != 2) {
@@ -867,11 +851,7 @@ int CascadeClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
     }
     Tcl_DStringFree(&ds);
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_ODETECT, cas);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_ODETECT, cas);
 }
 
 
@@ -1206,7 +1186,6 @@ int HOGDescriptor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int histogramNormType = cv::HOGDescriptor::L2Hys;
 #endif
     cv::HOGDescriptor *hog;
-    Tcl_Obj *pResultStr = NULL;
 
     if (objc != 10 && objc != 16) {
         Tcl_WrongNumArgs(interp, 1, objv,
@@ -1294,11 +1273,7 @@ int HOGDescriptor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_Exc2Tcl(interp, NULL);
     }
 
-    pResultStr = Opencv_NewHandle(cd, interp, OPENCV_OOBJHOG, hog);
-
-    Tcl_SetObjResult(interp, pResultStr);
-
-    return TCL_OK;
+    return Opencv_NewHandleResult(cd, interp, OPENCV_OOBJHOG, hog);
 }
 #ifdef __cplusplus
 }
