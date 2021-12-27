@@ -874,6 +874,13 @@ Please notice, FaceRecognizerSF command will only have 1 instance.
 You can check [related tutorial](https://docs.opencv.org/master/d0/dd4/tutorial_dnn_face.html)
 and get model download link.
 
+    :cv::QRCodeEncoder ?-correction_level value? ?-mode value? ?-structure_number value? ?-version value?
+    QRCodeEncoder encode string
+    QRCodeEncoder close
+
+OpenCV 4.5.5 add `::cv::QRCodeEncoder`.
+Please notice, QRCodeEncoder command will only have 1 instance.
+
 ### ml
 
     ::cv::ml::LogisticRegression
@@ -1982,6 +1989,23 @@ StereoSGBM mode -
     ::cv::StereoSGBM_MODE_HH
     ::cv::StereoSGBM_MODE_SGBM_3WAY
     ::cv::StereoSGBM_MODE_HH4
+
+QRCodeEncoder CorrectionLevel mode -
+
+    ::cv::QRCodeEncoder_CORRECT_LEVEL_L
+    ::cv::QRCodeEncoder_CORRECT_LEVEL_M
+    ::cv::QRCodeEncoder_CORRECT_LEVEL_Q
+    ::cv::QRCodeEncoder_CORRECT_LEVEL_H
+
+QRCodeEncoder EncodeMode mode -
+
+    ::cv::QRCodeEncoder_MODE_AUTO
+    ::cv::QRCodeEncoder_MODE_NUMERIC
+    ::cv::QRCodeEncoder_MODE_ALPHANUMERIC
+    ::cv::QRCodeEncoder_MODE_BYTE
+    ::cv::QRCodeEncoder_MODE_ECI
+    ::cv::QRCodeEncoder_MODE_KANJI
+    ::cv::QRCodeEncoder_MODE_STRUCTURED_APPEND
 
 Photo inpaint flags -
 

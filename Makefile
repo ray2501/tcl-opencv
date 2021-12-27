@@ -120,7 +120,7 @@ TCL_SRC_DIR	= /home/abuild/rpmbuild/BUILD/tcl8.6.12
 #TK_SRC_DIR	= 
 
 # Not used, but retained for reference of what libs Tcl required
-#TCL_LIBS	= -ldl -lz  -lpthread -lm
+#TCL_LIBS	= 
 
 #========================================================================
 # TCLLIBPATH seeds the auto_path in Tcl's init.tcl so we can test our

@@ -184,6 +184,212 @@ int QRCodeDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 5)
+static void QRCodeEncoder_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->qrCodeEncoder) {
+        cvd->qrCodeEncoder.release();
+    }
+    cvd->cmd_qrCodeEncoder = NULL;
+}
+
+
+static int QRCodeEncoder_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "encode",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_ENCODE,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->qrCodeEncoder == nullptr) {
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_ENCODE: {
+            char *info = NULL;
+            int len = 0;
+            Tcl_Obj *pResultStr = NULL;
+            cv::Mat *dstmat;
+            cv::Mat qr_matrix;
+            Tcl_DString ds;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "string");
+                return TCL_ERROR;
+            }
+
+            info = Tcl_GetStringFromObj(objv[2], &len);
+            if (len < 1) {
+                return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid string");
+            }
+
+            info = Tcl_UtfToExternalDString(NULL, info, len, &ds);
+            try {
+                cv::String encoded_info(info);
+
+                cvd->qrCodeEncoder->encode(encoded_info, qr_matrix);
+            } catch (const cv::Exception &ex) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                Tcl_DStringFree(&ds);
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+            Tcl_DStringFree(&ds);
+
+            dstmat = new cv::Mat(qr_matrix);
+            pResultStr = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, pResultStr);
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_qrCodeEncoder) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_qrCodeEncoder);
+            }
+
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_qrCodeEncoder) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_qrCodeEncoder, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::QRCodeEncoder", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int QRCodeEncoder(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_Obj *pResultStr = NULL;
+    char *zArg = NULL;
+    int correction_level = 1, mode = -1, structure_number = 1, version = 0;
+    cv::QRCodeEncoder::Params params;
+    cv::Ptr<cv::QRCodeEncoder> qrCodeEncoder;
+
+    if ((objc&1) != 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, "?-correction_level value? ?-mode value? ?-structure_number value? ?-version value?");
+        return TCL_ERROR;
+    }
+
+    for (int i = 1; i + 1 < objc; i += 2) {
+        zArg = Tcl_GetString(objv[i]);
+
+        if (strcmp(zArg, "-correction_level") == 0) {
+            if (Tcl_GetIntFromObj(interp, objv[i+1], &correction_level) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.correction_level = (cv::QRCodeEncoder::CorrectionLevel) correction_level;
+        } else if (strcmp(zArg, "-mode") == 0) {
+            if (Tcl_GetIntFromObj(interp, objv[i+1], &mode) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.mode = (cv::QRCodeEncoder::EncodeMode) mode;
+        } else if (strcmp(zArg, "-structure_number") == 0) {
+            if (Tcl_GetIntFromObj(interp, objv[i+1], &structure_number) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.structure_number = structure_number;
+        } else if (strcmp(zArg, "-version") == 0) {
+            if (Tcl_GetIntFromObj(interp, objv[i+1], &version) != TCL_OK) {
+                return TCL_ERROR;
+            }
+
+            params.version = version;
+        } else {
+            return Opencv_SetResult(interp, cv::Error::StsBadArg, "invalid parameter");
+        }
+    }
+
+    try {
+        qrCodeEncoder = cv::QRCodeEncoder::create(params);
+
+        if (qrCodeEncoder == nullptr) {
+            CV_Error(cv::Error::StsNullPtr, "QRCodeEncoder nullptr");
+        }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-qrCodeEncoder", -1);
+
+    if (cvd->cmd_qrCodeEncoder) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_qrCodeEncoder);
+    }
+    cvd->cmd_qrCodeEncoder =
+        Tcl_CreateObjCommand(interp, "::cv-qrCodeEncoder",
+            (Tcl_ObjCmdProc *) QRCodeEncoder_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) QRCodeEncoder_DESTRUCTOR);
+
+    cvd->qrCodeEncoder = qrCodeEncoder;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+#endif
+
+
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 4)
 static void FaceDetectorYN_DESTRUCTOR(void *cd)
 {

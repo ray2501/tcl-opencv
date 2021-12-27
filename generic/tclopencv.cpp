@@ -233,6 +233,11 @@ InterpDelProc(ClientData clientdata, Tcl_Interp *interp)
         cvd->faceRecognizerSF.release();
     }
 #endif
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 5)
+    if (cvd->qrCodeEncoder) {
+        cvd->qrCodeEncoder.release();
+    }
+#endif
 #endif
     if (cvd->stitcher) {
         cvd->stitcher.release();
@@ -1760,6 +1765,10 @@ Opencv_Init(Tcl_Interp *interp)
         { "FaceRecognizerSF",
           (Tcl_ObjCmdProc *) FaceRecognizerSF },
 #endif
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 5)
+        { "QRCodeEncoder",
+          (Tcl_ObjCmdProc *) QRCodeEncoder },
+#endif
 #endif
 
         /*
@@ -2807,6 +2816,31 @@ Opencv_Init(Tcl_Interp *interp)
         { "StereoSGBM_MODE_SGBM_3WAY", cv::StereoSGBM::MODE_SGBM_3WAY },
 #ifdef TCL_USE_OPENCV4
         { "StereoSGBM_MODE_HH4", cv::StereoSGBM::MODE_HH4 },
+#endif
+
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 5)
+        /*
+         * QRCodeEncoder CorrectionLevel mode
+         */
+
+        { "QRCodeEncoder_CORRECT_LEVEL_L", cv::QRCodeEncoder::CORRECT_LEVEL_L },
+        { "QRCodeEncoder_CORRECT_LEVEL_M", cv::QRCodeEncoder::CORRECT_LEVEL_M },
+        { "QRCodeEncoder_CORRECT_LEVEL_Q", cv::QRCodeEncoder::CORRECT_LEVEL_Q },
+        { "QRCodeEncoder_CORRECT_LEVEL_H", cv::QRCodeEncoder::CORRECT_LEVEL_H },
+
+        /*
+         * QRCodeEncoder EncodeMode mode
+         */
+
+        { "QRCodeEncoder_MODE_AUTO", cv::QRCodeEncoder::MODE_AUTO },
+        { "QRCodeEncoder_MODE_NUMERIC", cv::QRCodeEncoder::MODE_NUMERIC },
+        { "QRCodeEncoder_MODE_ALPHANUMERIC", cv::QRCodeEncoder::MODE_ALPHANUMERIC },
+        { "QRCodeEncoder_MODE_BYTE", cv::QRCodeEncoder::MODE_BYTE },
+        { "QRCodeEncoder_MODE_ECI", cv::QRCodeEncoder::MODE_ECI },
+        { "QRCodeEncoder_MODE_KANJI", cv::QRCodeEncoder::MODE_KANJI },
+        { "QRCodeEncoder_MODE_STRUCTURED_APPEND", cv::QRCodeEncoder::MODE_STRUCTURED_APPEND },
+#endif
 #endif
 
         /*

@@ -1494,8 +1494,25 @@ test opencv-1.97 {createTrackbar} {*}{
     -result {0 1}
 }
 
-test opencv-1.98 {Close test} {*}{
+test opencv-1.98 {QRCode test} {*}{
     -body {
+        set qrenc [::cv::QRCodeEncoder]
+        set qrimg [$qrenc encode "https://tcl.tk"]
+        $qrenc close
+
+        set qrdetector [::cv::QRCodeDetector]
+        set res [$qrdetector detectAndDecode $qrimg]
+        lindex $res 0
+    }
+    -returnCodes ok
+    -result {https://tcl.tk}
+}
+
+test opencv-1.99 {Close test} {*}{
+    -body {
+        $qrimg close
+        $qrdetector close
+
         ::cv::imwrite output.png $image
         $tmatrix1 close
         $tmatrix2 close
