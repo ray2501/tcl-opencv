@@ -874,7 +874,7 @@ Please notice, FaceRecognizerSF command will only have 1 instance.
 You can check [related tutorial](https://docs.opencv.org/master/d0/dd4/tutorial_dnn_face.html)
 and get model download link.
 
-    :cv::QRCodeEncoder ?-correction_level value? ?-mode value? ?-structure_number value? ?-version value?
+    ::cv::QRCodeEncoder ?-correction_level value? ?-mode value? ?-structure_number value? ?-version value?
     QRCodeEncoder encode string
     QRCodeEncoder close
 
