@@ -1,3 +1,7 @@
+2021-12-31 Danilo Chang
+
+	* Bump version to v0.14
+
 2021-12-27 Danilo Chang
 
 	* Implement command: QRCodeEncoder
