@@ -399,7 +399,7 @@ It is used to find the path (contour) between two points which can be used for i
 
 ### videoio
 
-    ::cv::VideoCapture file/index filename/number ?flags?
+    ::cv::VideoCapture file/index filename/number ?flags? ?paramId value?
     VideoCapture isOpened
     VideoCapture read
     VideoCapture get propId

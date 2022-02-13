@@ -470,9 +470,12 @@ int VideoCapture(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int flags = cv::CAP_ANY;
     cv::VideoCapture *capture;
     Tcl_DString ds;
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 2)
+    std::vector<int> params;
+#endif
 
-    if (objc != 3 && objc != 4) {
-        Tcl_WrongNumArgs(interp, 1, objv, "file/index filename/number ?flags?");
+    if ((objc < 3) || (objc >= 4 && ((objc&1) != 0))) {
+        Tcl_WrongNumArgs(interp, 1, objv, "file/index filename/number ?flags? ?paramId value?");
         return TCL_ERROR;
     }
 
@@ -502,6 +505,18 @@ int VideoCapture(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         }
     }
 
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 2)
+    for(int count = 4; count < objc; count++) {
+        int value = 0;
+
+        if (Tcl_GetIntFromObj(interp, objv[count], &value) != TCL_OK) {
+            return TCL_ERROR;
+        }
+
+        params.push_back(value);
+    }
+#endif
+
     if (type == 1) {
         filename = Tcl_UtfToExternalDString(NULL, filename, len, &ds);
     } else {
@@ -512,7 +527,15 @@ int VideoCapture(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             capture = new cv::VideoCapture(filename, flags);
         } else {
 #ifdef TCL_USE_OPENCV4
-            capture = new cv::VideoCapture(index, flags);
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 2)
+            if (objc > 4) {
+                capture = new cv::VideoCapture(index, flags, params);
+            } else {
+#endif
+                capture = new cv::VideoCapture(index, flags);
+#if CV_VERSION_GREATER_OR_EQUAL(4, 5, 2)
+            }
+#endif
 #else
             capture = new cv::VideoCapture(index);
 #endif
