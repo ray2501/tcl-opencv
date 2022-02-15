@@ -1,3 +1,7 @@
+2022-02-15 Danilo Chang
+
+	* Bump version to v0.15
+
 2022-02-13 Danilo Chang
 
 	* Try to support open-only property for VideoCapture command
