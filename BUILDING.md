@@ -93,7 +93,7 @@ I use [Magicsplat Tcl/Tk for Windows](https://www.magicsplat.com/tcl-installer/i
 to test, and install path is `c:\Tcl`.
 
 Users require download and install
-[opencv-4.5.5-vc14_vc15.exe](https://sourceforge.net/projects/opencvlibrary/files/4.5.5/),
+[opencv-4.6.0-vc14_vc15.exe](https://sourceforge.net/projects/opencvlibrary/files/4.6.0/),
 and install path is `c:\opencv`.
 
 Or you can modify `win\makefile.vc` file to specify OpenCV path:

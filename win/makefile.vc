@@ -21,7 +21,7 @@ PROJECT = opencv
 DOTVERSION = 0.15
 
 PRJ_INCLUDES = -I"C:\opencv\build\include"
-PRJ_LIBS = C:\opencv\build\x64\vc15\lib\opencv_world455.lib
+PRJ_LIBS = C:\opencv\build\x64\vc15\lib\opencv_world460.lib
 !include "rules-ext.vc"
 
 # Define the object files and resource file that make up the extension.
