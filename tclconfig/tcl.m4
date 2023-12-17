@@ -53,6 +53,10 @@ AC_DEFUN([TEA_PATH_TCLCONFIG], [
 	    AS_HELP_STRING([--with-tcl],
 		[directory containing tcl configuration (tclConfig.sh)]),
 	    [with_tclconfig="${withval}"])
+	AC_ARG_WITH(tcl8,
+	    AS_HELP_STRING([--with-tcl8],
+		[Compile for Tcl8 in Tcl9 environment]),
+	    [with_tcl8="${withval}"])
 	AC_MSG_CHECKING([for Tcl configuration])
 	AC_CACHE_VAL(ac_cv_c_tclconfig,[
 
@@ -1167,6 +1171,9 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 		    amd64|x64|yes)
 			MACHINE="AMD64" ; # default to AMD64 64-bit build
 			;;
+		    arm64|aarch64)
+			MACHINE="ARM64"
+			;;
 		    ia64)
 			MACHINE="IA64"
 			;;
@@ -1235,6 +1242,13 @@ AC_DEFUN([TEA_CONFIG_CFLAGS], [
 				AR="x86_64-w64-mingw32-ar"
 				RANLIB="x86_64-w64-mingw32-ranlib"
 				RC="x86_64-w64-mingw32-windres"
+			    ;;
+			    arm64|aarch64)
+				CC="aarch64-w64-mingw32-clang"
+				LD="aarch64-w64-mingw32-ld"
+				AR="aarch64-w64-mingw32-ar"
+				RANLIB="aarch64-w64-mingw32-ranlib"
+				RC="aarch64-w64-mingw32-windres"
 			    ;;
 			    *)
 				CC="i686-w64-mingw32-${CC}"
@@ -2353,7 +2367,8 @@ AC_DEFUN([TEA_TIME_HANDLER], [
     # (like convex) have timezone functions, etc.
     #
     AC_CACHE_CHECK([long timezone variable], tcl_cv_timezone_long, [
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]],
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>
+#include <stdlib.h>]],
 	[[extern long timezone;
 	    timezone += 1;
 	    exit (0);]])],
@@ -2365,7 +2380,8 @@ AC_DEFUN([TEA_TIME_HANDLER], [
 	# On some systems (eg IRIX 6.2), timezone is a time_t and not a long.
 	#
 	AC_CACHE_CHECK([time_t timezone variable], tcl_cv_timezone_time, [
-	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]],
+	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>
+#include <stdlib.h>]],
 	    [[extern time_t timezone;
 		timezone += 1;
 		exit (0);]])],
@@ -2517,20 +2533,19 @@ AC_DEFUN([TEA_TCL_LINK_LIBS], [
 #
 #	Might define the following vars:
 #		_ISOC99_SOURCE
-#		_LARGEFILE64_SOURCE
-#		_LARGEFILE_SOURCE64
+#		_FILE_OFFSET_BITS
 #
 #--------------------------------------------------------------------
 
 AC_DEFUN([TEA_TCL_EARLY_FLAG],[
     AC_CACHE_VAL([tcl_cv_flag_]translit($1,[A-Z],[a-z]),
 	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[$2]], [[$3]])],
-	    [tcl_cv_flag_]translit($1,[A-Z],[a-z])=no,[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[[#define ]$1[ 1
+	    [tcl_cv_flag_]translit($1,[A-Z],[a-z])=no,[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[[#define ]$1[ ]m4_default([$4],[1])[
 ]$2]], [[$3]])],
 	[tcl_cv_flag_]translit($1,[A-Z],[a-z])=yes,
 	[tcl_cv_flag_]translit($1,[A-Z],[a-z])=no)]))
     if test ["x${tcl_cv_flag_]translit($1,[A-Z],[a-z])[}" = "xyes"] ; then
-	AC_DEFINE($1, 1, [Add the ]$1[ flag when building])
+	AC_DEFINE($1, m4_default([$4],[1]), [Add the ]$1[ flag when building])
 	tcl_flags="$tcl_flags $1"
     fi
 ])
@@ -2540,10 +2555,10 @@ AC_DEFUN([TEA_TCL_EARLY_FLAGS],[
     tcl_flags=""
     TEA_TCL_EARLY_FLAG(_ISOC99_SOURCE,[#include <stdlib.h>],
 	[char *p = (char *)strtoll; char *q = (char *)strtoull;])
-    TEA_TCL_EARLY_FLAG(_LARGEFILE64_SOURCE,[#include <sys/stat.h>],
-	[struct stat64 buf; int i = stat64("/", &buf);])
-    TEA_TCL_EARLY_FLAG(_LARGEFILE_SOURCE64,[#include <sys/stat.h>],
-	[char *p = (char *)open64;])
+    if test "${TCL_MAJOR_VERSION}" -ne 8 ; then
+	TEA_TCL_EARLY_FLAG(_FILE_OFFSET_BITS,[#include <sys/stat.h>],
+	    [switch (0) { case 0: case (sizeof(off_t)==sizeof(long long)): ; }],64)
+    fi
     if test "x${tcl_flags}" = "x" ; then
 	AC_MSG_RESULT([none])
     else
@@ -2567,6 +2582,7 @@ AC_DEFUN([TEA_TCL_EARLY_FLAGS],[
 #		HAVE_STRUCT_DIRENT64, HAVE_DIR64
 #		HAVE_STRUCT_STAT64
 #		HAVE_TYPE_OFF64_T
+#		_TIME_BITS
 #
 #--------------------------------------------------------------------
 
@@ -2597,6 +2613,25 @@ AC_DEFUN([TEA_TCL_64BIT_FLAGS], [
 	AC_MSG_RESULT([${tcl_cv_type_64bit}])
 
 	# Now check for auxiliary declarations
+    if test "${TCL_MAJOR_VERSION}" -ne 8 ; then
+	    AC_CACHE_CHECK([for 64-bit time_t], tcl_cv_time_t_64,[
+		AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>]],
+		    [[switch (0) {case 0: case (sizeof(time_t)==sizeof(long long)): ;}]])],
+		    [tcl_cv_time_t_64=yes],[tcl_cv_time_t_64=no])])
+	    if test "x${tcl_cv_time_t_64}" = "xno" ; then
+		# Note that _TIME_BITS=64 requires _FILE_OFFSET_BITS=64
+		# which SC_TCL_EARLY_FLAGS has defined if necessary.
+		AC_CACHE_CHECK([if _TIME_BITS=64 enables 64-bit time_t], tcl_cv__time_bits,[
+		    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#define _TIME_BITS 64
+#include <sys/types.h>]],
+			[[switch (0) {case 0: case (sizeof(time_t)==sizeof(long long)): ;}]])],
+			[tcl_cv__time_bits=yes],[tcl_cv__time_bits=no])])
+		if test "x${tcl_cv__time_bits}" = "xyes" ; then
+		    AC_DEFINE(_TIME_BITS, 64, [_TIME_BITS=64 enables 64-bit time_t.])
+		fi
+	    fi
+	fi
+
 	AC_CACHE_CHECK([for struct dirent64], tcl_cv_struct_dirent64,[
 	    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
 #include <dirent.h>]], [[struct dirent64 p;]])],
@@ -2735,8 +2770,6 @@ The PACKAGE_NAME variable must be defined by your TEA configure.ac])
     AC_SUBST(PKG_LIB_FILE)
     AC_SUBST(PKG_LIB_FILE8)
     AC_SUBST(PKG_LIB_FILE9)
-    # Substitute STUB_LIB_FILE in case package creates a stub library too.
-    AC_SUBST(PKG_STUB_LIB_FILE)
 
     # We AC_SUBST these here to ensure they are subst'ed,
     # in case the user doesn't call TEA_ADD_...
@@ -3094,11 +3127,15 @@ AC_DEFUN([TEA_SETUP_COMPILER], [
 	fi
     fi
 
+    if test "${TCL_MAJOR_VERSION}" -lt 9 -a "${TCL_MINOR_VERSION}" -lt 7; then
+	    AC_DEFINE(Tcl_Size, int, [Is 'Tcl_Size' in <tcl.h>?])
+	fi
+
     #--------------------------------------------------------------------
     # Common compiler flag setup
     #--------------------------------------------------------------------
 
-    AC_C_BIGENDIAN
+    AC_C_BIGENDIAN(,,,[#])
 ])
 
 #------------------------------------------------------------------------
@@ -3162,10 +3199,11 @@ print("manifest needed")
 
     PACKAGE_LIB_PREFIX8="${PACKAGE_LIB_PREFIX}"
     PACKAGE_LIB_PREFIX9="${PACKAGE_LIB_PREFIX}tcl9"
-    if test "${TCL_MAJOR_VERSION}" -gt 8 ; then
+    if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tcl8}" == x; then
 	PACKAGE_LIB_PREFIX="${PACKAGE_LIB_PREFIX9}"
     else
 	PACKAGE_LIB_PREFIX="${PACKAGE_LIB_PREFIX8}"
+	AC_DEFINE(TCL_MAJOR_VERSION, 8, [Compile for Tcl8?])
     fi
     if test "${TEA_PLATFORM}" = "windows" ; then
 	if test "${SHARED_BUILD}" = "1" ; then
@@ -3190,7 +3228,11 @@ print("manifest needed")
 	    eval eval "PKG_LIB_FILE=${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
 	fi
 	# Some packages build their own stubs libraries
-	eval eval "PKG_STUB_LIB_FILE=${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
+	if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tcl8}" == x; then
+	    eval eval "PKG_STUB_LIB_FILE=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub.a"
+	else
+	    eval eval "PKG_STUB_LIB_FILE=${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
+	fi
 	if test "$GCC" = "yes"; then
 	    PKG_STUB_LIB_FILE=lib${PKG_STUB_LIB_FILE}
 	fi
@@ -3209,12 +3251,16 @@ print("manifest needed")
 	    eval eval "PKG_LIB_FILE=lib${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${SHARED_LIB_SUFFIX}"
 	    RANLIB=:
 	else
-	    eval eval "PKG_LIB_FILE=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
-	    eval eval "PKG_LIB_FILE=lib${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE8=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
+	    eval eval "PKG_LIB_FILE9=lib${PACKAGE_LIB_PREFIX9}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
 	    eval eval "PKG_LIB_FILE=lib${PACKAGE_LIB_PREFIX}${PACKAGE_NAME}${UNSHARED_LIB_SUFFIX}"
 	fi
 	# Some packages build their own stubs libraries
-	eval eval "PKG_STUB_LIB_FILE=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
+	if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tcl8}" == x; then
+	    eval eval "PKG_STUB_LIB_FILE=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub.a"
+	else
+	    eval eval "PKG_STUB_LIB_FILE=lib${PACKAGE_LIB_PREFIX8}${PACKAGE_NAME}stub${UNSHARED_LIB_SUFFIX}"
+	fi
     fi
 
     # These are escaped so that only CFLAGS is picked up at configure time.
@@ -3228,6 +3274,8 @@ print("manifest needed")
     AC_SUBST(MAKE_SHARED_LIB)
     AC_SUBST(MAKE_STATIC_LIB)
     AC_SUBST(MAKE_STUB_LIB)
+    # Substitute STUB_LIB_FILE in case package creates a stub library too.
+    AC_SUBST(PKG_STUB_LIB_FILE)
     AC_SUBST(RANLIB_STUB)
     AC_SUBST(VC_MANIFEST_EMBED_DLL)
     AC_SUBST(VC_MANIFEST_EMBED_EXE)
@@ -3907,6 +3955,10 @@ AC_DEFUN([TEA_EXPORT_CONFIG], [
 	eval $1_LIB_FLAG="-l$1`echo ${PACKAGE_VERSION} | tr -d .`"
 	eval $1_STUB_LIB_FLAG="-l$1stub`echo ${PACKAGE_VERSION} | tr -d .`"
     fi
+    if test "${TCL_MAJOR_VERSION}" -gt 8 -a x"${with_tcl8}" == x; then
+	eval $1_STUB_LIB_FLAG="-l$1stub"
+    fi
+
     $1_BUILD_LIB_SPEC="-L`$CYGPATH $(pwd)` ${$1_LIB_FLAG}"
     $1_LIB_SPEC="-L`$CYGPATH ${pkglibdir}` ${$1_LIB_FLAG}"
     $1_BUILD_STUB_LIB_SPEC="-L`$CYGPATH $(pwd)` [$]{$1_STUB_LIB_FLAG}"

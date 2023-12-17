@@ -115,6 +115,7 @@ TEA_ADD_SOURCES([tclopencv.cpp tcore.cpp timgproc.cpp timgcodecs.cpp
                  tdnn.cpp tml.cpp tfstorage.cpp tthread.cpp])
 TEA_ADD_HEADERS([])
 TEA_ADD_INCLUDES([])
+TEA_ADD_CFLAGS([-DTCL_THREADS=1])
 AC_MSG_CHECKING([whether to use opencv4 package])
 if pkg-config opencv4 --exists; then
     tcl_ok=yes
