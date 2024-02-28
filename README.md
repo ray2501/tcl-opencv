@@ -93,6 +93,7 @@ variable. You can check
     ::cv::convertScaleAbs matrix alpha beta
     ::cv::copyMakeBorder matrix top bottom left right borderType ?color_list?
     ::cv::countNonZero matrix
+    ::cv::hasNonZero matrix
     ::cv::determinant matrix
     ::cv::divide matrix_1 matrix_2 ?scale?
     ::cv::eigen matrix
@@ -142,6 +143,8 @@ variable. You can check
     ::cv::transform matrix_1 matrix_2
     ::cv::hconcat matrix_1 matrix_2
     ::cv::vconcat matrix_1 matrix_2
+
+OpenCV 4.8.0 add `::cv::hasNonZero`.
 
     ::cv::kmeans matrix k bestLabels termCriteria attempts flags
 

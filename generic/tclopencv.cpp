@@ -1195,6 +1195,12 @@ Opencv_Init(Tcl_Interp *interp)
           (Tcl_ObjCmdProc *) mat_copyMakeBorder },
         { "countNonZero",
           (Tcl_ObjCmdProc *) mat_countNonZero },
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 8, 0)
+        { "hasNonZero",
+          (Tcl_ObjCmdProc *) mat_hasNonZero },
+#endif
+#endif
         { "determinant",
           (Tcl_ObjCmdProc *) mat_determinant },
         { "eigen",
