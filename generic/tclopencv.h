@@ -169,6 +169,11 @@ MODULE_SCOPE int getGaussianKernel(void *cd, Tcl_Interp *interp, int objc, Tcl_O
 MODULE_SCOPE int blur(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int GaussianBlur(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int medianBlur(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 7, 0)
+MODULE_SCOPE int stackBlur(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
+#endif
+#endif
 MODULE_SCOPE int bilateralFilter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int boxFilter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);
 MODULE_SCOPE int sqrBoxFilter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv);

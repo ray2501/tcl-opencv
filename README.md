@@ -237,9 +237,12 @@ For more FileStorage info, you can check
     ::cv::blur src_matrix ksize_width ksize_height ?anchor_x anchor_y borderType?
     ::cv::GaussianBlur src_matrix ksize_width ksize_height sigmaX ?sigmaY borderType?
     ::cv::medianBlur src_matrix ksize
+    ::cv::stackBlur src_matrix ksize_width ksize_height
     ::cv::bilateralFilter src_matrix d sigmaColor sigmaSpace ?borderType?
     ::cv::boxFilter src_matrix ksize_width ksize_height ?anchor_x anchor_y normalize borderType?
     ::cv::sqrBoxFilter src_matrix ksize_width ksize_height ?anchor_x anchor_y normalize borderType?
+
+OpenCV 4.7.0 add `::cv::stackBlur`.
 
     ::cv::getStructuringElement shape ksize_width ksize_height ?anchor_x anchor_y?
     ::cv::dilate src_matrix kernel_matrix ?anchor_x anchor_y iterations?

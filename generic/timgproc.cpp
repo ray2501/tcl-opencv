@@ -2133,6 +2133,49 @@ int medianBlur(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 }
 
 
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 7, 0)
+int stackBlur(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    cv::Mat blur_image;
+    int ksize_width = 0, ksize_height = 0;
+    cv::Mat *mat, *dstmat;
+
+    if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 1, objv,
+                         "src_matrix ksize_width ksize_height");
+        return TCL_ERROR;
+    }
+
+    mat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[1]);
+    if (!mat) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[2], &ksize_width) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIntFromObj(interp, objv[3], &ksize_height) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    try {
+        cv::stackBlur(*mat, blur_image, cv::Size(ksize_width, ksize_height));
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    dstmat = new cv::Mat(blur_image);
+
+    return Opencv_NewHandleResult(cd, interp, OPENCV_MAT, dstmat);
+}
+#endif
+#endif
+
+
 int bilateralFilter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat blur_image;

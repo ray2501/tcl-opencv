@@ -1410,6 +1410,12 @@ Opencv_Init(Tcl_Interp *interp)
           (Tcl_ObjCmdProc *) GaussianBlur },
         { "medianBlur",
           (Tcl_ObjCmdProc *) medianBlur },
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 7, 0)
+        { "stackBlur",
+          (Tcl_ObjCmdProc *) stackBlur },
+#endif
+#endif
         { "bilateralFilter",
           (Tcl_ObjCmdProc *) bilateralFilter },
         { "boxFilter",
