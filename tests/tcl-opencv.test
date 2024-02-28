@@ -1500,8 +1500,11 @@ test opencv-1.98 {QRCode test} {*}{
         set qrimg [$qrenc encode "https://tcl.tk"]
         $qrenc close
 
+        set qrimg2 [::cv::resize $qrimg 200 200 $::cv::INTER_NEAREST]
+        $qrimg close
+
         set qrdetector [::cv::QRCodeDetector]
-        set res [$qrdetector detectAndDecode $qrimg]
+        set res [$qrdetector detectAndDecode $qrimg2]
         lindex $res 0
     }
     -returnCodes ok
@@ -1510,7 +1513,7 @@ test opencv-1.98 {QRCode test} {*}{
 
 test opencv-1.99 {Close test} {*}{
     -body {
-        $qrimg close
+        $qrimg2 close
         $qrdetector close
 
         ::cv::imwrite output.png $image

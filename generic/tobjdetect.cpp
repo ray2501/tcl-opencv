@@ -105,7 +105,7 @@ int QRCodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
 
             Tcl_Obj *list[3];
 
-            list[0] = Tcl_NewByteArrayObj((const unsigned char *) result.c_str(), result.length());
+            list[0] = Tcl_NewStringObj(result.c_str(), result.length());
 
             dstmat = new cv::Mat(points_matrix);
             list[1] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
