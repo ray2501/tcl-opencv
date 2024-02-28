@@ -1825,6 +1825,9 @@ LineSegmentDetector modes -
     ::cv::REDUCE_AVG
     ::cv::REDUCE_MAX
     ::cv::REDUCE_MIN
+    ::cv::REDUCE_SUM2
+
+OpenCV 4.8.0 add `::cv::REDUCE_SUM2` option to ::cv::reduce.
 
 `::cv::rotate` rotateCode -
 

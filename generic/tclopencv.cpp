@@ -2597,6 +2597,11 @@ Opencv_Init(Tcl_Interp *interp)
         { "REDUCE_AVG", cv::REDUCE_AVG },
         { "REDUCE_MAX", cv::REDUCE_MAX },
         { "REDUCE_MIN", cv::REDUCE_MIN },
+#ifdef TCL_USE_OPENCV4
+#if CV_VERSION_GREATER_OR_EQUAL(4, 8, 0)
+        { "REDUCE_SUM2", cv::REDUCE_SUM2 },
+#endif
+#endif
 
         /*
          * Rotate Flags (rotateCode)
