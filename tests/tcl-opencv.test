@@ -533,8 +533,6 @@ test opencv-1.57 {Split and merge image} {*}{
 
 test opencv-1.58 {Split and merge image} {*}{
     -body {
-        set imgList [::cv::split $image]
-        set len [llength $imgList]
         set img2 [::cv::cvtColor $image $::cv::COLOR_BGR2YCrCb]
         set simg [::cv::split $img2]
         set simg0 [lindex $simg 0]
