@@ -520,6 +520,7 @@ test opencv-1.57 {Split and merge image} {*}{
         set imgList [::cv::split $image]
         set len [llength $imgList]
         set img2 [::cv::merge $imgList]
+        $img2 close
 
         for {set i 0} {$i < $len} {incr i} {
             set myimage [lindex $imgList $i]
