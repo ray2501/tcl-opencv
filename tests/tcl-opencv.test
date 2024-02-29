@@ -1505,6 +1505,13 @@ test opencv-1.98 {QRCode test} {*}{
 
         set qrdetector [::cv::QRCodeDetector]
         set res [$qrdetector detectAndDecode $qrimg2]
+
+        set p_mat [lindex $res 1]
+        $p_mat close
+
+        set s_mat [lindex $res 2]
+        $s_mat close
+
         lindex $res 0
     }
     -returnCodes ok
