@@ -887,6 +887,13 @@ and get model download link.
 OpenCV 4.5.5 add `::cv::QRCodeEncoder`.
 Please notice, QRCodeEncoder command will only have 1 instance.
 
+    ::cv::BarcodeDetector
+    BarcodeDetector detectAndDecodeWithType matrix
+    BarcodeDetector close
+
+OpenCV 4.8.0 add `::cv::BarcodeDetector`.
+Please notice, BarcodeDetector command will only have 1 instance.
+
 ### ml
 
     ::cv::ml::LogisticRegression

@@ -1781,6 +1781,10 @@ Opencv_Init(Tcl_Interp *interp)
         { "QRCodeEncoder",
           (Tcl_ObjCmdProc *) QRCodeEncoder },
 #endif
+#if CV_VERSION_GREATER_OR_EQUAL(4, 8, 0)
+        { "BarcodeDetector",
+          (Tcl_ObjCmdProc *) BarcodeDetector },
+#endif
 #endif
 
         /*

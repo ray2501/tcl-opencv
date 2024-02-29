@@ -390,6 +390,205 @@ int QRCodeEncoder(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 #endif
 
 
+#if CV_VERSION_GREATER_OR_EQUAL(4, 8, 0)
+static void BarcodeDetector_DESTRUCTOR(void *cd)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+
+    if (cvd->barcodeDetector) {
+        cvd->barcodeDetector.release();
+    }
+    cvd->cmd_barcodeDetector = NULL;
+}
+
+
+static int BarcodeDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    int choice;
+
+    static const char *FUNC_strs[] = {
+        "detectAndDecodeWithType",
+        "close",
+        "_command",
+        "_name",
+        "_type",
+        0
+    };
+
+    enum FUNC_enum {
+        FUNC_DETECTANDDECODE,
+        FUNC_CLOSE,
+        FUNC__COMMAND,
+        FUNC__NAME,
+        FUNC__TYPE,
+    };
+
+    if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 1, objv, "SUBCOMMAND ...");
+        return TCL_ERROR;
+    }
+
+    if (Tcl_GetIndexFromObj(interp, objv[1], FUNC_strs, "option", 0, &choice)) {
+        return TCL_ERROR;
+    }
+
+    if (cvd->barcodeDetector == nullptr) {
+        Opencv_SetResult(interp, cv::Error::StsNullPtr, "singleton not instantiated");
+        return TCL_ERROR;
+    }
+
+    switch ((enum FUNC_enum)choice) {
+        case FUNC_DETECTANDDECODE: {
+            cv::Mat *srcmat, *dstmat;
+            cv::Mat points_matrix;
+            std::vector<std::string> decoded_info;
+            std::vector<std::string> decoded_type;
+            bool result;
+
+            if (objc != 3) {
+                Tcl_WrongNumArgs(interp, 2, objv, "matrix");
+                return TCL_ERROR;
+            }
+
+            srcmat = (cv::Mat *) Opencv_FindHandle(cd, interp, OPENCV_MAT, objv[2]);
+            if (!srcmat) {
+                return TCL_ERROR;
+            }
+
+            try {
+                result = cvd->barcodeDetector->detectAndDecodeWithType(
+                                                      *srcmat,
+                                                      decoded_info,
+                                                      decoded_type,
+                                                      points_matrix);
+                if (!result) {
+                    return Opencv_SetResult(interp, cv::Error::StsError, "no detect result");
+                }
+
+                if (decoded_info.size() == 0) {
+                    return Opencv_SetResult(interp, cv::Error::StsError, "decoded_info size is 0");
+                }
+
+                if (decoded_type.size() == 0) {
+                    return Opencv_SetResult(interp, cv::Error::StsError, "decoded_type size is 0");
+                }
+            } catch (const cv::Exception &ex) {
+                return Opencv_Exc2Tcl(interp, &ex);
+            } catch (...) {
+                return Opencv_Exc2Tcl(interp, NULL);
+            }
+
+            Tcl_Obj *list[3];
+
+            list[0] = Tcl_NewListObj(decoded_info.size(), NULL);
+            for (size_t i = 0; i < decoded_info.size(); i++) {
+                Tcl_Obj *pListStr =
+                    Tcl_NewStringObj(decoded_info[i].c_str(),
+                                     decoded_info[i].length());
+
+                Tcl_ListObjAppendElement(NULL, list[0], pListStr);
+            }
+
+            list[1] = Tcl_NewListObj(decoded_type.size(), NULL);
+            for (size_t i = 0; i < decoded_type.size(); i++) {
+                Tcl_Obj *pListStr =
+                    Tcl_NewStringObj(decoded_type[i].c_str(),
+                                     decoded_type[i].length());
+
+                Tcl_ListObjAppendElement(NULL, list[1], pListStr);
+            }
+
+            dstmat = new cv::Mat(points_matrix);
+            list[2] = Opencv_NewHandle(cd, interp, OPENCV_MAT, dstmat);
+
+            Tcl_SetObjResult(interp, Tcl_NewListObj(3, list));
+
+            break;
+        }
+        case FUNC_CLOSE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            if (cvd->cmd_barcodeDetector) {
+                Tcl_DeleteCommandFromToken(interp, cvd->cmd_barcodeDetector);
+            }
+
+            break;
+        }
+        case FUNC__COMMAND:
+        case FUNC__NAME: {
+            Tcl_Obj *obj;
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            obj = Tcl_NewObj();
+            if (cvd->cmd_barcodeDetector) {
+                Tcl_GetCommandFullName(interp, cvd->cmd_barcodeDetector, obj);
+            }
+            Tcl_SetObjResult(interp, obj);
+            break;
+        }
+        case FUNC__TYPE: {
+            if (objc != 2) {
+                Tcl_WrongNumArgs(interp, 2, objv, 0);
+                return TCL_ERROR;
+            }
+
+            Tcl_SetResult(interp, (char *) "cv::BarcodeDetector", TCL_STATIC);
+            break;
+        }
+    }
+
+    return TCL_OK;
+}
+
+
+int BarcodeDetector(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
+{
+    Opencv_Data *cvd = (Opencv_Data *)cd;
+    Tcl_Obj *pResultStr = NULL;
+    cv::Ptr<cv::barcode::BarcodeDetector> barcodeDetector;
+
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, 0);
+        return TCL_ERROR;
+    }
+
+    try {
+        barcodeDetector = cv::makePtr<cv::barcode::BarcodeDetector>();
+
+        if (barcodeDetector == nullptr) {
+            CV_Error(cv::Error::StsNullPtr, "BarcodeDetector nullptr");
+        }
+    } catch (const cv::Exception &ex) {
+        return Opencv_Exc2Tcl(interp, &ex);
+    } catch (...) {
+        return Opencv_Exc2Tcl(interp, NULL);
+    }
+
+    pResultStr = Tcl_NewStringObj("::cv-barcodeDetector", -1);
+
+    if (cvd->cmd_barcodeDetector) {
+        Tcl_DeleteCommandFromToken(interp, cvd->cmd_barcodeDetector);
+    }
+    cvd->cmd_barcodeDetector =
+        Tcl_CreateObjCommand(interp, "::cv-barcodeDetector",
+            (Tcl_ObjCmdProc *) BarcodeDetector_FUNCTION,
+            cd, (Tcl_CmdDeleteProc *) BarcodeDetector_DESTRUCTOR);
+
+    cvd->barcodeDetector = barcodeDetector;
+
+    Tcl_SetObjResult(interp, pResultStr);
+    return TCL_OK;
+}
+#endif
+
+
 #if CV_VERSION_GREATER_OR_EQUAL(4, 5, 4)
 static void FaceDetectorYN_DESTRUCTOR(void *cd)
 {
