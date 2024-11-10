@@ -250,7 +250,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             break;
         }
         case FUNC_AT: {
-            int count = 0;
+            Tcl_Size count = 0;
             int channel = 0;
             int *index = NULL;;
             double value = 0.0;
@@ -1109,7 +1109,7 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             break;
         }
         case FUNC_SETDATA: {
-            int count = 0;
+            Tcl_Size count = 0;
             int depth = mat->depth();
             long max_data_len = mat->total() * mat->channels();
             uchar *orig_data = mat->data;
@@ -1149,7 +1149,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             break;
         }
         case FUNC_SETTO: {
-            int B = 0, G = 0, R = 0, A = 0, count = 0;
+            int B = 0, G = 0, R = 0, A = 0;
+            Tcl_Size count = 0;
             cv::Mat *mmat = 0;
 
             if (objc != 3 && objc != 4) {
@@ -1292,7 +1293,8 @@ int MATRIX_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
             break;
         }
         case FUNC_FROMBYTEA: {
-            int width, height, bpp, len, newType;
+            int width, height, bpp, newType;
+            Tcl_Size len;
             unsigned char *bdata, *mdata;
 
             if (objc != 6) {
@@ -1849,7 +1851,8 @@ int tcl_CV_64FC(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_mat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int rows, cols, type;
-    int count = 0, B = 0, G = 0, R = 0, A = 0;
+    Tcl_Size count = 0;
+    int B = 0, G = 0, R = 0, A = 0;
     cv::Mat mat_mat;
     cv::Mat *dstmat;
 
@@ -1918,7 +1921,8 @@ int mat_mat(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_matwithdims(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int dims, *index, type;
-    int count = 0, B = 0, G = 0, R = 0, A = 0;
+    Tcl_Size count = 0;
+    int B = 0, G = 0, R = 0, A = 0;
     cv::Mat mat_mat;
     cv::Mat *dstmat;
 
@@ -2630,7 +2634,7 @@ int mat_copyMakeBorder(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
 {
     int top = 0, bottom = 0, left = 0, right = 0, borderType = cv::BORDER_DEFAULT;
     int B = 0, G = 0, R = 0, A = 0;
-    int count = 0;
+    Tcl_Size count = 0;
     cv::Mat dstimage;
     cv::Mat *mat, *dstmat;
 
@@ -3137,7 +3141,7 @@ int mat_dft(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int mat_inRange(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat image;
-    int count = 0;
+    Tcl_Size count = 0;
     int B1 = 0, G1 = 0, R1 = 0, A1 = 0;
     int B2 = 0, G2 = 0, R2 = 0, A2 = 0;
     cv::Mat *mat, *dstmat;
@@ -3722,7 +3726,7 @@ int mat_merge(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     std::vector<cv::Mat> channels;
     cv::Mat image;
     cv::Mat *dstmat;
-    int count = 0;
+    Tcl_Size count = 0;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "matrix_list");
@@ -3893,7 +3897,7 @@ int mat_randn(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double mean_B = 0, mean_G = 0, mean_R = 0, mean_A = 0;
     double stddev_B = 0, stddev_G = 0, stddev_R = 0, stddev_A = 0;
-    int count = 0;
+    Tcl_Size count = 0;
     cv::Mat *mat;
 
     if (objc != 4) {
@@ -3986,7 +3990,7 @@ int mat_randu(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     double min_B = 0, min_G = 0, min_R = 0, min_A = 0;
     double max_B = 0, max_G = 0, max_R = 0, max_A = 0;
-    int count = 0;
+    Tcl_Size count = 0;
     cv::Mat *mat;
 
     if (objc != 4) {
@@ -4836,7 +4840,8 @@ int kmeans(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int perspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    int count = 0, npts = 0;
+    Tcl_Size count = 0;
+    int npts = 0;
     cv::Mat mat_image;
     std::vector<cv::Point2f> src_points, dst_points;
     Tcl_Obj *pResultStr = NULL;

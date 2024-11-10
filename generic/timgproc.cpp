@@ -81,7 +81,8 @@ int cvtColor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int calcBackProject(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    int count = 0, rangecount = 0;
+    Tcl_Size count = 0;
+    int rangecount = 0;
     int *channels = NULL;
     float **ranges = NULL;
     double scale = 1;
@@ -251,7 +252,8 @@ int calcBackProject(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int calcHist(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    int dims = 0, count = 0, rangecount = 0;
+    int dims = 0, rangecount = 0;
+    Tcl_Size count = 0;
     int *histSize = NULL, *channels = NULL;
     float **ranges = NULL;
     int uniform = 1, accumulate = 0;
@@ -594,7 +596,8 @@ int floodFill(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     int r_x = 0, r_y = 0, r_w = 0, r_h = 0;
     int lo_B = 0, lo_G= 0, lo_R = 0, lo_A = 0;
     int up_B = 0, up_G = 0, up_R = 0, up_A = 0;
-    int flags = 4, count = 0;
+    int flags = 4;
+    Tcl_Size count = 0;
     cv::Mat *mat;
 
     if (objc != 5 && objc != 9) {
@@ -1007,7 +1010,7 @@ int getRectSubPix(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int HuMoments(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    int count;
+    Tcl_Size count;
     double hu[7] ;
     double m00, m10, m01, m20, m11, m02, m30, m21, m12, m03;
 
@@ -1342,7 +1345,8 @@ int adaptiveThreshold(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
 
 int getAffineTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    int count = 0, npts = 0;
+    Tcl_Size count = 0;
+    int npts = 0;
     cv::Mat mat_image;
     std::vector<cv::Point2f> src_points, dst_points;
     cv::Mat *dstmat;
@@ -1484,7 +1488,8 @@ int warpAffine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int getPerspectiveTransform(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    int count = 0, npts = 0;
+    Tcl_Size count = 0;
+    int npts = 0;
     cv::Mat mat_image;
     std::vector<cv::Point2f> src_points, dst_points;
     int solveMethod = cv::DECOMP_LU;
@@ -3836,7 +3841,8 @@ int findContoursWithHierarchy(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 int drawContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int contourIdx = 0, thickness = 1, lineType = cv::LINE_8, maxLevel = INT_MAX;
-    int B = 0, G = 0, R = 0, A = 0, count = 0;
+    int B = 0, G = 0, R = 0, A = 0;
+    Tcl_Size count = 0;
     int offset_point_x = 0, offset_point_y = 0;
     cv::Mat *mat;
     std::vector<std::vector<cv::Point> > contours;
@@ -3861,7 +3867,7 @@ int drawContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     } else {
         for (int contours_count = 0; contours_count < count; contours_count++) {
             Tcl_Obj *elemListPtr = NULL;
-            int index_count = 0;
+            Tcl_Size index_count = 0;
             std::vector<cv::Point> points;
 
             Tcl_ListObjIndex(interp, objv[2], contours_count, &elemListPtr);
@@ -3975,7 +3981,8 @@ int drawContours(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int drawContoursWithHierarchy(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     int contourIdx = 0, thickness = 1, lineType = cv::LINE_8, maxLevel = INT_MAX;
-    int B = 0, G = 0, R = 0, A = 0, count = 0;
+    int B = 0, G = 0, R = 0, A = 0;
+    Tcl_Size count = 0;
     int offset_point_x = 0, offset_point_y = 0;
     cv::Mat *mat;
     std::vector<std::vector<cv::Point> > contours;
@@ -4001,7 +4008,7 @@ int drawContoursWithHierarchy(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
     } else {
         for (int contours_count = 0; contours_count < count; contours_count++) {
             Tcl_Obj *elemListPtr = NULL;
-            int index_count = 0;
+            Tcl_Size index_count = 0;
             std::vector<cv::Point> points;
 
             Tcl_ListObjIndex(interp, objv[2], contours_count, &elemListPtr);
@@ -4092,7 +4099,7 @@ int drawContoursWithHierarchy(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
     } else {
         for (int hierarchy_count = 0; hierarchy_count < count; hierarchy_count++) {
             Tcl_Obj *elemListPtr = NULL;
-            int index_count = 0;
+            Tcl_Size index_count = 0;
             cv::Vec4i veci;
 
             Tcl_ListObjIndex(interp, objv[7], hierarchy_count, &elemListPtr);
@@ -4155,7 +4162,8 @@ int drawContoursWithHierarchy(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
 int approxPolyDP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     std::vector<cv::Point> points, approxCurve;
-    int closed = 0, count = 0;
+    int closed = 0;
+    Tcl_Size count = 0;
     double epsilon = 0;
     Tcl_Obj *pResultStr = NULL;
 
@@ -4225,7 +4233,8 @@ int approxPolyDP(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int arcLength(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     std::vector<cv::Point> points;
-    int closed = 0, count = 0;
+    int closed = 0;
+    Tcl_Size count = 0;
     double result = 0;
 
     if (objc != 3) {
@@ -4284,7 +4293,8 @@ int arcLength(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int contourArea(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     std::vector<cv::Point> points;
-    int oriented = 0, count = 0;
+    int oriented = 0;
+    Tcl_Size count = 0;
     double result = 0;
 
     if (objc != 2 && objc != 3) {
@@ -4346,7 +4356,7 @@ int boundingRect(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     std::vector<cv::Point> points;
     cv::Rect rect;
-    int count = 0;
+    Tcl_Size count = 0;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "contour");
@@ -4408,7 +4418,7 @@ int minAreaRect(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     std::vector<cv::Point> points;
     cv::RotatedRect rect;
-    int count = 0;
+    Tcl_Size count = 0;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "contour");
@@ -4471,7 +4481,7 @@ int fitEllipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     std::vector<cv::Point> points;
     cv::RotatedRect rect;
-    int count = 0;
+    Tcl_Size count = 0;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "contour");
@@ -4536,7 +4546,8 @@ int fitLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     std::vector<cv::Point> points;
     cv::Vec4f line;
     cv::RotatedRect rect;
-    int count = 0, distType = 0;
+    Tcl_Size count = 0;
+    int distType = 0;
     double param = 0, reps = 0, aeps = 0;
 
     if (objc != 6) {
@@ -4620,7 +4631,7 @@ int boxPoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     double x, y, width, height, angle;
     cv::RotatedRect rect;
     Tcl_Obj *pResultStr = NULL;
-    int count = 0;
+    Tcl_Size count = 0;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "box");
@@ -4688,7 +4699,7 @@ int minEnclosingCircle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*ob
     std::vector<cv::Point> points;
     cv::Point2f center;
     float radius;
-    int count = 0;
+    Tcl_Size count = 0;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp, 1, objv, "contour");
@@ -4750,7 +4761,8 @@ int convexHull(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     std::vector<cv::Point> points, hull;
     std::vector<int> hull_ind;
     Tcl_Obj *pResultStr = NULL;
-    int count = 0, clockwise = 0, returnPoints = 1;
+    Tcl_Size count = 0;
+    int clockwise = 0, returnPoints = 1;
 
     if (objc != 2 && objc != 4) {
         Tcl_WrongNumArgs(interp, 1, objv, "contour ?clockwise returnPoints?");
@@ -4834,7 +4846,7 @@ int convexityDefects(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
     std::vector<int> hull_ind;
     std::vector<cv::Vec4i> results;
     Tcl_Obj *pResultStr = NULL;
-    int count = 0;
+    Tcl_Size count = 0;
 
     if (objc != 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "contour convexhull");
@@ -4924,7 +4936,8 @@ int convexityDefects(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 int matchShapes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     std::vector<cv::Point> points1, points2;
-    int count = 0, method = 0;
+    Tcl_Size count = 0;
+    int  method = 0;
     double result = 0;
 
     if (objc != 4) {
@@ -5014,7 +5027,8 @@ int matchShapes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int pointPolygonTest(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     std::vector<cv::Point> points;
-    int count = 0, measureDist = 0;
+    Tcl_Size count = 0;
+    int measureDist = 0;
     double x = 0, y = 0, result = 0;
 
     if (objc != 5) {
@@ -5086,7 +5100,7 @@ int pointPolygonTest(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 int arrowedLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat *mat;
-    int count = 0;
+    Tcl_Size count = 0;
     int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
     int B = 0, G = 0, R = 0, A = 0;
     int thickness = 1, lineType = cv::LINE_8, shift = 0;
@@ -5185,7 +5199,7 @@ int arrowedLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int circle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat *mat;
-    int count = 0;
+    Tcl_Size count = 0;
     int x1 = 0, y1 = 0, radius = 0;
     int B = 0, G = 0, R = 0, A = 0;
     int thickness = 1, lineType = cv::LINE_8, shift = 0;
@@ -5274,7 +5288,7 @@ int circle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 
 int clipLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    int count = 0;
+    Tcl_Size count = 0;
     int width, height;
     int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
     bool result;
@@ -5367,7 +5381,7 @@ int clipLine(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int drawMarker(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat *mat;
-    int count = 0;
+    Tcl_Size count = 0;
     int x1 = 0, y1 = 0;
     int B = 0, G = 0, R = 0, A = 0;
     int markerType = cv::MARKER_CROSS, markerSize = 20, thickness = 1, line_type = cv::LINE_8;
@@ -5457,7 +5471,7 @@ int drawMarker(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int ellipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat *mat;
-    int count = 0;
+    Tcl_Size count = 0;
     int x1 = 0, y1 = 0, width = 0, height;
     int B = 0, G = 0, R = 0, A = 0;
     double angle = 0.0, startAngle = 0.0, endAngle = 0.0;
@@ -5565,7 +5579,8 @@ int ellipse(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int fillConvexPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat *mat;
-    int count = 0, B = 0, G = 0, R = 0, A = 0;
+    Tcl_Size count = 0;
+    int B = 0, G = 0, R = 0, A = 0;
     int lineType = cv::LINE_8, shift = 0;
     cv::Point *pts;
     int npts = 0;
@@ -5682,11 +5697,12 @@ int fillConvexPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int fillPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat *mat;
-    int count = 0, B = 0, G = 0, R = 0, A = 0;
+    Tcl_Size count = 0;
+    int B = 0, G = 0, R = 0, A = 0;
     int lineType = cv::LINE_8, shift = 0, offset_x = 0, offset_y = 0;
     cv::Point **pts = NULL;
     int *npts = NULL;
-    int ncontours = 0;
+    Tcl_Size ncontours = 0;
     int isDone = 0;
 
     if (objc != 4 && objc != 8) {
@@ -5710,7 +5726,7 @@ int fillPoly(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         pts = (cv::Point **) ckalloc(sizeof(cv::Point *) * ncontours);
         npts = (int *) ckalloc(sizeof(int) * ncontours);
         Tcl_Obj *elemPointListPtr = NULL;
-        int count = 0;
+        Tcl_Size count = 0;
 
         for (int number = 0; number < ncontours; number++) {
             pts[number] = NULL;
@@ -5893,7 +5909,8 @@ int getTextSize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Size size;
     char *text = NULL;
-    int len = 0, fontFace = 0, thickness = 0, baseline = 0;
+    Tcl_Size len = 0;
+    int fontFace = 0, thickness = 0, baseline = 0;
     double fontScale = 1.0;
     Tcl_DString ds;
     Tcl_Encoding enc;
@@ -5944,7 +5961,7 @@ int getTextSize(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int line(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat *mat;
-    int count = 0;
+    Tcl_Size count = 0;
     int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
     int B = 0, G = 0, R = 0, A = 0;
     int thickness = 1, lineType = cv::LINE_8, shift = 0;
@@ -6039,7 +6056,8 @@ int polylines(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat *mat;
     int ncontours = 0, isClosed = 0;
-    int count = 0, B = 0, G = 0, R = 0, A = 0;
+    Tcl_Size count = 0;
+    int B = 0, G = 0, R = 0, A = 0;
     int thickness = 1, lineType = cv::LINE_8, shift = 0;
     cv::Point *pts;
     int npts = 0;
@@ -6173,8 +6191,8 @@ int putText(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat *mat;
     char *text = NULL;
-    int len = 0;
-    int count = 0;
+    Tcl_Size len = 0;
+    Tcl_Size count = 0;
     int x1 = 0, y1 = 0, fontFace = 0, B = 0, G = 0, R = 0, A = 0;
     double fontScale = 1.0;
     int thickness = 1, lineType = cv::LINE_8, bottomLeftOrigin = 0;
@@ -6278,7 +6296,7 @@ int putText(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int rectangle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat *mat;
-    int count = 0;
+    Tcl_Size count = 0;
     int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
     int B = 0, G= 0, R = 0, A = 0;
     int thickness = 1, lineType = cv::LINE_8, shift = 0;
@@ -8038,7 +8056,7 @@ static int LineSegmentDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, 
             break;
         }
         case FUNC_drawSegments: {
-            int count = 0;
+            Tcl_Size count = 0;
             std::vector<cv::Vec4f> lines_std;
             cv::Mat *mat;
 
@@ -8061,7 +8079,7 @@ static int LineSegmentDetector_FUNCTION(void *cd, Tcl_Interp *interp, int objc, 
             } else {
                 for (int i = 0; i < count; i++) {
                     Tcl_Obj *elemListPtr = NULL;
-                    int subCount = 0;
+                    Tcl_Size subCount = 0;
                     cv::Vec4f values;
 
                     Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);

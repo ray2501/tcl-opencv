@@ -109,7 +109,7 @@ int Opencv_Tsend(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     }
     Tcl_DStringInit(&msg->ds);
     if (objc > 3) {
-        int len;
+        Tcl_Size len;
         char *string = Tcl_GetStringFromObj(objv[3], &len);
 
         Tcl_DStringAppend(&msg->ds, string, len);

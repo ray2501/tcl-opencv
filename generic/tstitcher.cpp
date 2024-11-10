@@ -53,7 +53,7 @@ static int Stitcher_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_STITCH: {
-            int count = 0;
+            Tcl_Size count = 0;
             std::vector<cv::Mat> imgs;
             cv::Mat result_image;
             cv::Mat *dstmat;

@@ -8,7 +8,8 @@ int drawKeypoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     cv::Mat dst_image;
     std::vector<cv::KeyPoint> keypoints;
-    int count = 0, flags = 0, new_B = 0, new_G = 0, new_R = 0, new_A = 0;
+    Tcl_Size count = 0;
+    int flags = 0, new_B = 0, new_G = 0, new_R = 0, new_A = 0;
     int nodstimage = 0;
     cv::Mat *mat1, *mat2 = NULL, *dstmat;
 
@@ -31,7 +32,7 @@ int drawKeypoints(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     } else {
         for (int i = 0; i < count; i++) {
             Tcl_Obj *elemListPtr = NULL;
-            int sub_count = 0;
+            Tcl_Size sub_count = 0;
             Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
 
             if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
@@ -180,7 +181,8 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     cv::Mat mask, dst_image;
     std::vector<cv::KeyPoint> keypoints1, keypoints2;
     std::vector<cv::DMatch> matches1to2;
-    int count = 0, flags = 0, B1 = 0, G1 = 0, R1 = 0, A1 = 0;
+    Tcl_Size count = 0;
+    int flags = 0, B1 = 0, G1 = 0, R1 = 0, A1 = 0;
     int B2 = 0, G2 = 0, R2 = 0, A2 = 0;
     int nodstimage = 0;
     cv::Mat *mat1, *mat2, *mat3 = NULL, *dstmat;
@@ -205,7 +207,7 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     } else {
         for (int i = 0; i < count; i++) {
             Tcl_Obj *elemListPtr = NULL;
-            int sub_count = 0;
+            Tcl_Size sub_count = 0;
             Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
 
             if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
@@ -277,7 +279,7 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     } else {
         for (int i = 0; i < count; i++) {
             Tcl_Obj *elemListPtr = NULL;
-            int sub_count = 0;
+            Tcl_Size sub_count = 0;
             Tcl_ListObjIndex(interp, objv[4], i, &elemListPtr);
 
             if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
@@ -347,7 +349,7 @@ int drawMatches(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     } else {
         for (int i = 0; i < count; i++) {
             Tcl_Obj *elemListPtr = NULL;
-            int sub_count = 0;
+            Tcl_Size sub_count = 0;
             Tcl_ListObjIndex(interp, objv[5], i, &elemListPtr);
 
             if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
@@ -1712,7 +1714,7 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
         }
         case FUNC_COMPUTE: {
             cv::Mat descriptors;
-            int count = 0;
+            Tcl_Size count = 0;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
 
@@ -1735,7 +1737,7 @@ static int ORB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
             } else {
                 for (int i = 0; i < count; i++) {
                     Tcl_Obj *elemListPtr = NULL;
-                    int sub_count = 0;
+                    Tcl_Size sub_count = 0;
                     Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
 
                     if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
@@ -2500,7 +2502,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         }
         case FUNC_COMPUTE: {
             cv::Mat descriptors;
-            int count = 0;
+            Tcl_Size count = 0;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
 
@@ -2523,7 +2525,7 @@ static int AKAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
             } else {
                 for (int i = 0; i < count; i++) {
                     Tcl_Obj *elemListPtr = NULL;
-                    int sub_count = 0;
+                    Tcl_Size sub_count = 0;
                     Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
 
                     if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
@@ -3186,7 +3188,7 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         }
         case FUNC_COMPUTE: {
             cv::Mat descriptors;
-            int count = 0;
+            Tcl_Size count = 0;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
 
@@ -3209,7 +3211,7 @@ static int BRISK_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
             } else {
                 for (int i = 0; i < count; i++) {
                     Tcl_Obj *elemListPtr = NULL;
-                    int sub_count = 0;
+                    Tcl_Size sub_count = 0;
                     Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
 
                     if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
@@ -3572,7 +3574,7 @@ static int KAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         }
         case FUNC_COMPUTE: {
             cv::Mat descriptors;
-            int count = 0;
+            Tcl_Size count = 0;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
 
@@ -3595,7 +3597,7 @@ static int KAZE_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             } else {
                 for (int i = 0; i < count; i++) {
                     Tcl_Obj *elemListPtr = NULL;
-                    int sub_count = 0;
+                    Tcl_Size sub_count = 0;
                     Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
 
                     if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
@@ -4207,7 +4209,7 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         }
         case FUNC_COMPUTE: {
             cv::Mat descriptors;
-            int count = 0;
+            Tcl_Size count = 0;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
 
@@ -4230,7 +4232,7 @@ static int SIFT_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             } else {
                 for (int i = 0; i < count; i++) {
                     Tcl_Obj *elemListPtr = NULL;
-                    int sub_count = 0;
+                    Tcl_Size sub_count = 0;
                     Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
 
                     if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
@@ -4580,7 +4582,7 @@ static int AffineFeature_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
         }
         case FUNC_COMPUTE: {
             cv::Mat descriptors;
-            int count = 0;
+            Tcl_Size count = 0;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
 
@@ -4603,7 +4605,7 @@ static int AffineFeature_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
             } else {
                 for (int i = 0; i < count; i++) {
                     Tcl_Obj *elemListPtr = NULL;
-                    int sub_count = 0;
+                    Tcl_Size sub_count = 0;
                     Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
 
                     if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
@@ -4794,7 +4796,8 @@ int AffineFeature(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;
     char *dextractor_name = NULL;
-    int len = 0, maxTilt = 5, minTilt = 0;
+    Tcl_Size len = 0;
+    int maxTilt = 5, minTilt = 0;
     double tiltStep = 1.4142135623730951, rotateStepBase = 72;
     Tcl_Obj *pResultStr = NULL;
     cv::Ptr<cv::AffineFeature> asiftdetector;
@@ -5327,10 +5330,11 @@ int FlannBasedMatcher(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;
     Tcl_Obj *pResultStr = NULL;
-    int count = 0, table_number = 6, key_size = 12, multi_probe_level = 1;
+    Tcl_Size count = 0;
+    int table_number = 6, key_size = 12, multi_probe_level = 1;
     int trees = 5;
     char *algorithm = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     int algo = 0;
     cv::Ptr<cv::FlannBasedMatcher> flannbasedmatcher;
 
@@ -6020,7 +6024,7 @@ int BOWImgDescriptorExtractor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, T
     switch ((enum FUNC_enum)choice) {
         case FUNC_compute: {
             cv::Mat descriptors;
-            int count = 0;
+            Tcl_Size count = 0;
             std::vector<cv::KeyPoint> keypoints;
             cv::Mat *mat, *dstmat;
 
@@ -6043,7 +6047,7 @@ int BOWImgDescriptorExtractor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, T
             } else {
                 for (int i = 0; i < count; i++) {
                     Tcl_Obj *elemListPtr = NULL;
-                    int sub_count = 0;
+                    Tcl_Size sub_count = 0;
                     Tcl_ListObjIndex(interp, objv[3], i, &elemListPtr);
 
                     if (Tcl_ListObjLength(interp, elemListPtr, &sub_count) != TCL_OK) {
@@ -6250,7 +6254,7 @@ int BOWImgDescriptorExtractor(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *c
     cv::Ptr<cv::DescriptorMatcher> dmatcher;
     cv::BOWImgDescriptorExtractor *bowimgextractor;
     char *dextractor_name = NULL, *dmatcher_name = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
 
     if (objc != 3) {
         Tcl_WrongNumArgs(interp, 1, objv, "dextractor dmatcher");

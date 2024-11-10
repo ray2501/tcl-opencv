@@ -78,7 +78,9 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
     switch ((enum FUNC_enum)choice) {
         case FUNC_OPEN: {
             char *filename;
-            int len, mode;
+            Tcl_Size len;
+            int mode;
+
             if (objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "filename|data mode");
                 return TCL_ERROR;
@@ -124,7 +126,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
             try {
                 const char *name = NULL;
                 cv::FileNode node;
-                int len;
+                Tcl_Size len;
                 if (objc == 2) {
                     node = fs->root();
                 } else {
@@ -166,7 +168,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         case FUNC_STARTM:
         case FUNC_STARTS: {
             const char *name;
-            int nlen;
+            Tcl_Size nlen;
             Tcl_DString ds;
             Tcl_Encoding enc;
             if (objc != 3) {
@@ -237,7 +239,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         }
         case FUNC_RDDBL: {
             const char *name;
-            int nlen;
+            Tcl_Size nlen;
             Tcl_DString ds;
             Tcl_Encoding enc;
             Tcl_Obj *listPtr;
@@ -292,7 +294,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         }
         case FUNC_RDINT: {
             const char *name;
-            int nlen;
+            Tcl_Size nlen;
             Tcl_DString ds;
             Tcl_Encoding enc;
             Tcl_Obj *listPtr;
@@ -347,7 +349,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         }
         case FUNC_RDMAT: {
             const char *name;
-            int nlen;
+            Tcl_Size nlen;
             Tcl_DString ds;
             Tcl_Encoding enc;
             cv::Mat rmat, *mat;
@@ -391,7 +393,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         }
         case FUNC_RDOBJ: {
             const char *name;
-            int nlen;
+            Tcl_Size nlen;
             Tcl_DString ds;
             Tcl_Encoding enc;
             Tcl_Obj *empty;
@@ -820,7 +822,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         }
         case FUNC_RDSTR: {
             const char *name;
-            int nlen;
+            Tcl_Size nlen;
             Tcl_DString ds, ds2;
             Tcl_Encoding enc;
             Tcl_Obj *listPtr;
@@ -885,7 +887,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         }
         case FUNC_WRDBL: {
             const char *name;
-            int nlen;
+            Tcl_Size nlen;
             Tcl_DString ds;
             Tcl_Encoding enc;
             double value;
@@ -935,7 +937,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         }
         case FUNC_WRINT: {
             const char *name;
-            int nlen;
+            Tcl_Size nlen;
             Tcl_DString ds;
             Tcl_Encoding enc;
             int value;
@@ -985,7 +987,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         }
         case FUNC_WRMAT: {
             const char *name;
-            int nlen;
+            Tcl_Size nlen;
             Tcl_DString ds;
             Tcl_Encoding enc;
             cv::Mat *mat;
@@ -1018,7 +1020,8 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         }
         case FUNC_WROBJ: {
             const char *name;
-            int i, nlen;
+            int i;
+            Tcl_Size nlen;
             Tcl_DString ds;
             Tcl_Encoding enc;
             Opencv_Obj *obj = NULL;
@@ -1538,7 +1541,7 @@ int FileStorage_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*
         }
         case FUNC_WRSTR: {
             const char *name, *value;
-            int nlen, vlen;
+            Tcl_Size nlen, vlen;
             Tcl_DString ds1, ds2;
             Tcl_Encoding enc;
             std::vector<std::string> vec;

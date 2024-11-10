@@ -778,7 +778,8 @@ Opencv_Info(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 static int
 Opencv_FromByteArray(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    int width, height, bpp, len;
+    int width, height, bpp;
+    Tcl_Size len;
     unsigned char *data;
     cv::Mat img, *mat;
 

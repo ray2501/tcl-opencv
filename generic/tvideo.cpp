@@ -1013,7 +1013,7 @@ int TrackerGOTURN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     cv::Ptr<cv::TrackerGOTURN> trackerGOTURN;
     cv::TrackerGOTURN::Params parameters = cv::TrackerGOTURN::Params();
     char *modelBin = NULL, *modelTxt = NULL;
-    int len;
+    Tcl_Size len;
     Tcl_DString ds1, ds2;
 
     if (objc != 1 && objc != 3) {
@@ -1297,7 +1297,7 @@ int TrackerDaSiamRPN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 
         if (strcmp(zArg, "-model") == 0) {
             char *model;
-            int len = 0;
+            Tcl_Size len = 0;
 
             model = Tcl_GetStringFromObj(objv[i+1], &len);
             if (len < 1) {
@@ -1311,7 +1311,7 @@ int TrackerDaSiamRPN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
             parameters.model = model;
         } else if (strcmp(zArg, "-kernel_cls1") == 0) {
             char *kernel_cls1;
-            int len = 0;
+            Tcl_Size len = 0;
 
             kernel_cls1 = Tcl_GetStringFromObj(objv[i+1], &len);
             if (len < 1) {
@@ -1325,7 +1325,7 @@ int TrackerDaSiamRPN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
             parameters.kernel_cls1 = kernel_cls1;
         } else if (strcmp(zArg, "-kernel_r1") == 0) {
             char *kernel_r1;
-            int len = 0;
+            Tcl_Size len = 0;
 
             kernel_r1 = Tcl_GetStringFromObj(objv[i+1], &len);
             if (len < 1) {
@@ -1688,7 +1688,7 @@ int calcOpticalFlowFarneback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 int readOpticalFlow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *filename = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     cv::Mat flow;
     cv::Mat *dstmat;
     Tcl_DString ds;
@@ -1728,7 +1728,7 @@ int readOpticalFlow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int writeOpticalFlow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *filename = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     cv::Mat *mat1;
     int result = 0;
     Tcl_DString ds;

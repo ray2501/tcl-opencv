@@ -235,7 +235,7 @@ static int QRCodeEncoder_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Ob
     switch ((enum FUNC_enum)choice) {
         case FUNC_ENCODE: {
             char *info = NULL;
-            int len = 0;
+            Tcl_Size len = 0;
             Tcl_Obj *pResultStr = NULL;
             cv::Mat *dstmat;
             cv::Mat qr_matrix;
@@ -723,7 +723,7 @@ int FaceDetectorYN(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_Obj *pResultStr = NULL;
     cv::Ptr<cv::FaceDetectorYN> faceDetectorYN;
     char *model = NULL, *config = NULL;
-    int len1 = 0, len2 = 0;
+    Tcl_Size len1 = 0, len2 = 0;
     int width = 0, height = 0, top_k = 5000, backend_id = 0, target_id = 0;
     double score_threshold = 0.9, nms_threshold = 0.3;
     Tcl_DString ds1, ds2;
@@ -1005,7 +1005,8 @@ int FaceRecognizerSF(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
     Tcl_Obj *pResultStr = NULL;
     cv::Ptr<cv::FaceRecognizerSF> faceRecognizerSF;
     char *model = NULL, *config = NULL;
-    int len1 = 0, len2 = 0, backend_id = 0, target_id = 0;
+    Tcl_Size len1 = 0, len2 = 0;
+    int backend_id = 0, target_id = 0;
     Tcl_DString ds1, ds2;
 
     if (objc != 3 && objc != 5) {
@@ -1226,7 +1227,7 @@ int CascadeClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
 int CascadeClassifier(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *filename = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     cv::CascadeClassifier *cas;
     Tcl_DString ds;
 
@@ -1496,7 +1497,7 @@ int HOGDescriptor_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         }
         case FUNC_setSVMDetector: {
             std::vector<float> svmdetector;
-            int count = 0;
+            Tcl_Size count = 0;
 
             if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "svmdetector");

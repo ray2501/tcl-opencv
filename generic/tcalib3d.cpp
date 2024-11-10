@@ -108,7 +108,8 @@ int drawChessboardCorners(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
 
 int calibrateCamera(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
-    int width = 0, height = 0, count = 0;
+    int width = 0, height = 0;
+    Tcl_Size count = 0;
     std::vector<cv::Mat> objectPoints, imagePoints, rvecs, tvecs;
     cv::Mat *cameraMatrix, *distCoeffs;
     double ret = 0;

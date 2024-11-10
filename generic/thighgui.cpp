@@ -7,7 +7,7 @@ extern "C" {
 int namedWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *winname = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     int flags = cv::WINDOW_AUTOSIZE;
     Tcl_DString ds;
 
@@ -46,7 +46,7 @@ int namedWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int imshow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *winname = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     cv::Mat *mat;
     Tcl_DString ds;
 
@@ -109,7 +109,8 @@ int waitKey(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int moveWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *winname = NULL;
-    int len = 0, x = 0, y = 0;
+    Tcl_Size len = 0;
+    int x = 0, y = 0;
     Tcl_DString ds;
 
     if (objc != 4) {
@@ -148,7 +149,8 @@ int moveWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int resizeWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *winname = NULL;
-    int len = 0, width = 0, height = 0;
+    Tcl_Size len = 0;
+    int width = 0, height = 0;
     Tcl_DString ds;
 
     if (objc != 4) {
@@ -190,7 +192,7 @@ int resizeWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int setWindowTitle(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *winname = NULL, *title = NULL;
-    int len1 = 0, len2 = 0;
+    Tcl_Size len1 = 0, len2 = 0;
     Tcl_DString ds1, ds2;
 
     if (objc != 3) {
@@ -232,7 +234,7 @@ int destroyWindow(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;
     char *winname = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     Tcl_DString ds;
     Tcl_HashEntry *hashEntryPtr;
     Tcl_HashSearch search;
@@ -405,7 +407,8 @@ int setMouseCallback(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 {
     Opencv_Data *cvd = (Opencv_Data *)cd;
     char *winname = NULL;
-    int len = 0, len2 = 0, isNew = 1;
+    Tcl_Size len = 0, len2 = 0;
+    int isNew = 1;
     CvCallbackInfo *callbackinfo;
     Tcl_DString ds;
     Tcl_HashEntry *hashEntryPtr;
@@ -515,7 +518,8 @@ int createTrackbar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Opencv_Data *cvd = (Opencv_Data *)cd;
     char *trackbarname = NULL, *winname = NULL;
     int init_value = 0, max_value = 0;
-    int len = 0, tlen = 0, wlen = 0, isNew = 1;
+    Tcl_Size len = 0, tlen = 0, wlen = 0;
+    int isNew = 1;
     CvCallbackInfo *callbackinfo = NULL;
     Tcl_DString ds1, ds2;
     Tcl_HashEntry *hashEntryPtr;
@@ -625,7 +629,7 @@ int createTrackbar(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int getTrackbarPos(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *trackbarname = NULL, *winname = NULL;
-    int tlen = 0, wlen = 0;
+    Tcl_Size tlen = 0, wlen = 0;
     int value;
     Tcl_DString ds1, ds2;
 

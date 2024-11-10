@@ -7,7 +7,7 @@ extern "C" {
 int imread(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *filename = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     int flags = cv::IMREAD_COLOR;
     cv::Mat image;
     cv::Mat *mat;
@@ -54,7 +54,7 @@ int imread(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int imdecode(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     unsigned char *data;
-    int len = 0;
+    Tcl_Size len = 0;
     int flags = cv::IMREAD_COLOR;
     cv::Mat image;
     cv::Mat *mat;
@@ -98,7 +98,7 @@ int imdecode(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int imwrite(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *filename = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     cv::Mat *mat;
     bool result = false;
     Tcl_DString ds;
@@ -140,7 +140,7 @@ int imwrite(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 int imencode(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *fileext = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     cv::Mat *mat;
     bool result = false;
     Tcl_DString ds;

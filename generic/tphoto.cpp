@@ -640,7 +640,7 @@ static int AlignMTB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
             std::vector<cv::Mat> src;
             std::vector<cv::Mat> dst;
             cv::Mat image;
-            int count;
+            Tcl_Size count;
             Tcl_Obj *pResultStr = NULL;
 
             if (objc != 3) {
@@ -838,7 +838,7 @@ static int CalibrateDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_PROCESS: {
-            int count;
+            Tcl_Size count;
             cv::Mat image, responseDebevec;
             cv::Mat *dstmat;
             std::vector<cv::Mat> src;
@@ -1050,7 +1050,7 @@ static int MergeDebevec_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_PROCESS: {
-            int count;
+            Tcl_Size count;
             cv::Mat image, dst;
             cv::Mat *mat, *dstmat;
             std::vector<cv::Mat> src;
@@ -1250,7 +1250,7 @@ static int MergeMertens_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj
 
     switch ((enum FUNC_enum)choice) {
         case FUNC_PROCESS: {
-            int count;
+            Tcl_Size count;
             cv::Mat image, dst;
             cv::Mat *dstmat;
             std::vector<cv::Mat> src;

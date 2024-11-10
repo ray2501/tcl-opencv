@@ -202,7 +202,7 @@ int VideoWriter(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *fourcc = NULL;
     char *filename = NULL;
-    int len, len4;
+    Tcl_Size len, len4;
     double fps = 0, width = 0, height = 0;
     int fourccvalue = 0, isColor = 1;
     cv::VideoWriter *writer;
@@ -465,7 +465,7 @@ int VideoCapture(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     char *opentype = NULL;
     char *filename = NULL;
     int index = 0;
-    int len = 0;
+    Tcl_Size len = 0;
     int type = 1;
     int flags = cv::CAP_ANY;
     cv::VideoCapture *capture;

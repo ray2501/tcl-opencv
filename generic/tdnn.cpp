@@ -10,7 +10,8 @@ int dnn_blobFromImage(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*obj
 {
     cv::Mat dstimage;
     double scalefactor = 1.0, B = 0, G = 0, R = 0, A = 0;;
-    int width = 0, height = 0, swapRB = 0, crop = 0, count = 0;
+    int width = 0, height = 0, swapRB = 0, crop = 0;
+    Tcl_Size count = 0;
     cv::Mat *mat, *dstmat;
 
     if (objc != 8) {
@@ -272,9 +273,10 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         case FUNC_setInput: {
             cv::Mat blob;
             char *name = NULL;
-            int len;
+            Tcl_Size len;
             double scalefactor = 1.0;
-            int count = 0, B = 0, G = 0, R = 0, A = 0;
+            Tcl_Size count = 0;
+            int B = 0, G = 0, R = 0, A = 0;
             cv::Mat *mat;
 
             if (objc != 3 && objc != 6) {
@@ -345,7 +347,7 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         case FUNC_forward: {
             cv::Mat result_mat;
             char *name = NULL;
-            int len;
+            Tcl_Size len;
             cv::Mat *mat;
 
             if (objc != 2 && objc != 3) {
@@ -381,7 +383,7 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         case FUNC_forwardWithNames: {
             std::vector<cv::String> outBlobNames;
             std::vector<cv::Mat> outputBlobs;
-            int count = 0;
+            Tcl_Size count = 0;
             Tcl_Obj *pResultStr = NULL;
 
             if (objc != 3) {
@@ -398,7 +400,7 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
             } else {
                 Tcl_Obj *elemListPtr = NULL;
                 char *name;
-                int len = 0;
+                Tcl_Size len = 0;
 
                 for (int i = 0; i < count; i++) {
                     Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
@@ -480,7 +482,7 @@ int READNET_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
 int dnn_readNet(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *model = NULL, *config = NULL, *framework = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     cv::dnn::Net *net;
     Tcl_DString ds1, ds2, ds3;
 
@@ -550,7 +552,8 @@ int dnn_NMSBoxes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     double  nms_threshold;
     std::vector<int> indices;
     double eta = 1.0;
-    int top_k = 0, count = 0;
+    int top_k = 0;
+    Tcl_Size count = 0;
     Tcl_Obj *pResultStr = NULL;
     int isRect = 1;
 
@@ -567,7 +570,7 @@ int dnn_NMSBoxes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
         return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty bboxes list");
     } else {
         Tcl_Obj *elemListPtr = NULL;
-        int subCount = 0;
+        Tcl_Size subCount = 0;
 
         for (int i = 0; i < count; i++) {
             Tcl_ListObjIndex(interp, objv[1], i, &elemListPtr);
@@ -721,7 +724,8 @@ int dnn_softNMSBoxes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
     double  nms_threshold;
     std::vector<int> indices;
     double sigma = 0.5;
-    int top_k = 0, method = (int) cv::dnn::SoftNMSMethod::SOFTNMS_GAUSSIAN, count = 0;
+    int top_k = 0, method = (int) cv::dnn::SoftNMSMethod::SOFTNMS_GAUSSIAN;
+    Tcl_Size count = 0;
 
     if (objc != 5 && objc != 8) {
         Tcl_WrongNumArgs(interp, 1, objv, "bboxes scores score_threshold nms_threshold ?top_k sigma method?");
@@ -736,7 +740,7 @@ int dnn_softNMSBoxes(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv
         return Opencv_SetResult(interp, cv::Error::StsBadArg, "empty bboxes list");
     } else {
         Tcl_Obj *elemListPtr = NULL;
-        int subCount = 0;
+        Tcl_Size subCount = 0;
 
         for (int i = 0; i < count; i++) {
             Tcl_ListObjIndex(interp, objv[1], i, &elemListPtr);
@@ -1028,7 +1032,8 @@ int TEXTDETECT_EAST_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
         case FUNC_setInputParams: {
             double scalefactor = 1.0, B = 0, G = 0, R = 0, A = 0;;
-            int width = 0, height = 0, swapRB = 0, crop = 0, count = 0;
+            int width = 0, height = 0, swapRB = 0, crop = 0;
+            Tcl_Size count = 0;
 
             if (objc != 7 && objc != 8) {
                 Tcl_WrongNumArgs(interp, 1, objv,
@@ -1150,7 +1155,7 @@ int TEXTDETECT_EAST_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 int TextDetectionModel_EAST(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *model = NULL, *config = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     cv::dnn::TextDetectionModel_EAST *east;
     Tcl_DString ds1, ds2;
 
@@ -1466,7 +1471,8 @@ int TEXTDETECT_DB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         }
         case FUNC_setInputParams: {
             double scalefactor = 1.0, B = 0, G = 0, R = 0, A = 0;;
-            int width = 0, height = 0, swapRB = 0, crop = 0, count = 0;
+            int width = 0, height = 0, swapRB = 0, crop = 0;
+            Tcl_Size count = 0;
 
             if (objc != 7 && objc != 8) {
                 Tcl_WrongNumArgs(interp, 1, objv,
@@ -1588,7 +1594,7 @@ int TEXTDETECT_DB_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
 int TextDetectionModel_DB(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *model = NULL, *config = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     cv::dnn::TextDetectionModel_DB *db;
     Tcl_DString ds1, ds2;
 
@@ -1758,7 +1764,7 @@ int TEXTRECOGNITION_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
         case FUNC_setDecodeType: {
             char *value = NULL;
-            int len = 0;
+            Tcl_Size len = 0;
 
             if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "value");
@@ -1786,7 +1792,7 @@ int TEXTRECOGNITION_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
         case FUNC_setVocabulary: {
             std::vector<std::string> vocabulary;
-            int count = 0;
+            Tcl_Size count = 0;
 
             if (objc != 3) {
                 Tcl_WrongNumArgs(interp, 2, objv, "vocabulary");
@@ -1802,7 +1808,7 @@ int TEXTRECOGNITION_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
             } else {
                 Tcl_Obj *elemListPtr = NULL;
                 char *vocstring = NULL;
-                int len = 0;
+                Tcl_Size len = 0;
 
                 for (int i = 0; i < count; i++) {
                     Tcl_ListObjIndex(interp, objv[2], i, &elemListPtr);
@@ -1827,7 +1833,8 @@ int TEXTRECOGNITION_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
         case FUNC_setInputParams: {
             double scalefactor = 1.0, B = 0, G = 0, R = 0, A = 0;;
-            int width = 0, height = 0, swapRB = 0, crop = 0, count = 0;
+            int width = 0, height = 0, swapRB = 0, crop = 0;
+            Tcl_Size count = 0;
 
             if (objc != 7 && objc != 8) {
                 Tcl_WrongNumArgs(interp, 1, objv,
@@ -1949,7 +1956,7 @@ int TEXTRECOGNITION_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
 int TextRecognitionModel(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
 {
     char *model = NULL, *config = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     cv::dnn::TextRecognitionModel *recognizer;
     Tcl_DString ds1, ds2;
 

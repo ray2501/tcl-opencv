@@ -333,7 +333,8 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         case FUNC_train: {
             cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
-            int len = 0, flags = 0;
+            Tcl_Size len = 0;
+            int flags = 0;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "trainData ?flags?");
@@ -408,7 +409,7 @@ static int Logistic_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
         case FUNC_save: {
             char *filename = NULL;
-            int len = 0;
+            Tcl_Size len = 0;
             Tcl_DString ds;
 
             if (objc != 3) {
@@ -524,7 +525,7 @@ int LogisticRegression_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
     Tcl_Obj *pResultStr = NULL;
     cv::Ptr<cv::ml::LogisticRegression> logistic;
     char *filename = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     Tcl_DString ds;
 
     if (objc != 2) {
@@ -627,7 +628,8 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
         case FUNC_train: {
             cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
-            int len = 0, flags = 0;
+            Tcl_Size len = 0;
+            int flags = 0;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "trainData ?flags?");
@@ -746,7 +748,7 @@ static int BayesClassifier_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_
         }
         case FUNC_save: {
             char *filename = NULL;
-            int len = 0;
+            Tcl_Size len = 0;
             Tcl_DString ds;
 
             if (objc != 3) {
@@ -862,7 +864,7 @@ int NormalBayesClassifier_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *
     Tcl_Obj *pResultStr = NULL;
     cv::Ptr<cv::ml::NormalBayesClassifier> bayesclassifier;
     char *filename = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     Tcl_DString ds;
 
     if (objc != 2) {
@@ -1184,7 +1186,8 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         case FUNC_train: {
             cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
-            int len = 0, flags = 0;
+            Tcl_Size len = 0;
+            int flags = 0;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "trainData ?flags?");
@@ -1259,7 +1262,7 @@ static int KNearest_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
         case FUNC_save: {
             char *filename = NULL;
-            int len = 0;
+            Tcl_Size len = 0;
             Tcl_DString ds;
 
             if (objc != 3) {
@@ -1375,7 +1378,7 @@ int KNearest_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_Obj *pResultStr = NULL;
     cv::Ptr<cv::ml::KNearest> knearest;
     char *filename = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     Tcl_DString ds;
 
     if (objc != 2) {
@@ -1948,7 +1951,8 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
         case FUNC_train: {
             cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
-            int len = 0, flags = 0;
+            Tcl_Size len = 0;
+            int flags = 0;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "trainData ?flags?");
@@ -2023,7 +2027,7 @@ static int SVM_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*o
         }
         case FUNC_save: {
             char *filename = NULL;
-            int len = 0;
+            Tcl_Size len = 0;
             Tcl_DString ds;
 
             if (objc != 3) {
@@ -2139,7 +2143,7 @@ int SVM_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_Obj *pResultStr = NULL;
     cv::Ptr<cv::ml::SVM> svm;
     char *filename = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     Tcl_DString ds;
 
     if (objc != 2) {
@@ -2562,7 +2566,8 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         case FUNC_train: {
             cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
-            int len = 0, flags = 0;
+            Tcl_Size len = 0;
+            int flags = 0;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "trainData ?flags?");
@@ -2637,7 +2642,7 @@ static int SVMSGD_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         }
         case FUNC_save: {
             char *filename = NULL;
-            int len = 0;
+            Tcl_Size len = 0;
             Tcl_DString ds;
 
             if (objc != 3) {
@@ -2754,7 +2759,7 @@ int SVMSGD_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_Obj *pResultStr = NULL;
     cv::Ptr<cv::ml::SVMSGD> svmsgd;
     char *filename = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     Tcl_DString ds;
 
     if (objc != 2) {
@@ -3264,7 +3269,8 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         case FUNC_train: {
             cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
-            int len = 0, flags = 0;
+            Tcl_Size len = 0;
+            int flags = 0;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "trainData ?flags?");
@@ -3339,7 +3345,7 @@ static int DTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         }
         case FUNC_save: {
             char *filename = NULL;
-            int len = 0;
+            Tcl_Size len = 0;
             Tcl_DString ds;
 
             if (objc != 3) {
@@ -3455,7 +3461,7 @@ int DTrees_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_Obj *pResultStr = NULL;
     cv::Ptr<cv::ml::DTrees> dtrees;
     char *filename = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     Tcl_DString ds;
 
     if (objc != 2) {
@@ -4100,7 +4106,8 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         case FUNC_train: {
             cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
-            int len = 0, flags = 0;
+            Tcl_Size len = 0;
+            int flags = 0;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "trainData ?flags?");
@@ -4175,7 +4182,7 @@ static int Boost_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const
         }
         case FUNC_save: {
             char *filename = NULL;
-            int len = 0;
+            Tcl_Size len = 0;
             Tcl_DString ds;
 
             if (objc != 3) {
@@ -4291,7 +4298,7 @@ int Boost_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_Obj *pResultStr = NULL;
     cv::Ptr<cv::ml::Boost> boost;
     char *filename = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     Tcl_DString ds;
 
     if (objc != 2) {
@@ -4980,7 +4987,8 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         case FUNC_train: {
             cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
-            int len = 0, flags = 0;
+            Tcl_Size len = 0;
+            int flags = 0;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "trainData ?flags?");
@@ -5055,7 +5063,7 @@ static int RTrees_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         }
         case FUNC_save: {
             char *filename = NULL;
-            int len = 0;
+            Tcl_Size len = 0;
             Tcl_DString ds;
 
             if (objc != 3) {
@@ -5171,7 +5179,7 @@ int RTrees_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_Obj *pResultStr = NULL;
     cv::Ptr<cv::ml::RTrees> rtrees;
     char *filename = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     Tcl_DString ds;
 
     if (objc != 2) {
@@ -5974,7 +5982,8 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
         case FUNC_train: {
             cv::Ptr<cv::ml::TrainData> trainData;
             char *command = NULL;
-            int len = 0, flags = 0;
+            Tcl_Size len = 0;
+            int flags = 0;
 
             if (objc != 3 && objc != 4) {
                 Tcl_WrongNumArgs(interp, 2, objv, "trainData ?flags?");
@@ -6049,7 +6058,7 @@ static int ANN_MLP_FUNCTION(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *con
         }
         case FUNC_save: {
             char *filename = NULL;
-            int len = 0;
+            Tcl_Size len = 0;
             Tcl_DString ds;
 
             if (objc != 3) {
@@ -6165,7 +6174,7 @@ int ANN_MLP_load(void *cd, Tcl_Interp *interp, int objc, Tcl_Obj *const*objv)
     Tcl_Obj *pResultStr = NULL;
     cv::Ptr<cv::ml::ANN_MLP> annmlp;
     char *filename = NULL;
-    int len = 0;
+    Tcl_Size len = 0;
     Tcl_DString ds;
 
     if (objc != 2) {
