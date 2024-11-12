@@ -1,3 +1,7 @@
+2024-11-12 Danilo Chang
+
+	* Update package require Tcl (and Tk) from 8.6 to 8.6- (for Tcl 9)
+
 2024-11-10 Danilo Chang
 
 	* Use Tcl_Size to replace int (for Tcl 9)

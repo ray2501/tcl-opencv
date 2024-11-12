@@ -843,16 +843,16 @@ int Opencv_CheckForTk(void *cd, Tcl_Interp *interp)
         return TCL_ERROR;
     }
     if (cvd->tkCheck == 0) {
-        if (Tcl_PkgPresent(interp, "Tk", "8.6", 0) == NULL) {
+        if (Tcl_PkgPresent(interp, "Tk", "8.6-", 0) == NULL) {
             return TCL_ERROR;
         }
 #ifdef USE_TK_STUBS
-        if (Tk_InitStubs(interp, "8.6", 0) == NULL) {
+        if (Tk_InitStubs(interp, "8.6-", 0) == NULL) {
             cvd->tkCheck = -1;
             return TCL_ERROR;
         }
 #else
-        if (Tcl_PkgRequire(interp, "Tk", "8.6", 0) == NULL) {
+        if (Tcl_PkgRequire(interp, "Tk", "8.6-", 0) == NULL) {
             cvd->tkCheck = -1;
             return TCL_ERROR;
         }
@@ -1097,11 +1097,11 @@ Opencv_Init(Tcl_Interp *interp)
     int nsLength;
 
 #ifdef USE_TCL_STUBS
-    if (Tcl_InitStubs(interp, "8.6", 0) == NULL) {
+    if (Tcl_InitStubs(interp, "8.6-", 0) == NULL) {
         return TCL_ERROR;
     }
 #else
-    if (Tcl_PkgRequire(interp, "Tcl", "8.6", 0) == NULL) {
+    if (Tcl_PkgRequire(interp, "Tcl", "8.6-", 0) == NULL) {
         return TCL_ERROR;
     }
 #endif
