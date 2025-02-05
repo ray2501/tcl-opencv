@@ -75,6 +75,8 @@ _RULESDIR = $(_RULESDIR)\win
 _RULESDIR = .
 !endif
 
+_RULESDIR = .
+
 !if "$(_RULESDIR)" != "."
 # Potentially using Tcl's support files. If this extension has its own
 # nmake support files, need to compare the versions and pick newer.
