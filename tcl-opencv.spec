@@ -5,7 +5,7 @@
 
 Name:          tcl-opencv
 Summary:       Tcl extension for OpenCV library
-Version:       0.17
+Version:       1.0
 Release:       0
 License:       MIT
 Group:         Development/Libraries/Tcl
